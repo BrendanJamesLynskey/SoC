@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modern SoC Packaging — From Wire Bonds to 3D Chiplets</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --r-background-color: #0a0a0f;
+    --r-main-font: 'DM Sans', sans-serif;
+    --r-heading-font: 'Playfair Display', serif;
+    --r-code-font: 'JetBrains Mono', monospace;
+    --r-main-font-size: 28px;
+    --r-heading-color: #e8e4df;
+    --r-main-color: #c8c4bf;
+    --r-link-color: #7eb8da;
+    --r-link-color-hover: #a8d4ef;
+    --r-selection-background-color: #2a5a7a;
+    --accent: #7eb8da;
+    --accent2: #e8a87c;
+    --accent3: #8fd4a4;
+    --accent4: #c49dd8;
+    --dim: #6a6660;
+    --surface: #16161e;
+    --surface2: #1e1e28;
+  }
+
+  .reveal { font-weight: 400; }
+  .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-shadow: none; }
+  .reveal h1 { font-size: 2.0em; font-weight: 900; }
+  .reveal h2 { font-size: 1.35em; }
+  .reveal h3 { font-size: 1.0em; color: var(--accent); font-family: var(--r-main-font); font-weight: 700; }
+  .reveal p, .reveal li { line-height: 1.6; }
+  .reveal ul { list-style: none; padding-left: 0; }
+  .reveal ul li { position: relative; padding-left: 1.4em; margin-bottom: 0.4em; }
+  .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  .reveal code { font-family: var(--r-code-font); font-size: 0.85em; }
+  .reveal pre { width: 100%; box-shadow: none; }
+  .reveal pre code { padding: 1em 1.2em; border-radius: 8px; background: var(--surface); border: 1px solid #2a2a35; max-height: 520px; font-size: 0.55em; line-height: 1.55; }
+  .reveal .slide-number { font-family: var(--r-code-font); font-size: 0.6em; color: var(--dim); background: transparent; }
+  .reveal blockquote { background: var(--surface); border-left: 4px solid var(--accent); padding: 0.8em 1.2em; font-style: normal; border-radius: 0 8px 8px 0; width: 90%; margin: 0.8em auto; font-size: 0.85em; }
+
+  /* Utility */
+  .accent  { color: var(--accent) !important; }
+  .accent2 { color: var(--accent2) !important; }
+  .accent3 { color: var(--accent3) !important; }
+  .accent4 { color: var(--accent4) !important; }
+  .dim     { color: var(--dim) !important; }
+  .mono    { font-family: var(--r-code-font) !important; }
+  .small   { font-size: 0.7em !important; }
+  .smaller { font-size: 0.6em !important; }
+  .tiny    { font-size: 0.5em !important; }
+  .left    { text-align: left !important; }
+  .center  { text-align: center !important; }
+
+  /* Tag / badge */
+  .tag { display: inline-block; padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.55em; font-family: var(--r-code-font); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; margin: 0 0.15em; }
+  .tag-blue   { background: rgba(126,184,218,0.18); color: var(--accent); }
+  .tag-orange { background: rgba(232,168,124,0.18); color: var(--accent2); }
+  .tag-green  { background: rgba(143,212,164,0.18); color: var(--accent3); }
+  .tag-purple { background: rgba(196,157,216,0.18); color: var(--accent4); }
+  .tag-dim    { background: rgba(106,102,96,0.18);  color: var(--dim); }
+
+  /* Tables */
+  .reveal table { border-collapse: collapse; margin: 0.6em auto; font-size: 0.65em; width: 95%; }
+  .reveal table th { background: var(--surface2); color: var(--accent); font-weight: 700; padding: 0.5em 0.7em; border-bottom: 2px solid var(--accent); text-align: left; }
+  .reveal table td { padding: 0.45em 0.7em; border-bottom: 1px solid #2a2a35; }
+  .reveal table tr:last-child td { border-bottom: none; }
+
+  /* Diagrams / boxes */
+  .box-row { display: flex; gap: 0.8em; justify-content: center; flex-wrap: wrap; margin: 0.6em 0; }
+  .box { background: var(--surface); border: 1px solid #2a2a35; border-radius: 8px; padding: 0.7em 1em; flex: 1; min-width: 180px; max-width: 320px; text-align: center; }
+  .box h3 { margin: 0 0 0.3em; font-size: 0.85em; }
+  .box p, .box ul { font-size: 0.65em; margin: 0; }
+
+  /* Two-col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; align-items: start; }
+  .two-col.wide-left { grid-template-columns: 1.3fr 0.7fr; }
+  .two-col.wide-right { grid-template-columns: 0.7fr 1.3fr; }
+
+  /* Numbered steps */
+  .steps { counter-reset: step; padding-left: 0; }
+  .steps li { counter-increment: step; padding-left: 2.2em; }
+  .steps li::before { content: counter(step); position: absolute; left: 0; width: 1.5em; height: 1.5em; background: var(--accent); color: var(--r-background-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 700; }
+
+  /* Slide-specific */
+  .title-slide h1 { font-size: 2.2em; margin-bottom: 0.15em; }
+  .title-slide .subtitle { font-size: 0.85em; color: var(--accent); margin-bottom: 0.5em; font-family: var(--r-main-font); }
+  .title-slide .meta { font-size: 0.55em; color: var(--dim); }
+
+  .section-slide { background: linear-gradient(135deg, #0d1420 0%, #0a0a0f 100%); }
+  .section-slide h2 { font-size: 1.8em; }
+  .section-slide .section-num { font-family: var(--r-code-font); font-size: 0.6em; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.3em; }
+
+  /* Architecture diagram via CSS */
+  .arch-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0.5em auto; max-width: 700px; }
+  .arch-layer { width: 100%; padding: 0.4em 0.8em; border-radius: 6px; text-align: center; font-size: 0.6em; font-weight: 700; font-family: var(--r-code-font); }
+
+  /* Animated underline on headings */
+  .reveal section h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--accent);
+    margin: 0.25em auto 0;
+    border-radius: 2px;
+  }
+
+  .section-slide h2::after,
+  .title-slide h1::after { display: none; }
+
+  /* Key-value layout */
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2em 1em; font-size: 0.7em; text-align: left; margin: 0.5em auto; max-width: 90%; }
+  .kv dt { color: var(--accent); font-weight: 700; white-space: nowrap; font-family: var(--r-code-font); font-size: 0.9em; }
+  .kv dd { margin: 0; }
+
+  /* Flow arrow */
+  .flow-arrow { color: var(--dim); font-size: 1.4em; margin: 0.15em 0; }
+
+  /* Highlight bar */
+  .highlight-bar { background: linear-gradient(90deg, rgba(126,184,218,0.12) 0%, transparent 100%); border-left: 3px solid var(--accent); padding: 0.5em 1em; margin: 0.5em 0; border-radius: 0 6px 6px 0; font-size: 0.75em; }
+
+  /* Footer attribution */
+  .slide-footer { position: absolute; bottom: 1em; left: 50%; transform: translateX(-50%); font-size: 0.35em; color: var(--dim); font-family: var(--r-code-font); }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- SLIDE 1: Title -->
+<!-- ============================================================ -->
+<section class="title-slide" data-background-gradient="radial-gradient(ellipse at 30% 50%, #111828 0%, #0a0a0f 70%)">
+  <p class="mono small accent" style="letter-spacing:0.15em;">MODERN SOC DESIGN · PRESENTATION 01</p>
+  <h1>SoC Packaging</h1>
+  <p class="subtitle">From Wire Bonds to 3D Chiplets & Beyond</p>
+  <p class="meta" style="margin-top:1.5em;">
+    Wire bond · Flip-chip · Fan-out · 2.5D interposers · 3D stacking · Chiplets · CoWoS · EMIB · Foveros · UCIe
+  </p>
+  <p class="meta" style="margin-top:1em;">Navigate: <span class="mono">→ ←</span> &nbsp;|&nbsp; Overview: <span class="mono">Esc</span> &nbsp;|&nbsp; Fullscreen: <span class="mono">F</span></p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2: Why Packaging Matters -->
+<!-- ============================================================ -->
+<section>
+  <h2>Why Packaging Matters</h2>
+  <div class="two-col" style="margin-top:0.6em;">
+    <div class="left">
+      <ul style="font-size:0.75em;">
+        <li><strong class="accent">Performance</strong> — interconnect latency &amp; bandwidth between die and memory now dominate system bottlenecks</li>
+        <li><strong class="accent2">Power</strong> — off-chip I/O burns 5–10× more energy per bit than on-die interconnect</li>
+        <li><strong class="accent3">Cost</strong> — yield drops exponentially with monolithic die area; chiplets restore economics</li>
+        <li><strong class="accent4">Integration</strong> — heterogeneous process nodes (logic, analog, I/O, memory) on a single package</li>
+      </ul>
+    </div>
+    <div>
+      <blockquote style="font-size:0.75em;">
+        "Packaging, not chip manufacturing, is now the primary supply constraint for AI accelerators."
+        <br><span class="dim small">— Industry consensus, 2025</span>
+      </blockquote>
+      <div class="highlight-bar" style="margin-top:0.8em;">
+        Advanced packaging market: <strong class="accent">~$45B</strong> in 2024 → projected <strong class="accent3">~$80B</strong> by 2030 <span class="dim">(CAGR ≈ 9.4%)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3: Section — Packaging Evolution -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section I</p>
+  <h2>Packaging Evolution</h2>
+  <p class="dim" style="font-size:0.75em;">DIP → QFP → BGA → Flip-Chip → Fan-Out → 2.5D → 3D</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4: Traditional Packaging Timeline -->
+<!-- ============================================================ -->
+<section>
+  <h2>Traditional Package Types</h2>
+  <table>
+    <tr>
+      <th>Era</th><th>Package</th><th>I/O Count</th><th>Key Feature</th><th>Limitation</th>
+    </tr>
+    <tr>
+      <td class="dim">1970s</td>
+      <td>DIP <span class="tag tag-dim">Through-hole</span></td>
+      <td>8–64</td>
+      <td>Simple, hand-solderable</td>
+      <td>Low density, high inductance</td>
+    </tr>
+    <tr>
+      <td class="dim">1980s</td>
+      <td>QFP <span class="tag tag-dim">SMD</span></td>
+      <td>44–304</td>
+      <td>Peripheral leads, fine pitch</td>
+      <td>Fragile leads, coplanarity</td>
+    </tr>
+    <tr>
+      <td class="dim">1990s</td>
+      <td>BGA <span class="tag tag-blue">Area-array</span></td>
+      <td>100–2000+</td>
+      <td>Solder balls underneath</td>
+      <td>Inspection difficulty</td>
+    </tr>
+    <tr>
+      <td class="dim">2000s</td>
+      <td>Flip-Chip BGA <span class="tag tag-green">Bumped</span></td>
+      <td>1000–5000+</td>
+      <td>Die face-down; short interconnects</td>
+      <td>Underfill, CTE mismatch</td>
+    </tr>
+    <tr>
+      <td class="dim">2010s+</td>
+      <td>Fan-Out WLP <span class="tag tag-orange">eWLB</span></td>
+      <td>500–3000+</td>
+      <td>RDL routing beyond die edge</td>
+      <td>Die shift, warpage</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5: Wire Bond vs Flip-Chip -->
+<!-- ============================================================ -->
+<section>
+  <h2>Wire Bond → Flip-Chip</h2>
+  <div class="two-col" style="margin-top:0.5em;">
+    <div>
+      <h3>Wire Bond</h3>
+      <div class="arch-stack">
+        <div class="arch-layer" style="background:#2a3a4a;">Mold Compound</div>
+        <div class="arch-layer" style="background:#3a5a7a; font-size:0.5em;">Au / Cu wires (peripheral pads → lead frame)</div>
+        <div class="arch-layer" style="background:#4a6a3a;">Die (face-up)</div>
+        <div class="arch-layer" style="background:#5a4a3a;">Die Attach (epoxy / solder)</div>
+        <div class="arch-layer" style="background:#3a3a4a;">Lead Frame / Substrate</div>
+      </div>
+      <ul style="font-size:0.6em; margin-top:0.3em;">
+        <li>Peripheral-only I/O → limited pin count</li>
+        <li>Long wire inductance (2–5 nH)</li>
+        <li>Still dominant for low-cost MCUs, sensors</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Flip-Chip (C4 / μ-bump)</h3>
+      <div class="arch-stack">
+        <div class="arch-layer" style="background:#3a3a4a;">Lid / Heat Spreader</div>
+        <div class="arch-layer" style="background:#4a6a3a;">Die (face-down)</div>
+        <div class="arch-layer" style="background:#5a3a5a; font-size:0.5em;">Solder bumps (area-array, 100–150 μm pitch)</div>
+        <div class="arch-layer" style="background:#4a4a2a; font-size:0.5em;">Underfill (CTE stress relief)</div>
+        <div class="arch-layer" style="background:#3a3a4a;">Organic Substrate (multi-layer)</div>
+        <div class="arch-layer" style="background:#2a4a5a; font-size:0.5em;">BGA solder balls → PCB</div>
+      </div>
+      <ul style="font-size:0.6em; margin-top:0.3em;">
+        <li>Area-array → 5000+ I/O</li>
+        <li>Short interconnects (~50 pH inductance)</li>
+        <li>Better thermal path (die → heat sink)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6: Fan-Out Packaging -->
+<!-- ============================================================ -->
+<section>
+  <h2>Fan-Out Wafer-Level Packaging</h2>
+  <div class="two-col wide-left" style="margin-top:0.4em;">
+    <div>
+      <div class="arch-stack" style="max-width:500px;">
+        <div class="arch-layer" style="background:#4a3a5a; font-size:0.5em;">Redistribution Layers (RDL) — Cu/PI, 2–5 μm L/S</div>
+        <div class="arch-layer" style="background:#4a6a3a;">Known Good Die (KGD)</div>
+        <div class="arch-layer" style="background:#5a4a3a; font-size:0.5em;">Mold Compound (epoxy reconstitution)</div>
+        <div class="arch-layer" style="background:#2a4a5a; font-size:0.5em;">Solder Balls (fan-out area > die area)</div>
+      </div>
+      <p class="small left" style="margin-top:0.5em;">
+        The key innovation: the <strong class="accent">redistribution layer (RDL)</strong> routes signals
+        from the die's fine-pitch pads to a larger fan-out area, enabling more I/Os
+        without increasing die size.
+      </p>
+    </div>
+    <div>
+      <h3>TSMC InFO Variants</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">InFO-WLP</strong> — single die, mobile SoCs (Apple A-series since A10)</li>
+        <li><strong class="accent">InFO-PoP</strong> — Package-on-Package; DRAM stacked above logic</li>
+        <li><strong class="accent">InFO-L</strong> — large-scale fan-out with local silicon interconnect (LSI) bridges</li>
+        <li><strong class="accent">InFO-M</strong> — multi-die fan-out for networking ASICs</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.6em;">
+        Fan-out eliminated the package substrate for mobile SoCs, reducing Z-height by ~0.3 mm and improving power integrity.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7: Section — 2.5D Integration -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section II</p>
+  <h2>2.5D Integration</h2>
+  <p class="dim" style="font-size:0.75em;">Silicon interposers · RDL interposers · Embedded bridges</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8: 2.5D Concept -->
+<!-- ============================================================ -->
+<section>
+  <h2>2.5D Architecture Concept</h2>
+  <p class="small dim" style="margin-bottom:0.3em;">Multiple die placed side-by-side on a shared interposer, connected via fine-pitch interconnects</p>
+  <div class="arch-stack" style="max-width:750px;">
+    <div style="display:flex; gap:4px; width:100%;">
+      <div class="arch-layer" style="background:#3a5a3a; flex:2;">Logic SoC</div>
+      <div class="arch-layer" style="background:#5a5a3a; flex:1;">HBM</div>
+      <div class="arch-layer" style="background:#5a5a3a; flex:1;">HBM</div>
+      <div class="arch-layer" style="background:#5a5a3a; flex:1;">HBM</div>
+    </div>
+    <div class="arch-layer" style="background:rgba(126,184,218,0.15); border:2px solid var(--accent); font-size:0.55em;">
+      μ-bumps (30–55 μm pitch) · &nbsp; fine-pitch Cu pads
+    </div>
+    <div class="arch-layer" style="background:#2a3a5a;">
+      Silicon / RDL Interposer &nbsp;<span class="smaller dim">(TSVs + multi-layer Cu RDL)</span>
+    </div>
+    <div class="arch-layer" style="background:rgba(126,184,218,0.08); font-size:0.55em;">
+      C4 / micro-C4 bumps
+    </div>
+    <div class="arch-layer" style="background:#3a3a4a;">Organic Package Substrate</div>
+    <div class="arch-layer" style="background:#2a2a35; font-size:0.55em;">BGA solder balls → PCB</div>
+  </div>
+  <div class="box-row" style="margin-top:0.5em;">
+    <div class="box">
+      <h3 class="accent">Bandwidth</h3>
+      <p>μ-bump pitch enables TB/s-class die-to-die and die-to-HBM links</p>
+    </div>
+    <div class="box">
+      <h3 class="accent2">Power</h3>
+      <p>Short interconnect (~1 pJ/bit) vs off-package (~10 pJ/bit)</p>
+    </div>
+    <div class="box">
+      <h3 class="accent3">Heterogeneous</h3>
+      <p>Each die on optimal process node — logic at N3, I/O at N5/N7</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9: CoWoS Deep Dive -->
+<!-- ============================================================ -->
+<section>
+  <h2>TSMC CoWoS Family</h2>
+  <table>
+    <tr>
+      <th>Variant</th><th>Interposer</th><th>Max Size</th><th>Key Application</th><th>Interconnect</th>
+    </tr>
+    <tr>
+      <td><strong class="accent">CoWoS-S</strong></td>
+      <td>Silicon + TSVs</td>
+      <td>3.3× reticle (~2700 mm²)</td>
+      <td>NVIDIA H100, AMD MI300</td>
+      <td>Sub-μm Cu RDL, eDTC</td>
+    </tr>
+    <tr>
+      <td><strong class="accent">CoWoS-R</strong></td>
+      <td>RDL organic (polymer)</td>
+      <td>&gt; 3.3× reticle</td>
+      <td>Cost-sensitive HPC</td>
+      <td>Wider pitch, lower cost</td>
+    </tr>
+    <tr>
+      <td><strong class="accent">CoWoS-L</strong></td>
+      <td>RDL + LSI chip bridges</td>
+      <td>5.5–9.5× reticle</td>
+      <td>NVIDIA B100/B200, GB300</td>
+      <td>LSI for fine-pitch D2D, RDL for coarse</td>
+    </tr>
+  </table>
+  <div class="two-col" style="margin-top:0.4em; font-size:0.7em;">
+    <div class="left">
+      <p><strong class="accent">CoWoS-L innovation:</strong> Local Silicon Interconnect (LSI) chips provide sub-μm die-to-die links where needed, while an organic RDL interposer handles power distribution and coarse routing over a much larger area — breaking the reticle size limit of pure silicon interposers.</p>
+    </div>
+    <div>
+      <p class="dim">Capacity ramp:</p>
+      <dl class="kv">
+        <dt>2024</dt><dd>35–40K wafers/month</dd>
+        <dt>2025</dt><dd>65–90K wafers/month</dd>
+        <dt>2026e</dt><dd>130–150K wafers/month</dd>
+      </dl>
+      <p class="tiny dim">NVIDIA alone: ~63% of CoWoS demand</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: Intel EMIB -->
+<!-- ============================================================ -->
+<section>
+  <h2>Intel EMIB — Embedded Multi-Die Interconnect Bridge</h2>
+  <div class="two-col" style="margin-top:0.5em;">
+    <div>
+      <div class="arch-stack" style="max-width:450px;">
+        <div style="display:flex; gap:4px; width:100%;">
+          <div class="arch-layer" style="background:#3a5a3a; flex:1;">Chiplet A</div>
+          <div class="arch-layer" style="background:#5a3a5a; flex:1;">Chiplet B</div>
+        </div>
+        <div class="arch-layer" style="background:rgba(232,168,124,0.15); border:2px solid var(--accent2); font-size:0.5em;">
+          μ-bumps at bridge region only
+        </div>
+        <div class="arch-layer" style="background:#3a3a4a; position:relative;">
+          Organic Substrate
+          <span style="position:absolute; bottom:-2px; left:30%; width:40%; height:50%; background:var(--accent2); opacity:0.3; border-radius:4px 4px 0 0; display:flex; align-items:center; justify-content:center; font-size:0.45em; color:#fff;">EMIB Bridge</span>
+        </div>
+        <div class="arch-layer" style="background:#2a2a35; font-size:0.55em;">BGA → PCB</div>
+      </div>
+      <p class="small dim left" style="margin-top:0.5em;">
+        Small silicon bridge embedded <em>inside</em> the organic substrate cavity — only where die-to-die links are needed.
+      </p>
+    </div>
+    <div class="left">
+      <h3>EMIB vs CoWoS</h3>
+      <table style="font-size:0.85em;">
+        <tr><th>Aspect</th><th>EMIB</th><th>CoWoS</th></tr>
+        <tr><td>Interposer</td><td>None (local bridge)</td><td>Full interposer</td></tr>
+        <tr><td>TSVs</td><td>Not required</td><td>Required (silicon)</td></tr>
+        <tr><td>Scalability</td><td>Modular bridges</td><td>Reticle-limited</td></tr>
+        <tr><td>Cost</td><td>Lower per bridge</td><td>Higher (large Si)</td></tr>
+        <tr><td>Best for</td><td>ASICs, networking</td><td>GPU + HBM</td></tr>
+      </table>
+      <p class="tiny dim">Mass production since 2017 (Stratix 10 MX FPGA); used in Ponte Vecchio, Granite Rapids.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: Samsung & Competitors -->
+<!-- ============================================================ -->
+<section>
+  <h2>Competitive Landscape — 2.5D</h2>
+  <table>
+    <tr>
+      <th>Company</th><th>Technology</th><th>Approach</th><th>Status</th>
+    </tr>
+    <tr>
+      <td><strong>TSMC</strong></td>
+      <td>CoWoS-S/-R/-L</td>
+      <td>Silicon + RDL + LSI hybrid interposers</td>
+      <td><span class="tag tag-green">HVM</span> Market leader</td>
+    </tr>
+    <tr>
+      <td><strong>Intel</strong></td>
+      <td>EMIB / EMIB 3.5D</td>
+      <td>Embedded silicon bridges in substrate</td>
+      <td><span class="tag tag-green">HVM</span> Since 2017</td>
+    </tr>
+    <tr>
+      <td><strong>Samsung</strong></td>
+      <td>I-Cube / H-Cube</td>
+      <td>Silicon interposer (I-Cube); hybrid 2.5D+3D</td>
+      <td><span class="tag tag-orange">Ramp</span></td>
+    </tr>
+    <tr>
+      <td><strong>ASE</strong></td>
+      <td>FOCoS / VIPack</td>
+      <td>Fan-out + silicon bridge + TSV</td>
+      <td><span class="tag tag-orange">Ramp</span></td>
+    </tr>
+    <tr>
+      <td><strong>Amkor</strong></td>
+      <td>S-Connect / 2.5D Si</td>
+      <td>Silicon interposer, TSMC-partnered</td>
+      <td><span class="tag tag-blue">Expanding</span> AZ fab ($7B)</td>
+    </tr>
+  </table>
+  <p class="tiny dim center" style="margin-top:0.5em;">OSATs (ASE, Amkor, SPIL) are building CoWoS-like capacity as second-source options for fabless customers.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: Section — 3D Integration -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section III</p>
+  <h2>3D Integration</h2>
+  <p class="dim" style="font-size:0.75em;">Die-on-die stacking · TSVs · Hybrid bonding · SoIC · Foveros</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 13: 3D Stacking Concept -->
+<!-- ============================================================ -->
+<section>
+  <h2>3D Die Stacking — Vertical Integration</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div>
+      <div class="arch-stack" style="max-width:400px;">
+        <div class="arch-layer" style="background:#5a5a3a;">Compute Chiplet (N3)</div>
+        <div class="arch-layer" style="background:rgba(143,212,164,0.2); border:1px solid var(--accent3); font-size:0.5em;">
+          Hybrid Bond (Cu-Cu, &lt;1 μm pitch)
+        </div>
+        <div class="arch-layer" style="background:#3a5a5a;">I/O Die (N5/N6)</div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.1); font-size:0.5em;">TSVs through I/O die</div>
+        <div class="arch-layer" style="background:#2a3a5a;">2.5D Interposer</div>
+        <div class="arch-layer" style="background:#3a3a4a;">Package Substrate</div>
+      </div>
+      <p class="small dim left" style="margin-top:0.4em;">
+        AMD MI300X: XCDs (N5) 3D-stacked on IODs (N6), then placed on 2.5D Si interposer with HBM3 — a "3.5D" architecture.
+      </p>
+    </div>
+    <div class="left">
+      <h3>Bonding Technologies</h3>
+      <table style="font-size:0.85em;">
+        <tr><th>Method</th><th>Pitch</th><th>Density</th></tr>
+        <tr><td>μ-bump (solder)</td><td>30–55 μm</td><td>~400/mm²</td></tr>
+        <tr><td>Cu pillar</td><td>20–40 μm</td><td>~1000/mm²</td></tr>
+        <tr><td><strong class="accent3">Hybrid bond</strong></td><td><strong>0.5–9 μm</strong></td><td><strong>10K–1M/mm²</strong></td></tr>
+      </table>
+      <div class="highlight-bar" style="margin-top:0.5em;">
+        <strong class="accent3">Hybrid bonding</strong> (Cu-Cu direct bond) enables 100–1000× the interconnect density of μ-bumps, unlocking true 3D logic stacking with massive inter-die bandwidth.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 14: TSMC SoIC and Intel Foveros -->
+<!-- ============================================================ -->
+<section>
+  <h2>TSMC SoIC &amp; Intel Foveros</h2>
+  <div class="two-col" style="margin-top:0.5em;">
+    <div>
+      <h3 style="color:var(--accent);">TSMC SoIC</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>SoIC-X</strong> — Chip-on-Wafer, face-to-face hybrid bonding (finest pitch, highest density)</li>
+        <li><strong>SoIC-P</strong> — Chip-on-Wafer, face-to-back, TSV-based; allows &gt;2 die stacking tiers</li>
+        <li>Combined with CoWoS in <strong>CoWoS+SoIC</strong> for full 3.5D system integration</li>
+        <li>Used in AMD MI300 series (logic-on-logic stacking)</li>
+      </ul>
+      <p class="tiny dim">$3.5B+ investment in SoIC capacity across multiple Taiwan sites</p>
+    </div>
+    <div>
+      <h3 style="color:var(--accent2);">Intel Foveros</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>Foveros</strong> — original die-on-die with μ-bumps (Lakefield, 2019)</li>
+        <li><strong>Foveros-S</strong> — silicon interposer variant</li>
+        <li><strong>Foveros-R</strong> — RDL fan-out interposer</li>
+        <li><strong>Foveros-B</strong> — silicon bridge variant</li>
+        <li><strong>Foveros Direct</strong> — hybrid bond (&lt;10 μm pitch, Cu-Cu)</li>
+        <li>Combined with EMIB → <strong>"3.5D"</strong> integration (Ponte Vecchio)</li>
+      </ul>
+      <p class="tiny dim">$3.5B New Mexico facility dedicated to Foveros</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 15: Section — Chiplets & Standards -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section IV</p>
+  <h2>Chiplet Architecture &amp; Standards</h2>
+  <p class="dim" style="font-size:0.75em;">Disaggregation · UCIe · Die-to-die protocols</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 16: Chiplet Rationale -->
+<!-- ============================================================ -->
+<section>
+  <h2>The Chiplet Rationale</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="left">
+      <h3>Monolithic Die Problems</h3>
+      <ul style="font-size:0.7em;">
+        <li><strong>Yield:</strong> At N3, a 600 mm² die may have &lt;30% yield; two 300 mm² chiplets can exceed 70% each</li>
+        <li><strong>Cost:</strong> Advanced node wafers cost $20–30K; smaller die = more per wafer</li>
+        <li><strong>Flexibility:</strong> Can't mix process nodes on one die (analog ≠ logic ≠ I/O)</li>
+        <li><strong>Reticle limit:</strong> Max ~858 mm² per lithography exposure</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>Chiplet Advantages</h3>
+      <ul style="font-size:0.7em;">
+        <li><strong class="accent">Yield recovery:</strong> Smaller die → quadratic yield improvement</li>
+        <li><strong class="accent2">Mix &amp; match:</strong> Compute at N3, I/O at N5, SerDes at N7 — each optimised</li>
+        <li><strong class="accent3">IP reuse:</strong> Same chiplet across product families (AMD CCD → EPYC, Ryzen, Threadripper)</li>
+        <li><strong class="accent4">Time-to-market:</strong> Parallel development of independent die</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-bar" style="margin-top:0.5em;">
+    <strong>AMD's proof point:</strong> A single Zen CCD chiplet design is reused across consumer (Ryzen), workstation (Threadripper), and server (EPYC) product lines — varying only the I/O die and chiplet count per package.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 17: UCIe Standard -->
+<!-- ============================================================ -->
+<section>
+  <h2>UCIe — Universal Chiplet Interconnect Express</h2>
+  <p class="small dim">The "USB for chiplets" — an open standard for die-to-die communication</p>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div>
+      <table style="font-size:0.9em;">
+        <tr><th>Spec</th><th>UCIe 1.0</th><th>UCIe 2.0</th><th>UCIe 3.0</th></tr>
+        <tr><td>Data Rate</td><td>4–32 GT/s</td><td>32 GT/s</td><td><strong class="accent">64 GT/s</strong></td></tr>
+        <tr><td>Reach</td><td>Standard + Advanced</td><td>Extended</td><td>+ 100 mm sideband</td></tr>
+        <tr><td>Protocols</td><td>PCIe, CXL</td><td>+ streaming</td><td>+ priority, throttle</td></tr>
+        <tr><td>Released</td><td>2022</td><td>2024</td><td><strong>Aug 2025</strong></td></tr>
+      </table>
+    </div>
+    <div class="left">
+      <h3>Protocol Stack</h3>
+      <div class="arch-stack" style="max-width:300px;">
+        <div class="arch-layer" style="background:#3a5a3a; font-size:0.55em;">Application (PCIe / CXL / Custom)</div>
+        <div class="arch-layer" style="background:#4a4a5a; font-size:0.55em;">Protocol Layer (flit format)</div>
+        <div class="arch-layer" style="background:#5a4a3a; font-size:0.55em;">Die-to-Die Adapter (retry, CRC)</div>
+        <div class="arch-layer" style="background:#2a4a5a; font-size:0.55em;">Physical Layer (SerDes / forwarded clock)</div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.15); font-size:0.5em; border:1px solid var(--accent);">
+          Bump/pad interface (standard or advanced)
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="tiny dim center" style="margin-top:0.4em;">Consortium members: AMD, Arm, ASE, Google, Intel, Meta, Microsoft, NVIDIA, Qualcomm, Samsung, TSMC, and 100+ others</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 18: Section — Thermal & Power -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section V</p>
+  <h2>Thermal &amp; Power Challenges</h2>
+  <p class="dim" style="font-size:0.75em;">PDN integrity · TDP scaling · Advanced cooling · BSPDN</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 19: Power Delivery -->
+<!-- ============================================================ -->
+<section>
+  <h2>Power Delivery in Advanced Packages</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="left">
+      <p class="small">As AI accelerators push past <strong class="accent2">700W TDP</strong> (NVIDIA B200) and toward 1000W+, power delivery through the package becomes critical.</p>
+      <h3>Challenges</h3>
+      <ul style="font-size:0.65em;">
+        <li>IR drop across interposer RDL and substrate</li>
+        <li>Simultaneous switching noise (SSN) with TB/s I/O</li>
+        <li>Decoupling capacitance density requirements</li>
+        <li>VRM-to-die impedance at &gt;100A current</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>Solutions</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">eDTC</strong> — embedded Deep Trench Capacitors in interposer (CoWoS-L); high-density decoupling directly under die</li>
+        <li><strong class="accent2">PIVR</strong> — Package-Integrated Voltage Regulators (Marvell); VRM inside the package</li>
+        <li><strong class="accent3">BSPDN</strong> — Backside Power Delivery Network; separate power and signal to different die faces</li>
+        <li><strong class="accent4">IVR on die</strong> — Integrated voltage regulators for per-domain DVFS</li>
+      </ul>
+      <p class="tiny dim">TSMC BSPDN for N2: power rails on wafer backside, freeing frontside for signal routing density.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 20: Thermal Management -->
+<!-- ============================================================ -->
+<section>
+  <h2>Thermal Management</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="left">
+      <h3>The Heat Problem</h3>
+      <ul style="font-size:0.68em;">
+        <li>3D stacking creates <strong>buried hot spots</strong> with no direct path to heatsink</li>
+        <li>CTE mismatch (Si ≈ 2.6 ppm/°C vs organic ≈ 17 ppm/°C) causes warpage and solder fatigue</li>
+        <li>HBM stacks are thermally constrained (~1.2W per die layer, cumulative)</li>
+        <li>Data center racks exceed <strong class="accent2">100 kW</strong> with advanced GPU nodes</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>Cooling Technologies</h3>
+      <ul style="font-size:0.68em;">
+        <li><strong class="accent">Lid engineering</strong> — IHS with vapor chamber, TIM1/TIM2 optimization</li>
+        <li><strong class="accent2">Direct liquid cooling</strong> — cold plates on package; TSMC demonstrated <strong>0.055 °C/W</strong> at 2.6 kW+ TDP on CoWoS</li>
+        <li><strong class="accent3">Microfluidic channels</strong> — etched into silicon interposer backside</li>
+        <li><strong class="accent4">SiC interposers</strong> — silicon carbide offers 3× the thermal conductivity of Si (exploring stage)</li>
+      </ul>
+    </div>
+  </div>
+  <blockquote style="margin-top:0.4em; font-size:0.7em;">
+    TSMC demonstrated direct-to-silicon liquid cooling on CoWoS at IEEE ECTC 2025, achieving 0.055 °C/W thermal resistance at 2.6 kW TDP on a 3,300 mm² interposer.
+  </blockquote>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 21: Section — Real-World Examples -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section VI</p>
+  <h2>Case Studies</h2>
+  <p class="dim" style="font-size:0.75em;">NVIDIA Blackwell · AMD MI300X · Apple M-series · Intel Ponte Vecchio</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 22: NVIDIA Blackwell B200 -->
+<!-- ============================================================ -->
+<section>
+  <h2>NVIDIA Blackwell B200</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <dl class="kv" style="font-size:0.85em;">
+        <dt>Process</dt><dd>TSMC N4P</dd>
+        <dt>Package</dt><dd>CoWoS-L (5.5× reticle+)</dd>
+        <dt>Architecture</dt><dd>Dual compute chiplets</dd>
+        <dt>D2D Link</dt><dd>10 TB/s NV-HBI (custom)</dd>
+        <dt>Memory</dt><dd>8× HBM3E stacks</dd>
+        <dt>HBM BW</dt><dd>8 TB/s aggregate</dd>
+        <dt>TDP</dt><dd>~700W (SXM)</dd>
+        <dt>Transistors</dt><dd>208 billion</dd>
+      </dl>
+    </div>
+    <div class="left">
+      <h3>Packaging Innovations</h3>
+      <ul style="font-size:0.65em;">
+        <li>Two GPU chiplets connected by <strong class="accent">10 TB/s NV-HBI</strong> — appear as single coherent GPU to software</li>
+        <li>CoWoS-L enables a package far exceeding single-reticle limits</li>
+        <li>LSI bridges provide fine-pitch D2D between chiplets</li>
+        <li>eDTC on interposer for power integrity at &gt;700W</li>
+        <li>NVIDIA reportedly secures <strong>~70%</strong> of TSMC's CoWoS-L capacity</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.5em;">
+        Blackwell demonstrates that advanced packaging is now the primary enabler of GPU scaling — die size no longer limited by lithography.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 23: AMD MI300X -->
+<!-- ============================================================ -->
+<section>
+  <h2>AMD MI300X — 3.5D Integration</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <dl class="kv" style="font-size:0.85em;">
+        <dt>XCDs</dt><dd>8× CDNA 3 compute (TSMC N5)</dd>
+        <dt>IODs</dt><dd>4× I/O die (TSMC N6)</dd>
+        <dt>3D Bond</dt><dd>XCDs hybrid-bonded onto IODs (SoIC)</dd>
+        <dt>2.5D</dt><dd>Stacked die on CoWoS-S Si interposer</dd>
+        <dt>HBM</dt><dd>8× HBM3 stacks (192 GB)</dd>
+        <dt>TDP</dt><dd>750W</dd>
+        <dt>Transistors</dt><dd>153 billion</dd>
+      </dl>
+    </div>
+    <div class="left">
+      <h3>Architecture Stack</h3>
+      <div class="arch-stack" style="max-width:350px;">
+        <div style="display:flex; gap:2px; width:100%;">
+          <div class="arch-layer" style="background:#3a5a3a; font-size:0.5em; flex:1;">XCD</div>
+          <div class="arch-layer" style="background:#3a5a3a; font-size:0.5em; flex:1;">XCD</div>
+        </div>
+        <div class="arch-layer" style="background:rgba(143,212,164,0.2); font-size:0.45em; border:1px solid var(--accent3);">Hybrid Bond (SoIC)</div>
+        <div class="arch-layer" style="background:#4a4a5a; font-size:0.5em;">I/O Die (IOD)</div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.1); font-size:0.45em;">μ-bumps</div>
+        <div class="arch-layer" style="background:#2a3a5a; font-size:0.5em;">Si Interposer (CoWoS-S)</div>
+        <div class="arch-layer" style="background:#3a3a4a; font-size:0.5em;">Package Substrate</div>
+      </div>
+      <p class="tiny dim" style="margin-top:0.3em;">First production GPU to combine 3D stacking (logic-on-logic) with 2.5D interposer integration.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 24: Apple M-Series & More -->
+<!-- ============================================================ -->
+<section>
+  <h2>More Packaging Case Studies</h2>
+  <div class="box-row">
+    <div class="box" style="max-width:280px;">
+      <h3 class="accent">Apple M2 Ultra</h3>
+      <p>Two M2 Max dies connected via <strong>UltraFusion</strong> — a custom silicon interposer bridge providing 2.5 TB/s die-to-die bandwidth. Uses TSMC InFO + silicon bridge.</p>
+      <p class="tiny dim">Appears as unified SoC to macOS</p>
+    </div>
+    <div class="box" style="max-width:280px;">
+      <h3 class="accent2">Intel Ponte Vecchio</h3>
+      <p>47 active tiles, 5 process nodes, 100B+ transistors. Combines <strong>Foveros</strong> (3D stacking), <strong>EMIB</strong> (2.5D bridges), and standard packaging in one product.</p>
+      <p class="tiny dim">Most complex IC package ever produced (2023)</p>
+    </div>
+    <div class="box" style="max-width:280px;">
+      <h3 class="accent3">AMD EPYC (Zen 5)</h3>
+      <p>Up to <strong>16 CCDs</strong> (Zen 5 compute) connected to a central IOD via Infinity Fabric. Each CCD is a reusable chiplet — same die as Ryzen consumer parts.</p>
+      <p class="tiny dim">Chiplet economics: 1 CCD design → 4+ product families</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 25: Section — Future -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section VII</p>
+  <h2>Future Directions</h2>
+  <p class="dim" style="font-size:0.75em;">Panel-level packaging · Photonics · System-on-Wafer · SiC substrates</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 26: Future Packaging Technologies -->
+<!-- ============================================================ -->
+<section>
+  <h2>What's Next?</h2>
+  <div class="box-row" style="margin-top:0.3em;">
+    <div class="box">
+      <h3 class="accent">FoPLP</h3>
+      <p>Fan-Out Panel-Level Packaging — move from 300 mm wafers to 600×600 mm panels. Dramatically lower cost per unit area for large packages.</p>
+    </div>
+    <div class="box">
+      <h3 class="accent2">Co-Packaged Optics (CPO)</h3>
+      <p>Photonic transceivers integrated into the package. Eliminates electrical I/O bottlenecks for data center interconnect at 100+ Tbps per package.</p>
+    </div>
+    <div class="box">
+      <h3 class="accent3">System-on-Wafer (SoW)</h3>
+      <p>TSMC's SoW-X architecture — entire wafer-scale integration for extreme AI/HPC. Complements Cerebras WSE approach at foundry level.</p>
+    </div>
+  </div>
+  <div class="box-row" style="margin-top:0.3em;">
+    <div class="box">
+      <h3 class="accent4">SiC Interposers</h3>
+      <p>Silicon carbide as interposer material — 3× thermal conductivity of Si, better mechanical robustness. TSMC actively exploring for next-gen CoWoS.</p>
+    </div>
+    <div class="box">
+      <h3 style="color:#e8a87c;">Glass Substrates</h3>
+      <p>Intel investing in glass core substrates — superior flatness, thermal stability, and ultra-fine through-glass vias (TGV) vs. organic substrates.</p>
+    </div>
+    <div class="box">
+      <h3 style="color:#8fd4a4;">CoPoS</h3>
+      <p>Chip on Panel on Substrate — TSMC's ultra-large-area approach complementing CoWoS for future AI/HPC packages beyond wafer-scale limits.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 27: Packaging Decision Framework -->
+<!-- ============================================================ -->
+<section>
+  <h2>Packaging Decision Framework</h2>
+  <p class="small dim">How to choose the right packaging approach for your SoC</p>
+  <table style="margin-top:0.3em;">
+    <tr>
+      <th>Requirement</th><th>Recommended Packaging</th><th>Example</th>
+    </tr>
+    <tr>
+      <td>Low cost, moderate I/O</td>
+      <td>Wire bond / QFP / standard BGA</td>
+      <td>IoT MCUs, sensors</td>
+    </tr>
+    <tr>
+      <td>High I/O, single die</td>
+      <td>Flip-chip BGA</td>
+      <td>Application processors, FPGAs</td>
+    </tr>
+    <tr>
+      <td>Thin profile, mobile</td>
+      <td>Fan-out WLP (InFO)</td>
+      <td>Apple A-series, Qualcomm Snapdragon</td>
+    </tr>
+    <tr>
+      <td>GPU + HBM (high BW)</td>
+      <td>2.5D CoWoS-S/-L</td>
+      <td>NVIDIA H100/B200, AMD MI300</td>
+    </tr>
+    <tr>
+      <td>Modular chiplets, ASIC</td>
+      <td>EMIB or fan-out bridge</td>
+      <td>Intel Ponte Vecchio, networking ASICs</td>
+    </tr>
+    <tr>
+      <td>Maximum integration</td>
+      <td>3D stacking (SoIC/Foveros) + 2.5D</td>
+      <td>AMD MI300X (3.5D hybrid)</td>
+    </tr>
+    <tr>
+      <td>Ultra-scale AI</td>
+      <td>SoW / FoPLP / CoPoS</td>
+      <td>Next-gen data center accelerators</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 28: Key Metrics Comparison -->
+<!-- ============================================================ -->
+<section>
+  <h2>Key Metrics Comparison</h2>
+  <table>
+    <tr>
+      <th>Metric</th>
+      <th>Wire Bond</th>
+      <th>Flip-Chip</th>
+      <th>2.5D CoWoS</th>
+      <th>3D Hybrid Bond</th>
+    </tr>
+    <tr>
+      <td>I/O Density</td>
+      <td>~20/mm</td>
+      <td>~25/mm²</td>
+      <td>~400/mm²</td>
+      <td class="accent3"><strong>10K–1M/mm²</strong></td>
+    </tr>
+    <tr>
+      <td>Bump Pitch</td>
+      <td>50–60 μm pad</td>
+      <td>100–150 μm</td>
+      <td>30–55 μm</td>
+      <td class="accent3"><strong>0.5–9 μm</strong></td>
+    </tr>
+    <tr>
+      <td>D2D BW</td>
+      <td>—</td>
+      <td>—</td>
+      <td>TB/s class</td>
+      <td class="accent3"><strong>Multi-TB/s</strong></td>
+    </tr>
+    <tr>
+      <td>Energy / bit</td>
+      <td>~5 pJ</td>
+      <td>~2 pJ</td>
+      <td>~0.5 pJ</td>
+      <td class="accent3"><strong>~0.05 pJ</strong></td>
+    </tr>
+    <tr>
+      <td>Rel. Cost</td>
+      <td>1×</td>
+      <td>2–3×</td>
+      <td>5–10×</td>
+      <td>10–20×</td>
+    </tr>
+    <tr>
+      <td>Heterogeneous</td>
+      <td>No</td>
+      <td>Limited</td>
+      <td class="accent"><strong>Yes</strong></td>
+      <td class="accent3"><strong>Yes (3D)</strong></td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 29: Summary -->
+<!-- ============================================================ -->
+<section>
+  <h2>Summary &amp; Key Takeaways</h2>
+  <div class="left" style="max-width:90%; margin:0.4em auto;">
+    <ul style="font-size:0.72em;">
+      <li><strong class="accent">Packaging is the new scaling vector</strong> — as Moore's Law slows, advanced packaging enables continued system-level performance gains through heterogeneous integration</li>
+      <li><strong class="accent2">2.5D is mainstream for HPC/AI</strong> — CoWoS and EMIB are in high-volume manufacturing, with demand exceeding supply through 2027</li>
+      <li><strong class="accent3">3D stacking is production-ready</strong> — hybrid bonding enables logic-on-logic (MI300X) and will expand to logic-on-memory</li>
+      <li><strong class="accent4">Chiplets + UCIe enable modular SoC design</strong> — disaggregation improves yield, enables IP reuse, and allows mixing of process nodes</li>
+      <li><strong>Thermal &amp; power delivery</strong> are the binding constraints — liquid cooling, BSPDN, eDTC, and SiC substrates are all being deployed to keep pace with 700W+ TDPs</li>
+      <li><strong>The supply chain matters</strong> — CoWoS capacity is the bottleneck for AI chip production; packaging facilities are receiving billions in investment worldwide</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 30: References -->
+<!-- ============================================================ -->
+<section>
+  <h2>References &amp; Further Reading</h2>
+  <div class="left" style="max-width:90%; margin:0 auto; font-size:0.55em; line-height:1.8;">
+    <p>
+      <strong class="accent">TSMC 3DFabric</strong> — CoWoS, InFO, SoIC technology documentation<br>
+      <strong class="accent">Intel Packaging</strong> — EMIB, Foveros, glass substrate technology briefs<br>
+      <strong class="accent">UCIe Consortium</strong> — Universal Chiplet Interconnect Express specifications (1.0, 2.0, 3.0)<br>
+      <strong class="accent">Yole Group</strong> — "State of Advanced Packaging 2024" market report<br>
+      <strong class="accent">IEEE ECTC 2025</strong> — TSMC direct-to-silicon liquid cooling demonstration<br>
+      <strong class="accent">JEDEC</strong> — HBM3, HBM3E, HBM4 standards (JESD238)<br>
+      <strong class="accent">AMD</strong> — MI300X architecture white paper; EPYC chiplet design methodology<br>
+      <strong class="accent">NVIDIA</strong> — Blackwell architecture technical overview<br>
+      <strong class="accent">Lau, J.H.</strong> — <em>Semiconductor Advanced Packaging</em>, Springer, 2021<br>
+      <strong class="accent">Vivet, P. et al.</strong> — "Chiplet-based architecture for edge AI computing," IEEE JSSC, 2023
+    </p>
+    <p class="dim" style="margin-top:0.8em; font-size:0.85em;">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use. Code examples provided as-is.
+    </p>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  showSlideNumber: 'all',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'fade',
+  center: true,
+  margin: 0.08,
+  width: 1280,
+  height: 720,
+  plugins: [ RevealHighlight ]
+});
+</script>
+</body>
+</html>

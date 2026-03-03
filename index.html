@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modern SoC Design — Presentation Series</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0a0a0f;
+    --surface:  #12121a;
+    --surface2: #1a1a24;
+    --border:   #2a2a35;
+    --text:     #c8c4bf;
+    --heading:  #e8e4df;
+    --accent:   #7eb8da;
+    --accent2:  #e8a87c;
+    --accent3:  #8fd4a4;
+    --accent4:  #c49dd8;
+    --dim:      #6a6660;
+    --font-heading: 'Playfair Display', Georgia, serif;
+    --font-body:    'DM Sans', system-ui, sans-serif;
+    --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    background: radial-gradient(ellipse at 30% 40%, #111828 0%, var(--bg) 70%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    opacity: 0.85;
+  }
+  .hero h1 {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--heading);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 0.3em;
+  }
+  .hero .subtitle {
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .hero .desc {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 0.95rem;
+    color: var(--dim);
+  }
+
+  /* Main content */
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+  }
+
+  /* Presentation cards */
+  .card-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .card {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr auto;
+    align-items: center;
+    gap: 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(126,184,218,0.08);
+  }
+  .card-num {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+  }
+  .card-body h3 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--heading);
+    margin-bottom: 0.25em;
+  }
+  .card-body p {
+    font-size: 0.82rem;
+    color: var(--dim);
+    margin: 0;
+  }
+  .card-status {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.25em 0.7em;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .status-live   { background: rgba(143,212,164,0.15); color: var(--accent3); }
+  .status-next   { background: rgba(232,168,124,0.15); color: var(--accent2); }
+  .status-plan   { background: rgba(106,102,96,0.12);  color: var(--dim); }
+
+  .card.disabled { pointer-events: none; opacity: 0.55; }
+  .card.disabled:hover { transform: none; box-shadow: none; border-color: var(--border); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.78rem;
+    color: var(--dim);
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .card { grid-template-columns: 2.5rem 1fr; gap: 0.8rem; padding: 1rem; }
+    .card-status { grid-column: 2; justify-self: start; margin-top: -0.3em; }
+    .hero { padding: 4rem 1.5rem 3rem; }
+    .container { padding: 2rem 1.5rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="hero-icon">⬡</span>
+  <h1>Modern SoC Design<br>Presentation Series</h1>
+  <p class="subtitle">Packaging · Architecture · Memory · Interconnect · Implementation</p>
+  <p class="desc">
+    Interactive slide decks covering modern System-on-Chip design end-to-end — from advanced packaging
+    and chiplet architectures through memory hierarchies, on-chip interconnects, and silicon implementation.
+    Click any presentation below to launch it.
+  </p>
+</header>
+
+<main class="container">
+  <div class="card-grid">
+
+    <a class="card" href="01-soc-packaging/">
+      <div class="card-num">01</div>
+      <div class="card-body">
+        <h3>Modern SoC Packaging</h3>
+        <p>Wire bond · Flip-chip · Fan-out · 2.5D CoWoS &amp; EMIB · 3D stacking · Chiplets · UCIe · Thermal &amp; power delivery</p>
+      </div>
+      <span class="card-status status-live">▶ Launch</span>
+    </a>
+
+    <div class="card disabled">
+      <div class="card-num">02</div>
+      <div class="card-body">
+        <h3>On-Chip Interconnect &amp; NoC Design</h3>
+        <p>Bus vs crossbar · AXI/ACE · Network-on-Chip topologies · Coherency protocols · QoS &amp; arbitration</p>
+      </div>
+      <span class="card-status status-next">Coming next</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">03</div>
+      <div class="card-body">
+        <h3>Memory Hierarchy — SRAM to HBM</h3>
+        <p>Cache design · SRAM bitcells · DRAM fundamentals · LPDDR5/6 · HBM3/4 · CXL memory pooling</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">04</div>
+      <div class="card-body">
+        <h3>Power Management &amp; Clocking</h3>
+        <p>DVFS · Power domains · PMICs · LDO vs switching · Clock distribution · PLL design · BSPDN</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">05</div>
+      <div class="card-body">
+        <h3>High-Speed SerDes &amp; I/O</h3>
+        <p>PCIe 5/6 · UCIe PHY · PAM4 signaling · CDR · Equalization · Die-to-die links · Co-packaged optics</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">06</div>
+      <div class="card-body">
+        <h3>AI / ML Accelerator Architectures</h3>
+        <p>Systolic arrays · Dataflow engines · Sparsity · Mixed precision · NPU integration in SoCs</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">07</div>
+      <div class="card-body">
+        <h3>Process Technology — FinFET to GAA</h3>
+        <p>FinFET · Gate-All-Around · Nanosheet · CFET · Backside power · EUV lithography · N2 &amp; beyond</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">08</div>
+      <div class="card-body">
+        <h3>SoC Verification &amp; Physical Design</h3>
+        <p>RTL simulation · Formal verification · Emulation · PnR · Timing closure · DFT · Sign-off</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">09</div>
+      <div class="card-body">
+        <h3>Security in SoC Design</h3>
+        <p>Hardware root of trust · Secure boot · Side-channel countermeasures · PUFs · Crypto accelerators</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+    <div class="card disabled">
+      <div class="card-num">10</div>
+      <div class="card-body">
+        <h3>SoC Design for Automotive &amp; Edge AI</h3>
+        <p>ISO 26262 · Functional safety · Automotive-grade packaging · Edge inference SoCs · ADAS architectures</p>
+      </div>
+      <span class="card-status status-plan">Planned</span>
+    </div>
+
+  </div>
+</main>
+
+<footer class="footer">
+  Built with <a href="https://revealjs.com">Reveal.js</a> · Navigate presentations with arrow keys or swipe<br>
+  Contributions, corrections, and suggestions welcome via issues and pull requests.
+</footer>
+
+</body>
+</html>
