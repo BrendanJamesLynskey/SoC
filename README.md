@@ -16,15 +16,17 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 |---|-------|--------|--------|
 | 01 | Modern SoC Packaging | 18 | ✅ Complete |
 | 02 | On-Chip Interconnect & NoC Design | 20 | ✅ Complete |
-| 03 | Memory Hierarchy — SRAM to HBM | — | Planned |
-| 04 | Power Management & Clocking | — | Planned |
-| 05 | High-Speed SerDes & I/O | — | Planned |
-| 06 | AI / ML Accelerator Architectures | — | Planned |
-| 07 | Process Technology — FinFET to GAA | — | Planned |
-| 08 | SoC Verification & Physical Design | — | Planned |
-| 09 | Security in SoC Design | — | Planned |
-| 10 | SoC Design for Automotive & Edge AI | — | Planned |
-| 11 | CXL — Compute Express Link | — | Planned |
+| 03 | Memory Hierarchy | — | Planned |
+| 04 | High-Speed SerDes & I/O | — | Planned |
+| 05 | AI / ML Accelerator Architectures | — | Planned |
+| 06 | SoCs for ML Inference | — | Planned |
+| 07 | Security in SoC Design | — | Planned |
+| 08 | CXL — Compute Express Link | — | Planned |
+| 09 | Modern Accelerator Power Delivery | — | Planned |
+| 10 | Modern SoC Verification | — | Planned |
+| 11 | Power Management in Accelerator SoCs | — | Planned |
+| 12 | Thermal Management in Accelerator SoCs | — | Planned |
+| 13 | Clocking and Reset in Accelerator SoCs | — | Planned |
 
 ---
 
