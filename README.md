@@ -24,6 +24,7 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 | 08 | SoC Verification & Physical Design | — | Planned |
 | 09 | Security in SoC Design | — | Planned |
 | 10 | SoC Design for Automotive & Edge AI | — | Planned |
+| 11 | CXL — Compute Express Link | — | Planned |
 
 ---
 
@@ -64,6 +65,24 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 **Commercial NoC & Case Studies** — Arm CMN-700/S3, Arteris FlexNoC/Ncore, Synopsys/Cadence NoC IP. AMD Infinity Fabric architecture (intra-CCD, CCD↔IOD, xGMI). Intel ring-to-mesh transition (Sandy Bridge through Granite Rapids) with latency analysis.
 
 **Advanced Topics** — CXL 3.1 (CXL.io/cache/mem), UCIe D2D chiplet interconnect, NoC power management (clock/power gating, DVFS, GALS), and functional safety (AMBA parity, data poisoning, TDM, lockstep routers, ISO 26262 certified NoC IP).
+
+---
+
+## Presentation 11: CXL — Compute Express Link *(Planned)*
+
+Planned coverage:
+
+**Fundamentals** — CXL motivation and market drivers. PCIe PHY reuse. CXL 1.1 → 2.0 → 3.0 → 3.1 specification evolution. Relationship to PCIe Gen5/Gen6.
+
+**Protocol Sub-Protocols** — CXL.io (discovery, configuration, non-coherent DMA). CXL.cache (device-to-host coherency, snoop-based). CXL.mem (host-managed device memory, HDM-H/HDM-D). Protocol multiplexing over shared PHY.
+
+**Device Types** — Type 1 (accelerator, CXL.cache only), Type 2 (accelerator + memory, CXL.cache + CXL.mem), Type 3 (memory expander, CXL.mem only). Use cases and design trade-offs for each.
+
+**Memory Pooling & Fabric** — CXL 3.0+ fabric switches, Global Fabric Attached Memory (GFAM), peer-to-peer communication, back-invalidation snooping. Multi-host memory sharing and dynamic capacity provisioning.
+
+**SoC Integration** — CXL controller IP integration with on-chip NoC (Arm CMN CXS bridge, custom implementations). Coherency domain boundaries. NUMA implications and OS/firmware support.
+
+**Hardware Ecosystem** — CXL memory modules, CXL switches (Microchip, XConn), CXL-enabled CPUs (Intel Sapphire/Granite Rapids, AMD Genoa/Turin). Test and validation infrastructure.
 
 ---
 

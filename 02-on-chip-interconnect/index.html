@@ -519,29 +519,140 @@
 </section>
 
 <!-- ============================================================ -->
-<!-- SLIDE 13: AXI Handshake Waveform (text-based) -->
+<!-- SLIDE 13: AXI Handshake Waveform (SVG) -->
 <!-- ============================================================ -->
 <section>
   <h2>AXI Handshake &amp; Burst Timing</h2>
-  <pre><code class="language-plaintext">                 CLK  ─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─
-                        │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │
-  ── Write Address ─────────────────────────────────────────────
-         AWVALID  ──────┘     └──────────────────────────────── 
-         AWREADY  ──────┘     └──────────────────────────────── 
-         AWADDR   ═══════╡ A ╞══════════════════════════════════
-         AWLEN    ═══════╡ 3 ╞══════   (4-beat burst: len = 3)
-                                │
-  ── Write Data ────────────────▼───────────────────────────────
-         WVALID   ──────────────┘                 └─────────────
-         WREADY   ──────────────┘     ┌───┐       └─────────────
-         WDATA    ══════════════╡ D0 ╞╡ D1╞═╡ D2 ╞═╡ D3 ╞═════
-         WLAST    ──────────────────────────────────┘   └───────
-                                                        │
-  ── Write Response ────────────────────────────────────▼───────
-         BVALID   ──────────────────────────────────────┘ └─────
-         BREADY   ──────────────────────────────────────┘ └─────
-         BRESP    ══════════════════════════════════════╡OK╞════</code></pre>
-  <p class="tiny dim center">AXI write burst (INCR, len=3): address phase → 4 data beats → write response. WLAST marks final beat. All channels use independent VALID/READY handshake.</p>
+  <p class="tiny dim center" style="margin-bottom:0.2em;">AXI write burst (INCR, AWLEN=3): address phase → 4 data beats → write response</p>
+  <svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg" style="width:95%; max-width:920px; margin:0 auto; display:block;">
+    <defs>
+      <style>
+        .wf-label  { font: 700 11px 'JetBrains Mono', monospace; }
+        .wf-group  { font: 700 10px 'JetBrains Mono', monospace; }
+        .wf-annot  { font: 500 9.5px 'DM Sans', sans-serif; fill: #6a6660; }
+        .wf-data   { font: 700 10px 'JetBrains Mono', monospace; }
+        .wf-grid   { stroke: #1e1e28; stroke-width: 0.5; }
+      </style>
+    </defs>
+
+    <!-- Clock ticks (vertical gridlines) -->
+    <g class="wf-grid">
+      <line x1="140" y1="18" x2="140" y2="410" /><line x1="200" y1="18" x2="200" y2="410" />
+      <line x1="260" y1="18" x2="260" y2="410" /><line x1="320" y1="18" x2="320" y2="410" />
+      <line x1="380" y1="18" x2="380" y2="410" /><line x1="440" y1="18" x2="440" y2="410" />
+      <line x1="500" y1="18" x2="500" y2="410" /><line x1="560" y1="18" x2="560" y2="410" />
+      <line x1="620" y1="18" x2="620" y2="410" /><line x1="680" y1="18" x2="680" y2="410" />
+      <line x1="740" y1="18" x2="740" y2="410" /><line x1="800" y1="18" x2="800" y2="410" />
+      <line x1="860" y1="18" x2="860" y2="410" />
+    </g>
+
+    <!-- Clock waveform -->
+    <text x="10" y="28" class="wf-label" fill="#6a6660">CLK</text>
+    <polyline points="140,14 140,32 170,32 170,14 200,14 200,32 230,32 230,14 260,14 260,32 290,32 290,14 320,14 320,32 350,32 350,14 380,14 380,32 410,32 410,14 440,14 440,32 470,32 470,14 500,14 500,32 530,32 530,14 560,14 560,32 590,32 590,14 620,14 620,32 650,32 650,14 680,14 680,32 710,32 710,14 740,14 740,32 770,32 770,14 800,14 800,32 830,32 830,14 860,14 860,32 890,32 890,14" fill="none" stroke="#4a4a55" stroke-width="1.5"/>
+
+    <!-- ── WRITE ADDRESS GROUP ── -->
+    <text x="10" y="58" class="wf-group" fill="#7eb8da">── Write Address ──</text>
+
+    <!-- AWVALID -->
+    <text x="10" y="80" class="wf-label" fill="#7eb8da">AWVALID</text>
+    <polyline points="140,86 200,86 200,70 320,70 320,86 860,86" fill="none" stroke="#7eb8da" stroke-width="2"/>
+
+    <!-- AWREADY -->
+    <text x="10" y="104" class="wf-label" fill="#7eb8da">AWREADY</text>
+    <polyline points="140,110 260,110 260,94 320,94 320,110 860,110" fill="none" stroke="#5a9aba" stroke-width="2"/>
+    <!-- Handshake marker -->
+    <line x1="260" y1="68" x2="260" y2="112" stroke="#7eb8da" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+    <circle cx="260" cy="70" r="3" fill="#7eb8da" opacity="0.7"/>
+    <text x="265" y="67" class="wf-annot" fill="#7eb8da">handshake</text>
+
+    <!-- AWADDR -->
+    <text x="10" y="130" class="wf-label" fill="#7eb8da">AWADDR</text>
+    <polygon points="200,118 210,126 200,134 140,134 140,118" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+    <polygon points="200,118 320,118 310,126 320,134 200,134 210,126" fill="rgba(126,184,218,0.15)" stroke="#7eb8da" stroke-width="2"/>
+    <text x="245" y="130" class="wf-data" fill="#7eb8da" text-anchor="middle">ADDR</text>
+    <polygon points="320,118 860,118 860,134 320,134 330,126" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+
+    <!-- AWLEN -->
+    <text x="10" y="154" class="wf-label" fill="#7eb8da">AWLEN</text>
+    <polygon points="200,142 210,150 200,158 140,158 140,142" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+    <polygon points="200,142 320,142 310,150 320,158 200,158 210,150" fill="rgba(126,184,218,0.15)" stroke="#7eb8da" stroke-width="2"/>
+    <text x="250" y="154" class="wf-data" fill="#7eb8da" text-anchor="middle">3</text>
+    <polygon points="320,142 860,142 860,158 320,158 330,150" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+    <text x="340" y="154" class="wf-annot">(4-beat burst)</text>
+
+    <!-- ── WRITE DATA GROUP ── -->
+    <text x="10" y="184" class="wf-group" fill="#e8a87c">── Write Data ──</text>
+
+    <!-- WVALID -->
+    <text x="10" y="206" class="wf-label" fill="#e8a87c">WVALID</text>
+    <polyline points="140,212 320,212 320,196 680,196 680,212 860,212" fill="none" stroke="#e8a87c" stroke-width="2"/>
+
+    <!-- WREADY -->
+    <text x="10" y="230" class="wf-label" fill="#e8a87c">WREADY</text>
+    <polyline points="140,236 320,236 320,220 440,220 440,236 500,236 500,220 680,220 680,236 860,236" fill="none" stroke="#c88a5c" stroke-width="2"/>
+    <!-- Stall annotation -->
+    <rect x="440" y="222" width="60" height="12" rx="2" fill="rgba(232,168,124,0.1)" stroke="none"/>
+    <text x="470" y="232" class="wf-annot" fill="#e8a87c" text-anchor="middle">stall</text>
+
+    <!-- WDATA -->
+    <text x="10" y="258" class="wf-label" fill="#e8a87c">WDATA</text>
+    <polygon points="320,246 860,246 860,266 320,266 330,256" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+    <!-- D0 -->
+    <polygon points="320,246 440,246 430,256 440,266 320,266 330,256" fill="rgba(126,184,218,0.12)" stroke="#7eb8da" stroke-width="1.5"/>
+    <text x="375" y="260" class="wf-data" fill="#7eb8da" text-anchor="middle">D0</text>
+    <!-- D1 -->
+    <polygon points="440,246 500,246 490,256 500,266 440,266 450,256" fill="rgba(143,212,164,0.12)" stroke="#8fd4a4" stroke-width="1.5"/>
+    <text x="467" y="260" class="wf-data" fill="#8fd4a4" text-anchor="middle">D1</text>
+    <!-- D2 -->
+    <polygon points="500,246 620,246 610,256 620,266 500,266 510,256" fill="rgba(196,157,216,0.12)" stroke="#c49dd8" stroke-width="1.5"/>
+    <text x="555" y="260" class="wf-data" fill="#c49dd8" text-anchor="middle">D2</text>
+    <!-- D3 -->
+    <polygon points="620,246 680,246 670,256 680,266 620,266 630,256" fill="rgba(232,168,124,0.15)" stroke="#e8a87c" stroke-width="2"/>
+    <text x="645" y="260" class="wf-data" fill="#e8a87c" text-anchor="middle">D3</text>
+    <!-- Post -->
+    <polygon points="680,246 860,246 860,266 680,266 690,256" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+
+    <!-- Handshake ticks on WDATA beats -->
+    <line x1="320" y1="194" x2="320" y2="268" stroke="#e8a87c" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.4"/>
+    <line x1="440" y1="194" x2="440" y2="268" stroke="#e8a87c" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.4"/>
+    <line x1="500" y1="194" x2="500" y2="268" stroke="#e8a87c" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.4"/>
+    <line x1="620" y1="194" x2="620" y2="268" stroke="#e8a87c" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.4"/>
+
+    <!-- WLAST -->
+    <text x="10" y="286" class="wf-label" fill="#e8a87c">WLAST</text>
+    <polyline points="140,292 620,292 620,276 680,276 680,292 860,292" fill="none" stroke="#e8a87c" stroke-width="2"/>
+    <text x="647" y="274" class="wf-annot" fill="#e8a87c">↑ last beat</text>
+
+    <!-- ── WRITE RESPONSE GROUP ── -->
+    <text x="10" y="318" class="wf-group" fill="#8fd4a4">── Write Response ──</text>
+
+    <!-- BVALID -->
+    <text x="10" y="340" class="wf-label" fill="#8fd4a4">BVALID</text>
+    <polyline points="140,346 740,346 740,330 800,330 800,346 860,346" fill="none" stroke="#8fd4a4" stroke-width="2"/>
+
+    <!-- BREADY (always ready) -->
+    <text x="10" y="364" class="wf-label" fill="#8fd4a4">BREADY</text>
+    <polyline points="140,360 860,360" fill="none" stroke="#6aa484" stroke-width="2"/>
+    <text x="870" y="364" class="wf-annot">(tied high)</text>
+
+    <!-- BRESP -->
+    <text x="10" y="388" class="wf-label" fill="#8fd4a4">BRESP</text>
+    <polygon points="740,376 860,376 860,396 740,396 750,386" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+    <polygon points="740,376 800,376 790,386 800,396 740,396 750,386" fill="rgba(143,212,164,0.15)" stroke="#8fd4a4" stroke-width="2"/>
+    <text x="766" y="390" class="wf-data" fill="#8fd4a4" text-anchor="middle">OK</text>
+    <polygon points="800,376 860,376 860,396 800,396 810,386" fill="none" stroke="#3a4a5a" stroke-width="1.5"/>
+
+    <!-- Handshake marker on B channel -->
+    <line x1="740" y1="328" x2="740" y2="398" stroke="#8fd4a4" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.4"/>
+
+    <!-- Phase annotations at bottom -->
+    <rect x="200" y="406" width="120" height="14" rx="3" fill="rgba(126,184,218,0.12)"/>
+    <text x="260" y="416" class="wf-annot" fill="#7eb8da" text-anchor="middle">Addr Phase</text>
+    <rect x="320" y="406" width="360" height="14" rx="3" fill="rgba(232,168,124,0.12)"/>
+    <text x="500" y="416" class="wf-annot" fill="#e8a87c" text-anchor="middle">Data Phase (4 beats, 1 stall cycle)</text>
+    <rect x="740" y="406" width="60" height="14" rx="3" fill="rgba(143,212,164,0.12)"/>
+    <text x="770" y="416" class="wf-annot" fill="#8fd4a4" text-anchor="middle">Resp</text>
+  </svg>
 </section>
 
 <!-- ============================================================ -->
