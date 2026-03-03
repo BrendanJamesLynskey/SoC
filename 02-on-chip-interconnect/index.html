@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>On-Chip Interconnect &amp; NoC Design</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --r-background-color: #0a0a0f;
+    --r-main-font: 'DM Sans', sans-serif;
+    --r-heading-font: 'Playfair Display', serif;
+    --r-code-font: 'JetBrains Mono', monospace;
+    --r-main-font-size: 28px;
+    --r-heading-color: #e8e4df;
+    --r-main-color: #c8c4bf;
+    --r-link-color: #7eb8da;
+    --r-link-color-hover: #a8d4ef;
+    --r-selection-background-color: #2a5a7a;
+    --accent: #7eb8da;
+    --accent2: #e8a87c;
+    --accent3: #8fd4a4;
+    --accent4: #c49dd8;
+    --dim: #6a6660;
+    --surface: #16161e;
+    --surface2: #1e1e28;
+  }
+
+  .reveal { font-weight: 400; }
+  .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-shadow: none; }
+  .reveal h1 { font-size: 2.0em; font-weight: 900; }
+  .reveal h2 { font-size: 1.35em; }
+  .reveal h3 { font-size: 1.0em; color: var(--accent); font-family: var(--r-main-font); font-weight: 700; }
+  .reveal p, .reveal li { line-height: 1.6; }
+  .reveal ul { list-style: none; padding-left: 0; }
+  .reveal ul li { position: relative; padding-left: 1.4em; margin-bottom: 0.4em; }
+  .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  .reveal code { font-family: var(--r-code-font); font-size: 0.85em; }
+  .reveal pre { width: 100%; box-shadow: none; }
+  .reveal pre code { padding: 1em 1.2em; border-radius: 8px; background: var(--surface); border: 1px solid #2a2a35; max-height: 520px; font-size: 0.55em; line-height: 1.55; }
+  .reveal .slide-number { font-family: var(--r-code-font); font-size: 0.6em; color: var(--dim); background: transparent; }
+  .reveal blockquote { background: var(--surface); border-left: 4px solid var(--accent); padding: 0.8em 1.2em; font-style: normal; border-radius: 0 8px 8px 0; width: 90%; margin: 0.8em auto; font-size: 0.85em; }
+
+  .accent  { color: var(--accent) !important; }
+  .accent2 { color: var(--accent2) !important; }
+  .accent3 { color: var(--accent3) !important; }
+  .accent4 { color: var(--accent4) !important; }
+  .dim     { color: var(--dim) !important; }
+  .mono    { font-family: var(--r-code-font) !important; }
+  .small   { font-size: 0.7em !important; }
+  .smaller { font-size: 0.6em !important; }
+  .tiny    { font-size: 0.5em !important; }
+  .left    { text-align: left !important; }
+  .center  { text-align: center !important; }
+
+  .tag { display: inline-block; padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.55em; font-family: var(--r-code-font); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; margin: 0 0.15em; }
+  .tag-blue   { background: rgba(126,184,218,0.18); color: var(--accent); }
+  .tag-orange { background: rgba(232,168,124,0.18); color: var(--accent2); }
+  .tag-green  { background: rgba(143,212,164,0.18); color: var(--accent3); }
+  .tag-purple { background: rgba(196,157,216,0.18); color: var(--accent4); }
+  .tag-dim    { background: rgba(106,102,96,0.18);  color: var(--dim); }
+
+  .reveal table { border-collapse: collapse; margin: 0.6em auto; font-size: 0.65em; width: 95%; }
+  .reveal table th { background: var(--surface2); color: var(--accent); font-weight: 700; padding: 0.5em 0.7em; border-bottom: 2px solid var(--accent); text-align: left; }
+  .reveal table td { padding: 0.45em 0.7em; border-bottom: 1px solid #2a2a35; }
+  .reveal table tr:last-child td { border-bottom: none; }
+
+  .box-row { display: flex; gap: 0.8em; justify-content: center; flex-wrap: wrap; margin: 0.6em 0; }
+  .box { background: var(--surface); border: 1px solid #2a2a35; border-radius: 8px; padding: 0.7em 1em; flex: 1; min-width: 180px; max-width: 320px; text-align: center; }
+  .box h3 { margin: 0 0 0.3em; font-size: 0.85em; }
+  .box p, .box ul { font-size: 0.65em; margin: 0; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; align-items: start; }
+  .two-col.wide-left  { grid-template-columns: 1.3fr 0.7fr; }
+  .two-col.wide-right { grid-template-columns: 0.7fr 1.3fr; }
+
+  .arch-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0.5em auto; max-width: 700px; }
+  .arch-layer { width: 100%; padding: 0.4em 0.8em; border-radius: 6px; text-align: center; font-size: 0.6em; font-weight: 700; font-family: var(--r-code-font); }
+
+  .reveal section h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--accent);
+    margin: 0.25em auto 0;
+    border-radius: 2px;
+  }
+  .section-slide h2::after,
+  .title-slide h1::after { display: none; }
+
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2em 1em; font-size: 0.7em; text-align: left; margin: 0.5em auto; max-width: 90%; }
+  .kv dt { color: var(--accent); font-weight: 700; white-space: nowrap; font-family: var(--r-code-font); font-size: 0.9em; }
+  .kv dd { margin: 0; }
+
+  .highlight-bar { background: linear-gradient(90deg, rgba(126,184,218,0.12) 0%, transparent 100%); border-left: 3px solid var(--accent); padding: 0.5em 1em; margin: 0.5em 0; border-radius: 0 6px 6px 0; font-size: 0.75em; }
+
+  .title-slide h1 { font-size: 2.2em; margin-bottom: 0.15em; }
+  .title-slide .subtitle { font-size: 0.85em; color: var(--accent); margin-bottom: 0.5em; font-family: var(--r-main-font); }
+  .title-slide .meta { font-size: 0.55em; color: var(--dim); }
+
+  .section-slide { background: linear-gradient(135deg, #0d1420 0%, #0a0a0f 100%); }
+  .section-slide h2 { font-size: 1.8em; }
+  .section-slide .section-num { font-family: var(--r-code-font); font-size: 0.6em; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.3em; }
+
+  /* Mesh diagram via CSS grid */
+  .mesh-grid { display: grid; gap: 2px; margin: 0.4em auto; max-width: 420px; }
+  .mesh-node { width: 100%; aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.4em; font-weight: 700; font-family: var(--r-code-font); border: 1px solid #3a3a4a; }
+  .mesh-node.xp   { background: var(--surface2); color: var(--dim); }
+  .mesh-node.cpu   { background: rgba(126,184,218,0.2); color: var(--accent); border-color: var(--accent); }
+  .mesh-node.mem   { background: rgba(232,168,124,0.2); color: var(--accent2); border-color: var(--accent2); }
+  .mesh-node.io    { background: rgba(143,212,164,0.2); color: var(--accent3); border-color: var(--accent3); }
+  .mesh-node.cache { background: rgba(196,157,216,0.2); color: var(--accent4); border-color: var(--accent4); }
+
+  /* Channel diagram */
+  .channel-row { display: flex; align-items: center; gap: 0.5em; margin: 0.2em 0; font-size: 0.6em; }
+  .channel-label { width: 120px; text-align: right; font-weight: 700; font-family: var(--r-code-font); }
+  .channel-arrow { flex: 1; height: 3px; border-radius: 2px; position: relative; }
+  .channel-arrow::after { content: '▸'; position: absolute; right: -0.5em; top: -0.6em; font-size: 1.2em; }
+  .channel-arrow.bidir::before { content: '◂'; position: absolute; left: -0.5em; top: -0.6em; font-size: 1.2em; }
+
+  /* Protocol stack layers */
+  .proto-stack { display: flex; flex-direction: column; gap: 2px; max-width: 350px; margin: 0.3em auto; }
+  .proto-layer { padding: 0.35em 0.6em; border-radius: 5px; text-align: center; font-size: 0.55em; font-weight: 700; font-family: var(--r-code-font); }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- SLIDE 1: Title -->
+<!-- ============================================================ -->
+<section class="title-slide" data-background-gradient="radial-gradient(ellipse at 30% 50%, #111828 0%, #0a0a0f 70%)">
+  <p class="mono small accent" style="letter-spacing:0.15em;">MODERN SOC DESIGN · PRESENTATION 02</p>
+  <h1>On-Chip Interconnect<br>&amp; NoC Design</h1>
+  <p class="subtitle">Buses · Crossbars · Networks-on-Chip · Coherency · QoS</p>
+  <p class="meta" style="margin-top:1.5em;">
+    AMBA AXI · ACE · CHI · Mesh · Ring · Torus · Routing · Arbitration · Snoop Filters · MESI · CXL
+  </p>
+  <p class="meta" style="margin-top:1em;">Navigate: <span class="mono">→ ←</span> &nbsp;|&nbsp; Overview: <span class="mono">Esc</span> &nbsp;|&nbsp; Fullscreen: <span class="mono">F</span></p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2: Why Interconnect Matters -->
+<!-- ============================================================ -->
+<section>
+  <h2>Why Interconnect Matters</h2>
+  <div class="two-col" style="margin-top:0.6em;">
+    <div class="left">
+      <ul style="font-size:0.75em;">
+        <li><strong class="accent">Bandwidth ceiling</strong> — modern SoCs have 100+ IP blocks; the interconnect determines aggregate throughput between them</li>
+        <li><strong class="accent2">Latency floor</strong> — cache miss to DRAM is dominated by NoC traversal + memory controller queuing, not DRAM access time</li>
+        <li><strong class="accent3">Power budget</strong> — interconnect consumes 30–40% of total SoC dynamic power; wire energy dominates at advanced nodes</li>
+        <li><strong class="accent4">Design reuse</strong> — a well-designed NoC allows IP blocks to be swapped, added, or removed without backend redesign</li>
+      </ul>
+    </div>
+    <div>
+      <blockquote style="font-size:0.75em;">
+        The communication subsystem consumes 30–40% of total SoC chip resources and is the primary determinant of system-level performance.
+      </blockquote>
+      <div class="highlight-bar" style="margin-top:0.6em;">
+        Trend: from <strong>shared buses</strong> (AHB, 2000s) → <strong>crossbar switches</strong> (NIC-400) → <strong>packet-switched NoC</strong> (CMN-700, Arteris FlexNoC) as IP block counts and bandwidth demands scale.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3: Section — Interconnect Evolution -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section I</p>
+  <h2>Interconnect Evolution</h2>
+  <p class="dim" style="font-size:0.75em;">Shared bus → Crossbar → Network-on-Chip</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4: Shared Bus Architecture -->
+<!-- ============================================================ -->
+<section>
+  <h2>Shared Bus Architecture</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div>
+      <h3>AMBA AHB / APB</h3>
+      <div class="arch-stack" style="max-width:400px;">
+        <div style="display:flex; gap:4px; width:100%;">
+          <div class="arch-layer" style="background:rgba(126,184,218,0.2);">CPU</div>
+          <div class="arch-layer" style="background:rgba(126,184,218,0.2);">DMA</div>
+          <div class="arch-layer" style="background:rgba(126,184,218,0.2);">GPU</div>
+        </div>
+        <div class="arch-layer" style="background:var(--accent); color:#0a0a0f;">
+          Shared Bus (AHB) — single manager at a time
+        </div>
+        <div style="display:flex; gap:4px; width:100%;">
+          <div class="arch-layer" style="background:rgba(232,168,124,0.2);">SRAM</div>
+          <div class="arch-layer" style="background:rgba(232,168,124,0.2);">Flash</div>
+          <div class="arch-layer" style="background:rgba(232,168,124,0.2);">MMIO</div>
+        </div>
+      </div>
+      <p class="small dim left" style="margin-top:0.4em;">An arbiter grants one manager access at a time. All subordinates share the same address/data wires.</p>
+    </div>
+    <div class="left">
+      <h3>Characteristics</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>Simple</strong> — minimal area, easy verification</li>
+        <li><strong>Pipelined</strong> — AHB uses address + data phases</li>
+        <li><strong>Single-master bottleneck</strong> — only one transaction at a time on the bus</li>
+        <li><strong>Non-scalable</strong> — adding masters degrades throughput linearly</li>
+      </ul>
+      <h3 style="margin-top:0.5em;">Where It Still Works</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>APB</strong> — low-bandwidth peripheral register access (UART, SPI, I²C config registers)</li>
+        <li><strong>AHB-Lite</strong> — single-manager subsystems (sensor hubs, audio DSPs)</li>
+        <li>MCUs with ≤4 bus masters and ≤1 GHz clock</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5: Crossbar Switch -->
+<!-- ============================================================ -->
+<section>
+  <h2>Crossbar Switch Architecture</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div>
+      <div class="arch-stack" style="max-width:400px;">
+        <div style="display:flex; gap:4px; width:100%;">
+          <div class="arch-layer" style="background:rgba(126,184,218,0.2);">M0</div>
+          <div class="arch-layer" style="background:rgba(126,184,218,0.2);">M1</div>
+          <div class="arch-layer" style="background:rgba(126,184,218,0.2);">M2</div>
+          <div class="arch-layer" style="background:rgba(126,184,218,0.2);">M3</div>
+        </div>
+        <div class="arch-layer" style="background:#2a3a4a; border:2px solid var(--accent); font-size:0.5em;">
+          N×M Crossbar Switch — concurrent non-conflicting paths
+        </div>
+        <div style="display:flex; gap:4px; width:100%;">
+          <div class="arch-layer" style="background:rgba(232,168,124,0.2);">S0</div>
+          <div class="arch-layer" style="background:rgba(232,168,124,0.2);">S1</div>
+          <div class="arch-layer" style="background:rgba(232,168,124,0.2);">S2</div>
+          <div class="arch-layer" style="background:rgba(232,168,124,0.2);">S3</div>
+        </div>
+      </div>
+      <p class="small dim left" style="margin-top:0.4em;">Multiple concurrent transactions as long as they target different subordinates. Conflicts arbitrated per-subordinate port.</p>
+    </div>
+    <div class="left">
+      <h3>Crossbar Properties</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>Parallel paths</strong> — M0→S2 and M1→S0 proceed simultaneously</li>
+        <li><strong>Low latency</strong> — single-hop, no store-and-forward</li>
+        <li><strong>Wire cost</strong> — grows as O(N×M); practical limit ~16×16 ports</li>
+        <li><strong>Centralized</strong> — all arbitration in one block; routing congestion</li>
+      </ul>
+      <h3 style="margin-top:0.5em;">Examples</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>Arm NIC-400</strong> — configurable AXI crossbar for mid-range SoCs</li>
+        <li><strong>Synopsys DW_axi</strong> — DesignWare AXI interconnect matrix</li>
+        <li>Most FPGA soft-core SoCs (Xilinx AXI Interconnect IP)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6: Network-on-Chip Concept -->
+<!-- ============================================================ -->
+<section>
+  <h2>Network-on-Chip (NoC)</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <p class="small">A NoC replaces ad-hoc global wires and centralized crossbars with a <strong class="accent">packet-switched network</strong> of distributed routers connected by point-to-point links.</p>
+      <h3>Three Building Blocks</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">Network Interface (NI)</strong> — converts IP transactions (AXI/CHI) to network packets and back; handles protocol isolation, clock/power domain crossing</li>
+        <li><strong class="accent2">Router</strong> — receives packets, performs routing lookup, arbitrates between inputs, forwards to output port; typically 3–5 pipeline stages</li>
+        <li><strong class="accent3">Link</strong> — physical wires between routers; can be pipelined for long distances; defines raw bandwidth (width × frequency)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Why NoC over Crossbar?</h3>
+      <table style="font-size:0.9em;">
+        <tr><th>Property</th><th>Crossbar</th><th>NoC</th></tr>
+        <tr><td>Scalability</td><td>O(N²) wires</td><td class="accent3"><strong>O(N) links</strong></td></tr>
+        <tr><td>Max ports</td><td>~16</td><td class="accent3"><strong>100s</strong></td></tr>
+        <tr><td>Wire length</td><td>Global</td><td class="accent3"><strong>Local (hop)</strong></td></tr>
+        <tr><td>Multi-clock</td><td>Hard</td><td class="accent3"><strong>Per-NI</strong></td></tr>
+        <tr><td>Latency (min)</td><td class="accent3"><strong>1 cycle</strong></td><td>3–10 cycles</td></tr>
+        <tr><td>Reusability</td><td>Low</td><td class="accent3"><strong>High</strong></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7: Section — NoC Topologies -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section II</p>
+  <h2>NoC Topologies</h2>
+  <p class="dim" style="font-size:0.75em;">Mesh · Torus · Ring · Tree · Hierarchical · Application-specific</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8: Topology Comparison -->
+<!-- ============================================================ -->
+<section>
+  <h2>Common NoC Topologies</h2>
+  <table>
+    <tr>
+      <th>Topology</th><th>Structure</th><th>Diameter (N nodes)</th><th>Bisection BW</th><th>Strengths</th><th>Weakness</th>
+    </tr>
+    <tr>
+      <td><strong class="accent">2D Mesh</strong></td>
+      <td>Grid, 4 neighbors</td>
+      <td>2(√N − 1)</td>
+      <td>√N links</td>
+      <td>Regular, easy to layout, locality</td>
+      <td>Edge asymmetry, center congestion</td>
+    </tr>
+    <tr>
+      <td><strong class="accent2">Torus</strong></td>
+      <td>Mesh + wrap-around</td>
+      <td>√N</td>
+      <td>2√N links</td>
+      <td>Edge symmetric, lower diameter</td>
+      <td>Long wrap-around wires, hard to route</td>
+    </tr>
+    <tr>
+      <td><strong class="accent3">Ring</strong></td>
+      <td>Circular, 2 neighbors</td>
+      <td>N/2</td>
+      <td>2 links</td>
+      <td>Simplest, minimal area</td>
+      <td>High diameter, low bisection BW</td>
+    </tr>
+    <tr>
+      <td><strong class="accent4">Fat Tree</strong></td>
+      <td>Hierarchical switches</td>
+      <td>2·log₂N</td>
+      <td>N/2 links</td>
+      <td>High bisection BW, good for uniform traffic</td>
+      <td>Root bottleneck, complex layout</td>
+    </tr>
+    <tr>
+      <td><strong>Hierarchical</strong></td>
+      <td>Multi-tier (cluster + global)</td>
+      <td>Varies</td>
+      <td>Varies</td>
+      <td>Matches SoC hierarchy, power isolation</td>
+      <td>Design complexity, non-uniform latency</td>
+    </tr>
+  </table>
+  <div class="highlight-bar" style="margin-top:0.3em;">
+    <strong class="accent">2D Mesh</strong> dominates commercial SoC NoCs (Arm CMN-600/700, Intel mesh, AMD Infinity Fabric) because its regular structure simplifies physical design, timing closure, and floorplanning.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9: Mesh in Practice — Arm CMN -->
+<!-- ============================================================ -->
+<section>
+  <h2>Mesh in Practice — Arm CMN-700</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div>
+      <div class="mesh-grid" style="grid-template-columns: repeat(4,1fr); max-width:260px;">
+        <div class="mesh-node cpu">CPU</div>
+        <div class="mesh-node xp">XP</div>
+        <div class="mesh-node cpu">CPU</div>
+        <div class="mesh-node io">PCIe</div>
+        <div class="mesh-node xp">XP</div>
+        <div class="mesh-node cache">SLC</div>
+        <div class="mesh-node cache">SLC</div>
+        <div class="mesh-node xp">XP</div>
+        <div class="mesh-node cpu">CPU</div>
+        <div class="mesh-node cache">SLC</div>
+        <div class="mesh-node cache">SLC</div>
+        <div class="mesh-node cpu">CPU</div>
+        <div class="mesh-node mem">DDR</div>
+        <div class="mesh-node xp">XP</div>
+        <div class="mesh-node xp">XP</div>
+        <div class="mesh-node mem">DDR</div>
+      </div>
+      <p class="tiny dim center" style="margin-top:0.3em;">Simplified 4×4 mesh showing cross-point routers (XP), CPU clusters, SLC slices, DDR and PCIe</p>
+    </div>
+    <div class="left">
+      <dl class="kv" style="font-size:0.85em;">
+        <dt>Max mesh</dt><dd>12×12 (144 XPs) per die</dd>
+        <dt>Protocol</dt><dd>AMBA 5 CHI (Issue E)</dd>
+        <dt>SLC</dt><dd>Up to 512 MB distributed system cache</dd>
+        <dt>Snoop filter</dt><dd>Directory-based, per HN-F node</dd>
+        <dt>Multi-chip</dt><dd>CCIX 2.0 + CXL 2.0</dd>
+        <dt>CPUs</dt><dd>Up to 256 cores (512 in 2-chip)</dd>
+        <dt>Memory</dt><dd>DDR5, HBM3, CXL memory</dd>
+      </dl>
+      <p class="tiny dim" style="margin-top:0.4em;">Used in AWS Graviton3/4, Ampere AmpereOne, NVIDIA Grace, and many HPC/networking SoCs.</p>
+      <p class="tiny dim"><strong>CMN S3</strong> (latest): adds confidential compute, chiplet fabric, Armv9.2 support.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: Section — AMBA Protocol Suite -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section III</p>
+  <h2>The AMBA Protocol Suite</h2>
+  <p class="dim" style="font-size:0.75em;">APB · AHB · AXI · ACE · CHI — the lingua franca of SoC interconnect</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: AMBA Timeline -->
+<!-- ============================================================ -->
+<section>
+  <h2>AMBA Protocol Evolution</h2>
+  <table>
+    <tr>
+      <th>Year</th><th>Spec</th><th>Protocol</th><th>Key Innovation</th><th>Use Case</th>
+    </tr>
+    <tr>
+      <td class="dim">1996</td><td>AMBA 1</td>
+      <td>ASB, APB</td>
+      <td>First standardized on-chip bus</td>
+      <td>MCU peripherals</td>
+    </tr>
+    <tr>
+      <td class="dim">1999</td><td>AMBA 2</td>
+      <td>AHB</td>
+      <td>Single-edge pipelined bus, burst</td>
+      <td>Embedded processors</td>
+    </tr>
+    <tr>
+      <td class="dim">2003</td><td>AMBA 3</td>
+      <td><strong class="accent">AXI3</strong></td>
+      <td>5 independent channels, OoO, burst</td>
+      <td>High-perf SoCs</td>
+    </tr>
+    <tr>
+      <td class="dim">2010</td><td>AMBA 4</td>
+      <td><strong class="accent">AXI4</strong>, ACE, AXI-Stream</td>
+      <td>256-beat burst, QoS, coherency (ACE)</td>
+      <td>Mobile AP, big.LITTLE</td>
+    </tr>
+    <tr>
+      <td class="dim">2013</td><td>AMBA 5</td>
+      <td><strong class="accent">CHI</strong></td>
+      <td>Packet-based layered protocol, scalable coherency</td>
+      <td>Server, HPC, AI SoCs</td>
+    </tr>
+    <tr>
+      <td class="dim">2024</td><td>AMBA 5</td>
+      <td><strong class="accent">AXI Issue G</strong>, CHI Issue E</td>
+      <td>Unique ID, write-channel CMOs, parity, MTE</td>
+      <td>Automotive safety, AI</td>
+    </tr>
+  </table>
+  <p class="tiny dim center" style="margin-top:0.3em;">All AMBA specifications are royalty-free and publicly available from Arm.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: AXI Deep Dive -->
+<!-- ============================================================ -->
+<section>
+  <h2>AMBA AXI — Five Channel Architecture</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div>
+      <p class="small dim left" style="margin-bottom:0.3em;">Manager → Subordinate &amp; Subordinate → Manager</p>
+      <div style="max-width:420px; margin:0 auto;">
+        <div class="channel-row">
+          <span class="channel-label accent">AW</span>
+          <div class="channel-arrow" style="background:var(--accent);"></div>
+          <span class="smaller">Write Address</span>
+        </div>
+        <div class="channel-row">
+          <span class="channel-label accent">W</span>
+          <div class="channel-arrow" style="background:var(--accent);"></div>
+          <span class="smaller">Write Data + Strobe</span>
+        </div>
+        <div class="channel-row">
+          <span class="channel-label accent2">B</span>
+          <div class="channel-arrow bidir" style="background:var(--accent2);"></div>
+          <span class="smaller">Write Response</span>
+        </div>
+        <div class="channel-row">
+          <span class="channel-label accent3">AR</span>
+          <div class="channel-arrow" style="background:var(--accent3);"></div>
+          <span class="smaller">Read Address</span>
+        </div>
+        <div class="channel-row">
+          <span class="channel-label accent4">R</span>
+          <div class="channel-arrow bidir" style="background:var(--accent4);"></div>
+          <span class="smaller">Read Data + Response</span>
+        </div>
+      </div>
+      <p class="tiny dim left" style="margin-top:0.4em;">Each channel uses independent <code>xVALID</code> / <code>xREADY</code> handshake — channels decouple fully for maximum throughput.</p>
+    </div>
+    <div class="left">
+      <h3>Key AXI Features</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>Burst transfers</strong> — FIXED, INCR, WRAP; up to 256 beats (AXI4)</li>
+        <li><strong>Out-of-order</strong> — responses can return in any order using transaction IDs</li>
+        <li><strong>Multiple outstanding</strong> — manager issues N requests before first response returns</li>
+        <li><strong>Write strobes</strong> — WSTRB enables per-byte lane masking</li>
+        <li><strong>Protection</strong> — AxPROT[2:0]: privileged/unprivileged, secure/non-secure, instruction/data</li>
+        <li><strong>Cache hints</strong> — AxCACHE[3:0]: bufferable, cacheable, read/write-allocate</li>
+        <li><strong>QoS</strong> — AxQOS[3:0]: 16 priority levels for interconnect arbitration</li>
+      </ul>
+      <p class="tiny dim">AXI-Lite: single-beat, no burst, no ID — for simple register interfaces. AXI-Stream: unidirectional data streaming (DMA, video, DSP pipes).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 13: AXI Handshake Waveform (text-based) -->
+<!-- ============================================================ -->
+<section>
+  <h2>AXI Handshake &amp; Burst Timing</h2>
+  <pre><code class="language-plaintext">                 CLK  ─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─
+                        │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │
+  ── Write Address ─────────────────────────────────────────────
+         AWVALID  ──────┘     └──────────────────────────────── 
+         AWREADY  ──────┘     └──────────────────────────────── 
+         AWADDR   ═══════╡ A ╞══════════════════════════════════
+         AWLEN    ═══════╡ 3 ╞══════   (4-beat burst: len = 3)
+                                │
+  ── Write Data ────────────────▼───────────────────────────────
+         WVALID   ──────────────┘                 └─────────────
+         WREADY   ──────────────┘     ┌───┐       └─────────────
+         WDATA    ══════════════╡ D0 ╞╡ D1╞═╡ D2 ╞═╡ D3 ╞═════
+         WLAST    ──────────────────────────────────┘   └───────
+                                                        │
+  ── Write Response ────────────────────────────────────▼───────
+         BVALID   ──────────────────────────────────────┘ └─────
+         BREADY   ──────────────────────────────────────┘ └─────
+         BRESP    ══════════════════════════════════════╡OK╞════</code></pre>
+  <p class="tiny dim center">AXI write burst (INCR, len=3): address phase → 4 data beats → write response. WLAST marks final beat. All channels use independent VALID/READY handshake.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 14: ACE — Coherency Extensions -->
+<!-- ============================================================ -->
+<section>
+  <h2>ACE — AXI Coherency Extensions</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="left">
+      <p class="small">ACE extends AXI with <strong class="accent">three additional channels</strong> to support hardware cache coherency between multiple managers.</p>
+      <h3>Additional ACE Channels</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">AC</strong> (Snoop Address) — interconnect sends snoop request to cached managers</li>
+        <li><strong class="accent2">CR</strong> (Snoop Response) — manager responds with cache line state</li>
+        <li><strong class="accent3">CD</strong> (Snoop Data) — manager returns dirty data to interconnect</li>
+      </ul>
+      <h3 style="margin-top:0.4em;">ACE Transaction Types</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>ReadShared</strong> — read, others may retain copy</li>
+        <li><strong>ReadUnique</strong> — read with exclusive ownership</li>
+        <li><strong>CleanUnique</strong> — upgrade shared → exclusive</li>
+        <li><strong>WriteBack</strong> — evict dirty line to memory</li>
+        <li><strong>MakeInvalid</strong> — invalidate all other copies</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>ACE Variants</h3>
+      <table style="font-size:0.9em;">
+        <tr><th>Protocol</th><th>Coherency</th><th>Use Case</th></tr>
+        <tr><td><strong>ACE</strong></td><td>Full (bi-dir snoop)</td><td>CPU clusters</td></tr>
+        <tr><td><strong>ACE-Lite</strong></td><td>I/O coherent (one-way)</td><td>GPU, DMA, NIC</td></tr>
+        <tr><td><strong>ACE-Lite+DVM</strong></td><td>+ Virtual memory sync</td><td>SMMU-backed I/O</td></tr>
+      </table>
+      <div class="highlight-bar" style="margin-top:0.5em;">
+        ACE enables Arm's <strong>big.LITTLE</strong> and <strong>DynamIQ</strong> architectures where heterogeneous CPU clusters share a coherent memory view without software intervention.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 15: CHI — Coherent Hub Interface -->
+<!-- ============================================================ -->
+<section>
+  <h2>AMBA CHI — Coherent Hub Interface</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div>
+      <h3>Layered Architecture</h3>
+      <div class="proto-stack">
+        <div class="proto-layer" style="background:#3a5a3a;">Protocol Layer — transactions, coherency, ordering</div>
+        <div class="proto-layer" style="background:#4a4a5a;">Network Layer — node IDs, routing, QoS</div>
+        <div class="proto-layer" style="background:#5a4a3a;">Link Layer — flit packing, flow control, credits</div>
+        <div class="proto-layer" style="background:#2a4a5a;">Physical Layer — wires, clock, parity</div>
+      </div>
+      <h3 style="margin-top:0.4em;">Node Types</h3>
+      <ul style="font-size:0.6em;">
+        <li><strong class="accent">RN-F</strong> — Request Node, Full coherent (CPU)</li>
+        <li><strong class="accent2">RN-I</strong> — Request Node, I/O coherent (GPU, DMA)</li>
+        <li><strong class="accent3">HN-F</strong> — Home Node, Full (SLC + snoop filter)</li>
+        <li><strong class="accent4">SN-F</strong> — Subordinate Node (memory controller)</li>
+        <li><strong>MN</strong> — Misc Node (debug, DVM)</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>Why CHI over ACE?</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>Packet-based</strong> — replaces ACE's signal-level protocol with flits; reduces wire count by ~30%</li>
+        <li><strong>Scalable</strong> — credit-based flow control prevents congestion; supports 100+ agents</li>
+        <li><strong>Retry mechanism</strong> — if home node is busy, request can be retried without blocking the network</li>
+        <li><strong>Atomic ops</strong> — near-memory atomic operations (AtomicStore, AtomicCompare) reduce round-trips</li>
+        <li><strong>Data poisoning</strong> — end-to-end error signaling for RAS</li>
+        <li><strong>MTE</strong> — Memory Tagging Extension support (CHI Issue E)</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.4em;">
+        CHI is the native protocol for Arm's CMN-600/700/S3 mesh interconnects and all Neoverse V/N-series server platforms.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 16: Section — Coherency -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section IV</p>
+  <h2>Cache Coherency</h2>
+  <p class="dim" style="font-size:0.75em;">MOESI · Snoop · Directory · Snoop filters · Coherency domains</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 17: Coherency Protocols -->
+<!-- ============================================================ -->
+<section>
+  <h2>Cache Coherency — MOESI States</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div>
+      <table style="font-size:0.9em;">
+        <tr><th>State</th><th>Valid</th><th>Dirty</th><th>Exclusive</th><th>Meaning</th></tr>
+        <tr><td><strong class="accent">M</strong>odified</td><td>✓</td><td>✓</td><td>✓</td><td>Only copy, modified</td></tr>
+        <tr><td><strong class="accent2">O</strong>wned</td><td>✓</td><td>✓</td><td>✗</td><td>Dirty, others have Shared</td></tr>
+        <tr><td><strong class="accent3">E</strong>xclusive</td><td>✓</td><td>✗</td><td>✓</td><td>Only copy, clean</td></tr>
+        <tr><td><strong class="accent4">S</strong>hared</td><td>✓</td><td>✗</td><td>✗</td><td>Clean, others may have copy</td></tr>
+        <tr><td><strong class="dim">I</strong>nvalid</td><td>✗</td><td>✗</td><td>✗</td><td>Not cached</td></tr>
+      </table>
+      <p class="tiny dim" style="margin-top:0.3em;">MESI (no Owned) used in Intel; MOESI used in AMD. Arm CHI uses a similar model with Unique/Shared/Invalid + Dirty/Clean.</p>
+    </div>
+    <div class="left">
+      <h3>Snoop vs Directory</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">Broadcast snoop</strong> — every coherent agent is queried on each miss; simple but O(N) traffic; used in ACE-based systems with ≤8 cores</li>
+        <li><strong class="accent2">Directory / snoop filter</strong> — home node tracks which caches hold each line; targeted snoops; O(1) snoop traffic; essential for 16+ core systems</li>
+        <li><strong class="accent3">Distributed directory</strong> — snoop filter state distributed across HN-F nodes in mesh (CMN-700); scales to 256+ cores</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.4em;">
+        <strong>Snoop filter sizing rule of thumb:</strong> ≥ 1.5× the aggregate exclusive cache capacity of all coherent agents to avoid costly back-invalidations.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 18: Coherency Flow Example -->
+<!-- ============================================================ -->
+<section>
+  <h2>Coherency Transaction Flow</h2>
+  <p class="small dim">Example: CPU0 reads a cache line that CPU1 holds in Modified state</p>
+  <div class="arch-stack" style="max-width:650px; gap:6px; margin-top:0.4em;">
+    <div class="arch-layer" style="background:rgba(126,184,218,0.12); border:1px solid var(--accent); font-size:0.55em; text-align:left; padding:0.4em 1em;">
+      <strong>1.</strong> CPU0 cache miss → sends <code>ReadShared</code> request to Home Node (HN-F)
+    </div>
+    <div class="arch-layer" style="background:rgba(232,168,124,0.12); border:1px solid var(--accent2); font-size:0.55em; text-align:left; padding:0.4em 1em;">
+      <strong>2.</strong> HN-F checks snoop filter → finds CPU1 holds line in <strong>Modified</strong> state
+    </div>
+    <div class="arch-layer" style="background:rgba(196,157,216,0.12); border:1px solid var(--accent4); font-size:0.55em; text-align:left; padding:0.4em 1em;">
+      <strong>3.</strong> HN-F sends targeted <code>SnpShared</code> to CPU1 only (directory-based, no broadcast)
+    </div>
+    <div class="arch-layer" style="background:rgba(232,168,124,0.12); border:1px solid var(--accent2); font-size:0.55em; text-align:left; padding:0.4em 1em;">
+      <strong>4.</strong> CPU1 transitions M→<strong>Shared</strong>, sends dirty data via <code>CompData</code> to HN-F
+    </div>
+    <div class="arch-layer" style="background:rgba(143,212,164,0.12); border:1px solid var(--accent3); font-size:0.55em; text-align:left; padding:0.4em 1em;">
+      <strong>5.</strong> HN-F writes data to SLC, forwards <code>CompData</code> to CPU0; updates snoop filter
+    </div>
+    <div class="arch-layer" style="background:rgba(126,184,218,0.12); border:1px solid var(--accent); font-size:0.55em; text-align:left; padding:0.4em 1em;">
+      <strong>6.</strong> CPU0 installs line in <strong>Shared</strong> state; read completes
+    </div>
+  </div>
+  <p class="tiny dim center" style="margin-top:0.4em;">In CHI, this is a 3-hop transfer (CPU0→HN-F→CPU1→CPU0 via HN-F). The snoop filter avoids broadcasting to all N cores.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 19: Section — QoS & Arbitration -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section V</p>
+  <h2>QoS, Arbitration &amp; Flow Control</h2>
+  <p class="dim" style="font-size:0.75em;">Priority · Bandwidth regulation · Virtual channels · Deadlock avoidance</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 20: QoS Mechanisms -->
+<!-- ============================================================ -->
+<section>
+  <h2>Quality of Service in NoC</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Traffic Classes</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">Latency-sensitive</strong> — CPU demand loads; require low, predictable latency (e.g., &lt;100 ns to DRAM)</li>
+        <li><strong class="accent2">Latency-critical + BW</strong> — display/video pipeline; sustained bandwidth with deadline (frame drops if starved)</li>
+        <li><strong class="accent3">Best-effort BW</strong> — bulk DMA, Ethernet, background copies; can tolerate jitter</li>
+        <li><strong class="accent4">Signaling</strong> — inter-processor interrupts, config register accesses; tiny but urgent</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>QoS Mechanisms</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>AxQOS priority</strong> — AXI 4-bit field (0–15) attached to every transaction; arbiters use it for prioritization</li>
+        <li><strong>Urgency escalation</strong> — dynamically raise priority of aging transactions to prevent starvation</li>
+        <li><strong>Bandwidth regulation</strong> — rate limiters at NI ports; prevent any single agent from monopolizing links</li>
+        <li><strong>Virtual Channels (VCs)</strong> — separate physical link into logically independent channels; prevent head-of-line blocking between traffic classes</li>
+        <li><strong>TDM slots</strong> — Time-Division Multiplexing guarantees deterministic bandwidth; used in safety-critical (automotive) NoCs</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-bar" style="margin-top:0.3em;">
+    <strong>Key insight:</strong> QoS is not just priority — it requires <em>isolation</em> so that misbehaving agents cannot starve critical traffic, and <em>regulation</em> to bound worst-case latency.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 21: Arbitration & Flow Control -->
+<!-- ============================================================ -->
+<section>
+  <h2>Arbitration &amp; Flow Control</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="left">
+      <h3>Arbitration Schemes</h3>
+      <table style="font-size:0.9em;">
+        <tr><th>Scheme</th><th>Property</th><th>Use</th></tr>
+        <tr><td><strong>Round-robin</strong></td><td>Fair, simple</td><td>Default in most NoCs</td></tr>
+        <tr><td><strong>Weighted RR</strong></td><td>BW proportional</td><td>Differentiated QoS</td></tr>
+        <tr><td><strong>Fixed priority</strong></td><td>Deterministic</td><td>Safety-critical paths</td></tr>
+        <tr><td><strong>Lottery</strong></td><td>Probabilistic fair</td><td>Research / soft QoS</td></tr>
+        <tr><td><strong>Age-based</strong></td><td>Oldest-first</td><td>Starvation prevention</td></tr>
+      </table>
+    </div>
+    <div class="left">
+      <h3>Flow Control</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">Credit-based</strong> — sender tracks receiver buffer space via credits; used in CHI. Prevents buffer overflow without back-pressure stalls.</li>
+        <li><strong class="accent2">Wormhole</strong> — packet split into flits; head flit reserves path, body/tail follow. Low buffer cost but can cause head-of-line blocking.</li>
+        <li><strong class="accent3">Virtual Cut-Through (VCT)</strong> — forward as soon as enough buffer exists for entire packet. Higher throughput than wormhole, more buffers.</li>
+        <li><strong class="accent4">Store-and-Forward</strong> — entire packet buffered before forwarding. Highest latency, simplest error handling.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 22: Routing & Deadlock -->
+<!-- ============================================================ -->
+<section>
+  <h2>Routing Algorithms &amp; Deadlock Avoidance</h2>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="left">
+      <h3>Routing Strategies</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">Deterministic (XY)</strong> — route first in X, then Y dimension; no adaptivity but <em>deadlock-free</em> by construction; simplest hardware</li>
+        <li><strong class="accent2">Oblivious</strong> — fixed path per source-dest pair but can use multiple static routes; load-balanced</li>
+        <li><strong class="accent3">Adaptive</strong> — choose path based on local congestion; higher throughput under non-uniform traffic; needs deadlock avoidance mechanism</li>
+        <li><strong class="accent4">Source routing</strong> — full path embedded in packet header; no per-router routing tables; used in some custom NoCs</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>Deadlock Avoidance</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>Dimension-ordered routing</strong> — XY routing on mesh creates an acyclic channel dependency graph → no deadlock</li>
+        <li><strong>Virtual channel classes</strong> — separate request/response/snoop into VCs; break circular dependencies between protocol message classes</li>
+        <li><strong>Turn model</strong> — forbid specific turns (e.g., west-first, negative-first) to eliminate cycles while allowing partial adaptivity</li>
+        <li><strong>Escape channels</strong> — designate one VC with deterministic routing as an "escape" for adaptive traffic that might deadlock</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.4em;">
+        CHI uses <strong>separate virtual networks</strong> for REQ, RSP, SNP, and DAT message classes — preventing protocol-level deadlock by design.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 23: Section — Real-World NoC -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section VI</p>
+  <h2>Commercial NoC IP &amp; Case Studies</h2>
+  <p class="dim" style="font-size:0.75em;">Arm CMN · Arteris FlexNoC · Synopsys · AMD Infinity Fabric · Intel Ring/Mesh</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 24: Commercial NoC IP Landscape -->
+<!-- ============================================================ -->
+<section>
+  <h2>Commercial NoC IP Landscape</h2>
+  <table>
+    <tr>
+      <th>Vendor</th><th>Product</th><th>Topology</th><th>Coherency</th><th>Notable Users</th>
+    </tr>
+    <tr>
+      <td><strong>Arm</strong></td>
+      <td>CMN-700 / CMN S3</td>
+      <td>2D Mesh (up to 12×12)</td>
+      <td>CHI, full snoop filter</td>
+      <td>AWS Graviton, Ampere, NVIDIA Grace</td>
+    </tr>
+    <tr>
+      <td><strong>Arm</strong></td>
+      <td>NI-700</td>
+      <td>Packetized tree/star</td>
+      <td>Non-coherent (AXI/CHI transport)</td>
+      <td>Mobile SoCs (peripheral fabric)</td>
+    </tr>
+    <tr>
+      <td><strong>Arteris</strong></td>
+      <td>FlexNoC 5 / Ncore</td>
+      <td>Configurable (any)</td>
+      <td>CHI, ACE, AMBA; Ncore = coherent</td>
+      <td>Samsung, Mobileye, many AI SoCs</td>
+    </tr>
+    <tr>
+      <td><strong>Synopsys</strong></td>
+      <td>DW AXI / CHI Fabric</td>
+      <td>Configurable crossbar/NoC</td>
+      <td>AXI, ACE-Lite, CHI</td>
+      <td>Broad SoC IP ecosystem</td>
+    </tr>
+    <tr>
+      <td><strong>Cadence</strong></td>
+      <td>Interconnect IP</td>
+      <td>Configurable</td>
+      <td>AXI, CHI</td>
+      <td>Tensilica DSP-centric SoCs</td>
+    </tr>
+    <tr>
+      <td><strong>NetSpeed (Intel)</strong></td>
+      <td>Orion AI NoC</td>
+      <td>Configurable mesh</td>
+      <td>CHI, CXL</td>
+      <td>Internal Intel + licensable</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 25: AMD Infinity Fabric -->
+<!-- ============================================================ -->
+<section>
+  <h2>AMD Infinity Fabric</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <p class="small">AMD's proprietary scalable interconnect connecting CCDs, IODs, and across sockets.</p>
+      <dl class="kv" style="font-size:0.85em;">
+        <dt>Intra-CCD</dt><dd>L3 cache fabric (256-bit, core clock)</dd>
+        <dt>CCD↔IOD</dt><dd>Infinity Fabric Link (IF, 32B/cycle per dir)</dd>
+        <dt>Socket↔Socket</dt><dd>xGMI (Global Memory Interconnect)</dd>
+        <dt>Coherency</dt><dd>Probe filter (directory) on IOD</dd>
+        <dt>Protocol</dt><dd>Custom (not AMBA); loosely maps to CHI concepts</dd>
+        <dt>Clock</dt><dd>FCLK (Fabric Clock) — tied to DRAM freq in some configs</dd>
+      </dl>
+    </div>
+    <div class="left">
+      <h3>Key Design Decisions</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">Chiplet-native</strong> — designed from the ground up for die-to-die communication between CCD and IOD chiplets</li>
+        <li><strong class="accent2">NUMA-aware</strong> — each CCD has preferred memory channels; OS scheduler considers fabric topology</li>
+        <li><strong class="accent3">Scalable</strong> — same fabric from 1-CCD Ryzen (8 cores) to 16-CCD EPYC (128+ cores), to 2-socket (256+ cores)</li>
+        <li><strong class="accent4">Bandwidth</strong> — each IF link: ~40 GB/s per direction; EPYC 9004: 12 IF links = ~480 GB/s aggregate CCD↔IOD</li>
+      </ul>
+      <p class="tiny dim">Infinity Fabric also carries non-coherent traffic (PCIe, SATA, USB) between IOD and peripherals.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 26: Intel Ring → Mesh Evolution -->
+<!-- ============================================================ -->
+<section>
+  <h2>Intel: Ring → Mesh Interconnect</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Ring (Sandy Bridge → Broadwell)</h3>
+      <ul style="font-size:0.65em;">
+        <li>Bidirectional ring connecting cores, LLC slices, memory controllers, and I/O agents</li>
+        <li>Simple, low latency for ≤10 cores</li>
+        <li>Bandwidth saturates at ~12–14 cores; latency grows linearly with core count</li>
+        <li>Dual ring used in Haswell-EP (up to 18 cores) to mitigate, but fundamental limit remains</li>
+      </ul>
+      <h3 style="margin-top:0.4em;">Mesh (Skylake-SP onwards)</h3>
+      <ul style="font-size:0.65em;">
+        <li>2D mesh with XY routing; each tile = core + LLC slice + mesh stop</li>
+        <li>Scales to 56+ cores per die (Sapphire Rapids)</li>
+        <li>Snoop filter replaces broadcast for coherency</li>
+        <li>Sub-NUMA clustering: partition mesh into 1, 2, or 4 NUMA domains for latency optimization</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>Why the Transition?</h3>
+      <div class="box-row" style="flex-direction:column; gap:0.4em;">
+        <div class="box" style="max-width:100%;">
+          <h3 class="accent">Ring: O(N) latency</h3>
+          <p>Worst-case hop count = N/2. At 28 cores, half-ring traversal adds ~30 ns to cache access.</p>
+        </div>
+        <div class="box" style="max-width:100%;">
+          <h3 class="accent3">Mesh: O(√N) latency</h3>
+          <p>Worst-case = 2(√N−1) hops. At 28 cores (≈5×6), max ~8 hops. Bisection BW scales with √N.</p>
+        </div>
+      </div>
+      <p class="tiny dim" style="margin-top:0.3em;">Xeon Scalable (Skylake-SP): first Intel server mesh. Granite Rapids continues with mesh + EMIB chiplet fabric.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 27: Section — Advanced Topics -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section VII</p>
+  <h2>Advanced Topics</h2>
+  <p class="dim" style="font-size:0.75em;">CXL · Chiplet fabrics · 3D NoC · Power management · Functional safety</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 28: CXL and Chiplet Interconnect -->
+<!-- ============================================================ -->
+<section>
+  <h2>CXL &amp; Chiplet-Level Interconnect</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>CXL (Compute Express Link)</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>CXL.io</strong> — PCIe-based discovery and config (non-coherent)</li>
+        <li><strong>CXL.cache</strong> — device caches host memory with coherency</li>
+        <li><strong>CXL.mem</strong> — host-managed device memory (memory expansion / pooling)</li>
+        <li><strong>CXL 3.1</strong> — peer-to-peer, fabric switches, global fabric addressing</li>
+      </ul>
+      <p class="tiny dim">CXL runs over PCIe PHY — reuses existing SerDes; supported in Arm CMN-700/S3 via AMBA CXS bridge.</p>
+    </div>
+    <div class="left">
+      <h3>Die-to-Die (D2D) NoC Extension</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">UCIe</strong> — standardized D2D PHY + protocol; extends NoC across chiplet boundaries</li>
+        <li><strong class="accent2">BoW (Bunch of Wires)</strong> — OCP-defined low-latency parallel D2D for short reach</li>
+        <li><strong class="accent3">Custom links</strong> — AMD IF, NVIDIA NV-HBI, Apple UltraFusion</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.4em;">
+        The NoC must now extend <strong>beyond a single die</strong> — chiplet fabrics require the interconnect to manage coherency, ordering, and QoS across package-level boundaries with different latency characteristics.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 29: Power & Safety -->
+<!-- ============================================================ -->
+<section>
+  <h2>Power Management &amp; Functional Safety</h2>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>NoC Power Techniques</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong class="accent">Clock gating</strong> — idle routers/links gate clocks; AMBA Q-Channel handshake for safe clock stop</li>
+        <li><strong class="accent2">Power gating</strong> — entire NoC regions powered down; requires wake-up latency management</li>
+        <li><strong class="accent3">DVFS per domain</strong> — NI adapters handle clock domain crossing; high-traffic paths run faster</li>
+        <li><strong class="accent4">Link serialization</strong> — reduce wire count on low-BW links; trade latency for fewer active wires</li>
+        <li><strong>GALS</strong> — Globally Asynchronous, Locally Synchronous; each IP block has its own clock; NI handles synchronization</li>
+      </ul>
+    </div>
+    <div class="left">
+      <h3>Functional Safety (ISO 26262)</h3>
+      <ul style="font-size:0.65em;">
+        <li><strong>AMBA parity extension</strong> — AXI Issue G / CHI Issue D add interface parity for transient fault detection</li>
+        <li><strong>End-to-end protection</strong> — CRC or ECC on flits across the NoC; detects router/link errors</li>
+        <li><strong>Data poisoning</strong> — CHI poison bit marks corrupted data; consumer can handle gracefully</li>
+        <li><strong>TDM scheduling</strong> — deterministic time slots guarantee worst-case latency bounds for ASIL-rated paths</li>
+        <li><strong>Lockstep routers</strong> — duplicate router logic for ASIL-D; compare outputs cycle-by-cycle</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.4em;">
+        <strong>Arteris FlexNoC FuSa Option</strong> provides ISO 26262 ASIL-B/D certified NoC IP for automotive SoCs (Mobileye EyeQ, others).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 30: Summary -->
+<!-- ============================================================ -->
+<section>
+  <h2>Summary &amp; Key Takeaways</h2>
+  <div class="left" style="max-width:90%; margin:0.4em auto;">
+    <ul style="font-size:0.72em;">
+      <li><strong class="accent">Interconnect is the SoC backbone</strong> — it determines bandwidth, latency, power, and design reusability; consumes 30–40% of chip resources</li>
+      <li><strong class="accent2">AMBA dominates</strong> — from APB (peripherals) through AXI (high-performance) to CHI (scalable coherency), the AMBA suite is the industry standard protocol hierarchy</li>
+      <li><strong class="accent3">2D Mesh is the standard topology</strong> — Arm CMN, Intel mesh, AMD IF all converged on mesh for its regularity, scalability, and physical design advantages</li>
+      <li><strong class="accent4">Directory-based coherency scales</strong> — snoop filters/directories replaced broadcast snooping as core counts grew beyond ~8; essential for 100+ core designs</li>
+      <li><strong>QoS requires isolation + regulation</strong> — priority alone is insufficient; virtual channels, bandwidth limiters, and TDM ensure deterministic behavior</li>
+      <li><strong>NoC now extends across chiplets</strong> — UCIe, CXL, and custom D2D links require the interconnect architecture to manage coherency and ordering across die boundaries</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 31: References -->
+<!-- ============================================================ -->
+<section>
+  <h2>References &amp; Further Reading</h2>
+  <div class="left" style="max-width:90%; margin:0 auto; font-size:0.55em; line-height:1.8;">
+    <p>
+      <strong class="accent">Arm AMBA Specifications</strong> — AXI/ACE Issue G, CHI Issue E (arm.com/architecture/amba)<br>
+      <strong class="accent">Arm CMN-700 / CMN S3</strong> — Coherent Mesh Network technical reference manuals<br>
+      <strong class="accent">Arm NI-700 / CI-700</strong> — SoC and coherent interconnect documentation<br>
+      <strong class="accent">Arteris</strong> — FlexNoC, Ncore interconnect IP technical documentation<br>
+      <strong class="accent">WikiChip Fuse</strong> — CMN-700 deep dive (David Schor, 2021)<br>
+      <strong class="accent">AnandTech</strong> — Neoverse V1/N2, CMN-700 mesh analysis<br>
+      <strong class="accent">CXL Consortium</strong> — CXL 3.1 specification<br>
+      <strong class="accent">UCIe Consortium</strong> — Universal Chiplet Interconnect Express 3.0<br>
+      <strong class="accent">Bokhari &amp; Parameswaran</strong> — "Network-on-Chip Design," Springer, 2020<br>
+      <strong class="accent">Bolotin et al.</strong> — "QNoC: QoS architecture for network on chip," J. Systems Architecture, 2004<br>
+      <strong class="accent">Dally &amp; Towles</strong> — <em>Principles and Practices of Interconnection Networks</em>, Morgan Kaufmann, 2004
+    </p>
+    <p class="dim" style="margin-top:0.8em; font-size:0.85em;">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use. Code examples provided as-is.
+    </p>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  showSlideNumber: 'all',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'fade',
+  center: true,
+  margin: 0.08,
+  width: 1280,
+  height: 720,
+  plugins: [ RevealHighlight ]
+});
+</script>
+</body>
+</html>

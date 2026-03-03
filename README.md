@@ -2,7 +2,7 @@
 
 Interactive slide decks covering modern System-on-Chip design end-to-end — from advanced packaging and chiplet architectures through memory hierarchies, on-chip interconnects, and silicon implementation.
 
-## ▶ [Open the Series Landing Page](https://brendanjameslynskey.github.io/Modern-SoC-Design/)
+## ▶ [Open the Series Landing Page](https://brendanjameslynskey.github.io/SoC/)
 
 > **Setup:** Enable GitHub Pages (Settings → Pages → Deploy from `main` branch, `/ (root)` directory), then replace `OWNER` and `REPO` in the link above with your GitHub username and repository name.
 >
@@ -15,7 +15,7 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 | # | Topic | Slides | Status |
 |---|-------|--------|--------|
 | 01 | Modern SoC Packaging | 18 | ✅ Complete |
-| 02 | On-Chip Interconnect & NoC Design | — | Coming next |
+| 02 | On-Chip Interconnect & NoC Design | 20 | ✅ Complete |
 | 03 | Memory Hierarchy — SRAM to HBM | — | Planned |
 | 04 | Power Management & Clocking | — | Planned |
 | 05 | High-Speed SerDes & I/O | — | Planned |
@@ -47,12 +47,32 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ---
 
-## Repository Structure
+## Presentation 02: On-Chip Interconnect & NoC Design
+
+20 interactive slides covering:
+
+**Interconnect Evolution** — Shared bus (AHB/APB) limitations, crossbar switch architecture (NIC-400, DesignWare), and the transition to packet-switched Networks-on-Chip. Bus vs crossbar vs NoC trade-off analysis.
+
+**NoC Topologies** — 2D Mesh, Torus, Ring, Fat Tree, and hierarchical topologies with diameter, bisection bandwidth, and layout comparisons. Why 2D mesh dominates commercial implementations. Arm CMN-700 mesh deep dive: 12×12 scalability, distributed SLC, snoop filters, CCIX/CXL support.
+
+**AMBA Protocol Suite** — Complete evolution from AMBA 1 (1996) through AMBA 5 (2024): APB → AHB → AXI3 → AXI4 → ACE → CHI. AXI five-channel architecture with handshake timing, burst modes, OoO completion, QoS, and protection signals. AXI waveform walkthrough.
+
+**Cache Coherency** — MOESI state machine, snoop-based vs directory-based coherency, snoop filter sizing, Arm CHI node types (RN-F, HN-F, SN-F), and step-by-step coherency transaction flow for a ReadShared with dirty-line transfer.
+
+**QoS & Arbitration** — Traffic classification, AxQOS priority, urgency escalation, bandwidth regulation, virtual channels, TDM scheduling. Arbitration schemes (round-robin, weighted, fixed priority, age-based). Flow control: credit-based (CHI), wormhole, virtual cut-through. Routing algorithms (XY deterministic, adaptive) and deadlock avoidance via VCs and turn models.
+
+**Commercial NoC & Case Studies** — Arm CMN-700/S3, Arteris FlexNoC/Ncore, Synopsys/Cadence NoC IP. AMD Infinity Fabric architecture (intra-CCD, CCD↔IOD, xGMI). Intel ring-to-mesh transition (Sandy Bridge through Granite Rapids) with latency analysis.
+
+**Advanced Topics** — CXL 3.1 (CXL.io/cache/mem), UCIe D2D chiplet interconnect, NoC power management (clock/power gating, DVFS, GALS), and functional safety (AMBA parity, data poisoning, TDM, lockstep routers, ISO 26262 certified NoC IP).
+
+---
 
 ```
 ├── index.html                     ← Landing page (links to all presentations)
 ├── README.md                      ← This file
-└── 01-soc-packaging/
+├── 01-soc-packaging/
+│   └── index.html                 ← Reveal.js interactive slide deck
+└── 02-on-chip-interconnect/
     └── index.html                 ← Reveal.js interactive slide deck
 ```
 
