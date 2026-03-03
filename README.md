@@ -16,17 +16,17 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 |---|-------|--------|--------|
 | 01 | Modern SoC Packaging | 18 | ✅ Complete |
 | 02 | On-Chip Interconnect & NoC Design | 20 | ✅ Complete |
-| 03 | Memory Hierarchy | — | Planned |
+| 03 | Memory Hierarchy in ML Accelerator SoCs | — | Planned |
 | 04 | High-Speed SerDes & I/O | — | Planned |
 | 05 | AI / ML Accelerator Architectures | — | Planned |
 | 06 | SoCs for ML Inference | — | Planned |
 | 07 | Security in SoC Design | — | Planned |
-| 08 | CXL — Compute Express Link | — | Planned |
-| 09 | Modern Accelerator Power Delivery | — | Planned |
+| 08 | CXL in ML Accelerator SoCs | — | Planned |
+| 09 | Modern ML Accelerator SoC Power Delivery | — | Planned |
 | 10 | Modern SoC Verification | — | Planned |
-| 11 | Power Management in Accelerator SoCs | — | Planned |
-| 12 | Thermal Management in Accelerator SoCs | — | Planned |
-| 13 | Clocking and Reset in Accelerator SoCs | — | Planned |
+| 11 | Power Management in ML Accelerator SoCs | — | Planned |
+| 12 | Thermal Management in ML Accelerator SoCs | — | Planned |
+| 13 | Clocks and Resets in ML Accelerator SoCs | — | Planned |
 
 ---
 
@@ -67,24 +67,6 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 **Commercial NoC & Case Studies** — Arm CMN-700/S3, Arteris FlexNoC/Ncore, Synopsys/Cadence NoC IP. AMD Infinity Fabric architecture (intra-CCD, CCD↔IOD, xGMI). Intel ring-to-mesh transition (Sandy Bridge through Granite Rapids) with latency analysis.
 
 **Advanced Topics** — CXL 3.1 (CXL.io/cache/mem), UCIe D2D chiplet interconnect, NoC power management (clock/power gating, DVFS, GALS), and functional safety (AMBA parity, data poisoning, TDM, lockstep routers, ISO 26262 certified NoC IP).
-
----
-
-## Presentation 11: CXL — Compute Express Link *(Planned)*
-
-Planned coverage:
-
-**Fundamentals** — CXL motivation and market drivers. PCIe PHY reuse. CXL 1.1 → 2.0 → 3.0 → 3.1 specification evolution. Relationship to PCIe Gen5/Gen6.
-
-**Protocol Sub-Protocols** — CXL.io (discovery, configuration, non-coherent DMA). CXL.cache (device-to-host coherency, snoop-based). CXL.mem (host-managed device memory, HDM-H/HDM-D). Protocol multiplexing over shared PHY.
-
-**Device Types** — Type 1 (accelerator, CXL.cache only), Type 2 (accelerator + memory, CXL.cache + CXL.mem), Type 3 (memory expander, CXL.mem only). Use cases and design trade-offs for each.
-
-**Memory Pooling & Fabric** — CXL 3.0+ fabric switches, Global Fabric Attached Memory (GFAM), peer-to-peer communication, back-invalidation snooping. Multi-host memory sharing and dynamic capacity provisioning.
-
-**SoC Integration** — CXL controller IP integration with on-chip NoC (Arm CMN CXS bridge, custom implementations). Coherency domain boundaries. NUMA implications and OS/firmware support.
-
-**Hardware Ecosystem** — CXL memory modules, CXL switches (Microchip, XConn), CXL-enabled CPUs (Intel Sapphire/Granite Rapids, AMD Genoa/Turin). Test and validation infrastructure.
 
 ---
 
