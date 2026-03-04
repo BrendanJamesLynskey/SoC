@@ -18,7 +18,7 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 | 02 | On-Chip Interconnect & NoC Design | 20 | ✅ Complete |
 | 03 | Memory Hierarchy in ML Accelerator SoCs | 23 | ✅ Complete |
 | 04 | High-Speed SerDes & I/O | 23 | ✅ Complete |
-| 05 | AI / ML Accelerator Architectures | — | Planned |
+| 05 | AI / ML Accelerator Architectures | 22 | ✅ Complete |
 | 06 | SoCs for ML Inference | — | Planned |
 | 07 | Security in SoC Design | — | Planned |
 | 08 | CXL in ML Accelerator SoCs | — | Planned |
@@ -130,17 +130,67 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ---
 
+## Presentation 05: AI / ML Accelerator Architectures
+
+22 interactive slides covering:
+
+**Motivation** — End of Dennard scaling; ML workload characteristics (regularity, data reuse, sparsity, low-precision tolerance). Why DSAs deliver 10–1000× efficiency over CPUs.
+
+**Roofline Model** — Arithmetic intensity (FLOP/byte); ridge point calculation for H100 SXM; positioning GEMM, convolution, attention, and GEMV on the roofline; design strategy for shifting workloads into the compute-bound regime.
+
+**Compute Primitives** — Scalar MAC → SIMD/vector → tensor/matrix units. GEMM tiling strategy for fitting the memory hierarchy; output-stationary, weight-stationary, and K-dimension tiling.
+
+**Systolic Arrays** — 2D PE mesh operating principle; weight-stationary, output-stationary, and row-stationary (TPU) dataflows. Google TPU v1 MXU deep dive: 256×256, INT8, 92 TOPS, 700 MHz. Illustrated 4×4 systolic array with data-flow annotations.
+
+**Dataflow Architectures** — Control-flow vs dataflow execution model; spatial dataflow engines (Cerebras WSE-3, Groq LPU, SambaNova SN40L, Tenstorrent Blackhole); compiler-as-hardware paradigm.
+
+**Mixed Precision** — Full numeric format table: FP64 through FP4/NF4/INT8. NVIDIA Tensor Core evolution (Volta → Ampere → Hopper → Blackwell). Automatic Mixed Precision (AMP) training with loss scaling and FP32 master weights.
+
+**Sparsity** — Activation sparsity (ReLU), weight pruning, NVIDIA 2:4 structured sparsity with hardware decompression, sparse storage formats (CSR/BSR/COO), Flash Attention O(N) sparsity. Mixture-of-Experts as architecture-level sparsity (Mixtral 8×7B).
+
+**Memory Hierarchy** — Register file → L1 SRAM → unified buffer → HBM → NVLink pool pyramid with bandwidth figures. On-chip SRAM sizing (6T SRAM density, area cost). Flash Attention algorithm-hardware co-design: O(N²) → O(N) HBM reads.
+
+**Transformer Accelerators** — Prefill vs decode bottleneck analysis; KV cache sizing at scale; Multi-Query/Grouped Query Attention; PagedAttention (vLLM); NVIDIA Transformer Engine (FP8, WGMMA, TMA); prefill/decode disaggregated serving.
+
+**Quantisation** — PTQ (symmetric/asymmetric/per-channel/per-group), QAT, GPTQ/AWQ INT4, QLoRA + NF4. Hardware support table across NVIDIA H100/B200, Google TPU v5, Apple ANE, Qualcomm HTP.
+
+**GPU Architecture (H100)** — 80B transistors, 132 SMs, 4th-gen Tensor Cores, FP8 3,958 TFLOPS, HBM3 3.35 TB/s, 700W. Hopper innovations: Transformer Engine, WGMMA, TMA, DPX, NVLink Switch NVL72, Confidential Computing.
+
+**Google TPU** — Full generation timeline TPU v1 → v6 Trillium; ICI 3D torus topology; OCS optical reconfigurable interconnect; SparseCore for embedding workloads.
+
+**NPU SoC Integration** — Block diagram of NPU micro-architecture (DMA, MAC array, unified SRAM, activation unit). Flagship mobile NPU comparison table (Apple A18, Qualcomm SD Elite, Samsung Exynos 2500, MediaTek D9400, Google Tensor G4). Datacenter SoC NPUs: Intel Gaudi 3, AMD MI300X, AWS Trainium2, Microsoft Maia 100.
+
+**Parallelism** — Data parallelism (DDP, ZeRO), Tensor parallelism (Megatron-LM column/row sharding), Pipeline parallelism (1F1B interleaved), Expert parallelism (MoE all-to-all), 3D parallelism combination.
+
+**CNN Accelerators** — 7-loop nest tiling space; im2col, Winograd, FFT-based and depthwise-separable transforms. Line buffers, double buffering, kernel fusion. Edge ASIC comparison: Hailo-8, Kneron, Rockchip NPU, Arm Ethos-U85.
+
+**Compiler Stack** — Framework → graph IR (torch.compile, XLA, MLIR) → optimisation passes (fusion, layout, quantisation, tiling) → backend codegen → runtime. MLIR dialect system. CUDA ecosystem: cuDNN, cuBLAS, CUTLASS, Triton, TensorRT. Inference runtimes: vLLM, SGLang, ONNX Runtime, llama.cpp.
+
+**Power Efficiency** — TOPS/W comparison table (Ethos-U85 ~50 TOPS/W → H100 ~2.8 TOPS/W). Power breakdown in ML ASICs (MAC arrays 40–60%, SRAM 25–35%, HBM PHY 15–25%). Energy-reduction techniques: clock/power gating, DVFS, near-threshold computing, zero-skipping, data compression.
+
+**Case Study: Blackwell B200** — 208B transistors, 2×462 mm² NV-HBI chiplet, FP4 native Tensor Cores (~18 PFLOPS sparse), HBM3e 192 GB / 8 TB/s, NVLink 5 1.8 TB/s, 1000W TDP. NVL72 rack: 72 B200 + 36 Grace CPUs; 1.4 exaFLOPS FP4.
+
+**Case Study: Apple ANE** — Unified Memory Architecture; TOPS evolution A11 (0.6) → M4/A18 (38); CoreML stateful KV cache; MLX framework; on-device Apple Intelligence stack; speculative decoding on ANE.
+
+**Emerging Directions** — Processing-in-Memory (Samsung HBM-PIM, SK Hynix AiM); analog in-memory compute (PCM, ReRAM — IBM 85 TOPS/W demo); photonic MAC (Lightmatter Passage); neuromorphic (Intel Loihi 2); Cerebras wafer-scale; 3D SRAM-on-logic stacking (TSMC SoIC, >100 TB/s bandwidth).
+
+---
+
+## Repository Structure
+
 ```
-├── index.html                     ← Landing page (links to all presentations)
-├── README.md                      ← This file
+├── index.html                              ← Landing page (links to all presentations)
+├── README.md                               ← This file
 ├── 01-soc-packaging/
-│   └── index.html                 ← Reveal.js interactive slide deck
+│   └── index.html                          ← Reveal.js interactive slide deck
 ├── 02-on-chip-interconnect/
-│   └── index.html                 ← Reveal.js interactive slide deck
+│   └── index.html                          ← Reveal.js interactive slide deck
 ├── 03-memory-hierarchy/
-│   └── index.html                 ← Reveal.js interactive slide deck
-└── 04-serdes-io/
-    └── index.html                 ← Reveal.js interactive slide deck
+│   └── index.html                          ← Reveal.js interactive slide deck
+├── 04-serdes-io/
+│   └── index.html                          ← Reveal.js interactive slide deck
+└── 05-ai-ml-accelerator-architectures/
+    └── index.html                          ← Reveal.js interactive slide deck
 ```
 
 Each presentation is a single self-contained `index.html`. No build step, no npm — just HTML/CSS/JS with CDN-hosted Reveal.js and Google Fonts.
@@ -160,7 +210,7 @@ Each presentation is a single self-contained `index.html`. No build step, no npm
 
 ## References
 
-TSMC 3DFabric (CoWoS, InFO, SoIC) · Intel Packaging Technology (EMIB, Foveros, Glass Substrates) · UCIe Consortium Specifications (1.0–3.0) · Yole Group, "State of Advanced Packaging 2024" · IEEE ECTC 2025 Proceedings · JEDEC HBM3/HBM3E Standards (JESD238) · JEDEC JESD239 (GDDR7) · AMD MI300X Architecture White Paper · NVIDIA Blackwell / H100 / H200 Architecture Overviews · PCI-SIG PCIe 5.0 / 6.0 Base Specifications · IEEE 802.3 (400G / 800G / 1.6T Ethernet) · CXL Consortium CXL 3.1 Specification · Lau, J.H., *Semiconductor Advanced Packaging*, Springer, 2021 · Patterson & Hennessy, *Computer Architecture*, 6th ed. · Razavi, B., *Design of Analog CMOS Integrated Circuits*, 2nd ed. · Dally & Poulton, *Digital Systems Engineering*, Cambridge · Williams et al., "Roofline," CACM 2009 · Dao et al., "FlashAttention-2," ICLR 2024 · Vivet, P. et al., "Chiplet-based architecture for edge AI computing," IEEE JSSC, 2023
+TSMC 3DFabric (CoWoS, InFO, SoIC) · Intel Packaging Technology (EMIB, Foveros, Glass Substrates) · UCIe Consortium Specifications (1.0–3.0) · Yole Group, "State of Advanced Packaging 2024" · IEEE ECTC 2025 Proceedings · JEDEC HBM3/HBM3E Standards (JESD238) · JEDEC JESD239 (GDDR7) · AMD MI300X Architecture White Paper · NVIDIA Blackwell / H100 / H200 Architecture Overviews · PCI-SIG PCIe 5.0 / 6.0 Base Specifications · IEEE 802.3 (400G / 800G / 1.6T Ethernet) · CXL Consortium CXL 3.1 Specification · Lau, J.H., *Semiconductor Advanced Packaging*, Springer, 2021 · Patterson & Hennessy, *Computer Architecture*, 6th ed. · Razavi, B., *Design of Analog CMOS Integrated Circuits*, 2nd ed. · Dally & Poulton, *Digital Systems Engineering*, Cambridge · Williams et al., "Roofline," CACM 2009 · Jouppi, N. et al., "In-Datacenter Performance Analysis of a Tensor Processing Unit," ISCA 2017 · Chen, Y.-H. et al., "Eyeriss: An Energy-Efficient Reconfigurable Accelerator for DNNs," IEEE JSSC 2017 · Dao, T. et al., "FlashAttention-2," ICLR 2024 · Kwon, W. et al., "Efficient Memory Management for LLM Serving with PagedAttention," SOSP 2023 · Frantar, E. et al., "GPTQ: Accurate Post-Training Quantization for GPTs," ICLR 2023 · Dettmers, T. et al., "QLoRA: Efficient Finetuning of Quantized LLMs," NeurIPS 2023 · Vivet, P. et al., "Chiplet-based architecture for edge AI computing," IEEE JSSC, 2023
 
 ## License
 
