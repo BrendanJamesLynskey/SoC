@@ -19,7 +19,7 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 | 03 | Memory Hierarchy in ML Accelerator SoCs | 23 | ✅ Complete |
 | 04 | High-Speed SerDes & I/O | 23 | ✅ Complete |
 | 05 | AI / ML Accelerator Architectures | 22 | ✅ Complete |
-| 06 | SoCs for ML Inference | — | Planned |
+| 06 | SoCs for ML Inference | 24 | ✅ Complete |
 | 07 | Security in SoC Design | — | Planned |
 | 08 | CXL in ML Accelerator SoCs | — | Planned |
 | 09 | Modern ML Accelerator SoC Power Delivery | — | Planned |
@@ -176,6 +176,56 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ---
 
+## Presentation 06: SoCs for ML Inference
+
+24 interactive slides covering:
+
+**Training vs Inference** — Fundamental differences in hardware requirements: forward-only pass, INT8/FP8 precision, KV-cache dominance, latency constraints, and continuous batching vs training's throughput focus. Why inference TOPS/W and memory bandwidth matter more than raw FLOPS.
+
+**Deployment Landscape** — Four tiers: cloud/hyperscale (H100, MI300X, TPU v5p), on-premise workstation (RTX 4090, L40S), edge/endpoint (Apple M4, Snapdragon X Elite, Tensor G4), and MCU/TinyML (STM32, nRF, RP2350). Binding constraints at each tier.
+
+**Quantisation Fundamentals** — Symmetric vs asymmetric, per-tensor vs per-channel vs per-group scaling. PTQ (GPTQ, AWQ, SmoothQuant) vs QAT. Precision format table: FP32 through FP4/NF4/INT8. NVIDIA Tensor Core evolution (Volta → Blackwell). Accuracy vs efficiency trade-offs.
+
+**INT8 & INT4 Hardware Pipelines** — W8A8 MAC pipeline: INT8 × INT8 → INT32 accumulate → dequant to FP16. INT4 weight-only (W4A16): GPTQ second-order Hessian rounding, AWQ activation-aware scaling. 2× bandwidth saving at INT4. NVIDIA Tensor Core TOPS by format.
+
+**LLM Inference Pipeline** — Prefill vs decode phases: prefill is compute-bound GEMM, decode is memory-bound GEMV. KV-cache sizing formula and worked examples (Llama 3.1 8B to 70B at various context lengths). GQA 8× reduction, MQA, PagedAttention, KV quantisation, Streaming LLM. Prefill/decode disaggregation.
+
+**Memory Bandwidth — The Dominant Bottleneck** — Arithmetic intensity of inference operations: GEMV at 1–4 FLOP/B vs H100 ridge point 295 FLOP/B. Practical GPU utilisation in decode less than 5%. Escape strategies: batching, speculative decoding, INT4 weight compression, GQA, near-memory compute.
+
+**NPU Micro-Architecture** — Block diagram: DMA engine, unified SRAM scratchpad, MAC array, activation unit, command processor. Scratchpad vs cache trade-offs. Double-buffering for DMA/compute overlap. Weight-stationary and output-stationary dataflows. Operator fusion pipeline.
+
+**Sparsity Exploitation** — Activation sparsity (ReLU 50–80%), NVIDIA 2:4 structured sparsity with hardware decompression (2× TOPS), MoE architecture-level sparsity (Mixtral, DeepSeek-V3), FlashAttention block-sparse O(N) attention. Speculative decoding as temporal sparsity.
+
+**On-Device LLM SoC Architecture** — Apple M-series unified memory blueprint: CPU + GPU + NPU share LPDDR5X with zero-copy coherence. Heterogeneous dispatch strategy per operation type. Apple Intelligence stateful KV-cache on ANE. MLX framework.
+
+**Mobile & Edge NPU Comparison** — Detailed table: Apple A18 Pro / M4 (38 TOPS ANE), Qualcomm SD X Elite (75 TOPS Hexagon), SD 8 Gen 3, Samsung Exynos 2500, MediaTek D9400, Google Tensor G4. Memory bandwidth as the binding constraint for model size selection. INT4 as the practical edge sweet spot.
+
+**Power Management for Inference** — NPU power breakdown: MAC array ~55%, SRAM ~25%, DMA/fabric ~12%. DVFS strategy: max frequency for compute-bound ops, reduced for memory-bound. Clock/power gating. Thermal management: TDP envelopes, throttling, PPEM scheduling. Energy minimisation: zero-skipping, data compression, near-threshold compute.
+
+**Inference Compiler & Runtime Stack** — Full stack: PyTorch checkpoint → graph IR → optimisation passes → backend codegen → runtime. Key passes: operator fusion, layout transformation, constant folding, tiling & scheduling, kernel auto-selection. Inference runtimes compared: TensorRT, vLLM, SGLang, llama.cpp, CoreML, ONNX Runtime. Triton / OpenAI DSL.
+
+**TinyML — MCU Inference** — Constraints: 256 KB SRAM, under 100 mW, years on coin cell. Architectures: MobileNetV3-tiny, DS-CNN, MCUNet, XNOR-Net. Arm Cortex-M55 + Ethos-U55/U65: 8 mW, continuous keyword spotting at under 0.1 mW. STM32N6, TFLite Micro, Edge Impulse.
+
+**CNN Inference Optimisation** — im2col transform and implicit GEMM. Winograd convolution F(2,3): 9→4 MACs for 3×3 conv. Depthwise-separable convolution (MobileNetV2 8–9× reduction). 7-loop nest tiling, output-stationary and row-stationary dataflows, Halide/TVM/MLIR.
+
+**Serving Systems & Batching** — Static vs continuous (iteration-level) batching: 2–3× utilisation improvement. PagedAttention: virtual KV pages, copy-on-write prefix sharing, 3× more concurrent requests. SGLang RadixAttention prefix caching. Latency vs throughput trade-off; disaggregated prefill/decode routing.
+
+**Distributed Inference** — Tensor parallelism (Megatron-LM column/row): one all-reduce per transformer block. Pipeline parallelism: GPipe micro-batching, 1F1B interleaved, zero bubble for inference-only. Expert parallelism: MoE all-to-all dispatch. 3D parallelism at hyperscale.
+
+**Case Study: NVIDIA H100 / H200** — H100 SXM5: 80B transistors, FP8 3,958 TOPS, HBM3 3.35 TB/s, 700 W TDP. Hopper innovations: Transformer Engine FP8, WGMMA, TMA, MIG. H200: 141 GB HBM3E, 4.8 TB/s, ~1.9× decode speedup. Llama 3.1 70B inference benchmarks.
+
+**Case Study: Qualcomm Cloud AI 100 Ultra** — 870 INT8 TOPS, 128 MB on-chip SRAM, 136 GB LPDDR5X, 2.2 TB/s, 150 W. Inference-first architecture: no FP64 paths, compiler-driven static scheduling. LPDDR vs HBM trade-off analysis. Competitive comparison vs H100.
+
+**Case Study: Groq LPU** — Tensor Streaming Processor: 230 MB on-chip SRAM, 80 TB/s SRAM bandwidth, no external memory, compiler-as-hardware paradigm. 750 tok/s batch=1 Llama 3 8B — 15× faster decode than H100 via SRAM residency. Trade-offs: model size ceiling, no dynamic shapes.
+
+**Security in Inference SoCs** — Weight encryption (AES-256), secure boot, Secure Enclave. NVIDIA Confidential Computing / AMD SEV-SNP for cloud TEE inference. Inference-time attacks: prompt injection, model extraction, side-channel timing, data poisoning mitigations. On-device privacy and Apple Private Cloud Compute.
+
+**Emerging Inference Techniques** — Speculative decoding deep dive: rejection sampling, Medusa/Eagle self-speculative heads, 2–3× speedup, roofline transformation. State Space Models (Mamba, Jamba): O(1) decode memory, no KV-cache. Analog in-memory compute (IBM PCM: 85 TOPS/W), photonic MAC (Lightmatter), 3D SRAM-on-logic.
+
+**Power-Performance Trade-off Summary** — Comparison table across Ethos-U65 (~60 TOPS/W) through Groq TSP, AI 100 Ultra, H100/H200, MI300X, TPU v5p. Selection criteria: model size, latency, throughput, and TCO.
+
+---
+
 ## Repository Structure
 
 ```
@@ -189,7 +239,9 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 │   └── index.html                          ← Reveal.js interactive slide deck
 ├── 04-serdes-io/
 │   └── index.html                          ← Reveal.js interactive slide deck
-└── 05-ai-ml-accelerator-architectures/
+├── 05-ai-ml-accelerator-architectures/
+│   └── index.html                          ← Reveal.js interactive slide deck
+└── 06-socs-for-ml-inference/
     └── index.html                          ← Reveal.js interactive slide deck
 ```
 
