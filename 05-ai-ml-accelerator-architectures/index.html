@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI / ML Accelerator Architectures — Modern SoC Design Series</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"/>
+<style>
+:root {
+  --bg:      #0d0f14;
+  --surface: #13161e;
+  --panel:   #1a1f2e;
+  --border:  #2a3048;
+  --accent:  #7eb8f7;
+  --accent2: #f7a05a;
+  --accent3: #7ef7c0;
+  --accent4: #f76e7e;
+  --muted:   #8892aa;
+  --text:    #dde4f0;
+  --white:   #ffffff;
+  --mono:    'JetBrains Mono', monospace;
+  --serif:   'Playfair Display', serif;
+  --sans:    'DM Sans', sans-serif;
+}
+
+.reveal-viewport { background: var(--bg); }
+.reveal { font-family: var(--sans); font-size: 1.55rem; color: var(--text); }
+.reveal h1,.reveal h2,.reveal h3,.reveal h4 {
+  font-family: var(--serif); letter-spacing: 0.01em; text-transform: none;
+  margin-bottom: 0.5em; color: var(--white); text-shadow: none;
+}
+.reveal h1 { font-size: 1.8em; line-height: 1.15; }
+.reveal h2 { font-size: 1.3em; }
+.reveal h3 { font-size: 1.05em; color: var(--accent); }
+.reveal p  { line-height: 1.55; margin: 0.4em 0; font-size: 0.82em; }
+.reveal ul { list-style: none; padding: 0; margin: 0; }
+.reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; font-size: 0.78em; line-height: 1.5; }
+.reveal ul li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
+.reveal ul ul li::before { color: var(--accent2); content: "◦"; }
+.reveal section { padding: 0 !important; }
+
+/* ─── slide shell ─── */
+.slide {
+  width: 100%; height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  padding: 2.8rem 3.4rem 1.6rem;
+  background: var(--bg);
+  position: relative; overflow: hidden;
+}
+.slide::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+}
+
+/* ─── hero slide ─── */
+.hero {
+  justify-content: center; align-items: flex-start;
+  background: radial-gradient(ellipse 80% 60% at 70% 50%, #111c35 0%, var(--bg) 70%);
+}
+.hero::after {
+  content: '';
+  position: absolute; right: -6rem; top: -6rem;
+  width: 42rem; height: 42rem; border-radius: 50%;
+  border: 1px solid rgba(126,184,247,0.08);
+  box-shadow: 0 0 0 4rem rgba(126,184,247,0.03), 0 0 0 8rem rgba(126,184,247,0.015);
+  pointer-events: none;
+}
+.hero-eyebrow { font-family: var(--mono); font-size: 0.62em; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1.2em; }
+.hero h1 { font-size: 2.1em; line-height: 1.1; max-width: 14em; }
+.hero-sub { font-size: 0.72em; color: var(--muted); margin-top: 1.2em; max-width: 38em; line-height: 1.7; }
+.hero-tags { display: flex; gap: 0.7em; flex-wrap: wrap; margin-top: 1.8em; }
+.tag { font-family: var(--mono); font-size: 0.55em; padding: 0.3em 0.8em; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); }
+.slide-num { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; right: 2em; }
+.series-badge { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; left: 2em; }
+
+/* ─── layout helpers ─── */
+.cols { display: grid; gap: 2rem; margin-top: 0.8rem; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-2-1 { grid-template-columns: 2fr 1fr; }
+.cols-1-2 { grid-template-columns: 1fr 2fr; }
+
+.panel {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1.2rem 1.4rem;
+  position: relative;
+}
+.panel-title {
+  font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.5em;
+}
+.panel-title.amber { color: var(--accent2); }
+.panel-title.green { color: var(--accent3); }
+.panel-title.red   { color: var(--accent4); }
+
+.kv-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
+.kv-row:last-child { border-bottom: none; }
+.kv-label { color: var(--muted); }
+.kv-value { font-family: var(--mono); color: var(--accent); }
+.kv-value.amber { color: var(--accent2); }
+.kv-value.green { color: var(--accent3); }
+.kv-value.red   { color: var(--accent4); }
+
+.slide-title { font-size: 1.0em; margin-bottom: 0.1em; }
+.slide-subtitle { font-size: 0.62em; color: var(--muted); font-family: var(--mono); letter-spacing: 0.06em; margin-bottom: 0.6em; }
+
+/* ─── timeline ─── */
+.timeline { position: relative; padding-left: 1.8rem; }
+.timeline::before { content:''; position:absolute; left:0.5rem; top:0.4em; bottom:0; width:1px; background: var(--border); }
+.tl-item { position:relative; margin-bottom:0.9em; }
+.tl-item::before { content:''; position:absolute; left:-1.38rem; top:0.4em; width:0.55rem; height:0.55rem; border-radius:50%; background: var(--accent); border:2px solid var(--bg); }
+.tl-item.amber::before { background: var(--accent2); }
+.tl-item.green::before { background: var(--accent3); }
+.tl-label { font-family: var(--mono); font-size:0.58em; color: var(--accent); }
+.tl-item.amber .tl-label { color: var(--accent2); }
+.tl-item.green .tl-label { color: var(--accent3); }
+.tl-text  { font-size: 0.72em; color: var(--text); line-height:1.45; margin-top:0.15em; }
+
+/* ─── figure/diagram helpers ─── */
+.fig { text-align:center; }
+.fig-caption { font-family:var(--mono); font-size:0.5em; color:var(--muted); margin-top:0.5em; }
+
+/* ─── SVG diagrams inline ─── */
+svg.diag { width:100%; height:auto; display:block; }
+
+/* ─── accent box ─── */
+.accent-box {
+  background: linear-gradient(135deg, rgba(126,184,247,0.07), rgba(126,184,247,0.02));
+  border: 1px solid rgba(126,184,247,0.25); border-radius:3px;
+  padding: 0.9em 1.1em; font-size:0.72em; line-height:1.55;
+}
+.accent-box.amber { background: linear-gradient(135deg, rgba(247,160,90,0.07), rgba(247,160,90,0.02)); border-color: rgba(247,160,90,0.25); }
+.accent-box.green { background: linear-gradient(135deg, rgba(126,247,192,0.07), rgba(126,247,192,0.02)); border-color: rgba(126,247,192,0.25); }
+.accent-box.red   { background: linear-gradient(135deg, rgba(247,110,126,0.07), rgba(247,110,126,0.02)); border-color: rgba(247,110,126,0.25); }
+
+.label { font-family:var(--mono); font-size:0.88em; font-weight:600; }
+.lb  { color: var(--accent); }
+.lam { color: var(--accent2); }
+.lgr { color: var(--accent3); }
+.lrd { color: var(--accent4); }
+
+/* ─── table ─── */
+.dtable { width:100%; border-collapse:collapse; font-size:0.65em; }
+.dtable th { background:var(--panel); color:var(--accent); font-family:var(--mono); font-size:0.92em; letter-spacing:0.07em; padding:0.55em 0.7em; border:1px solid var(--border); text-align:left; }
+.dtable td { padding:0.45em 0.7em; border:1px solid var(--border); color:var(--text); }
+.dtable tr:nth-child(even) td { background:rgba(255,255,255,0.015); }
+.dtable td.hi { color:var(--accent); font-family:var(--mono); }
+.dtable td.am { color:var(--accent2); font-family:var(--mono); }
+.dtable td.gr { color:var(--accent3); font-family:var(--mono); }
+.dtable td.rd { color:var(--accent4); font-family:var(--mono); }
+
+/* ─── progress bar ─── */
+.prog-wrap { background:var(--panel); border:1px solid var(--border); border-radius:2px; height:0.55rem; margin:0.35em 0; }
+.prog-bar  { height:100%; border-radius:2px; }
+
+/* ─── chip art ─── */
+.chip-art { font-family:var(--mono); font-size:0.42em; line-height:1.35; color:var(--accent); white-space:pre; }
+
+/* ─── equation ─── */
+.eq { font-family:var(--mono); font-size:0.72em; color:var(--accent3); background:var(--panel); border:1px solid var(--border); padding:0.5em 1em; border-radius:3px; text-align:center; }
+
+/* reveal overrides */
+.reveal .controls { color: var(--accent); }
+.reveal .progress  { color: var(--accent); height:3px; }
+.reveal .slide-number { font-family:var(--mono); font-size:0.4em; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 01 — TITLE
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide hero">
+  <div class="hero-eyebrow">Modern SoC Design Series · Presentation 05</div>
+  <h1>AI / ML Accelerator<br/>Architectures</h1>
+  <p class="hero-sub">
+    From roofline models and dataflow engines to systolic arrays, sparsity exploitation,
+    and the micro-architecture of today's NPUs — a rigorous tour of how silicon is shaped
+    to maximise AI throughput per watt.
+  </p>
+  <div class="hero-tags">
+    <span class="tag">Roofline Model</span>
+    <span class="tag">Systolic Arrays</span>
+    <span class="tag">Dataflow Engines</span>
+    <span class="tag">Sparsity</span>
+    <span class="tag">Mixed Precision</span>
+    <span class="tag">NPU / DSA</span>
+    <span class="tag">Transformer Accelerators</span>
+    <span class="tag">Case Studies</span>
+  </div>
+  <div class="series-badge">⬡ brendanjameslynskey.github.io/SoC</div>
+  <div class="slide-num">01 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 02 — WHY SPECIALISED HARDWARE?
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Why Specialised Hardware?</div>
+  <div class="slide-subtitle">the end of free scaling</div>
+
+  <div class="cols cols-2" style="margin-top:0.6rem;gap:1.4rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Dennard Scaling — Broken ~2006</div>
+        <ul>
+          <li>Voltage no longer scales with feature size — power density <em>rises</em></li>
+          <li>Clock frequency stalls; multi-core alleviates, not eliminates, the wall</li>
+          <li>Memory bandwidth grows far slower than compute — the "memory wall"</li>
+          <li>ILP extraction in general-purpose CPUs hits diminishing returns</li>
+        </ul>
+      </div>
+      <div class="panel" style="margin-top:1rem;">
+        <div class="panel-title amber">Compute Demand vs Supply Gap</div>
+        <ul>
+          <li>GPT-3: ~3.14 × 10²³ FLOP training</li>
+          <li>LLM inference: O(2·N·L) FLOP/token for N-param, L-layer model</li>
+          <li>Video diffusion, RL — orders of magnitude beyond NLP</li>
+          <li>NVIDIA A100 GPU: ~312 TFLOPS (FP16); not enough at scale</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">ML Workload Characteristics</div>
+        <ul>
+          <li><strong>Regularity</strong> — repeated MAC operations with fixed structure</li>
+          <li><strong>Data reuse</strong> — weights reused across many inputs (batching)</li>
+          <li><strong>Low precision</strong> — INT8 or FP8 often sufficient for inference</li>
+          <li><strong>Sparsity</strong> — zero activations &amp; pruned weights → skip logic</li>
+          <li><strong>Parallelism</strong> — SIMD, tensor, pipeline — all exploitable</li>
+        </ul>
+      </div>
+      <div class="accent-box green" style="margin-top:1rem;">
+        Domain-Specific Architectures (DSAs) align micro-architecture with workload
+        structure: fixed datapaths, scratchpad memories, reduced control overhead,
+        and dedicated precision support — yielding 10–1000× efficiency over CPUs.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">02 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 03 — ROOFLINE MODEL
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">The Roofline Model</div>
+  <div class="slide-subtitle">arithmetic intensity as the design compass</div>
+
+  <div class="cols cols-2" style="gap:1.6rem;">
+    <div>
+      <div class="eq" style="margin-bottom:0.8rem;">
+        Attainable FLOPS = min( Peak FLOPS ,  I × Peak BW )
+      </div>
+      <div class="panel">
+        <div class="panel-title">Arithmetic Intensity <span style="color:var(--accent3)">I</span></div>
+        <div class="kv-row"><span class="kv-label">Definition</span><span class="kv-value">FLOP / byte of DRAM traffic</span></div>
+        <div class="kv-row"><span class="kv-label">Dense GEMM (large)</span><span class="kv-value green">~300 FLOP/B</span></div>
+        <div class="kv-row"><span class="kv-label">Conv2D (large kernel)</span><span class="kv-value green">~100 FLOP/B</span></div>
+        <div class="kv-row"><span class="kv-label">Attention (MHA, seq=2k)</span><span class="kv-value amber">~15 FLOP/B</span></div>
+        <div class="kv-row"><span class="kv-label">Batch-1 GEMV (inference)</span><span class="kv-value red">~1–4 FLOP/B</span></div>
+        <div class="kv-row"><span class="kv-label">Element-wise ops (ReLU)</span><span class="kv-value red">&lt;1 FLOP/B</span></div>
+      </div>
+      <div class="panel" style="margin-top:0.9rem;">
+        <div class="panel-title amber">Ridge Point — NVIDIA H100 SXM</div>
+        <div class="kv-row"><span class="kv-label">FP16 Tensor TFLOPS</span><span class="kv-value">1,979</span></div>
+        <div class="kv-row"><span class="kv-label">HBM3 bandwidth</span><span class="kv-value">3.35 TB/s</span></div>
+        <div class="kv-row"><span class="kv-label">Ridge point</span><span class="kv-value amber">~591 FLOP/B</span></div>
+        <div class="kv-row"><span class="kv-label">GEMV inference</span><span class="kv-value red">Memory-bound !</span></div>
+      </div>
+    </div>
+    <div>
+      <!-- SVG roofline chart -->
+      <svg viewBox="0 0 320 210" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.4rem;">
+        <!-- axes -->
+        <line x1="30" y1="10" x2="30" y2="180" stroke="#2a3048" stroke-width="1.5"/>
+        <line x1="30" y1="180" x2="310" y2="180" stroke="#2a3048" stroke-width="1.5"/>
+        <!-- axis labels -->
+        <text x="15" y="95" fill="#8892aa" font-size="9" font-family="'JetBrains Mono',monospace" text-anchor="middle" transform="rotate(-90,15,95)">GFLOPS/s</text>
+        <text x="170" y="198" fill="#8892aa" font-size="9" font-family="'JetBrains Mono',monospace" text-anchor="middle">Arithmetic Intensity (FLOP/B)</text>
+        <!-- roofline: memory bound (slope) x=30..160, y=180..30 -->
+        <line x1="30" y1="180" x2="160" y2="30" stroke="#7eb8f7" stroke-width="2"/>
+        <!-- roofline: compute bound (flat) x=160..310 y=30 -->
+        <line x1="160" y1="30" x2="310" y2="30" stroke="#7eb8f7" stroke-width="2"/>
+        <!-- ridge point -->
+        <circle cx="160" cy="30" r="4" fill="#f7a05a"/>
+        <text x="162" y="26" fill="#f7a05a" font-size="8" font-family="'JetBrains Mono',monospace">Ridge</text>
+        <!-- workload points -->
+        <!-- GEMV: I~2, low perf -->
+        <circle cx="51" cy="168" r="4" fill="#f76e7e"/>
+        <text x="55" y="165" fill="#f76e7e" font-size="7.5" font-family="'DM Sans',sans-serif">GEMV</text>
+        <!-- Attention: I~15 -->
+        <circle cx="82" cy="133" r="4" fill="#f7a05a"/>
+        <text x="86" y="130" fill="#f7a05a" font-size="7.5" font-family="'DM Sans',sans-serif">Attn</text>
+        <!-- Conv: I~100 -->
+        <circle cx="143" cy="42" r="4" fill="#7ef7c0"/>
+        <text x="147" y="38" fill="#7ef7c0" font-size="7.5" font-family="'DM Sans',sans-serif">Conv</text>
+        <!-- GEMM: I>300 capped -->
+        <circle cx="230" cy="30" r="4" fill="#7ef7c0"/>
+        <text x="234" y="26" fill="#7ef7c0" font-size="7.5" font-family="'DM Sans',sans-serif">GEMM</text>
+        <!-- zone labels -->
+        <text x="65" y="80" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" opacity="0.5">Memory-bound</text>
+        <text x="190" y="50" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" opacity="0.5">Compute-bound</text>
+        <!-- dashed verticals -->
+        <line x1="51" y1="168" x2="51" y2="180" stroke="#f76e7e" stroke-width="0.8" stroke-dasharray="2,2"/>
+        <line x1="82" y1="133" x2="82" y2="180" stroke="#f7a05a" stroke-width="0.8" stroke-dasharray="2,2"/>
+        <line x1="143" y1="42" x2="143" y2="180" stroke="#7ef7c0" stroke-width="0.8" stroke-dasharray="2,2"/>
+        <!-- x-axis ticks -->
+        <text x="51"  y="190" fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">2</text>
+        <text x="82"  y="190" fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">15</text>
+        <text x="143" y="190" fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">100</text>
+        <text x="160" y="190" fill="#f7a05a" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">~591</text>
+      </svg>
+      <div class="accent-box" style="margin-top:0.9rem;">
+        Accelerator design is an exercise in <em>shifting the ridge point</em>: boost
+        compute throughput, reduce DRAM bandwidth demand through tiling &amp; data reuse,
+        or do both — placing target workloads in the compute-bound regime.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">03 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 04 — COMPUTE PRIMITIVES: MACSANDGEMM
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Compute Primitives: MAC → GEMM → Tensor</div>
+  <div class="slide-subtitle">the hierarchy of matrix operations</div>
+
+  <div class="cols cols-3" style="margin-top:0.6rem;">
+    <div class="panel">
+      <div class="panel-title">Scalar MAC</div>
+      <div class="eq" style="font-size:0.9em;">c += a × b</div>
+      <ul style="margin-top:0.7em;">
+        <li>Single multiply-accumulate per cycle</li>
+        <li>CPU FPU or ALU path</li>
+        <li>1 FLOP / cycle (scalar)</li>
+        <li>Poor reuse — reload A,B each time</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title amber">SIMD / Vector</div>
+      <div class="eq" style="font-size:0.9em;">C[i] += A[i] × B[i]</div>
+      <ul style="margin-top:0.7em;">
+        <li>AVX-512: 16 FP32 MACs / cycle</li>
+        <li>Arm SVE2: scalable vector length</li>
+        <li>Still 1D — limited tensor reuse</li>
+        <li>Compiler auto-vectorises easily</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title green">Tensor / Matrix Unit</div>
+      <div class="eq" style="font-size:0.9em;">C += A × Bᵀ</div>
+      <ul style="margin-top:0.7em;">
+        <li>NVIDIA Tensor Core: 16×16×16 MMA</li>
+        <li>Google TPU MXU: 128×128 systolic</li>
+        <li>Apple AMX: 32×32 tiles per cycle</li>
+        <li>Maximises data reuse; bandwidth ↓↓</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:1rem;">
+    <div class="panel-title">GEMM Tiling Strategy — Fitting the Memory Hierarchy</div>
+    <div class="cols cols-2" style="gap:1.2rem;">
+      <ul>
+        <li><strong>Tile into L1/register file</strong> — keep hot data in the fastest storage; amortise load cost over many MACs</li>
+        <li><strong>K-dimension tiling</strong> — partial sums accumulate in accumulators, not DRAM</li>
+        <li><strong>M × N output stationary</strong> — output tile stays; stream A and B rows/cols past it</li>
+      </ul>
+      <ul>
+        <li><strong>NVIDIA cuBLAS/CUTLASS</strong> — auto-tunes tile sizes per GPU architecture (warp-level MMA)</li>
+        <li><strong>Shared memory as L1 scratchpad</strong> — explicitly managed; programmer loads tiles once</li>
+        <li><strong>Memory-compute overlap</strong> — async copy + Tensor Core instructions interleaved</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-num">04 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 05 — SYSTOLIC ARRAYS
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Systolic Arrays</div>
+  <div class="slide-subtitle">data flowing like a heartbeat through a 2D PE mesh</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="panel" style="margin-bottom:1rem;">
+        <div class="panel-title">Operating Principle</div>
+        <ul>
+          <li>2D grid of Processing Elements (PEs), each performing MAC</li>
+          <li>Data injected from edges; flows rhythmically (systolically) across the array</li>
+          <li>Each PE accumulates a partial sum before passing data to its neighbour</li>
+          <li>Weight stationary: weights pre-loaded into PE register files; activations stream through</li>
+          <li>Output stationary: partial sums stay; both A and B flow (lower register pressure)</li>
+          <li>Row stationary (Google TPU v1): minimises total data movement energy</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title amber">Google TPU v1 MXU</div>
+        <div class="kv-row"><span class="kv-label">Array size</span><span class="kv-value">256 × 256 PEs</span></div>
+        <div class="kv-row"><span class="kv-label">Precision</span><span class="kv-value">INT8 MACs</span></div>
+        <div class="kv-row"><span class="kv-label">Peak throughput</span><span class="kv-value amber">92 TOPS</span></div>
+        <div class="kv-row"><span class="kv-label">Clock</span><span class="kv-value">700 MHz</span></div>
+        <div class="kv-row"><span class="kv-label">Weight FIFO</span><span class="kv-value">28 MiB on-chip</span></div>
+        <div class="kv-row"><span class="kv-label">Key insight</span><span class="kv-value green">No caches → predictable</span></div>
+      </div>
+    </div>
+    <!-- SVG 4×4 systolic array -->
+    <div class="fig">
+      <svg viewBox="0 0 300 260" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
+        <defs>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L6,3 z" fill="#7eb8f7" opacity="0.7"/>
+          </marker>
+          <marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L6,3 z" fill="#f7a05a" opacity="0.7"/>
+          </marker>
+          <marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L6,3 z" fill="#7ef7c0" opacity="0.7"/>
+          </marker>
+        </defs>
+
+        <!-- PEs: 4×4 grid, each 40×30, starting at x=70,y=50 -->
+        <!-- Row 0 -->
+        <rect x="70"  y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="120" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="170" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="220" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <!-- Row 1 -->
+        <rect x="70"  y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="120" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="170" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="220" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <!-- Row 2 -->
+        <rect x="70"  y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="120" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="170" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="220" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <!-- Row 3 -->
+        <rect x="70"  y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="120" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="170" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="220" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+
+        <!-- PE labels -->
+        <text x="90"  y="69" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC</text>
+        <text x="140" y="69" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC</text>
+        <text x="190" y="69" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC</text>
+        <text x="240" y="69" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC</text>
+
+        <!-- Horizontal arrows (activations flowing right) -->
+        <line x1="8" y1="65"  x2="65"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="110" y1="65"  x2="115"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="160" y1="65"  x2="165"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="210" y1="65"  x2="215"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <line x1="8" y1="110" x2="65"  y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="110" y1="110" x2="115" y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="160" y1="110" x2="165" y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <line x1="8" y1="155" x2="65"  y2="155" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="110" y1="155" x2="115" y2="155" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <line x1="8" y1="200" x2="65"  y2="200" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Vertical arrows (weights flowing down) -->
+        <line x1="90"  y1="8"  x2="90"  y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="90"  y1="80" x2="90"  y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="90"  y1="125" x2="90" y2="135" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="90"  y1="170" x2="90" y2="180" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+        <line x1="140" y1="8"  x2="140" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="140" y1="80" x2="140" y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="140" y1="125" x2="140" y2="135" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+        <line x1="190" y1="8"  x2="190" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="190" y1="80" x2="190" y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+        <line x1="240" y1="8"  x2="240" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+        <!-- partial sums out right -->
+        <line x1="260" y1="65"  x2="290" y2="65"  stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <line x1="260" y1="110" x2="290" y2="110" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <line x1="260" y1="155" x2="290" y2="155" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <line x1="260" y1="200" x2="290" y2="200" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <!-- legend -->
+        <line x1="8" y1="240" x2="30" y2="240" stroke="#7eb8f7" stroke-width="1.5"/>
+        <text x="33" y="244" fill="#7eb8f7" font-size="8" font-family="'DM Sans',sans-serif">Activations →</text>
+        <line x1="100" y1="240" x2="122" y2="240" stroke="#f7a05a" stroke-width="1.5"/>
+        <text x="125" y="244" fill="#f7a05a" font-size="8" font-family="'DM Sans',sans-serif">Weights ↓</text>
+        <line x1="190" y1="240" x2="212" y2="240" stroke="#7ef7c0" stroke-width="1.5"/>
+        <text x="215" y="244" fill="#7ef7c0" font-size="8" font-family="'DM Sans',sans-serif">Partial sums →</text>
+      </svg>
+      <div class="fig-caption">Weight-stationary 4×4 systolic array (concept). In practice the TPU v1 MXU is 256×256.</div>
+    </div>
+  </div>
+  <div class="slide-num">05 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 06 — DATAFLOW ARCHITECTURES
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Dataflow Architectures</div>
+  <div class="slide-subtitle">execution driven by data availability, not program counters</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Dataflow vs Control-flow</div>
+        <ul>
+          <li><strong>Control-flow (von Neumann)</strong>: sequential PC fetch/decode; memory bottleneck; branch misprediction overhead</li>
+          <li><strong>Dataflow</strong>: instructions fire when operands are ready; implicit parallelism; no speculative execution overhead</li>
+          <li>ML graphs are acyclic (mostly) → perfect fit for dataflow scheduling</li>
+          <li>Compiler maps layer graph onto PE array dataflow schedule at compile time — zero runtime overhead</li>
+        </ul>
+      </div>
+      <div class="panel" style="margin-top:1rem;">
+        <div class="panel-title amber">Dataflow Variants</div>
+        <ul>
+          <li><strong>Weight-stationary</strong>: weights loaded once into PE RFs; minimise weight movement energy</li>
+          <li><strong>Output-stationary</strong>: partial sums accumulate locally; maximise accumulator reuse</li>
+          <li><strong>Row-stationary (TPU)</strong>: each PE computes one convolution row; minimises total data movement</li>
+          <li><strong>No-local-reuse (NLR)</strong>: all operands from global buffer — less efficient but simpler PE</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Spatial Dataflow Engines</div>
+        <ul>
+          <li><strong>Cerebras WSE-3</strong>: entire wafer as one chip; 900K cores; 44 GB on-wafer SRAM — eliminates DRAM for moderate models</li>
+          <li><strong>Groq LPU</strong>: deterministic single-chip SIMD; compiler schedules every cycle; zero pipeline stalls; 750 TOPS INT8</li>
+          <li><strong>SambaNova SN40L</strong>: reconfigurable dataflow units (RDU); spatial compute array with streams; 2-tier DRAM+HBM</li>
+          <li><strong>Tenstorrent Blackhole</strong>: mesh of RISC-V tensix cores; compiler-controlled NoC; open-source toolchain</li>
+        </ul>
+      </div>
+      <div class="accent-box amber" style="margin-top:1rem;">
+        <strong>Compiler is the hardware:</strong> spatial dataflow chips push scheduling
+        complexity into ahead-of-time compilation. Hardware becomes a static, predictable
+        substrate — runtime control logic shrinks dramatically, freeing area for compute.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">06 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 07 — MIXED PRECISION
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Numerical Formats &amp; Mixed Precision</div>
+  <div class="slide-subtitle">matching bit-width to workload sensitivity</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <table class="dtable">
+        <tr><th>Format</th><th>Bits</th><th>Sign</th><th>Exp</th><th>Mant</th><th>Dynamic Range</th></tr>
+        <tr><td>FP64</td><td class="hi">64</td><td>1</td><td>11</td><td>52</td><td class="hi">~1.8×10³⁰⁸</td></tr>
+        <tr><td>FP32</td><td class="hi">32</td><td>1</td><td>8</td><td>23</td><td class="hi">~3.4×10³⁸</td></tr>
+        <tr><td>TF32</td><td class="am">19</td><td>1</td><td>8</td><td>10</td><td class="am">FP32 range, ↓precision</td></tr>
+        <tr><td>BF16</td><td class="am">16</td><td>1</td><td>8</td><td>7</td><td class="am">FP32 range (easy cast)</td></tr>
+        <tr><td>FP16</td><td class="am">16</td><td>1</td><td>5</td><td>10</td><td class="rd">±65504 (overflow risk)</td></tr>
+        <tr><td>FP8 E4M3</td><td class="gr">8</td><td>1</td><td>4</td><td>3</td><td class="gr">Fwd pass preferred</td></tr>
+        <tr><td>FP8 E5M2</td><td class="gr">8</td><td>1</td><td>5</td><td>2</td><td class="gr">Grad pass preferred</td></tr>
+        <tr><td>INT8</td><td class="gr">8</td><td>1</td><td>—</td><td>7</td><td class="gr">Inference standard</td></tr>
+        <tr><td>INT4 / NF4</td><td class="gr">4</td><td>1</td><td>—</td><td>3</td><td class="gr">QLoRA, edge inference</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">NVIDIA Tensor Core Evolution</div>
+        <div class="kv-row"><span class="kv-label">Volta (V100)</span><span class="kv-value">FP16 in, FP32 acc</span></div>
+        <div class="kv-row"><span class="kv-label">Ampere (A100)</span><span class="kv-value amber">TF32, BF16, INT8, INT4, FP64</span></div>
+        <div class="kv-row"><span class="kv-label">Hopper (H100)</span><span class="kv-value green">FP8 E4M3/E5M2, FP16, BF16</span></div>
+        <div class="kv-row"><span class="kv-label">Blackwell (B200)</span><span class="kv-value green">FP4 NV (2× H100 throughput)</span></div>
+        <div class="kv-row"><span class="kv-label">B200 FP4 peak</span><span class="kv-value amber">~9 PFLOPS (dense)</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title amber">Mixed-Precision Training (AMP)</div>
+        <ul>
+          <li><strong>Master weights</strong>: FP32 — guards gradient precision</li>
+          <li><strong>Forward/backward</strong>: FP16 or BF16 — feeds Tensor Cores</li>
+          <li><strong>Loss scaling</strong>: multiply loss before backward; prevents FP16 underflow</li>
+          <li><strong>Accumulation</strong>: FP32 accumulator in Tensor Core MMA instruction</li>
+          <li>Net result: 2–3× throughput vs pure FP32, near-identical accuracy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">07 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 08 — SPARSITY
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Sparsity Exploitation</div>
+  <div class="slide-subtitle">skipping zeros — architectural and algorithmic approaches</div>
+
+  <div class="cols cols-3" style="margin-top:0.5rem;">
+    <div class="panel">
+      <div class="panel-title">Sources of Sparsity</div>
+      <ul>
+        <li><strong>Activation sparsity</strong>: ReLU sets negative activations to zero; 50–80% sparse in practice</li>
+        <li><strong>Weight pruning</strong>: iterative magnitude pruning removes small-weight connections</li>
+        <li><strong>Structured pruning</strong>: remove entire filters/heads — hardware-friendly but accuracy cost</li>
+        <li><strong>Unstructured pruning</strong>: arbitrary zero pattern — needs sparse HW to exploit</li>
+        <li><strong>Dynamic sparsity</strong>: varies per input; harder to schedule statically</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title amber">NVIDIA 2:4 Structured Sparsity</div>
+      <ul>
+        <li>Exactly 2 non-zeros in every group of 4 weights</li>
+        <li>Stored in compressed format: 50% weight storage</li>
+        <li>Sparse Tensor Cores decode in hardware — 2× effective throughput</li>
+        <li>Metadata (2-bit indices per group) stored alongside values</li>
+        <li>Ampere+: hardware decompression before MMA; no software overhead</li>
+        <li>Accuracy: &lt;1% loss for most vision/NLP models with retraining</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title green">Sparse Format Trade-offs</div>
+      <ul>
+        <li><strong>CSR/CSC</strong>: row/col pointer + value arrays; irregular memory; good for very sparse (&gt;90%)</li>
+        <li><strong>COO</strong>: (row, col, val) tuples; simple but high overhead at &lt;90% sparsity</li>
+        <li><strong>Block-sparse (BSR)</strong>: 16×16 or 32×32 dense blocks at known positions; GPU-friendly</li>
+        <li><strong>Flash Attention sparse</strong>: attends only to local &amp; strided positions; O(N√N) compute</li>
+        <li><strong>MoE routing</strong>: dynamic expert selection = structured sparsity in FFN layers</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:0.9rem;">
+    <div class="panel-title red">Mixture-of-Experts (MoE) — Sparsity at the Architecture Level</div>
+    <div class="cols cols-2" style="gap:1rem;">
+      <ul>
+        <li>Replace dense FFN with N expert sub-networks (e.g. 8, 64, or 256)</li>
+        <li>Router selects top-K experts per token; only those experts execute</li>
+        <li>Parameter count scales with N, compute scales with K — decoupled</li>
+      </ul>
+      <ul>
+        <li><strong>Mixtral 8×7B</strong>: 46.7B params, ~12.9B active; inference cost of 12.9B dense</li>
+        <li><strong>GPT-4</strong>: rumoured MoE — explains scale vs serving cost</li>
+        <li>Load balancing aux loss prevents expert collapse</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-num">08 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 09 — MEMORY HIERARCHY IN ACCELERATORS
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Memory Hierarchy in AI Accelerators</div>
+  <div class="slide-subtitle">keeping compute fed — the bandwidth pyramid</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <!-- Memory pyramid SVG -->
+      <svg viewBox="0 0 300 230" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.5rem;">
+        <!-- L0: Register file -->
+        <polygon points="120,20 180,20 200,50 100,50" fill="rgba(126,247,192,0.3)" stroke="#7ef7c0" stroke-width="1"/>
+        <text x="150" y="39" fill="#7ef7c0" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">Register File</text>
+        <text x="260" y="39" fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace">kB · &gt;10 TB/s</text>
+
+        <!-- L1: SRAM local -->
+        <polygon points="100,55 200,55 220,85 80,85" fill="rgba(126,184,247,0.3)" stroke="#7eb8f7" stroke-width="1"/>
+        <text x="150" y="74" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">L1 SRAM / Scratchpad</text>
+        <text x="260" y="74" fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace">256–512 kB · 5 TB/s</text>
+
+        <!-- L2: Shared SRAM -->
+        <polygon points="80,90 220,90 240,120 60,120" fill="rgba(126,184,247,0.2)" stroke="#7eb8f7" stroke-width="1"/>
+        <text x="150" y="109" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">L2 / Unified Buffer SRAM</text>
+        <text x="260" y="109" fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace">50–100 MB · 1–2 TB/s</text>
+
+        <!-- HBM -->
+        <polygon points="60,125 240,125 255,155 45,155" fill="rgba(247,160,90,0.25)" stroke="#f7a05a" stroke-width="1"/>
+        <text x="150" y="144" fill="#f7a05a" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">HBM3/3E (on-package)</text>
+        <text x="260" y="144" fill="#f7a05a" font-size="7" font-family="'JetBrains Mono',monospace">96–192 GB · 3–5 TB/s</text>
+
+        <!-- DRAM / NVLink -->
+        <polygon points="45,160 255,160 270,190 30,190" fill="rgba(247,110,126,0.2)" stroke="#f76e7e" stroke-width="1"/>
+        <text x="150" y="179" fill="#f76e7e" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">NVLink / PCIe / CXL pool</text>
+        <text x="260" y="179" fill="#f76e7e" font-size="7" font-family="'JetBrains Mono',monospace">TB scale · 900 GB/s</text>
+
+        <!-- labels -->
+        <text x="150" y="215" fill="#8892aa" font-size="7.5" font-family="'DM Sans',sans-serif" text-anchor="middle">↑ Speed / Cost per GB   ↓ Capacity</text>
+      </svg>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">On-Chip SRAM Sizing Considerations</div>
+        <ul>
+          <li>Must hold input/output tiles + partial sums simultaneously</li>
+          <li>Larger SRAM → better roofline position; SRAM density limits die area</li>
+          <li>6T SRAM: ~0.026 µm² / bit in N5; 192 MB SRAM ≈ 40 mm²</li>
+          <li>NVIDIA H100: 50 MB L2; Google TPU v5e: 16 MB unified buffer per chip</li>
+          <li>Cerebras WSE-3: 44 GB on-wafer (no DRAM bottleneck for &lt;700B models)</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title amber">Flash Attention — Algorithm-Hardware Co-design</div>
+        <ul>
+          <li>Standard attention materialises full N×N score matrix — O(N²) HBM reads/writes</li>
+          <li>Flash Attention tiles Q,K,V into SRAM; fuses softmax + matmul kernel</li>
+          <li>HBM reads/writes: O(N) — linear, not quadratic</li>
+          <li>2–4× wall-clock speedup; enables 100K+ context lengths</li>
+          <li>Flash Attention 3: async WGMMA + softmax pipelining on H100; 75% MFU</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">09 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 10 — TRANSFORMER ACCELERATOR MICRO-ARCHITECTURE
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Transformer Accelerator Micro-Architecture</div>
+  <div class="slide-subtitle">mapping attention and FFN layers onto silicon</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;">
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">Attention Bottlenecks at Inference</div>
+        <ul>
+          <li><strong>Prefill (prompt)</strong>: large GEMM — compute-bound; exploits Tensor Cores well</li>
+          <li><strong>Decode (autoregressive)</strong>: GEMV — each token generates one row; memory-bandwidth bound</li>
+          <li><strong>KV Cache</strong>: past K,V tensors stored in HBM; grows O(seq_len × layers × heads × d_head)</li>
+          <li>At 70B model, 100K context: KV cache ~200 GB — exceeds single GPU VRAM</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title amber">KV Cache Optimisations</div>
+        <ul>
+          <li><strong>Multi-Query Attention (MQA)</strong>: share single K,V head across all Q heads — 8× KV cache reduction</li>
+          <li><strong>Grouped Query Attention (GQA)</strong>: G shared K,V heads (Llama 3 uses G=8); balance between MHA and MQA</li>
+          <li><strong>PagedAttention (vLLM)</strong>: KV cache in non-contiguous pages; near-zero fragmentation; enables batching</li>
+          <li><strong>Quantised KV</strong>: INT8/FP8 KV cache; 2× capacity increase at minor quality cost</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title green">Dedicated Transformer Engine (NVIDIA)</div>
+        <ul>
+          <li>Hopper H100: Transformer Engine with FP8 training support</li>
+          <li>Per-tensor dynamic scaling maintains numerical stability</li>
+          <li>Async WGMMA instructions: Tensor Core + shared mem overlap</li>
+          <li>TMA (Tensor Memory Accelerator): hardware async data copy engine; overlaps compute with memory</li>
+          <li>4× H100 Tensor Core throughput vs A100 in FP8 mode</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Prefill / Decode Disaggregation</div>
+        <ul>
+          <li>Prefill is compute-bound; decode is memory-bound → different optimal hardware</li>
+          <li><strong>Disaggregated serving</strong>: separate GPU pools for prefill vs decode (Splitwise, DistServe)</li>
+          <li>Prefill pool: large A/H100; decode pool: cheaper memory-bandwidth GPUs</li>
+          <li>Reduces total cost of serving by 30–40% at scale</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">10 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 11 — QUANTISATION FOR INFERENCE
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Quantisation for Inference</div>
+  <div class="slide-subtitle">reducing bit-width without sacrificing accuracy</div>
+
+  <div class="cols cols-3" style="margin-top:0.5rem;">
+    <div class="panel">
+      <div class="panel-title">Post-Training Quantisation (PTQ)</div>
+      <ul>
+        <li><strong>Symmetric</strong>: scale = max(|W|) / 127; zero-point = 0; preferred for weights</li>
+        <li><strong>Asymmetric</strong>: separate scale + zero-point; better for asymmetric activation distributions</li>
+        <li><strong>Per-tensor</strong>: one scale for whole tensor; fastest; least accurate</li>
+        <li><strong>Per-channel</strong>: one scale per output channel; standard for INT8 weights</li>
+        <li><strong>Per-group (GPTQ, AWQ)</strong>: groups of 128 weights share a scale; enables INT4 with &lt;1% PPL loss</li>
+        <li>Calibration dataset: 128–512 samples sufficient</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title amber">Quantisation-Aware Training (QAT)</div>
+      <ul>
+        <li>Simulate quantisation during training — fake quantise nodes in forward pass</li>
+        <li>Gradients flow through fake-quant via straight-through estimator (STE)</li>
+        <li>Model learns to be robust to quantisation error</li>
+        <li>Better accuracy than PTQ, especially at INT4</li>
+        <li><strong>QLoRA</strong>: 4-bit base model (NF4) + FP16 LoRA adapters — fine-tune 70B on single A100</li>
+        <li>NF4: normally-distributed 4-bit — optimal for normally-distributed weights</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title green">Hardware Quantisation Support</div>
+      <div class="kv-row"><span class="kv-label">NVIDIA A100</span><span class="kv-value green">INT8, INT4</span></div>
+      <div class="kv-row"><span class="kv-label">NVIDIA H100</span><span class="kv-value green">FP8, INT8, INT4</span></div>
+      <div class="kv-row"><span class="kv-label">NVIDIA B200</span><span class="kv-value green">FP4, FP6, FP8</span></div>
+      <div class="kv-row"><span class="kv-label">Google TPU v5</span><span class="kv-value green">INT8, BF16</span></div>
+      <div class="kv-row"><span class="kv-label">Apple ANE (M4)</span><span class="kv-value amber">INT8 (CoreML)</span></div>
+      <div class="kv-row"><span class="kv-label">Qualcomm HTP</span><span class="kv-value amber">INT8, INT4 (QNN)</span></div>
+      <div class="kv-row"><span class="kv-label">Samsung Mach-1</span><span class="kv-value amber">INT8</span></div>
+      <div style="margin-top:0.8em;">
+        <ul>
+          <li>Dequantisation overhead must be hidden by compute; batch size matters</li>
+          <li>W4A16 (GPTQ/AWQ): INT4 weight, FP16 activation — best decode throughput</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">11 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 12 — GPU ARCHITECTURE DEEP DIVE
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">GPU Architecture: NVIDIA Hopper H100</div>
+  <div class="slide-subtitle">the current standard bearer for AI compute</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">H100 SXM5 — Key Numbers</div>
+        <div class="kv-row"><span class="kv-label">Process</span><span class="kv-value">TSMC N4 (4nm)</span></div>
+        <div class="kv-row"><span class="kv-label">Die area</span><span class="kv-value">814 mm²</span></div>
+        <div class="kv-row"><span class="kv-label">Transistors</span><span class="kv-value amber">80 billion</span></div>
+        <div class="kv-row"><span class="kv-label">SMs</span><span class="kv-value">132 Streaming Multiprocessors</span></div>
+        <div class="kv-row"><span class="kv-label">Tensor Cores / SM</span><span class="kv-value">4 (4th gen)</span></div>
+        <div class="kv-row"><span class="kv-label">FP16 Tensor TFLOPS</span><span class="kv-value green">1,979</span></div>
+        <div class="kv-row"><span class="kv-label">FP8 Tensor TFLOPS</span><span class="kv-value green">3,958</span></div>
+        <div class="kv-row"><span class="kv-label">HBM3 capacity</span><span class="kv-value">80 GB</span></div>
+        <div class="kv-row"><span class="kv-label">HBM3 bandwidth</span><span class="kv-value amber">3.35 TB/s</span></div>
+        <div class="kv-row"><span class="kv-label">NVLink 4.0</span><span class="kv-value">900 GB/s bidirectional</span></div>
+        <div class="kv-row"><span class="kv-label">TDP (SXM)</span><span class="kv-value red">700 W</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title amber">Hopper New Features</div>
+        <ul>
+          <li><strong>Transformer Engine</strong>: hardware FP8 ↔ FP16/BF16 conversion; dynamic per-tensor scaling</li>
+          <li><strong>WGMMA (Warpgroup MMA)</strong>: asynchronous Tensor Core with larger 64×16×16 tiles</li>
+          <li><strong>TMA (Tensor Memory Accelerator)</strong>: independent DMA engine; overlaps data movement with WGMMA</li>
+          <li><strong>DPX instructions</strong>: native dynamic programming ops (Smith-Waterman, Floyd-Warshall)</li>
+          <li><strong>NVLink Switch</strong>: NVL72 connects 72× H100 GPUs in all-to-all topology at 900 GB/s</li>
+          <li><strong>Confidential computing</strong>: TEE with hardware attestation for multi-tenant inference</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title green">SM Micro-architecture</div>
+        <ul>
+          <li>128 CUDA cores (FP32) per SM + 64 FP64 + 64 INT32</li>
+          <li>4× 4th-gen Tensor Cores per SM</li>
+          <li>256 KB register file; 228 KB configurable L1/shared memory</li>
+          <li>4 warp schedulers; 64 warps (2048 threads) max in flight</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">12 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 13 — GOOGLE TPU ARCHITECTURE
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Google TPU Architecture</div>
+  <div class="slide-subtitle">purpose-built ASIC for TensorFlow / JAX workloads</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="timeline" style="margin-top:0.3rem;">
+        <div class="tl-item">
+          <div class="tl-label">TPU v1 (2016)</div>
+          <div class="tl-text">92 TOPS INT8 · 256×256 systolic MXU · no training support · GDDR3 · 40W · ResNet inference</div>
+        </div>
+        <div class="tl-item amber">
+          <div class="tl-label">TPU v2 (2017) — Training</div>
+          <div class="tl-text">45 TFLOPS BF16 · HBM 16 GB · liquid cooled · 4 cores per chip · TPU Pod via 2D torus ICI</div>
+        </div>
+        <div class="tl-item green">
+          <div class="tl-label">TPU v4 (2021)</div>
+          <div class="tl-text">275 TFLOPS BF16 · OCS optical reconfigurable interconnect · 4096-chip pods · sparse cores</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-label">TPU v5e / v5p (2023)</div>
+          <div class="tl-text">v5e: 393 TOPS INT8, HBM2 16 GB · v5p: 459 TFLOPS BF16, HBM3 95 GB; Trillium arch</div>
+        </div>
+        <div class="tl-item amber">
+          <div class="tl-label">TPU v6 Trillium (2024)</div>
+          <div class="tl-text">4.7× v5e MXU throughput · SparseCore for embedding · ICI at 1.2 Tb/s per chip · TSMC N3</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">TPU v4 Inter-Chip Link (ICI)</div>
+        <ul>
+          <li>Each chip has 6× bidirectional ICI links at 100 GB/s each = 600 GB/s per chip</li>
+          <li>4096-chip pod arranged as 3D torus topology</li>
+          <li>Optical Circuit Switch (OCS): software-reconfigurable physical topology — optimise per-workload</li>
+          <li>All-reduce over ICI faster than NVLink at pod scale</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title amber">TPU SparseCore (v5+)</div>
+        <ul>
+          <li>Dedicated accelerator for embedding lookups (recommendation models)</li>
+          <li>Embedding tables: sparse random-access pattern; hostile to systolic array</li>
+          <li>SparseCore: gather/scatter engine + local HBM slice</li>
+          <li>Enables unified chip for both dense (MXU) and sparse (SparseCore) workloads</li>
+        </ul>
+      </div>
+      <div class="accent-box" style="margin-top:0.9rem;">
+        Google operates the world's largest TPU fleet — over 50 exaFLOPS aggregate
+        (estimated). All Gemini models were trained and served on TPU infrastructure.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">13 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 14 — NPU IN SOC INTEGRATION
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">NPU Integration in SoCs</div>
+  <div class="slide-subtitle">on-device AI — from smartphone to datacenter SoC</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">Typical NPU Micro-architecture</div>
+        <!-- Simple NPU block diagram -->
+        <svg viewBox="0 0 280 150" style="width:100%;background:var(--bg);border-radius:3px;margin-top:0.5rem;">
+          <rect x="5"   y="10"  width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+          <text x="35"  y="29"  fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">DMA Engine</text>
+
+          <rect x="5"   y="55"  width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+          <text x="35"  y="74"  fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Cmd Queue</text>
+
+          <rect x="5"   y="100" width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+          <text x="35"  y="119" fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Post-proc</text>
+
+          <!-- central PE array -->
+          <rect x="80"  y="20"  width="80" height="100" rx="4" fill="rgba(126,184,247,0.1)" stroke="#7eb8f7"/>
+          <text x="120" y="60"  fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC Array</text>
+          <text x="120" y="73"  fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">(systolic / SIMD)</text>
+          <text x="120" y="90"  fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Accumulators</text>
+
+          <!-- SRAM buffer -->
+          <rect x="175" y="20"  width="65" height="45" rx="3" fill="#1a1f2e" stroke="#f7a05a"/>
+          <text x="207" y="43"  fill="#f7a05a" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Unified Buffer</text>
+          <text x="207" y="55"  fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">SRAM</text>
+
+          <!-- activation/pool/norm -->
+          <rect x="175" y="80"  width="65" height="45" rx="3" fill="#1a1f2e" stroke="#7ef7c0"/>
+          <text x="207" y="100" fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Act/Pool/</text>
+          <text x="207" y="112" fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Norm Unit</text>
+
+          <!-- arrows -->
+          <line x1="65" y1="25"  x2="79"  y2="50"  stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
+          <line x1="65" y1="70"  x2="79"  y2="70"  stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
+          <line x1="160" y1="50"  x2="174" y2="42" stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
+          <line x1="160" y1="80"  x2="174" y2="95" stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
+          <line x1="207" y1="125" x2="35" y2="115" stroke="#7ef7c0" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- SoC bus -->
+          <rect x="5" y="140" width="265" height="7" rx="2" fill="rgba(42,48,72,0.8)" stroke="#2a3048"/>
+          <text x="140" y="147" fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">SoC Fabric (AMBA AXI / CHI)</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title amber">Flagship Mobile NPUs (2024–2025)</div>
+        <table class="dtable" style="font-size:0.82em;">
+          <tr><th>Chip</th><th>NPU</th><th>TOPS</th><th>Process</th></tr>
+          <tr><td>Apple A18 Pro</td><td class="hi">ANE Gen 5</td><td class="gr">38</td><td>TSMC N3E</td></tr>
+          <tr><td>Apple M4</td><td class="hi">ANE Gen 5</td><td class="gr">38</td><td>TSMC N3E</td></tr>
+          <tr><td>Qualcomm SD Elite</td><td class="am">Hexagon HTP</td><td class="gr">75</td><td>TSMC N4P</td></tr>
+          <tr><td>Samsung Exynos 2500</td><td class="am">Mach-1</td><td class="gr">34</td><td>Samsung SF3</td></tr>
+          <tr><td>MediaTek D9400</td><td class="am">APU 790</td><td class="gr">50</td><td>TSMC N3E</td></tr>
+          <tr><td>Google Tensor G4</td><td class="hi">TPU (Samsung)</td><td class="gr">42</td><td>Samsung SF4</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-title green">Datacenter SoC NPU Integration</div>
+        <ul>
+          <li><strong>Intel Gaudi 3</strong>: 8× matrix multiplication engines (MME) + 24× TPC VLIW cores; 64 GB HBM2e</li>
+          <li><strong>AMD MI300X APU</strong>: CDNA3 GPU + CPU dies; 192 GB HBM3 shared; 5.3 TB/s</li>
+          <li><strong>AWS Trainium2</strong>: 2× NeuronCore-v2 per chip; NeuronLink die-to-die at 8 TB/s; 4-node cluster</li>
+          <li><strong>Microsoft Maia 100</strong>: custom ASIC; DGX-A100 training alternative for Azure fleet</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">14 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 15 — TENSOR PARALLELISM & DISTRIBUTED TRAINING
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Parallelism Strategies for Large Models</div>
+  <div class="slide-subtitle">distributing compute and memory across accelerators</div>
+
+  <div class="cols cols-3" style="margin-top:0.5rem;">
+    <div class="panel">
+      <div class="panel-title">Data Parallelism (DP)</div>
+      <ul>
+        <li>Each device holds a full model copy</li>
+        <li>Different micro-batches processed in parallel</li>
+        <li>Gradient all-reduce after backward pass</li>
+        <li>DDP (PyTorch): overlap all-reduce with backward; efficient at &lt;1B params</li>
+        <li>Scales well; limited by per-device memory (full model must fit)</li>
+        <li>ZeRO (DeepSpeed): shard optimizer states, gradients, params across DP ranks</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title amber">Tensor Parallelism (TP)</div>
+      <ul>
+        <li>Partition weight matrices across devices (column / row sharding)</li>
+        <li>Megatron-LM: column-split Q/K/V projections; row-split output projection</li>
+        <li>Each TP rank computes a partial GEMM; all-reduce/all-gather recombines</li>
+        <li>Requires high-bandwidth interconnect (NVLink) — all-reduce per layer</li>
+        <li>TP=8 typical; beyond 8 communication overhead dominates</li>
+        <li>Sequence parallelism (Ulysses): split along sequence dimension</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title green">Pipeline Parallelism (PP)</div>
+      <ul>
+        <li>Partition transformer layers across devices: device 0 = layers 0–7, etc.</li>
+        <li>Micro-batching: pipeline bubble reduced by processing B micro-batches simultaneously</li>
+        <li>Interleaved 1F1B schedule: forward-backward alternation; near-zero bubble</li>
+        <li>Communication: P2P activation passing between stages — lower BW requirement than TP</li>
+        <li>GPipe, PipeDream, Interleaved 1F1B — progressive refinements</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:0.8rem;">
+    <div class="panel-title red">3D Parallelism — Combining All Three</div>
+    <div class="cols cols-2" style="gap:1rem;">
+      <ul>
+        <li><strong>DP × TP × PP</strong>: e.g. 512 GPUs = DP=8, TP=8, PP=8 → fits 1T+ parameter models</li>
+        <li>NVLink for TP (high-BW, low-latency); InfiniBand for DP (high-BW); PCIe/NVLink for PP</li>
+      </ul>
+      <ul>
+        <li><strong>Expert Parallelism (EP)</strong>: route MoE experts to different devices; all-to-all dispatch/combine</li>
+        <li>GPT-4 / Gemini Ultra estimated: DP+TP+PP+EP combined across &gt;1000 chips</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-num">15 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 16 — CNN ACCELERATOR DESIGN
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">CNN Accelerator Design</div>
+  <div class="slide-subtitle">convolutional workloads — structure, tiling, and reuse</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">Convolution Loop Nest</div>
+        <div class="eq" style="font-size:0.75em; text-align:left; padding:0.7em 0.9em;">
+for N, C_out, OH, OW, C_in, KH, KW:<br/>
+&nbsp;&nbsp;O[n,c_out,oh,ow] +=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;W[c_out,c_in,kh,kw] ×<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;I[n, c_in, oh+kh, ow+kw]
+        </div>
+        <ul style="margin-top:0.6em;">
+          <li>7 nested loops → rich tiling space for data reuse</li>
+          <li>im2col transform: maps conv to GEMM (at cost of memory expansion)</li>
+          <li>Winograd: F(2×2, 3×3) reduces MACs by 2.25× for 3×3 kernels</li>
+          <li>FFT-based conv: efficient for large kernels (&gt;7×7)</li>
+          <li>Depthwise separable (MobileNet): factorises 3×3 → depthwise + pointwise; 8–9× fewer MACs</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title amber">CNN Accelerator Design Choices</div>
+        <ul>
+          <li><strong>Line buffer</strong>: store H×W rows of input; slide window without re-reading DRAM</li>
+          <li><strong>Double buffering</strong>: DMA fills buffer B while PE array consumes buffer A</li>
+          <li><strong>Weight caching</strong>: small kernels (3×3×C_in×C_out) fit in on-chip SRAM; reuse across output tiles</li>
+          <li><strong>Activation reuse</strong>: output-stationary on OH×OW tile; stream weights past</li>
+          <li><strong>Fusion</strong>: Conv + BN + ReLU fused into single kernel — eliminates 2× DRAM round trips</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title green">Edge CNN ASIC Examples</div>
+        <div class="kv-row"><span class="kv-label">Hailo-8</span><span class="kv-value green">26 TOPS · 2.5W · dataflow arch</span></div>
+        <div class="kv-row"><span class="kv-label">Kneron KL730</span><span class="kv-value">4 TOPS · INT8 · &lt;3W</span></div>
+        <div class="kv-row"><span class="kv-label">Rockchip RK3588 NPU</span><span class="kv-value amber">6 TOPS · INT8/INT4</span></div>
+        <div class="kv-row"><span class="kv-label">NXP i.MX 9 eIQ</span><span class="kv-value">4 TOPS · ethos-U65</span></div>
+        <div class="kv-row"><span class="kv-label">Arm Ethos-U85</span><span class="kv-value">4 TOPS · 256 MACs/cycle</span></div>
+        <div class="kv-row"><span class="kv-label">STM32N6 NPU</span><span class="kv-value">600 GOPS · Cortex-M55 + NPU</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">16 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 17 — COMPILER & SOFTWARE STACK
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">The AI Compiler Stack</div>
+  <div class="slide-subtitle">bridging high-level ML frameworks to bare silicon</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <!-- Stack diagram -->
+      <div class="timeline" style="margin-top:0.3rem;">
+        <div class="tl-item">
+          <div class="tl-label">Training Frameworks</div>
+          <div class="tl-text">PyTorch, JAX, TensorFlow — user-facing Python; define computation graphs eagerly or traced</div>
+        </div>
+        <div class="tl-item amber">
+          <div class="tl-label">Graph Capture / IR</div>
+          <div class="tl-text">torch.compile (TorchDynamo + TorchInductor), XLA, MLIR — capture static computation graph; apply op fusion, constant folding, dead-code elimination</div>
+        </div>
+        <div class="tl-item green">
+          <div class="tl-label">Optimisation Passes</div>
+          <div class="tl-text">Operator fusion · layout transforms (NCHW↔NHWC) · quantisation insertion · tiling/scheduling (Halide, Ansor) · memory planning</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-label">Backend Code Generation</div>
+          <div class="tl-text">NVCC / PTX for NVIDIA · XLA HLO → LLO for TPU · IREE for mobile · TVM Autoscheduler for edge</div>
+        </div>
+        <div class="tl-item amber">
+          <div class="tl-label">Runtime</div>
+          <div class="tl-text">Kernel launch, memory allocation, stream management, async execution, profiling hooks</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">MLIR — Multi-Level IR</div>
+        <ul>
+          <li>Dialect system: Linalg, Tensor, SCF, Affine, LLVM dialects</li>
+          <li>Progressive lowering: high-level ops → tiled loops → memory-specific ops → ISA</li>
+          <li>Used by: XLA, IREE, Torch-MLIR, OpenAI Triton backend</li>
+          <li>Enables sharing of optimisation passes across hardware backends</li>
+        </ul>
+      </div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title amber">NVIDIA CUDA Ecosystem</div>
+        <ul>
+          <li><strong>cuDNN</strong>: hand-tuned CNN kernels; Winograd, FFT, im2col automatically selected</li>
+          <li><strong>cuBLAS/cuBLASLt</strong>: GEMM with Tensor Core support; epilogue fusion</li>
+          <li><strong>CUTLASS</strong>: composable CUDA templates; custom GEMM variants</li>
+          <li><strong>Triton</strong>: Python DSL for custom GPU kernels; generates near-cuBLAS performance</li>
+          <li><strong>TensorRT</strong>: inference optimisation — layer fusion, precision calibration, engine caching</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title green">Inference Runtimes</div>
+        <ul>
+          <li>vLLM: PagedAttention + continuous batching; de-facto LLM serving standard</li>
+          <li>SGLang: structured generation with radix tree prefix caching</li>
+          <li>ONNX Runtime: cross-platform; EP plugins for TRT, CoreML, QNN</li>
+          <li>llama.cpp: CPU+GPU; GGUF quantised models; ARM NEON + Metal backends</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">17 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 18 — POWER & EFFICIENCY
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Power Efficiency &amp; Performance per Watt</div>
+  <div class="slide-subtitle">TOPS/W — the metric that matters for edge and datacenter alike</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <table class="dtable">
+        <tr><th>Accelerator</th><th>TOPS (INT8)</th><th>TDP (W)</th><th>TOPS/W</th><th>Segment</th></tr>
+        <tr><td>Apple ANE (M4)</td><td class="gr">38</td><td class="gr">~5</td><td class="gr">~7.6</td><td>Mobile</td></tr>
+        <tr><td>Qualcomm HTP (SD Elite)</td><td class="gr">75</td><td class="gr">~8</td><td class="gr">~9.4</td><td>Mobile</td></tr>
+        <tr><td>Hailo-8L</td><td class="am">13</td><td class="gr">1.5</td><td class="gr">~8.7</td><td>Edge ASIC</td></tr>
+        <tr><td>Google TPU v5e</td><td class="am">393</td><td class="am">~170</td><td class="am">~2.3</td><td>Cloud</td></tr>
+        <tr><td>NVIDIA H100 SXM</td><td class="am">1979</td><td class="rd">700</td><td class="am">~2.8</td><td>Cloud</td></tr>
+        <tr><td>NVIDIA B200 SXM</td><td class="am">4500</td><td class="rd">1000</td><td class="am">~4.5</td><td>Cloud</td></tr>
+        <tr><td>AWS Trainium2</td><td class="am">~3800</td><td class="am">~600</td><td class="am">~6.3</td><td>Cloud</td></tr>
+        <tr><td>Arm Ethos-U85</td><td class="gr">4</td><td class="gr">0.08</td><td class="gr">~50</td><td>MCU/IoT</td></tr>
+      </table>
+      <p style="font-size:0.58em;color:var(--muted);margin-top:0.5em;">* Estimates from published data-sheets and characterisation reports. TOPS definition varies (dense vs sparse).</p>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">Power Breakdown in ML ASICs</div>
+        <ul>
+          <li><strong>MAC arrays</strong>: 40–60% of total power — scale with utilisation; DVFS critical</li>
+          <li><strong>SRAM access</strong>: 25–35% — 6T SRAM reads dominate; scratchpad &gt; cache energy</li>
+          <li><strong>DRAM/HBM PHY</strong>: 15–25% — major target for compression and KV cache reduction</li>
+          <li><strong>NoC/interconnect</strong>: 5–10% — scales with data movement; locality crucial</li>
+          <li><strong>Control &amp; misc</strong>: 3–5% — reduced in DSA vs GPU by removing OoO logic</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title amber">Energy-Reduction Techniques</div>
+        <ul>
+          <li><strong>Clock gating</strong>: disable MAC array clocks when inactive; 20–40% dynamic power saved</li>
+          <li><strong>Power gating</strong>: shut down entire engine island; longer wake latency</li>
+          <li><strong>DVFS</strong>: scale V and f to minimum needed; quadratic V reduction</li>
+          <li><strong>Near-threshold computing</strong>: V_DD → V_T; 10× energy reduction; area/speed penalty</li>
+          <li><strong>Data compression</strong>: compress zero-heavy activations before DRAM transfer</li>
+          <li><strong>Sparsity gating</strong>: detect zero activations early; skip MAC; save dynamic power</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">18 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 19 — CASE STUDY: NVIDIA BLACKWELL B200
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Case Study: NVIDIA Blackwell B200</div>
+  <div class="slide-subtitle">the current apex of ML accelerator design (2024)</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">Architecture Highlights</div>
+        <div class="kv-row"><span class="kv-label">Die configuration</span><span class="kv-value amber">2× reticle dies; NV-HBI bridge</span></div>
+        <div class="kv-row"><span class="kv-label">Process</span><span class="kv-value">TSMC N4P (custom)</span></div>
+        <div class="kv-row"><span class="kv-label">Total transistors</span><span class="kv-value amber">208 billion</span></div>
+        <div class="kv-row"><span class="kv-label">Die size</span><span class="kv-value">2× 462 mm²</span></div>
+        <div class="kv-row"><span class="kv-label">SMs</span><span class="kv-value">192 per GPU (2 dies)</span></div>
+        <div class="kv-row"><span class="kv-label">5th-gen Tensor Cores</span><span class="kv-value green">FP4 native; 2× H100 per SM</span></div>
+        <div class="kv-row"><span class="kv-label">HBM3e</span><span class="kv-value">192 GB · 8 TB/s</span></div>
+        <div class="kv-row"><span class="kv-label">FP8 Tensor PFLOPS</span><span class="kv-value green">~9 (dense)</span></div>
+        <div class="kv-row"><span class="kv-label">FP4 Tensor PFLOPS</span><span class="kv-value green">~18 (sparse)</span></div>
+        <div class="kv-row"><span class="kv-label">NVLink 5</span><span class="kv-value">1.8 TB/s bidirectional</span></div>
+        <div class="kv-row"><span class="kv-label">TDP (SXM)</span><span class="kv-value red">1000 W</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title amber">New Blackwell Features</div>
+        <ul>
+          <li><strong>5th-gen Tensor Core</strong>: native FP4 (MXFP4); doubles throughput vs H100 FP8</li>
+          <li><strong>2nd-gen Transformer Engine</strong>: per-block micro-scaling (MX formats — MXFP8, MXFP4); higher accuracy at lower precision</li>
+          <li><strong>RAS Engine</strong>: Reliability/Availability/Serviceability; scrubbing, error injection, live migration support</li>
+          <li><strong>Secure AI</strong>: hardware TEE; confidential computing for multi-tenant inference</li>
+          <li><strong>NVLink Switch System (NVL72)</strong>: 72-GPU all-to-all fabric in a single rack; 1.4 exaFLOPS FP4 aggregate</li>
+          <li><strong>GB200 NVL72</strong>: 36× Grace CPUs + 72× B200 GPUs; HBM3e → Grace via NVLink-C2C at 900 GB/s</li>
+        </ul>
+      </div>
+      <div class="accent-box amber">
+        Blackwell positions NVIDIA to serve frontier model inference: a single NVL72 rack
+        can run a 1.8T-parameter MoE model at interactive latency — a capability that
+        required a full data-centre building just two years prior.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">19 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 20 — CASE STUDY: APPLE NEURAL ENGINE
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Case Study: Apple Neural Engine (ANE)</div>
+  <div class="slide-subtitle">efficiency-first on-device inference — 38 TOPS at &lt;5W</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;">
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">ANE Architecture (M4 / A18)</div>
+        <ul>
+          <li>Proprietary Apple ASIC integrated in SoC alongside CPU clusters and GPU</li>
+          <li>Unified Memory Architecture (UMA): CPU, GPU, ANE all share the same LPDDR5X pool — zero-copy tensor passing</li>
+          <li>16-bit floating point native (BF16/FP16); INT8 quantisation via CoreML</li>
+          <li>Dedicated convolution and matrix-multiplication datapaths</li>
+          <li>Tightly coupled with CoreML compiler: model → ANEModel → compiled binary at install time</li>
+          <li>M4 ANE: 38 TOPS at &lt;5W total — best TOPS/W in class</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title amber">Unified Memory — Bandwidth Efficiency</div>
+        <ul>
+          <li>M4 LPDDR5X: 120 GB/s shared across CPU, GPU, ANE, Media engines</li>
+          <li>No PCIe hop — GPU/ANE access host tensors at full memory bandwidth</li>
+          <li>Enables on-device Llama 3 8B inference at 30+ tok/s (quantised)</li>
+          <li>Trade-off: memory bandwidth shared across all engines — no dedicated HBM</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title green">On-Device LLM Inference Stack</div>
+        <ul>
+          <li><strong>Apple Intelligence (iOS 18 / macOS 15)</strong>: on-device models 3B–7B parameters</li>
+          <li>Private Cloud Compute: larger models on Apple Silicon servers — cryptographic attestation before sending data</li>
+          <li><strong>CoreML</strong>: stateless → stateful conversion; KV cache as CoreML state; eliminates re-allocation overhead</li>
+          <li><strong>MLX framework</strong>: JAX-like on Apple Silicon; Metal backend; community LLM ecosystem</li>
+          <li>Speculative decoding: draft model on ANE; verify on GPU; 2–3× decode speedup</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Evolution of TOPS</div>
+        <div class="kv-row"><span class="kv-label">A11 (2017) — 1st ANE</span><span class="kv-value">0.6 TOPS</span></div>
+        <div class="kv-row"><span class="kv-label">A14 (2020)</span><span class="kv-value amber">11 TOPS</span></div>
+        <div class="kv-row"><span class="kv-label">A16 (2022)</span><span class="kv-value amber">17 TOPS</span></div>
+        <div class="kv-row"><span class="kv-label">A17 Pro (2023)</span><span class="kv-value green">35 TOPS</span></div>
+        <div class="kv-row"><span class="kv-label">A18 Pro / M4 (2024)</span><span class="kv-value green">38 TOPS · 63× A11</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">20 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 21 — EMERGING DIRECTIONS
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Emerging Directions</div>
+  <div class="slide-subtitle">what comes after the current generation</div>
+
+  <div class="cols cols-3" style="margin-top:0.5rem;">
+    <div class="panel">
+      <div class="panel-title">Processing-in-Memory (PIM)</div>
+      <ul>
+        <li>Compute inside or adjacent to DRAM die — eliminates bus bottleneck</li>
+        <li><strong>Samsung HBM-PIM</strong>: GEMV engine inside each HBM stack; 2× bandwidth for DNN inference</li>
+        <li><strong>SK Hynix AiM</strong>: multiply-accumulate units in DRAM row decoders</li>
+        <li>Key challenge: limited compute density; no caches; programming model</li>
+        <li>Best fit: memory-bound ops — embedding lookup, GEMV decode</li>
+        <li>Prototype systems show 2.4× energy improvement for LLM decode</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title amber">Analog / Resistive Computing</div>
+      <ul>
+        <li><strong>Analog in-memory compute (AIMC)</strong>: weight stored as conductance; dot product via Kirchhoff's law — O(1) energy per MAC</li>
+        <li>Phase-change memory (PCM), ReRAM, MRAM: non-volatile weight storage — zero boot time</li>
+        <li><strong>IBM PCM chip</strong>: 512 analogue columns; INT4 equivalent; 85 TOPS/W demonstrated</li>
+        <li>Challenges: non-idealities (drift, noise, write endurance); ADC/DAC overhead consumes gains</li>
+        <li>Likely path: hybrid digital-analog; analog for weight-stationary inference, digital for accum</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title green">Photonic &amp; Neuromorphic</div>
+      <ul>
+        <li><strong>Photonic MAC</strong>: Mach-Zehnder interferometer arrays; perform GEMM at speed of light, zero dynamic power for multiply; Lightmatter Passage chip</li>
+        <li><strong>Neuromorphic</strong>: Intel Loihi 2; event-driven spiking neural network; &lt;1 mW for sparse workloads; not competitive with transformers yet</li>
+        <li><strong>Wafer-scale</strong>: Cerebras WSE-3; 44 GB SRAM; eliminates HBM for moderate models</li>
+        <li><strong>3D die stacking</strong>: SRAM-on-logic (TSMC SoIC); put 192 MB SRAM directly atop logic die — bandwidth &gt;100 TB/s</li>
+        <li>Timeline: 3D stacking in production now; photonic &amp; analog: 5–10+ years to volume</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-num">21 / 22</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     SLIDE 22 — SUMMARY
+════════════════════════════════════════════════════ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Summary &amp; Key Takeaways</div>
+  <div class="slide-subtitle">AI / ML Accelerator Architectures — Presentation 05</div>
+
+  <div class="cols cols-2" style="gap:1.5rem;margin-top:0.6rem;">
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title">Architecture Principles</div>
+        <ul>
+          <li><strong>Roofline model</strong> guides design: shift ridge point left (more BW) or up (more FLOPS); target workloads in compute-bound regime</li>
+          <li><strong>Systolic arrays</strong> maximise data reuse in GEMM; weight/output/row-stationary dataflows trade off different memory resources</li>
+          <li><strong>Dataflow engines</strong> (Groq, Cerebras) eliminate runtime scheduling overhead; compiler becomes the hardware</li>
+          <li><strong>Flash Attention</strong>: algorithm-hardware co-design moves attention from O(N²) HBM to O(N) — critical for long context</li>
+          <li><strong>Sparsity</strong> at multiple levels: activation (ReLU), weight pruning, structured (2:4), MoE</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:0.9rem;">
+        <div class="panel-title amber">Numerical Formats &amp; Precision</div>
+        <ul>
+          <li>Training: BF16/FP16 + FP32 master weights (AMP); FP8 on H100+ with dynamic scaling</li>
+          <li>Inference: INT8 standard; INT4/FP4 for bandwidth-limited decode; FP4 on B200</li>
+          <li>QLoRA/GPTQ/AWQ: PTQ at INT4 with per-group scaling — &lt;1% quality loss</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title green">System-Level Themes</div>
+        <ul>
+          <li><strong>Memory is the bottleneck</strong> — HBM, PagedAttention, KV cache optimisation</li>
+          <li><strong>Parallelism</strong> at every level: DP/TP/PP/EP for training; disaggregated serving</li>
+          <li><strong>Compiler stack</strong> (MLIR, XLA, TVM, Triton) as competitive differentiator</li>
+          <li><strong>Edge NPUs</strong>: 10–50 TOPS/W; UMA avoids bandwidth bottleneck; on-device LLM now real</li>
+          <li><strong>Next frontier</strong>: 3D SRAM stacking, PIM, photonic — closing the bandwidth gap</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:0.8rem;border-color:rgba(126,184,247,0.3);">
+    <div class="panel-title">Series Navigation</div>
+    <div style="font-size:0.62em;color:var(--muted);display:flex;gap:1.5em;flex-wrap:wrap;">
+      <span>✅ 01 SoC Packaging</span>
+      <span>✅ 02 On-Chip Interconnect</span>
+      <span style="color:var(--muted);">📋 03 Memory Hierarchy (next)</span>
+      <span>04 SerDes &amp; I/O</span>
+      <span style="color:var(--accent);font-weight:600;">▶ 05 AI/ML Accelerator Architectures</span>
+      <span>06 SoCs for ML Inference</span>
+      <span>07 Security in SoC</span>
+      <span>… 13 Clocks &amp; Resets</span>
+    </div>
+  </div>
+  <div class="series-badge">⬡ brendanjameslynskey.github.io/SoC</div>
+  <div class="slide-num">22 / 22</div>
+</div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: false,
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1280,
+  height: 720,
+  margin: 0,
+  plugins: [ RevealHighlight ],
+  keyboard: {
+    39: 'next',
+    37: 'prev'
+  }
+});
+</script>
+</body>
+</html>
