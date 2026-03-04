@@ -13,10 +13,10 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 ## Presentations
 
 | # | Topic | Slides | Status |
-|---|-------|--------|--------|
+| --- | --- | --- | --- |
 | 01 | Modern SoC Packaging | 18 | ✅ Complete |
 | 02 | On-Chip Interconnect & NoC Design | 20 | ✅ Complete |
-| 03 | Memory Hierarchy in ML Accelerator SoCs | — | Planned |
+| 03 | Memory Hierarchy in ML Accelerator SoCs | 23 | ✅ Complete |
 | 04 | High-Speed SerDes & I/O | — | Planned |
 | 05 | AI / ML Accelerator Architectures | — | Planned |
 | 06 | SoCs for ML Inference | — | Planned |
@@ -70,12 +70,44 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ---
 
+## Presentation 03: Memory Hierarchy in ML Accelerator SoCs
+
+23 interactive slides covering:
+
+**The Memory Wall** — Why ML accelerators are memory-bandwidth-bound rather than compute-bound. Compute vs memory bandwidth scaling gap. LLM inference arithmetic intensity analysis. Roofline model visualisation.
+
+**On-Chip SRAM** — 6T, 8T, HD, and LP bitcell architectures. Area and bandwidth tradeoffs. Voltage scaling challenges at N3/N5: read/write assist circuits (negative bitline, wordline boost, virtual VSS). SRAM compilers, multi-port cuts, and Monte Carlo yield characterisation.
+
+**Cache Design** — Set-associativity, replacement policies, write-back vs write-through. ML workload cache behaviour: streaming weights, activation locality, KV-cache spill. Hardware cache vs software-managed scratchpad tradeoffs — why ML NPUs (Google TPU, Qualcomm, Apple ANE) favour scratchpad + DMA.
+
+**The Memory Pyramid** — Five-level hierarchy from register file to CXL/NVMe. Capacity, bandwidth, and latency at each level. ML data mapping: hot activations → SPM, weight tiles → L2/LLC, full models → HBM, long-context KV → CXL.
+
+**DRAM Architecture & Timing** — 1T1C bitcell, destructive read, refresh. Bank organisation, row buffer locality, bank-group parallelism. Key timing parameters (tRCD, CL, tRP, tRAS, tFAW, tREFI). ML memory controller scheduling policies.
+
+**DDR5 & LPDDR5/6** — DDR5 sub-channel architecture, on-die ECC, DFE equalisation, 4800–8800 MT/s data rates. LPDDR5X/6 for edge AI (Apple M-series, Qualcomm Snapdragon). CAMM2 form factor, deep power-down modes. Why DDR falls short for large ML SoCs.
+
+**GDDR7** — PAM4 signalling, 36 Gbps/pin, JEDEC JESD239. GDDR7 vs GDDR6X comparison. NVIDIA RTX 5090 1.79 TB/s configuration. Cost vs capacity tradeoff against HBM.
+
+**HBM3 / HBM3E / HBM4** — 3D DRAM stacking via TSV, 1024-bit interface, pseudo-channel architecture. H100 (HBM3, 3.35 TB/s), H200 (HBM3E, 4.8 TB/s), AMD MI300X (HBM3, 5.2 TB/s, 192 GB). Thermal challenges, CoWoS-S/L interposer packaging. HBM4: 2048-bit interface, hybrid bonding, sub-1 pJ/bit target.
+
+**CXL Memory** — CXL.mem protocol, Host-managed Device Memory. Type 2/3 device taxonomy. Memory disaggregation for TB-scale LLM deployment. CXL 3.1 fabric switches and peer-to-peer coherency. Linux NUMA integration and tiered memory (TPP).
+
+**Roofline Model** — Arithmetic intensity, memory-bound vs compute-bound regimes, ridge point. Operating points for GEMM, GEMV, attention (prefill vs decode), elementwise ops. FlashAttention's roofline improvement. Batching as the mechanism to escape the memory-bound regime.
+
+**Production Case Studies** — NVIDIA H100/H200, AMD MI300X 3.5D stacking, Google TPU v5p, Apple M3 Ultra unified memory architecture.
+
+**Optimisation Techniques** — Quantisation (INT8/INT4), FlashAttention, KV-cache compression, paged attention, tensor parallelism, weight streaming, hardware prefetch, double buffering, near-memory compute, 2:4 structured sparsity.
+
+---
+
 ```
 ├── index.html                     ← Landing page (links to all presentations)
 ├── README.md                      ← This file
 ├── 01-soc-packaging/
 │   └── index.html                 ← Reveal.js interactive slide deck
-└── 02-on-chip-interconnect/
+├── 02-on-chip-interconnect/
+│   └── index.html                 ← Reveal.js interactive slide deck
+└── 03-memory-hierarchy/
     └── index.html                 ← Reveal.js interactive slide deck
 ```
 
@@ -84,7 +116,7 @@ Each presentation is a single self-contained `index.html`. No build step, no npm
 ## Slide Controls
 
 | Action | Key |
-|--------|-----|
+| --- | --- |
 | Next / Previous | `→` `←` or swipe |
 | Overview | `Esc` |
 | Fullscreen | `F` |
@@ -96,8 +128,8 @@ Each presentation is a single self-contained `index.html`. No build step, no npm
 
 ## References
 
-TSMC 3DFabric (CoWoS, InFO, SoIC) · Intel Packaging Technology (EMIB, Foveros, Glass Substrates) · UCIe Consortium Specifications (1.0–3.0) · Yole Group, "State of Advanced Packaging 2024" · IEEE ECTC 2025 Proceedings · JEDEC HBM3/HBM3E Standards (JESD238) · AMD MI300X Architecture White Paper · NVIDIA Blackwell Architecture Overview · Lau, J.H., *Semiconductor Advanced Packaging*, Springer, 2021 · Vivet, P. et al., "Chiplet-based architecture for edge AI computing," IEEE JSSC, 2023
+JEDEC JESD79-5 (DDR5) · JEDEC JESD235 (HBM3/3E) · JEDEC JESD239 (GDDR7) · CXL Consortium CXL 3.1 Specification · TSMC 3DFabric (CoWoS, InFO, SoIC) · Intel Packaging Technology (EMIB, Foveros) · UCIe Consortium Specifications (1.0–3.0) · NVIDIA H100/H200 Architecture White Papers · AMD MI300X Architecture Guide · Patterson & Hennessy, *Computer Architecture*, 6th ed. · Williams et al., "Roofline: An Insightful Visual Performance Model," CACM 2009 · Dao et al., "FlashAttention-2," ICLR 2024 · Kwon et al., "Efficient Memory Management for LLM Serving," SOSP 2023 (vLLM)
 
 ## License
 
-Educational use. Code examples provided as-is. Standards references are to publicly available NIST, IEEE, JEDEC, and industry documents.
+Educational use. Code examples provided as-is. Standards references are to publicly available JEDEC, IEEE, and industry documents.

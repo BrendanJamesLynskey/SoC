@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Memory Hierarchy in ML Accelerator SoCs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css" />
+<style>
+  :root {
+    --bg-dark:   #0d1117;
+    --bg-card:   #161b22;
+    --bg-panel:  #1c2330;
+    --accent1:   #58a6ff;   /* blue  – registers / L1 */
+    --accent2:   #3fb950;   /* green – L2 / SRAM      */
+    --accent3:   #d2a679;   /* amber – HBM            */
+    --accent4:   #bc8cff;   /* violet – DRAM / CXL    */
+    --accent5:   #f78166;   /* coral – hot path       */
+    --text-hi:   #e6edf3;
+    --text-lo:   #8b949e;
+    --border:    #30363d;
+  }
+
+  .reveal-viewport { background: var(--bg-dark); }
+  .reveal { font-family: 'DM Sans', sans-serif; font-size: 22px; color: var(--text-hi); }
+  .reveal h1, .reveal h2, .reveal h3 {
+    font-family: 'Playfair Display', serif;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-hi);
+    text-shadow: none;
+  }
+  .reveal h1 { font-size: 2.2em; }
+  .reveal h2 { font-size: 1.6em; margin-bottom: 0.5em; }
+  .reveal h3 { font-size: 1.15em; color: var(--accent1); }
+  .reveal p  { line-height: 1.6; margin: 0.4em 0; }
+  .reveal section { padding: 0 2%; box-sizing: border-box; }
+  .reveal ul { list-style: none; padding-left: 0; margin: 0; }
+  .reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; line-height: 1.5; }
+  .reveal ul li::before { content: "▸"; color: var(--accent1); position: absolute; left: 0; }
+  .reveal ul ul li::before { content: "◦"; color: var(--text-lo); }
+  .reveal code { font-family: 'JetBrains Mono', monospace; background: #1e2736; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.85em; }
+  .reveal pre { background: #1e2736; border-radius: 8px; padding: 1em; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+  .reveal a { color: var(--accent1); }
+  .reveal .controls { color: var(--accent1); }
+  .reveal .progress { color: var(--accent1); }
+
+  /* ---- Layout helpers ---- */
+  .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+  .col  { flex: 1; }
+  .col2 { flex: 2; }
+
+  /* ---- Cards ---- */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75em 1em;
+    margin: 0.4em 0;
+  }
+  .card-h { border-top: 3px solid var(--accent1); }
+  .card-g { border-top: 3px solid var(--accent2); }
+  .card-a { border-top: 3px solid var(--accent3); }
+  .card-v { border-top: 3px solid var(--accent4); }
+  .card-r { border-top: 3px solid var(--accent5); }
+
+  /* ---- Title slide ---- */
+  .title-slide { text-align: center; }
+  .title-slide h1 { font-size: 2.0em; margin: 0; }
+  .title-slide .series { font-family: 'DM Sans', sans-serif; font-size: 0.8em; color: var(--accent1); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4em; }
+  .title-slide .subtitle { font-size: 0.75em; color: var(--text-lo); margin-top: 0.6em; }
+  .hex-badge { display: inline-block; font-size: 3.5em; color: var(--accent1); margin-bottom: 0.2em; }
+
+  /* ---- Section title slides ---- */
+  .section-slide { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
+  .section-slide h2 { font-size: 1.9em; color: var(--accent1); }
+  .section-slide p { color: var(--text-lo); font-size: 0.85em; }
+  .section-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--text-lo); letter-spacing: 0.15em; margin-bottom: 0.3em; }
+
+  /* ---- Tags / pills ---- */
+  .tag { display: inline-block; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 0.2em 0.7em; font-size: 0.7em; color: var(--text-lo); margin: 0.15em; }
+  .tag-b { border-color: var(--accent1); color: var(--accent1); }
+  .tag-g { border-color: var(--accent2); color: var(--accent2); }
+  .tag-a { border-color: var(--accent3); color: var(--accent3); }
+  .tag-v { border-color: var(--accent4); color: var(--accent4); }
+  .tag-r { border-color: var(--accent5); color: var(--accent5); }
+
+  /* ---- Stat callout ---- */
+  .stat { text-align: center; padding: 0.5em; }
+  .stat .num { font-family: 'Playfair Display', serif; font-size: 2.0em; font-weight: 900; color: var(--accent1); }
+  .stat .lbl { font-size: 0.65em; color: var(--text-lo); }
+  .stat-g .num { color: var(--accent2); }
+  .stat-a .num { color: var(--accent3); }
+  .stat-v .num { color: var(--accent4); }
+  .stat-r .num { color: var(--accent5); }
+
+  /* ---- Memory pyramid SVG wrapper ---- */
+  .pyramid-wrap { text-align: center; }
+
+  /* ---- Table ---- */
+  .reveal table { border-collapse: collapse; font-size: 0.72em; width: 100%; }
+  .reveal table th { background: var(--bg-panel); color: var(--accent1); padding: 0.4em 0.6em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: 0.35em 0.6em; border: 1px solid var(--border); color: var(--text-hi); background: var(--bg-card); vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #1a2130; }
+
+  /* ---- Bandwidth arrow diagram ---- */
+  .bw-row { display: flex; align-items: center; margin: 0.3em 0; }
+  .bw-label { width: 7em; font-size: 0.72em; text-align: right; padding-right: 0.5em; color: var(--text-lo); }
+  .bw-bar { height: 1.4em; border-radius: 3px; display: flex; align-items: center; padding-left: 0.5em; font-size: 0.68em; font-family: 'JetBrains Mono', monospace; color: #fff; white-space: nowrap; }
+  .bw-val { font-size: 0.68em; padding-left: 0.4em; color: var(--text-lo); }
+
+  /* ---- SVG diagrams ---- */
+  svg text { font-family: 'DM Sans', sans-serif; }
+
+  /* ---- Roofline ---- */
+  .slide-footer { position: absolute; bottom: 0.3em; right: 0.8em; font-size: 0.5em; color: var(--text-lo); font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- =====================================================================
+     SLIDE 01  –  TITLE
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <div class="title-slide" style="padding-top:1.5em">
+    <div class="hex-badge">⬡</div>
+    <div class="series">Modern SoC Design · Presentation 03</div>
+    <h1>Memory Hierarchy<br/>in ML Accelerator SoCs</h1>
+    <p class="subtitle">
+      SRAM bitcells · Cache design · DRAM fundamentals · DDR5 · LPDDR5/6<br/>
+      GDDR7 · HBM3/3E/4 · CXL memory · Roofline model · Memory-wall analysis
+    </p>
+    <div style="margin-top:1.4em">
+      <span class="tag tag-b">SRAM</span><span class="tag tag-g">Cache</span>
+      <span class="tag tag-a">HBM</span><span class="tag tag-v">CXL</span>
+      <span class="tag tag-r">Bandwidth</span><span class="tag">Latency</span>
+      <span class="tag">Roofline</span><span class="tag">DRAM</span>
+    </div>
+    <p style="margin-top:1.6em; font-size:0.6em; color:var(--text-lo)">
+      Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf
+    </p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 02  –  WHY MEMORY DOMINATES ML PERFORMANCE
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Why Memory Dominates ML Performance</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-r" style="margin-bottom:0.7em">
+        <strong style="color:var(--accent5)">The Memory Wall</strong><br/>
+        <span style="font-size:0.82em">Compute throughput has grown at ~3× per generation; DRAM bandwidth grows at ~1.4×.
+        The gap compounds — modern ML accelerators are almost always memory-bandwidth-bound, not compute-bound.</span>
+      </div>
+      <ul style="font-size:0.82em">
+        <li>Transformer attention: bandwidth scales O(n²) with sequence length</li>
+        <li>LLM auto-regressive decode: <em>each token</em> must reload all model weights</li>
+        <li>CNN inference: activation maps dominate SRAM pressure</li>
+        <li>Sparsity extraction saves FLOPs but not necessarily bytes transferred</li>
+        <li>Quantisation (INT8/INT4) reduces model size — primary memory-wall mitigation</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center; padding:1em 0.5em">
+        <svg width="210" height="220" viewBox="0 0 210 220">
+          <!-- Y axis -->
+          <line x1="40" y1="10" x2="40" y2="190" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="40" y1="190" x2="200" y2="190" stroke="#30363d" stroke-width="1.5"/>
+          <!-- Compute growth -->
+          <polyline points="40,170 80,130 120,80 160,30 200,10"
+            fill="none" stroke="#58a6ff" stroke-width="2.5"/>
+          <!-- Memory BW growth -->
+          <polyline points="40,170 80,155 120,138 160,120 200,100"
+            fill="none" stroke="#f78166" stroke-width="2.5"/>
+          <!-- Labels -->
+          <text x="205" y="14" font-size="9" fill="#58a6ff">Compute</text>
+          <text x="205" y="104" font-size="9" fill="#f78166">Mem BW</text>
+          <text x="42" y="205" font-size="8" fill="#8b949e">Generation</text>
+          <text x="2" y="15" font-size="8" fill="#8b949e" transform="rotate(-90 12 100)">Relative</text>
+          <!-- Gap annotation -->
+          <line x1="200" y1="14" x2="200" y2="100" stroke="#d2a679" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="172" y="60" font-size="8" fill="#d2a679">Gap</text>
+        </svg>
+        <div style="font-size:0.6em; color:var(--text-lo); margin-top:0.3em">Compute vs Memory Bandwidth Scaling</div>
+      </div>
+      <div class="stat stat-r" style="margin-top:0.4em">
+        <div class="num">70%+</div>
+        <div class="lbl">of LLM inference time is<br/>memory access, not compute</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 03  –  SECTION BREAK: SRAM
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 01</div>
+    <h2>On-Chip SRAM</h2>
+    <p>Bitcell design · 6T / 8T / HD / LP · Voltage scaling · Yield &amp; assist circuits</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 04  –  SRAM BITCELL ARCHITECTURES
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>SRAM Bitcell Architectures</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-h" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent1)">Standard 6T Cell</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>2 cross-coupled inverters (4 transistors)</li>
+          <li>2 access transistors (pass gates)</li>
+          <li>Read / write share same bitlines → contention</li>
+          <li>Area: ~0.021 µm² at TSMC N3E</li>
+          <li>Used in L1/L2 caches and SRAM cuts</li>
+        </ul>
+      </div>
+      <div class="card card-g">
+        <strong style="color:var(--accent2)">8T Cell (Read-Decoupled)</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Separate read port (2 extra transistors)</li>
+          <li>Eliminates read-disturb → lower Vmin</li>
+          <li>+20–30% area vs 6T; preferred for L1 data</li>
+          <li>Read SNM independent of cell ratio</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-a" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent3)">HD (High Density) &amp; LP (Low Power)</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>HD: minimum-area, for L3 / LLC / eDRAM pockets</li>
+          <li>LP: wider transistors, higher Vmin margin → retention SRAM, register files</li>
+          <li>ML accelerators use HD for scratchpad (bulk area)</li>
+        </ul>
+      </div>
+      <div class="card card-v">
+        <strong style="color:var(--accent4)">Key SRAM Metrics for ML SoCs</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>Bandwidth:</strong> ports × width × frequency</li>
+          <li><strong>Vmin:</strong> min voltage for retention &amp; access (power gating depth)</li>
+          <li><strong>Leakage:</strong> bitcell × array size – dominates idle power</li>
+          <li><strong>Yield:</strong> 6σ targeting, assist circuits (negative BL, WL boost)</li>
+        </ul>
+      </div>
+      <div class="cols" style="margin-top:0.4em">
+        <div class="stat stat-g col"><div class="num">~70%</div><div class="lbl">die area in large ML<br/>SoCs is SRAM</div></div>
+        <div class="stat col"><div class="num">&lt;1ns</div><div class="lbl">L1 SRAM cycle<br/>time at 1GHz+</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 05  –  SRAM ASSIST CIRCUITS & SCALING
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>SRAM Voltage Scaling &amp; Assist Circuits</h2>
+  <div class="cols">
+    <div class="col2">
+      <p style="font-size:0.82em">At advanced nodes (N5, N3) device mismatch increases dramatically. Bitcell failure rate rises exponentially as supply voltage falls. <strong>Assist techniques</strong> restore margin:</p>
+      <div class="cols" style="margin-top:0.5em">
+        <div class="col">
+          <div class="card card-h">
+            <strong style="color:var(--accent1); font-size:0.85em">Write Assist</strong>
+            <ul style="font-size:0.75em">
+              <li>Negative bitline (NBL) pull-down</li>
+              <li>Wordline boost (VWL &gt; VDD)</li>
+              <li>VDD collapse during write</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-g">
+            <strong style="color:var(--accent2); font-size:0.85em">Read Assist</strong>
+            <ul style="font-size:0.75em">
+              <li>Virtual VSS (raised source)</li>
+              <li>Replica bitline sensing</li>
+              <li>Self-timed sense amplifiers</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="card card-a" style="margin-top:0.5em; font-size:0.8em">
+        <strong style="color:var(--accent3)">SRAM Compiler &amp; Characterisation</strong><br/>
+        Memory compilers (ARM, Cadence, TSMC internal) generate timing/power models (Liberty) and layout (GDS). 
+        Monte Carlo SPICE verifies yield targets across PVT corners. 
+        ML SoCs integrate multi-port SRAM cuts (1RW, 2RW, 1R1W) tiled to form large banks.
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center; padding:0.5em">
+        <svg width="190" height="200" viewBox="0 0 190 200">
+          <!-- Axes -->
+          <line x1="30" y1="10" x2="30" y2="170" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="30" y1="170" x2="185" y2="170" stroke="#30363d" stroke-width="1.5"/>
+          <!-- Failure rate curve (no assist) -->
+          <path d="M 35,20 Q 80,50 120,100 T 180,155" fill="none" stroke="#f78166" stroke-width="2.5"/>
+          <!-- Failure rate curve (with assist) -->
+          <path d="M 35,40 Q 90,70 130,115 T 180,165" fill="none" stroke="#3fb950" stroke-width="2.5" stroke-dasharray="5,3"/>
+          <!-- Labels -->
+          <text x="145" y="32" font-size="8" fill="#f78166">No assist</text>
+          <text x="145" y="88" font-size="8" fill="#3fb950">With assist</text>
+          <text x="32" y="188" font-size="7.5" fill="#8b949e">VDD →  low</text>
+          <text x="2" y="20" font-size="7.5" fill="#8b949e" writing-mode="vertical-rl" text-anchor="start">Bit-cell failure rate</text>
+          <!-- Vmin arrows -->
+          <line x1="95" y1="155" x2="95" y2="175" stroke="#d2a679" stroke-width="1.5"/>
+          <line x1="115" y1="165" x2="115" y2="175" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="78" y="184" font-size="7" fill="#d2a679">Vmin</text>
+          <text x="110" y="184" font-size="7" fill="#3fb950">new Vmin</text>
+        </svg>
+        <div style="font-size:0.6em; color:var(--text-lo)">Assist circuits lower effective Vmin</div>
+      </div>
+      <div class="stat stat-v" style="margin-top:0.5em">
+        <div class="num">50–100mV</div>
+        <div class="lbl">Vmin reduction from<br/>write-assist techniques</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 06  –  SECTION BREAK: CACHE DESIGN
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 02</div>
+    <h2>Cache Design</h2>
+    <p>Set-associativity · Replacement · Write policy · Scratchpad vs cache</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 07  –  CACHE FUNDAMENTALS
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Cache Fundamentals for ML SoCs</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-h">
+        <strong style="color:var(--accent1)">Organisation</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>Direct-mapped:</strong> simple, fast, high conflict miss rate</li>
+          <li><strong>N-way set-associative:</strong> N candidates per set; LRU/PLRU/random replacement</li>
+          <li><strong>Fully associative:</strong> maximum flexibility, CAM cost limits size</li>
+          <li>ML: 4–16 way typical for shared L2/L3</li>
+        </ul>
+      </div>
+      <div class="card card-g" style="margin-top:0.5em">
+        <strong style="color:var(--accent2)">Write Policy</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>Write-back + write-allocate:</strong> dominant; minimises DRAM traffic</li>
+          <li><strong>Write-through:</strong> simple coherency; used for I/O coherent agents</li>
+          <li>Non-temporal stores bypass cache (streaming write)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-a">
+        <strong style="color:var(--accent3)">ML Workload Cache Behaviour</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Weight matrices: large, streaming access → cache unfriendly</li>
+          <li>Activations: moderate reuse, fit well in scratchpad</li>
+          <li>Attention KV: grows with context length, spills to HBM</li>
+          <li>Hardware prefetch critical: stride, stream detectors</li>
+        </ul>
+      </div>
+      <div class="card card-v" style="margin-top:0.5em">
+        <strong style="color:var(--accent4)">Scratchpad vs Hardware Cache</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Scratchpad (SPM): software-managed SRAM, explicit DMA</li>
+          <li>Predictable latency; no tag overhead; zero conflict miss</li>
+          <li>Most ML NPUs use SPM + small hardware cache for CPU code</li>
+          <li>Google TPU: 8 MB on-chip SRAM scratchpad per chip</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 08  –  THE MEMORY PYRAMID
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>The ML Accelerator Memory Pyramid</h2>
+  <div class="cols" style="align-items:center">
+    <div class="col2">
+      <div class="pyramid-wrap">
+        <svg width="420" height="280" viewBox="0 0 420 280" style="max-width:100%">
+          <!-- Reg file -->
+          <polygon points="210,10 260,55 160,55" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="210" y="40" text-anchor="middle" font-size="9" fill="#58a6ff" font-weight="bold">Register File</text>
+          <!-- L1 -->
+          <polygon points="160,58 260,58 285,100 135,100" fill="#1a2535" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="210" y="83" text-anchor="middle" font-size="9.5" fill="#3fb950" font-weight="bold">L1 Cache / SPM</text>
+          <text x="210" y="95" text-anchor="middle" font-size="8" fill="#8b949e">32–256 KB · ~1 ns</text>
+          <!-- L2 -->
+          <polygon points="135,103 285,103 315,148 105,148" fill="#1c2030" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="210" y="130" text-anchor="middle" font-size="9.5" fill="#58a6ff" font-weight="bold">L2 Cache / Large SPM</text>
+          <text x="210" y="142" text-anchor="middle" font-size="8" fill="#8b949e">256 KB–8 MB · ~5 ns</text>
+          <!-- L3 / shared -->
+          <polygon points="105,151 315,151 350,198 70,198" fill="#1e1e2e" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="210" y="178" text-anchor="middle" font-size="9.5" fill="#d2a679" font-weight="bold">L3 / Shared LLC</text>
+          <text x="210" y="190" text-anchor="middle" font-size="8" fill="#8b949e">8–512 MB · ~20 ns</text>
+          <!-- HBM / DRAM -->
+          <polygon points="70,201 350,201 390,248 30,248" fill="#1a1535" stroke="#bc8cff" stroke-width="1.5"/>
+          <text x="210" y="228" text-anchor="middle" font-size="9.5" fill="#bc8cff" font-weight="bold">HBM / GDDR / LPDDR</text>
+          <text x="210" y="240" text-anchor="middle" font-size="8" fill="#8b949e">16 GB – 3+ TB · ~100 ns · TB/s</text>
+          <!-- CXL / far memory -->
+          <polygon points="30,251 390,251 420,275 0,275" fill="#15151e" stroke="#f78166" stroke-width="1.5"/>
+          <text x="210" y="266" text-anchor="middle" font-size="9" fill="#f78166" font-weight="bold">CXL / Far Memory · NVMe</text>
+          <!-- BW arrows right side -->
+          <text x="396" y="35" font-size="7.5" fill="#58a6ff">~10 TB/s</text>
+          <text x="396" y="83" font-size="7.5" fill="#3fb950">~5 TB/s</text>
+          <text x="396" y="125" font-size="7.5" fill="#58a6ff">~2 TB/s</text>
+          <text x="396" y="175" font-size="7.5" fill="#d2a679">~1 TB/s</text>
+          <text x="396" y="222" font-size="7.5" fill="#bc8cff">~3.35 TB/s</text>
+          <text x="396" y="265" font-size="7.5" fill="#f78166">&lt;200 GB/s</text>
+        </svg>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-r" style="font-size:0.78em; margin-bottom:0.5em">
+        <strong style="color:var(--accent5)">Capacity vs Bandwidth Tradeoff</strong><br/>
+        Moving down the pyramid: capacity grows by 100–1000× per level; bandwidth drops by 2–10×; latency increases by 5–100×.
+      </div>
+      <div class="card" style="font-size:0.78em; margin-bottom:0.5em">
+        <strong>ML mapping principle:</strong> Hot activations &amp; accumulation buffers → SPM/L1. Weight tiles &amp; KV-cache → L2/LLC. Full model &amp; long-context → HBM. Cold model shards, checkpoints → CXL/NVMe.
+      </div>
+      <div class="stat stat-a">
+        <div class="num">1000×</div>
+        <div class="lbl">latency ratio: register<br/>file → HBM</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 09  –  SECTION BREAK: DRAM FUNDAMENTALS
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 03</div>
+    <h2>DRAM Fundamentals</h2>
+    <p>1T1C cells · Bank organisation · Timing parameters · DDR evolution</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 10  –  DRAM ARCHITECTURE
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>DRAM Architecture &amp; Timing</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-h">
+        <strong style="color:var(--accent1)">1T1C Bitcell</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>One access transistor + storage capacitor (~10–30 fF)</li>
+          <li>Much smaller than SRAM — enables GB-scale density</li>
+          <li>Charge leaks → periodic refresh required (64ms / bank)</li>
+          <li>Destructive read → sense amp must rewrite</li>
+        </ul>
+      </div>
+      <div class="card card-g" style="margin-top:0.5em">
+        <strong style="color:var(--accent2)">Bank &amp; Rank Organisation</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>DRAM row = 8–16 KB; entire row activated per access</li>
+          <li>Row buffer (open-page policy): hit/miss/empty</li>
+          <li>Multiple banks allow pipelining (bank-level parallelism)</li>
+          <li>DDR5: 8 banks × 4 bank groups per die; 32 banks per rank</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-a">
+        <strong style="color:var(--accent3)">Key Timing Parameters</strong>
+        <table style="margin-top:0.4em; font-size:0.75em">
+          <tr><th>Param</th><th>Meaning</th><th>DDR5 ~</th></tr>
+          <tr><td><code>tRCD</code></td><td>RAS→CAS delay (row activate)</td><td>14 ns</td></tr>
+          <tr><td><code>CL</code></td><td>CAS latency (read cmd→data)</td><td>14 ns</td></tr>
+          <tr><td><code>tRP</code></td><td>Row precharge time</td><td>14 ns</td></tr>
+          <tr><td><code>tRAS</code></td><td>Row active minimum time</td><td>33 ns</td></tr>
+          <tr><td><code>tFAW</code></td><td>4-activate window</td><td>15 ns</td></tr>
+          <tr><td><code>tREFI</code></td><td>Refresh interval per row</td><td>3.9 µs</td></tr>
+        </table>
+      </div>
+      <div class="card card-v" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--accent4)">ML Scheduler Implications</strong><br/>
+        Memory controllers for ML SoCs use <strong>bank-aware scheduling</strong> and
+        <strong>row-buffer locality policies</strong> to maximise page-hit rate on
+        weight matrix streaming patterns. DRAM ECC (on-die ECC + SECDED at interface)
+        adds latency but is mandatory at datacenter.
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 11  –  DDR5 & LPDDR5/6
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>DDR5 &amp; LPDDR5/6</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-h">
+        <strong style="color:var(--accent1)">DDR5 — Server &amp; Workstation</strong>
+        <ul style="font-size:0.77em; margin-top:0.3em">
+          <li>Data rates: 4800 – 8800 MT/s (JEDEC); 2× sub-channels (32-bit each)</li>
+          <li>On-die ECC: 1-bit error correction per 128-bit burst</li>
+          <li>Decision feedback equalisation (DFE) at receiver</li>
+          <li>Power management: PMIC on DIMM, 1.1 V VDD</li>
+          <li>~89.6 GB/s peak per channel (DDR5-8800)</li>
+          <li>ML server: 8 × DDR5 channels = ~700 GB/s (Intel Gaudi 3)</li>
+        </ul>
+      </div>
+      <div class="card card-g" style="margin-top:0.5em">
+        <strong style="color:var(--accent2)">LPDDR5 / LPDDR5X / LPDDR6</strong>
+        <ul style="font-size:0.77em; margin-top:0.3em">
+          <li>Edge AI SoCs: Apple M-series, Qualcomm Snapdragon, MediaTek Dimensity</li>
+          <li>LPDDR5X: 8533 MT/s, 4-channel 128-bit = ~273 GB/s (Apple M3 Ultra)</li>
+          <li>LPDDR6: up to 17 Gbps, CAMM2 form factor, ZQ-less calibration</li>
+          <li>Deep power-down, partial array self-refresh → edge efficiency</li>
+          <li>Package-on-package (PoP) or co-packaged with SoC die</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <table style="font-size:0.7em; margin-top:0.2em">
+        <tr>
+          <th>Standard</th><th>Peak Rate</th><th>BW / ch</th><th>Voltage</th><th>Target</th>
+        </tr>
+        <tr><td>DDR5-6400</td><td>6400 MT/s</td><td>51 GB/s</td><td>1.1 V</td><td>Server</td></tr>
+        <tr><td>DDR5-8800</td><td>8800 MT/s</td><td>70 GB/s</td><td>1.1 V</td><td>Server</td></tr>
+        <tr><td>LPDDR5X</td><td>8533 MT/s</td><td>68 GB/s</td><td>1.05 V</td><td>Edge</td></tr>
+        <tr><td>LPDDR6</td><td>17 Gbps</td><td>~136 GB/s</td><td>0.9 V</td><td>Edge</td></tr>
+      </table>
+      <div class="card card-r" style="margin-top:0.6em; font-size:0.78em">
+        <strong style="color:var(--accent5)">Why not DDR for large ML SoCs?</strong><br/>
+        DDR bandwidth per pin is lower than HBM/GDDR because it operates at lower data rates and uses narrower interfaces (64/72 bits per channel vs HBM's 1024-bit stack interface). PCB routing limits channel count.
+      </div>
+      <div class="stat stat-g" style="margin-top:0.4em">
+        <div class="num">16×</div>
+        <div class="lbl">More bandwidth pins<br/>HBM vs DDR5</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 12  –  GDDR7
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>GDDR7 — Graphics &amp; Edge Inference</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-h" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent1)">GDDR7 Architecture</strong>
+        <ul style="font-size:0.8em; margin-top:0.3em">
+          <li>Up to 36 Gbps per pin (JEDEC JESD239); PAM4 signalling replaces NRZ</li>
+          <li>32-bit bus per die; multiple dies per package (256-bit typical for GPUs)</li>
+          <li>NVIDIA RTX 5090: 28 Gbps × 512-bit = 1.79 TB/s peak</li>
+          <li>On-die ECC; improved thermal design vs GDDR6X</li>
+          <li>Lower power per bit than GDDR6X despite higher rate</li>
+        </ul>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <div class="card card-g">
+            <strong style="color:var(--accent2); font-size:0.85em">GDDR7 vs GDDR6X</strong>
+            <ul style="font-size:0.76em; margin-top:0.3em">
+              <li>PAM4: 2 bits/symbol vs NRZ 1 bit/symbol</li>
+              <li>~1.6× bandwidth improvement per pin</li>
+              <li>Lower supply voltage: 1.1 V → 1.0 V</li>
+              <li>Better signal integrity with DFE + CTLE</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-a">
+            <strong style="color:var(--accent3); font-size:0.85em">When to use GDDR7</strong>
+            <ul style="font-size:0.76em; margin-top:0.3em">
+              <li>Desktop GPU / workstation ML</li>
+              <li>Cost-sensitive inference accelerators</li>
+              <li>Scenarios where HBM interposer cost is prohibitive</li>
+              <li>Lower capacity ceiling vs HBM (24–32 GB max)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="padding:0.5em; text-align:center">
+        <svg width="195" height="190" viewBox="0 0 195 190">
+          <!-- Comparison bars: BW GB/s per package -->
+          <!-- GDDR6 -->
+          <rect x="10" y="10" width="80" height="22" rx="3" fill="#1e2736"/>
+          <rect x="10" y="10" width="60" height="22" rx="3" fill="#58a6ff" opacity="0.7"/>
+          <text x="75" y="25" font-size="8" fill="#e6edf3">GDDR6  512 GB/s</text>
+          <!-- GDDR6X -->
+          <rect x="10" y="40" width="80" height="22" rx="3" fill="#1e2736"/>
+          <rect x="10" y="40" width="70" height="22" rx="3" fill="#58a6ff" opacity="0.85"/>
+          <text x="85" y="55" font-size="8" fill="#e6edf3">GDDR6X  1 TB/s</text>
+          <!-- GDDR7 -->
+          <rect x="10" y="70" width="120" height="22" rx="3" fill="#1e2736"/>
+          <rect x="10" y="70" width="120" height="22" rx="3" fill="#3fb950" opacity="0.9"/>
+          <text x="135" y="85" font-size="8" fill="#e6edf3">GDDR7  1.79 TB/s</text>
+          <!-- HBM3E (reference) -->
+          <rect x="10" y="100" width="155" height="22" rx="3" fill="#1e2736"/>
+          <rect x="10" y="100" width="155" height="22" rx="3" fill="#bc8cff" opacity="0.8"/>
+          <text x="168" y="115" font-size="8" fill="#e6edf3">HBM3E  3.35 TB/s</text>
+          <text x="10" y="144" font-size="8" fill="#8b949e">* Typical flagship config</text>
+          <text x="10" y="155" font-size="8" fill="#8b949e">  GDDR: 512-bit bus</text>
+          <text x="10" y="166" font-size="8" fill="#8b949e">  HBM3E: 8-stack H200</text>
+        </svg>
+      </div>
+      <div class="stat stat-g" style="margin-top:0.3em">
+        <div class="num">36 Gbps</div>
+        <div class="lbl">GDDR7 peak pin rate<br/>(JEDEC JESD239)</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 13  –  SECTION BREAK: HBM
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 04</div>
+    <h2>High Bandwidth Memory</h2>
+    <p>HBM3 · HBM3E · HBM4 · TSV stacking · Thermal challenges</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 14  –  HBM ARCHITECTURE
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>HBM Architecture — TSV Stacking &amp; Interface</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-a" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent3)">3D DRAM Stacking via TSV</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>4–16 DRAM dies stacked on base logic die; 55 µm TSV pitch (HBM3)</li>
+          <li>1024-bit wide interface per stack → massive BW at low per-pin rate (~2 Gbps)</li>
+          <li>Eliminates PCB routing: SoC + HBM on shared silicon interposer (CoWoS-S)</li>
+          <li>Base die: PHY, voltage regulation, RAS (repair / redundancy)</li>
+          <li>Pseudo-channel architecture: 2× 512-bit channels per stack</li>
+        </ul>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h">
+            <strong style="color:var(--accent1); font-size:0.85em">HBM3</strong>
+            <ul style="font-size:0.76em; margin-top:0.2em">
+              <li>6.4 Gbps/pin</li>
+              <li>819 GB/s per stack</li>
+              <li>16–24 GB capacity</li>
+              <li>Nvidia H100 (6 stacks)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-a">
+            <strong style="color:var(--accent3); font-size:0.85em">HBM3E</strong>
+            <ul style="font-size:0.76em; margin-top:0.2em">
+              <li>9.6 Gbps/pin</li>
+              <li>1.23 TB/s per stack</li>
+              <li>24–36 GB capacity</li>
+              <li>Nvidia H200, AMD MI325X</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-v">
+            <strong style="color:var(--accent4); font-size:0.85em">HBM4</strong>
+            <ul style="font-size:0.76em; margin-top:0.2em">
+              <li>12–16 Gbps/pin</li>
+              <li>2 TB/s per stack</li>
+              <li>2048-bit interface</li>
+              <li>2025–2026 ramp</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center; padding:0.5em">
+        <svg width="180" height="220" viewBox="0 0 180 220">
+          <!-- HBM cross-section schematic -->
+          <!-- DRAM die 4 (top) -->
+          <rect x="30" y="15" width="120" height="28" rx="2" fill="#1a2535" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="90" y="32" text-anchor="middle" font-size="9" fill="#d2a679">DRAM Die 4</text>
+          <!-- DRAM die 3 -->
+          <rect x="30" y="50" width="120" height="28" rx="2" fill="#1a2535" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="90" y="67" text-anchor="middle" font-size="9" fill="#d2a679">DRAM Die 3</text>
+          <!-- DRAM die 2 -->
+          <rect x="30" y="85" width="120" height="28" rx="2" fill="#1a2535" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="90" y="102" text-anchor="middle" font-size="9" fill="#d2a679">DRAM Die 2</text>
+          <!-- DRAM die 1 -->
+          <rect x="30" y="120" width="120" height="28" rx="2" fill="#1a2535" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="90" y="137" text-anchor="middle" font-size="9" fill="#d2a679">DRAM Die 1</text>
+          <!-- Base logic die -->
+          <rect x="25" y="155" width="130" height="32" rx="2" fill="#1e2048" stroke="#bc8cff" stroke-width="2"/>
+          <text x="90" y="174" text-anchor="middle" font-size="9" fill="#bc8cff" font-weight="bold">Base Logic Die (PHY)</text>
+          <!-- TSV lines -->
+          <line x1="60" y1="15" x2="60" y2="187" stroke="#58a6ff" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"/>
+          <line x1="90" y1="15" x2="90" y2="187" stroke="#58a6ff" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"/>
+          <line x1="120" y1="15" x2="120" y2="187" stroke="#58a6ff" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"/>
+          <text x="90" y="200" text-anchor="middle" font-size="7.5" fill="#58a6ff">TSVs (1024-bit bus)</text>
+          <!-- microbumps -->
+          <circle cx="55" cy="191" r="2.5" fill="#3fb950"/>
+          <circle cx="70" cy="191" r="2.5" fill="#3fb950"/>
+          <circle cx="85" cy="191" r="2.5" fill="#3fb950"/>
+          <circle cx="100" cy="191" r="2.5" fill="#3fb950"/>
+          <circle cx="115" cy="191" r="2.5" fill="#3fb950"/>
+          <text x="90" y="210" text-anchor="middle" font-size="7.5" fill="#3fb950">µ-bumps to interposer</text>
+        </svg>
+      </div>
+      <div class="stat stat-a" style="margin-top:0.3em">
+        <div class="num">9.6 Tb/s</div>
+        <div class="lbl">H200 aggregate HBM3E<br/>(8 stacks × 1.2 TB/s)</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 15  –  HBM THERMAL & POWER
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>HBM Thermal, Power &amp; Packaging</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-r">
+        <strong style="color:var(--accent5)">Thermal Challenges</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>HBM stacks: 85–150 W aggregate per GPU package</li>
+          <li>Heat must flow laterally through silicon interposer to SoC cooler</li>
+          <li>Limited thermal conductance through µ-bump array</li>
+          <li>Junction temperature limit: 85°C (DRAM junction), throttling above</li>
+          <li>Thermal interface material (TIM) between die top and lid critical</li>
+        </ul>
+      </div>
+      <div class="card card-a" style="margin-top:0.5em">
+        <strong style="color:var(--accent3)">HBM Interposer &amp; Packaging</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>CoWoS-S: SoC + HBM stacks on passive Si interposer (TSMC)</li>
+          <li>CoWoS-L: larger interposer enables more HBM stacks (H100 SXM)</li>
+          <li>Samsung HBM-PIM: Processing-in-Memory (GEMV in base die)</li>
+          <li>SK Hynix GDDR-in-HBM: HBM4 aims for 3D integration with SoC</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-v">
+        <strong style="color:var(--accent4)">HBM4 — Next Generation</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>2048-bit interface per stack (2× HBM3)</li>
+          <li>Target: 2 TB/s per stack, 4+ TB/s aggregate</li>
+          <li>Hybrid bonding to SoC die (eliminates interposer for some configs)</li>
+          <li>Sub-1 pJ/bit target vs ~3 pJ/bit for HBM3E</li>
+          <li>SK Hynix, Samsung, Micron all in qualification (2025–26)</li>
+        </ul>
+      </div>
+      <table style="font-size:0.7em; margin-top:0.5em">
+        <tr><th>Product</th><th>HBM</th><th>Stacks</th><th>Agg BW</th><th>Capacity</th></tr>
+        <tr><td>NVIDIA H100 SXM</td><td>HBM3</td><td>6</td><td>3.35 TB/s</td><td>80 GB</td></tr>
+        <tr><td>NVIDIA H200</td><td>HBM3E</td><td>8</td><td>4.8 TB/s</td><td>141 GB</td></tr>
+        <tr><td>AMD MI300X</td><td>HBM3</td><td>8</td><td>5.2 TB/s</td><td>192 GB</td></tr>
+        <tr><td>Google TPU v5e</td><td>HBM2e</td><td>4</td><td>1.6 TB/s</td><td>16 GB</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 16  –  SECTION BREAK: CXL MEMORY
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 05</div>
+    <h2>CXL Memory &amp; Memory Pooling</h2>
+    <p>CXL.mem · Type 3 devices · Memory disaggregation · Fabric switches</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 17  –  CXL MEMORY
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>CXL Memory Expansion &amp; Pooling</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-v" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent4)">CXL.mem — Memory Semantic Protocol</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>CXL 2.0+: Host-managed Device Memory (HDM) — CPU can directly load/store</li>
+          <li>Latency: ~150–250 ns (PCIe 5/6 + CXL device latency) vs ~80 ns for local DDR5</li>
+          <li>Bandwidth: up to ~128 GB/s per PCIe 5.0 ×16 link; PCIe 6 doubles this</li>
+          <li>Type 3 device: dedicated memory expander (no compute) — MemVerge, Samsung CMM-H</li>
+          <li>Type 2 device: compute + memory coherent (e.g. GPU with CXL)</li>
+        </ul>
+      </div>
+      <div class="card card-h" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent1)">Memory Disaggregation for ML</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>LLM models exceed single-node HBM capacity (e.g. 1.8T param model = 3.6 TB)</li>
+          <li>CXL fabric switch: multiple hosts share a pool of DDR5/HBM memory modules</li>
+          <li>Near-memory compute in CXL device reduces data movement</li>
+          <li>CXL 3.1: peer-to-peer coherency across multiple CXL hosts</li>
+        </ul>
+      </div>
+      <div class="card card-g">
+        <strong style="color:var(--accent2)">Software Stack</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Linux NUMA: CXL memory appears as NUMA node; <code>numactl</code> placement</li>
+          <li>Tiered memory: hot pages on DRAM, cold pages on CXL (TPP kernel feature)</li>
+          <li>PyTorch / CUDA Unified Memory: transparent CXL integration in progress</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center; padding:0.6em 0.4em">
+        <svg width="185" height="230" viewBox="0 0 185 230">
+          <!-- Host A -->
+          <rect x="5" y="10" width="80" height="38" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="45" y="27" text-anchor="middle" font-size="8" fill="#58a6ff">Host A (GPU)</text>
+          <text x="45" y="40" text-anchor="middle" font-size="7" fill="#8b949e">HBM 192 GB</text>
+          <!-- Host B -->
+          <rect x="100" y="10" width="80" height="38" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="140" y="27" text-anchor="middle" font-size="8" fill="#58a6ff">Host B (GPU)</text>
+          <text x="140" y="40" text-anchor="middle" font-size="7" fill="#8b949e">HBM 192 GB</text>
+          <!-- CXL Fabric Switch -->
+          <rect x="40" y="90" width="105" height="36" rx="4" fill="#1e2048" stroke="#bc8cff" stroke-width="2"/>
+          <text x="92" y="107" text-anchor="middle" font-size="8.5" fill="#bc8cff" font-weight="bold">CXL 3.x Fabric Switch</text>
+          <text x="92" y="120" text-anchor="middle" font-size="7" fill="#8b949e">PCIe 6 ×16 links</text>
+          <!-- CXL Memory Pool -->
+          <rect x="30" y="170" width="125" height="38" rx="4" fill="#192035" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="92" y="187" text-anchor="middle" font-size="8" fill="#d2a679">CXL Memory Pool</text>
+          <text x="92" y="200" text-anchor="middle" font-size="7" fill="#8b949e">DDR5 / HBM CXL Type 3</text>
+          <text x="92" y="211" text-anchor="middle" font-size="7" fill="#8b949e">2–8 TB pooled</text>
+          <!-- Arrows -->
+          <line x1="45" y1="48" x2="75" y2="90" stroke="#bc8cff" stroke-width="1.5"/>
+          <line x1="140" y1="48" x2="110" y2="90" stroke="#bc8cff" stroke-width="1.5"/>
+          <line x1="92" y1="126" x2="92" y2="170" stroke="#d2a679" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="100" y="152" font-size="7" fill="#8b949e">CXL.mem</text>
+        </svg>
+      </div>
+      <div class="stat stat-v" style="margin-top:0.3em">
+        <div class="num">8 TB</div>
+        <div class="lbl">CXL pool per fabric switch<br/>shared across multiple hosts</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 18  –  ROOFLINE MODEL
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Roofline Model — Visualising Memory Bottlenecks</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-h" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent1)">Roofline Fundamentals</strong>
+        <ul style="font-size:0.8em; margin-top:0.3em">
+          <li><strong>Arithmetic Intensity (AI):</strong> FLOPs per byte of DRAM traffic</li>
+          <li><strong>Memory-bound:</strong> Performance = AI × Peak_BW &nbsp; (left of ridge)</li>
+          <li><strong>Compute-bound:</strong> Performance = Peak_FLOPs &nbsp; (right of ridge)</li>
+          <li><strong>Ridge point:</strong> AI = Peak_FLOPs / Peak_BW</li>
+        </ul>
+      </div>
+      <div class="card card-g">
+        <strong style="color:var(--accent2)">Typical AI Workloads</strong>
+        <table style="font-size:0.76em; margin-top:0.3em">
+          <tr><th>Operation</th><th>Arithmetic Intensity</th><th>Bound</th></tr>
+          <tr><td>GEMM (large batch)</td><td>100–1000 FLOP/B</td><td>Compute</td></tr>
+          <tr><td>GEMV (batch=1, LLM decode)</td><td>0.5–2 FLOP/B</td><td>Memory</td></tr>
+          <tr><td>Attention (prefill, long ctx)</td><td>20–80 FLOP/B</td><td>Mixed</td></tr>
+          <tr><td>Elementwise (ReLU, layernorm)</td><td>&lt;1 FLOP/B</td><td>Memory</td></tr>
+          <tr><td>FlashAttention (fused)</td><td>↑ 10–50×</td><td>Compute</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center; padding:0.5em">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <!-- Axes -->
+          <line x1="30" y1="10" x2="30" y2="175" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="30" y1="175" x2="195" y2="175" stroke="#30363d" stroke-width="1.5"/>
+          <!-- Memory roof (diagonal) -->
+          <line x1="30" y1="175" x2="110" y2="50" stroke="#58a6ff" stroke-width="2.5"/>
+          <!-- Compute roof (horizontal) -->
+          <line x1="110" y1="50" x2="195" y2="50" stroke="#3fb950" stroke-width="2.5"/>
+          <!-- Ridge point -->
+          <circle cx="110" cy="50" r="4" fill="#d2a679"/>
+          <!-- Labels -->
+          <text x="145" y="44" font-size="7.5" fill="#3fb950">Compute Roof</text>
+          <text x="34" y="130" font-size="7.5" fill="#58a6ff" transform="rotate(-50 50 130)">BW Roof</text>
+          <text x="75" y="190" font-size="7.5" fill="#8b949e">Arithmetic Intensity (FLOP/B) →</text>
+          <text x="5" y="30" font-size="7.5" fill="#8b949e" writing-mode="vertical-rl">Performance →</text>
+          <!-- Workpoints -->
+          <!-- GEMV -->
+          <circle cx="42" cy="155" r="4" fill="#f78166"/>
+          <text x="44" y="153" font-size="7" fill="#f78166">GEMV</text>
+          <!-- Attention -->
+          <circle cx="75" cy="115" r="4" fill="#d2a679"/>
+          <text x="77" y="112" font-size="7" fill="#d2a679">Attn</text>
+          <!-- GEMM -->
+          <circle cx="148" cy="50" r="4" fill="#3fb950"/>
+          <text x="150" y="62" font-size="7" fill="#3fb950">GEMM</text>
+          <!-- Ridge annotation -->
+          <text x="108" y="40" font-size="7" fill="#d2a679">Ridge</text>
+          <line x1="110" y1="42" x2="110" y2="175" stroke="#d2a679" stroke-width="0.8" stroke-dasharray="3,3"/>
+        </svg>
+        <div style="font-size:0.6em; color:var(--text-lo)">Roofline: performance vs arithmetic intensity</div>
+      </div>
+      <div class="card card-r" style="margin-top:0.4em; font-size:0.78em">
+        <strong style="color:var(--accent5)">Key insight:</strong> LLM decode (batch=1) operates at &lt;2 FLOP/B — always memory-bound. Batching raises AI and shifts the operating point right toward the compute roof.
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 19  –  MEMORY BANDWIDTH COMPARISON
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Memory Technology Bandwidth Landscape</h2>
+  <p style="font-size:0.78em; color:var(--text-lo)">Aggregate bandwidth achievable in a single ML accelerator package (2024–2025)</p>
+
+  <!-- Bandwidth bar chart -->
+  <div style="margin: 0.5em 0 0.3em 0; font-size:0.78em">
+    <div class="bw-row">
+      <div class="bw-label">Register File</div>
+      <div class="bw-bar" style="width:95%; background:linear-gradient(90deg,#1e3a5a,#58a6ff);">~10+ TB/s</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">L1 SRAM / SPM</div>
+      <div class="bw-bar" style="width:85%; background:linear-gradient(90deg,#1a3a2a,#3fb950);">~5 TB/s (per tile)</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">HBM4 (4 stk)</div>
+      <div class="bw-bar" style="width:58%; background:linear-gradient(90deg,#2a1a4a,#bc8cff);">~8 TB/s</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">HBM3E (8 stk)</div>
+      <div class="bw-bar" style="width:45%; background:linear-gradient(90deg,#2a1a4a,#bc8cff);">~9.8 TB/s (H200)</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">HBM3 (6 stk)</div>
+      <div class="bw-bar" style="width:33%; background:linear-gradient(90deg,#2a1a4a,#9b6cdf);">~3.35 TB/s (H100)</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">GDDR7 (512b)</div>
+      <div class="bw-bar" style="width:20%; background:linear-gradient(90deg,#2a2a1a,#d2a679);">~1.79 TB/s (RTX 5090)</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">LPDDR5X</div>
+      <div class="bw-bar" style="width:14%; background:linear-gradient(90deg,#1a2a2a,#58a6ff);">~273 GB/s (M3 Ultra)</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">DDR5-8ch</div>
+      <div class="bw-bar" style="width:10%; background:linear-gradient(90deg,#1a2a2a,#3fb950);">~700 GB/s (Gaudi 3)</div>
+    </div>
+    <div class="bw-row">
+      <div class="bw-label">CXL 3.x (×16)</div>
+      <div class="bw-bar" style="width:4%; background:linear-gradient(90deg,#2a1a1a,#f78166);">~128 GB/s</div>
+    </div>
+  </div>
+  <div class="cols" style="margin-top:0.3em">
+    <div class="col">
+      <div class="card card-r" style="font-size:0.75em">
+        <strong style="color:var(--accent5)">Takeaway:</strong> On-chip SRAM provides 10–100× more bandwidth than off-chip memory. The ML SoC architect's core challenge is staging data efficiently across this hierarchy — prefetching weights, double-buffering activations, and fusing operations to maximise locality.
+      </div>
+    </div>
+    <div class="stat stat-a col">
+      <div class="num">100×</div>
+      <div class="lbl">SRAM bandwidth<br/>advantage over HBM</div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 20  –  MEMORY SYSTEM DESIGN CASE STUDIES
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Memory Systems in Production ML SoCs</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-h">
+        <strong style="color:var(--accent1)">NVIDIA H100 / H200</strong>
+        <ul style="font-size:0.76em; margin-top:0.3em">
+          <li>L1: 256 KB / SM; L2: 50 MB shared</li>
+          <li>HBM3 (H100): 6 stacks, 3.35 TB/s, 80 GB</li>
+          <li>HBM3E (H200): 8 stacks, 4.8 TB/s, 141 GB</li>
+          <li>NVLink 4: 900 GB/s bidirectional</li>
+          <li>Transformer Engine: FP8 weight loading</li>
+        </ul>
+      </div>
+      <div class="card card-a" style="margin-top:0.5em">
+        <strong style="color:var(--accent3)">AMD MI300X</strong>
+        <ul style="font-size:0.76em; margin-top:0.3em">
+          <li>3.5D: 3× compute dies (GCDs) + 4× HBM on base die</li>
+          <li>192 GB HBM3; 5.2 TB/s aggregate</li>
+          <li>Infinity Cache: shared L3 across dies</li>
+          <li>AMD's answer to fitting large LLMs per node</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-g">
+        <strong style="color:var(--accent2)">Google TPU v5p</strong>
+        <ul style="font-size:0.76em; margin-top:0.3em">
+          <li>HBM2e: 95 GB, 2.76 TB/s per chip</li>
+          <li>Software-managed SPM: no hardware cache</li>
+          <li>XLA compiler handles all prefetching</li>
+          <li>ICI (Inter-Chip Interconnect): 4.8 Tbps mesh</li>
+        </ul>
+      </div>
+      <div class="card card-v" style="margin-top:0.5em">
+        <strong style="color:var(--accent4)">Apple M3 Ultra (Edge Inference)</strong>
+        <ul style="font-size:0.76em; margin-top:0.3em">
+          <li>LPDDR5X: 192 GB unified memory, 800 GB/s</li>
+          <li>No discrete DRAM boundary — CPU/GPU/ANE share</li>
+          <li>ANE: 18 TOPS, 48 MB system-level cache</li>
+          <li>Enables 70B parameter LLM on-device</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 21  –  MEMORY OPTIMISATION TECHNIQUES
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Memory Optimisation Techniques</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-h">
+        <strong style="color:var(--accent1)">Software / Algorithmic</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li><strong>Quantisation:</strong> INT8/INT4 halves/quarters weight traffic</li>
+          <li><strong>FlashAttention:</strong> fused kernel, O(n) HBM reads vs O(n²)</li>
+          <li><strong>KV cache compression:</strong> grouped-query, multi-query attention</li>
+          <li><strong>Paged attention (vLLM):</strong> non-contiguous KV pages</li>
+          <li><strong>Tensor parallelism:</strong> shards weights across HBM stacks</li>
+          <li><strong>Weight streaming:</strong> offload to CPU DDR, fetch on demand</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-g">
+        <strong style="color:var(--accent2)">Hardware / Microarchitecture</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li><strong>Prefetch engines:</strong> stride / stream / PC-based</li>
+          <li><strong>Double buffering:</strong> overlap compute with DMA</li>
+          <li><strong>Memory-side cache:</strong> near-HBM SRAM tag buffer</li>
+          <li><strong>Compressed sparse format:</strong> NVIDIA A100 2:4 sparsity</li>
+          <li><strong>Near-memory compute:</strong> PIM in HBM base die</li>
+          <li><strong>Bank interleaving:</strong> distribute weight rows across banks</li>
+        </ul>
+      </div>
+      <div class="card card-r" style="margin-top:0.5em; font-size:0.79em">
+        <strong style="color:var(--accent5)">Co-design principle:</strong> 
+        Compiler (XLA, TVM, Triton) must be memory-hierarchy-aware — tile sizes, prefetch distances, and fusion decisions should be tuned to the specific SRAM capacity and HBM bandwidth of the target SoC.
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 22  –  SUMMARY & NEXT STEPS
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Summary</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h" style="font-size:0.78em">
+            <strong style="color:var(--accent1)">On-Chip SRAM</strong><br/>
+            6T/8T bitcells, assist circuits, HD vs LP flavours. ~70% die area in large ML SoCs. Vmin engineering enables power gating.
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-g" style="font-size:0.78em">
+            <strong style="color:var(--accent2)">Cache &amp; Scratchpad</strong><br/>
+            Hardware cache vs software SPM tradeoffs. ML NPUs favour SPM + DMA for predictable latency and zero tag overhead.
+          </div>
+        </div>
+      </div>
+      <div class="cols" style="margin-top:0.5em">
+        <div class="col">
+          <div class="card card-a" style="font-size:0.78em">
+            <strong style="color:var(--accent3)">HBM Family</strong><br/>
+            1024-bit TSV interface, 3.35–4.8+ TB/s aggregate. HBM4 targets 2 TB/s/stack with hybrid bonding to SoC.
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-v" style="font-size:0.78em">
+            <strong style="color:var(--accent4)">CXL Memory</strong><br/>
+            Disaggregated pooling for TB-scale LLMs. ~150–250 ns latency; PCIe 6 to ~256 GB/s per link.
+          </div>
+        </div>
+      </div>
+      <div class="card card-r" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--accent5)">The Unifying Principle:</strong> 
+        ML SoC memory architecture is a bandwidth optimisation problem across five decades of capacity. The roofline model quantifies where each operator sits; the solution space spans bitcell design, packaging, compiler fusion, and algorithmic compression.
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="font-size:0.78em; margin-bottom:0.5em">
+        <strong>Up Next in the Series</strong>
+        <ul style="margin-top:0.3em">
+          <li>04 · High-Speed SerDes &amp; I/O</li>
+          <li>05 · AI / ML Accelerator Architectures</li>
+          <li>06 · SoCs for ML Inference</li>
+        </ul>
+      </div>
+      <div class="card" style="font-size:0.72em">
+        <strong>References</strong><br/>
+        <ul style="font-size:0.9em">
+          <li>JEDEC: JESD79-5 (DDR5), JESD235 (HBM3), JESD239 (GDDR7)</li>
+          <li>Patterson &amp; Hennessy, <em>Computer Architecture</em>, 6th ed.</li>
+          <li>Williams et al., "Roofline," CACM 2009</li>
+          <li>Dao et al., "FlashAttention-2," ICLR 2024</li>
+          <li>NVIDIA H100/H200 Architecture White Papers</li>
+          <li>AMD MI300X Architecture Guide, 2024</li>
+          <li>SK Hynix HBM3E &amp; HBM4 Product Briefs</li>
+          <li>CXL Consortium: CXL 3.1 Specification</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">03 · Memory Hierarchy in ML Accelerator SoCs</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 23  –  CLOSING
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <div class="title-slide" style="padding-top:2em">
+    <div class="hex-badge">⬡</div>
+    <div class="series">Modern SoC Design · Presentation 03</div>
+    <h1 style="font-size:1.7em">Memory Hierarchy<br/>in ML Accelerator SoCs</h1>
+    <p style="margin-top:1em; font-size:0.75em; color:var(--text-lo)">
+      Part of an open series exploring modern SoC design end-to-end.<br/>
+      All presentations available at
+      <a href="https://brendanjameslynskey.github.io/SoC/">brendanjameslynskey.github.io/SoC</a>
+    </p>
+    <div style="margin-top:1.2em">
+      <span class="tag tag-b">SRAM</span><span class="tag tag-g">Cache</span>
+      <span class="tag tag-a">HBM3/3E/4</span><span class="tag tag-v">CXL</span>
+      <span class="tag tag-r">Roofline</span><span class="tag">DDR5</span>
+      <span class="tag">GDDR7</span><span class="tag">LPDDR5/6</span>
+    </div>
+    <p style="margin-top:1.5em; font-size:0.6em; color:var(--text-lo)">
+      Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf to URL
+    </p>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    controls: true,
+    progress: true,
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    plugins: [ RevealHighlight, RevealNotes ],
+    highlight: { highlightOnLoad: true }
+  });
+</script>
+</body>
+</html>
