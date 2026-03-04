@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>High-Speed SerDes &amp; I/O — Modern SoC Design 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css"/>
+<style>
+  :root {
+    --bg-dark:   #0d1117;
+    --bg-card:   #161b22;
+    --bg-panel:  #1c2330;
+    --accent1:   #58a6ff;   /* blue  – signal / digital    */
+    --accent2:   #3fb950;   /* green – link / PHY OK       */
+    --accent3:   #d2a679;   /* amber – equalisation / CDR  */
+    --accent4:   #bc8cff;   /* violet – PCIe / protocol    */
+    --accent5:   #f78166;   /* coral – impairment / loss   */
+    --text-hi:   #e6edf3;
+    --text-lo:   #8b949e;
+    --border:    #30363d;
+  }
+
+  .reveal-viewport { background: var(--bg-dark); }
+  .reveal { font-family: 'DM Sans', sans-serif; font-size: 22px; color: var(--text-hi); }
+  .reveal h1, .reveal h2, .reveal h3 {
+    font-family: 'Playfair Display', serif;
+    text-transform: none; letter-spacing: 0;
+    color: var(--text-hi); text-shadow: none;
+  }
+  .reveal h1 { font-size: 2.2em; }
+  .reveal h2 { font-size: 1.6em; margin-bottom: 0.5em; }
+  .reveal h3 { font-size: 1.15em; color: var(--accent1); }
+  .reveal p  { line-height: 1.6; margin: 0.4em 0; }
+  .reveal section { padding: 0 2%; box-sizing: border-box; }
+  .reveal ul { list-style: none; padding-left: 0; margin: 0; }
+  .reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; line-height: 1.5; }
+  .reveal ul li::before { content: "▸"; color: var(--accent1); position: absolute; left: 0; }
+  .reveal ul ul li::before { content: "◦"; color: var(--text-lo); }
+  .reveal code { font-family: 'JetBrains Mono', monospace; background: #1e2736; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.85em; }
+  .reveal pre  { background: #1e2736; border-radius: 8px; padding: 1em; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+  .reveal a    { color: var(--accent1); }
+  .reveal .controls { color: var(--accent1); }
+  .reveal .progress { color: var(--accent1); }
+
+  /* ---- Layout ---- */
+  .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+  .col  { flex: 1; }
+  .col2 { flex: 2; }
+
+  /* ---- Cards ---- */
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 0.75em 1em; margin: 0.4em 0; }
+  .card-h { border-top: 3px solid var(--accent1); }
+  .card-g { border-top: 3px solid var(--accent2); }
+  .card-a { border-top: 3px solid var(--accent3); }
+  .card-v { border-top: 3px solid var(--accent4); }
+  .card-r { border-top: 3px solid var(--accent5); }
+
+  /* ---- Title / section slides ---- */
+  .title-slide { text-align: center; padding-top: 1.5em; }
+  .title-slide h1 { font-size: 2.0em; margin: 0; }
+  .series  { font-family: 'DM Sans', sans-serif; font-size: 0.8em; color: var(--accent1); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4em; }
+  .subtitle { font-size: 0.75em; color: var(--text-lo); margin-top: 0.6em; }
+  .hex-badge { display: inline-block; font-size: 3.5em; color: var(--accent1); margin-bottom: 0.2em; }
+  .section-slide { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
+  .section-slide h2 { font-size: 1.9em; color: var(--accent1); }
+  .section-slide p  { color: var(--text-lo); font-size: 0.85em; }
+  .section-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--text-lo); letter-spacing: 0.15em; margin-bottom: 0.3em; }
+
+  /* ---- Tags ---- */
+  .tag    { display: inline-block; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 0.2em 0.7em; font-size: 0.7em; color: var(--text-lo); margin: 0.15em; }
+  .tag-b  { border-color: var(--accent1); color: var(--accent1); }
+  .tag-g  { border-color: var(--accent2); color: var(--accent2); }
+  .tag-a  { border-color: var(--accent3); color: var(--accent3); }
+  .tag-v  { border-color: var(--accent4); color: var(--accent4); }
+  .tag-r  { border-color: var(--accent5); color: var(--accent5); }
+
+  /* ---- Stat callout ---- */
+  .stat   { text-align: center; padding: 0.5em; }
+  .stat .num { font-family: 'Playfair Display', serif; font-size: 2.0em; font-weight: 900; color: var(--accent1); }
+  .stat .lbl { font-size: 0.65em; color: var(--text-lo); }
+  .stat-g .num { color: var(--accent2); }
+  .stat-a .num { color: var(--accent3); }
+  .stat-v .num { color: var(--accent4); }
+  .stat-r .num { color: var(--accent5); }
+
+  /* ---- Tables ---- */
+  .reveal table { border-collapse: collapse; font-size: 0.72em; width: 100%; }
+  .reveal table th { background: var(--bg-panel); color: var(--accent1); padding: 0.4em 0.6em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: 0.35em 0.6em; border: 1px solid var(--border); color: var(--text-hi); background: var(--bg-card); vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #1a2130; }
+
+  /* ---- Eye-diagram canvas wrapper ---- */
+  .eye-wrap { background: #060c14; border: 1px solid var(--border); border-radius: 8px; padding: 0.4em; text-align: center; }
+
+  /* ---- Signal trace rows ---- */
+  .sig-row { display: flex; align-items: center; margin: 0.25em 0; gap: 0.5em; }
+  .sig-label { width: 5.5em; font-size: 0.68em; text-align: right; color: var(--text-lo); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+
+  /* ---- Footer ---- */
+  .slide-footer { position: absolute; bottom: 0.3em; right: 0.8em; font-size: 0.5em; color: var(--text-lo); font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- =====================================================================
+     SLIDE 01  –  TITLE
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <div class="title-slide">
+    <div class="hex-badge">⬡</div>
+    <div class="series">Modern SoC Design · Presentation 04</div>
+    <h1>High-Speed SerDes &amp; I/O</h1>
+    <p class="subtitle">
+      SerDes fundamentals · NRZ &amp; PAM4 · Equalization · Clock &amp; Data Recovery<br/>
+      PCIe 5/6 · UCIe die-to-die · Co-packaged optics · Signal integrity
+    </p>
+    <div style="margin-top:1.4em">
+      <span class="tag tag-b">SerDes</span><span class="tag tag-g">PCIe 6</span>
+      <span class="tag tag-a">PAM4</span><span class="tag tag-v">UCIe</span>
+      <span class="tag tag-r">CDR</span><span class="tag">CTLE</span>
+      <span class="tag">DFE</span><span class="tag">Co-packaged Optics</span>
+    </div>
+    <p style="margin-top:1.6em; font-size:0.6em; color:var(--text-lo)">
+      Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf
+    </p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 02  –  WHY HIGH-SPEED I/O MATTERS
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Why I/O Bandwidth Is a First-Class Design Constraint</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-r" style="margin-bottom:0.7em">
+        <strong style="color:var(--accent5)">The I/O Bandwidth Problem</strong><br/>
+        <span style="font-size:0.82em">An H100 GPU delivers 3.35 TB/s of HBM bandwidth internally, yet must communicate with the rest of the system over PCIe 5.0 ×16 at just ~128 GB/s — a 26× mismatch.
+        As ML clusters scale to thousands of accelerators, the interconnect fabric between chips, boards, and racks becomes the dominant performance and power constraint.</span>
+      </div>
+      <ul style="font-size:0.82em">
+        <li>SerDes power ≈ 1–5 pJ/bit; at 10 Tbps aggregate this is tens of watts</li>
+        <li>Signal loss on PCB traces doubles every ~10 GHz — PAM4 is the industry response</li>
+        <li>Die-to-die interconnect (UCIe) targets &lt;0.5 pJ/bit over µm-pitch bumps</li>
+        <li>Co-packaged optics eliminate long-reach electrical SerDes entirely for rack-scale</li>
+        <li>Every generation: 2–4× bandwidth, same pin count, lower power per bit</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center; padding:0.8em 0.4em">
+        <svg width="200" height="195" viewBox="0 0 200 195">
+          <!-- Y axis -->
+          <line x1="38" y1="10" x2="38" y2="170" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="38" y1="170" x2="195" y2="170" stroke="#30363d" stroke-width="1.5"/>
+          <!-- PCIe BW trend -->
+          <polyline points="38,155 75,135 112,108 149,75 186,38"
+            fill="none" stroke="#bc8cff" stroke-width="2.5"/>
+          <!-- Pin count (flat) -->
+          <polyline points="38,80 75,80 112,80 149,80 186,80"
+            fill="none" stroke="#58a6ff" stroke-width="2" stroke-dasharray="5,3"/>
+          <!-- Labels -->
+          <text x="188" y="34" font-size="8" fill="#bc8cff">BW</text>
+          <text x="188" y="78" font-size="8" fill="#58a6ff">Pins</text>
+          <text x="38" y="184" font-size="7.5" fill="#8b949e">PCIe 3  4  5  6  7</text>
+          <text x="2"  y="20" font-size="7.5" fill="#8b949e" writing-mode="vertical-rl">GB/s per ×16</text>
+          <!-- X tick labels -->
+          <text x="36"  y="183" font-size="7" fill="#8b949e">3</text>
+          <text x="73"  y="183" font-size="7" fill="#8b949e">4</text>
+          <text x="110" y="183" font-size="7" fill="#8b949e">5</text>
+          <text x="147" y="183" font-size="7" fill="#8b949e">6</text>
+          <text x="184" y="183" font-size="7" fill="#8b949e">7</text>
+        </svg>
+        <div style="font-size:0.6em; color:var(--text-lo)">PCIe bandwidth doubles each generation; pin count stays fixed</div>
+      </div>
+      <div class="stat stat-r" style="margin-top:0.4em">
+        <div class="num">26×</div>
+        <div class="lbl">HBM vs PCIe BW gap<br/>in H100 GPU</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 03  –  SECTION: SERDES FUNDAMENTALS
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 01</div>
+    <h2>SerDes Fundamentals</h2>
+    <p>Serialiser · Deserialiser · PLL · Transmitter &amp; receiver architecture</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 04  –  SERDES ARCHITECTURE
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>SerDes Architecture</h2>
+  <div class="cols">
+    <div class="col2">
+      <p style="font-size:0.82em; margin-bottom:0.5em">A <strong>Serialiser/Deserialiser (SerDes)</strong> converts a wide parallel bus to a narrow high-speed serial stream and back, allowing a small number of pins to carry enormous aggregate bandwidth.</p>
+
+      <!-- Block diagram via SVG -->
+      <div class="card" style="padding:0.6em 0.4em; margin-bottom:0.5em; text-align:center">
+        <svg width="520" height="115" viewBox="0 0 520 115" style="max-width:100%">
+          <!-- TX side -->
+          <rect x="5"  y="30" width="70" height="55" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="40" y="53" text-anchor="middle" font-size="8.5" fill="#58a6ff" font-weight="bold">TX PLL</text>
+          <text x="40" y="68" text-anchor="middle" font-size="7.5" fill="#8b949e">Fractional-N</text>
+          <text x="40" y="79" text-anchor="middle" font-size="7.5" fill="#8b949e">LC VCO</text>
+
+          <rect x="83"  y="20" width="75" height="75" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="120" y="45" text-anchor="middle" font-size="8.5" fill="#58a6ff" font-weight="bold">Serialiser</text>
+          <text x="120" y="60" text-anchor="middle" font-size="7.5" fill="#8b949e">MUX N:1</text>
+          <text x="120" y="73" text-anchor="middle" font-size="7.5" fill="#8b949e">pre-emphasis</text>
+          <text x="120" y="85" text-anchor="middle" font-size="7.5" fill="#8b949e">FIR taps</text>
+
+          <rect x="166" y="30" width="65" height="55" rx="4" fill="#192035" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="198" y="52" text-anchor="middle" font-size="8.5" fill="#3fb950" font-weight="bold">Driver</text>
+          <text x="198" y="65" text-anchor="middle" font-size="7.5" fill="#8b949e">CML / LVDS</text>
+          <text x="198" y="76" text-anchor="middle" font-size="7.5" fill="#8b949e">impedance Zout</text>
+
+          <!-- Channel -->
+          <rect x="239" y="42" width="42" height="31" rx="3" fill="#13191e" stroke="#30363d" stroke-width="1"/>
+          <text x="260" y="57" text-anchor="middle" font-size="7.5" fill="#8b949e">Channel</text>
+          <text x="260" y="68" text-anchor="middle" font-size="7" fill="#f78166">loss / ISI</text>
+
+          <!-- RX side -->
+          <rect x="289" y="30" width="65" height="55" rx="4" fill="#192035" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="321" y="52" text-anchor="middle" font-size="8.5" fill="#3fb950" font-weight="bold">Receiver</text>
+          <text x="321" y="65" text-anchor="middle" font-size="7.5" fill="#8b949e">CTLE / DFE</text>
+          <text x="321" y="76" text-anchor="middle" font-size="7.5" fill="#8b949e">slicer / ADC</text>
+
+          <rect x="362" y="20" width="75" height="75" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="399" y="45" text-anchor="middle" font-size="8.5" fill="#58a6ff" font-weight="bold">CDR &amp; Des</text>
+          <text x="399" y="60" text-anchor="middle" font-size="7.5" fill="#8b949e">1:N DEMUX</text>
+          <text x="399" y="73" text-anchor="middle" font-size="7.5" fill="#8b949e">phase interp.</text>
+          <text x="399" y="85" text-anchor="middle" font-size="7.5" fill="#8b949e">FIFO</text>
+
+          <rect x="445" y="30" width="70" height="55" rx="4" fill="#1e2736" stroke="#bc8cff" stroke-width="1.5"/>
+          <text x="480" y="52" text-anchor="middle" font-size="8.5" fill="#bc8cff" font-weight="bold">RX PLL</text>
+          <text x="480" y="67" text-anchor="middle" font-size="7.5" fill="#8b949e">recovered</text>
+          <text x="480" y="78" text-anchor="middle" font-size="7.5" fill="#8b949e">clock</text>
+
+          <!-- Arrows -->
+          <line x1="75"  y1="57" x2="83"  y2="57" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="158" y1="57" x2="166" y2="57" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="231" y1="57" x2="239" y2="57" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="281" y1="57" x2="289" y2="57" stroke="#f78166" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="354" y1="57" x2="362" y2="57" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="437" y1="57" x2="445" y2="57" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          <!-- TX parallel data in -->
+          <line x1="83" y1="57" x2="67" y2="57" stroke="#30363d" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="0" y="54" font-size="7" fill="#8b949e">Parallel</text>
+          <text x="0" y="63" font-size="7" fill="#8b949e">data in</text>
+          <!-- RX parallel data out -->
+          <text x="515" y="54" font-size="7" fill="#8b949e">Parallel</text>
+          <text x="515" y="63" font-size="7" fill="#8b949e">data out</text>
+
+          <!-- Arrow marker -->
+          <defs>
+            <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#8b949e"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h" style="font-size:0.77em">
+            <strong style="color:var(--accent1)">TX Path</strong>
+            <ul>
+              <li>PLL generates low-jitter serial clock</li>
+              <li>N:1 MUX serialises parallel data</li>
+              <li>FIR pre-emphasis boosts high-frequency content to pre-compensate channel loss</li>
+              <li>CML driver into 50 Ω differential pair</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-g" style="font-size:0.77em">
+            <strong style="color:var(--accent2)">RX Path</strong>
+            <ul>
+              <li>CTLE: continuous-time linear equaliser (boost high freqs)</li>
+              <li>DFE: decision-feedback equaliser (remove post-cursor ISI)</li>
+              <li>CDR: clock &amp; data recovery (phase/frequency lock)</li>
+              <li>1:N DEMUX restores parallel bus</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stat stat-a">
+        <div class="num">112G</div>
+        <div class="lbl">state-of-art SerDes<br/>lane rate (PAM4)</div>
+      </div>
+      <div class="stat stat-v" style="margin-top:0.4em">
+        <div class="num">&lt;1 pJ</div>
+        <div class="lbl">target per bit<br/>next-gen SerDes</div>
+      </div>
+      <div class="card card-r" style="margin-top:0.5em; font-size:0.77em">
+        <strong style="color:var(--accent5)">Key challenge:</strong> At 112 Gbps, one unit interval (UI) = 9 ps. Jitter budget for the entire link — TX, channel, and RX — must fit inside roughly 30% of that: ~2.7 ps rms.
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 05  –  NRZ vs PAM4
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>NRZ vs PAM4 — The Modulation Shift</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-h" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent1)">NRZ — Non-Return-to-Zero (2-level)</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>1 bit per symbol; symbol rate = bit rate</li>
+          <li>Simple slicer with single threshold at 0</li>
+          <li>Good noise margin; works well to ~28–56 Gbps</li>
+          <li>Baud rate equals bit rate; requires wide channel bandwidth</li>
+          <li>Used in: PCIe 4, 25G Ethernet, SATA, USB 3</li>
+        </ul>
+      </div>
+      <div class="card card-a" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent3)">PAM4 — Pulse Amplitude Modulation 4-level</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>2 bits per symbol; symbol rate = <em>half</em> the bit rate</li>
+          <li>4 amplitude levels: {−3, −1, +1, +3} (normalised)</li>
+          <li>Halves Nyquist frequency → lower channel loss at same bit rate</li>
+          <li>Eye height is ⅓ of NRZ → 9.5 dB worse SNR margin</li>
+          <li>Requires DSP-based equalisation; typically ADC + digital CDR</li>
+          <li>Used in: PCIe 5/6, 400G/800G Ethernet, HBM4, GDDR7</li>
+        </ul>
+      </div>
+      <div class="card card-r">
+        <strong style="color:var(--accent5)">PAM4 Error Propagation</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>Each symbol carries 2 bits; a single symbol error can flip 1 or 2 bits</li>
+          <li>Gray coding assigns adjacent symbols to 1-bit-different codewords — limits burst errors</li>
+          <li>FEC (Reed-Solomon, LDPC) mandatory at PCIe 5+ to meet BER &lt;10⁻¹²</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <!-- Eye diagram comparison (SVG art) -->
+      <div class="eye-wrap" style="margin-bottom:0.5em">
+        <svg width="175" height="100" viewBox="0 0 175 100">
+          <text x="87" y="10" text-anchor="middle" font-size="8" fill="#58a6ff">NRZ Eye</text>
+          <!-- Eye outline -->
+          <ellipse cx="87" cy="55" rx="60" ry="32" fill="none" stroke="#3fb950" stroke-width="1.5" opacity="0.8"/>
+          <ellipse cx="87" cy="55" rx="48" ry="22" fill="#0d2a1a" opacity="0.5"/>
+          <!-- Noise bands -->
+          <line x1="27" y1="23" x2="147" y2="23" stroke="#f78166" stroke-width="0.8" stroke-dasharray="3,2"/>
+          <line x1="27" y1="87" x2="147" y2="87" stroke="#f78166" stroke-width="0.8" stroke-dasharray="3,2"/>
+          <!-- Threshold -->
+          <line x1="27" y1="55" x2="147" y2="55" stroke="#d2a679" stroke-width="0.8"/>
+          <text x="150" y="57" font-size="7" fill="#d2a679">Thresh</text>
+          <!-- Single eye label -->
+          <text x="87" y="58" text-anchor="middle" font-size="8" fill="#3fb950">1 eye</text>
+        </svg>
+        <svg width="175" height="120" viewBox="0 0 175 120">
+          <text x="87" y="10" text-anchor="middle" font-size="8" fill="#d2a679">PAM4 Eye</text>
+          <!-- 3 eyes stacked -->
+          <ellipse cx="87" cy="35" rx="55" ry="13" fill="none" stroke="#d2a679" stroke-width="1.5" opacity="0.8"/>
+          <ellipse cx="87" cy="65" rx="55" ry="13" fill="none" stroke="#d2a679" stroke-width="1.5" opacity="0.8"/>
+          <ellipse cx="87" cy="95" rx="55" ry="13" fill="none" stroke="#d2a679" stroke-width="1.5" opacity="0.8"/>
+          <!-- Threshold lines -->
+          <line x1="32" y1="49" x2="142" y2="49" stroke="#8b949e" stroke-width="0.7" stroke-dasharray="3,2"/>
+          <line x1="32" y1="79" x2="142" y2="79" stroke="#8b949e" stroke-width="0.7" stroke-dasharray="3,2"/>
+          <!-- Labels -->
+          <text x="150" y="38"  font-size="7" fill="#d2a679">11</text>
+          <text x="150" y="67"  font-size="7" fill="#d2a679">10</text>
+          <text x="150" y="97"  font-size="7" fill="#d2a679">01</text>
+          <text x="87" y="116" text-anchor="middle" font-size="7" fill="#f78166">⅓ eye height vs NRZ</text>
+        </svg>
+      </div>
+      <div class="stat stat-a">
+        <div class="num">2 bit/sym</div>
+        <div class="lbl">PAM4: same baud rate,<br/>double the bit rate</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 06  –  SECTION: EQUALISATION
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 02</div>
+    <h2>Equalisation</h2>
+    <p>CTLE · DFE · TX FIR · DSP-based RX · Adaptation algorithms</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 07  –  CHANNEL IMPAIRMENTS & EQUALISATION
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Channel Impairments &amp; Equalisation Techniques</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-r">
+        <strong style="color:var(--accent5)">Channel Impairments</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>Insertion loss:</strong> skin effect + dielectric loss; ~0.5–1.5 dB/GHz on FR4 PCB</li>
+          <li><strong>ISI (Inter-Symbol Interference):</strong> frequency-dependent loss smears symbols in time</li>
+          <li><strong>Crosstalk:</strong> NEXT (near-end) and FEXT (far-end) from adjacent traces</li>
+          <li><strong>Reflections:</strong> impedance discontinuities at vias, connectors, stubs</li>
+          <li><strong>Jitter:</strong> deterministic (crosstalk-induced) + random (thermal / shot noise)</li>
+        </ul>
+      </div>
+
+      <div class="card card-h" style="margin-top:0.5em">
+        <strong style="color:var(--accent1)">TX FIR Pre-emphasis</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Finite Impulse Response filter applied at transmitter</li>
+          <li>Boosts high-frequency content before signal enters lossy channel</li>
+          <li>Main tap + 1–3 pre/post-cursor taps; coefficient magnitudes &lt;1</li>
+          <li>De-emphasis variant: attenuates main tap relative to cursor taps</li>
+          <li>PCIe 5: 11 TX FIR coefficients, 3 pre-cursors, 10 post-cursors</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-a">
+        <strong style="color:var(--accent3)">CTLE — Continuous-Time Linear Equaliser</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Analogue high-pass filter at RX input</li>
+          <li>Boosts high frequencies to invert channel roll-off</li>
+          <li>Implemented with source-degenerated differential pair</li>
+          <li>Gain peaking: +6 to +20 dB at Nyquist; limited by noise amplification</li>
+          <li>Programmable via capacitor bank / resistor ladder</li>
+        </ul>
+      </div>
+      <div class="card card-v" style="margin-top:0.5em">
+        <strong style="color:var(--accent4)">DFE — Decision-Feedback Equaliser</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Uses <em>decided</em> past symbols to cancel post-cursor ISI</li>
+          <li>No noise amplification (unlike linear equalisers)</li>
+          <li>H1 tap critical: must complete in one UI (speed-limiting)</li>
+          <li>Unrolled (speculative) DFE: solves H1 timing with 2× slicers</li>
+          <li>4–8 taps typical for 56 G NRZ; 8–16 taps for 112 G PAM4</li>
+        </ul>
+      </div>
+      <div class="card card-g" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--accent2)">Adaptation</strong><br/>
+        Coefficients adapt continuously using LMS (Least Mean Squares) or
+        MMSE minimising RX eye closure. Convergence: ~10⁵–10⁶ symbols.
+        PCIe link training runs adaptation sequences at startup.
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 08  –  CDR
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Clock &amp; Data Recovery (CDR)</h2>
+  <div class="cols">
+    <div class="col2">
+      <p style="font-size:0.82em; margin-bottom:0.5em">The receiver has no reference clock aligned to the incoming data — it must extract timing directly from data transitions. CDR is the circuit that does this.</p>
+
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h">
+            <strong style="color:var(--accent1)">Phase-Locked Loop (PLL) CDR</strong>
+            <ul style="font-size:0.77em; margin-top:0.3em">
+              <li>Phase detector compares data edges vs VCO phase</li>
+              <li>Loop filter averages error signal</li>
+              <li>VCO tracks frequency + phase of incoming data</li>
+              <li>High bandwidth PLL: fast lock, higher jitter peaking</li>
+              <li>Used in: NRZ links, SATA, USB, older Ethernet</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-v">
+            <strong style="color:var(--accent4)">Phase Interpolator (PI) CDR</strong>
+            <ul style="font-size:0.77em; margin-top:0.3em">
+              <li>Fixed RX PLL generates reference phases (e.g. 8)</li>
+              <li>Digital loop selects/blends phase for sampling</li>
+              <li>Higher jitter tolerance bandwidth flexibility</li>
+              <li>Dominant in 56G+ SerDes, PCIe 4/5/6</li>
+              <li>Digital phase controller: binary/bang-bang or Mueller-Müller</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-a" style="margin-top:0.5em">
+        <strong style="color:var(--accent3)">Bang-Bang (BB) Phase Detector</strong>
+        <ul style="font-size:0.79em; margin-top:0.3em">
+          <li>Samples data at two phases: "early" and "late" relative to eye centre</li>
+          <li>1-bit decision: phase error is always ±1 LSB (non-linear)</li>
+          <li>Simple, fast, but causes jitter at steady state (limit cycling)</li>
+          <li>Loop bandwidth set by proportional + integral filter coefficients</li>
+        </ul>
+      </div>
+
+      <div class="card card-g" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--accent2)">Digital CDR (ADC-based, PAM4)</strong><br/>
+        PAM4 at 56G+ often uses a flash ADC (4–6 bits) followed by a fully digital CDR and DFE running at fractional rate. Enables aggressive EQ and adaptation but consumes significant area and power.
+      </div>
+    </div>
+    <div class="col">
+      <!-- CDR loop diagram -->
+      <div class="card" style="text-align:center; padding:0.6em 0.4em">
+        <svg width="185" height="230" viewBox="0 0 185 230">
+          <!-- Data in -->
+          <text x="5" y="42" font-size="8" fill="#8b949e">Data in →</text>
+          <!-- Phase detector -->
+          <rect x="50" y="28" width="85" height="30" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="92" y="48" text-anchor="middle" font-size="9" fill="#58a6ff">Phase Detector</text>
+          <!-- Loop filter -->
+          <rect x="65" y="82" width="55" height="28" rx="4" fill="#1e2736" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="92" y="100" text-anchor="middle" font-size="9" fill="#d2a679">Loop Filter</text>
+          <!-- VCO / PI -->
+          <rect x="55" y="134" width="75" height="28" rx="4" fill="#1e2736" stroke="#bc8cff" stroke-width="1.5"/>
+          <text x="92" y="152" text-anchor="middle" font-size="9" fill="#bc8cff">VCO / PI</text>
+          <!-- Recovered clock output -->
+          <text x="95" y="196" text-anchor="middle" font-size="8" fill="#3fb950">Recovered Clock</text>
+          <!-- Arrows -->
+          <line x1="92" y1="58" x2="92" y2="82" stroke="#8b949e" stroke-width="1.2" marker-end="url(#arr2)"/>
+          <line x1="92" y1="110" x2="92" y2="134" stroke="#8b949e" stroke-width="1.2" marker-end="url(#arr2)"/>
+          <line x1="92" y1="162" x2="92" y2="188" stroke="#3fb950" stroke-width="1.2" marker-end="url(#arr2)"/>
+          <!-- Feedback -->
+          <path d="M 92,188 L 92,210 L 152,210 L 152,43 L 135,43" fill="none" stroke="#bc8cff" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr2)"/>
+          <text x="155" y="130" font-size="7.5" fill="#bc8cff" writing-mode="vertical-rl">Feedback</text>
+          <defs>
+            <marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#8b949e"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="stat stat-v" style="margin-top:0.3em">
+        <div class="num">9 ps</div>
+        <div class="lbl">1 UI at 112 Gbps —<br/>total jitter budget</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 09  –  SECTION: PCIe
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 03</div>
+    <h2>PCIe 5 &amp; 6</h2>
+    <p>Protocol stack · Link training · FLIT mode · Bandwidth scaling</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 10  –  PCIe PROTOCOL STACK
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>PCIe Protocol Stack</h2>
+  <div class="cols">
+    <div class="col">
+      <!-- Layered stack diagram -->
+      <div class="card" style="padding:0.5em 0.7em; margin-bottom:0.5em">
+        <svg width="210" height="220" viewBox="0 0 210 220">
+          <!-- Software -->
+          <rect x="10" y="10"  width="190" height="28" rx="4" fill="#192035" stroke="#bc8cff" stroke-width="1.5"/>
+          <text x="105" y="28" text-anchor="middle" font-size="9" fill="#bc8cff" font-weight="bold">Software / OS Device Driver</text>
+          <!-- TL -->
+          <rect x="10" y="44"  width="190" height="28" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="105" y="57" text-anchor="middle" font-size="9" fill="#58a6ff" font-weight="bold">Transaction Layer (TL)</text>
+          <text x="105" y="69" text-anchor="middle" font-size="7.5" fill="#8b949e">TLPs: MRd, MWr, CplD, Msg, AtomicOp</text>
+          <!-- DL -->
+          <rect x="10" y="78"  width="190" height="28" rx="4" fill="#1e2736" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="105" y="91" text-anchor="middle" font-size="9" fill="#3fb950" font-weight="bold">Data Link Layer (DLL)</text>
+          <text x="105" y="103" text-anchor="middle" font-size="7.5" fill="#8b949e">DLLP: Ack/Nak, FC, PM · LCRC</text>
+          <!-- PHY log -->
+          <rect x="10" y="112" width="190" height="28" rx="4" fill="#1e2736" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="105" y="126" text-anchor="middle" font-size="9" fill="#d2a679" font-weight="bold">PHY — Logical (128b/130b, FLIT)</text>
+          <text x="105" y="138" text-anchor="middle" font-size="7.5" fill="#8b949e">Scrambling · Framing · Link training</text>
+          <!-- PHY elec -->
+          <rect x="10" y="146" width="190" height="28" rx="4" fill="#1e2736" stroke="#f78166" stroke-width="1.5"/>
+          <text x="105" y="160" text-anchor="middle" font-size="9" fill="#f78166" font-weight="bold">PHY — Electrical</text>
+          <text x="105" y="172" text-anchor="middle" font-size="7.5" fill="#8b949e">SerDes · EQ · CDR · Rx detect</text>
+          <!-- Physical medium -->
+          <rect x="10" y="180" width="190" height="28" rx="4" fill="#13191e" stroke="#30363d" stroke-width="1"/>
+          <text x="105" y="198" text-anchor="middle" font-size="9" fill="#8b949e">Differential Pair / Channel</text>
+        </svg>
+      </div>
+    </div>
+    <div class="col2">
+      <div class="card card-v" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent4)">TLP — Transaction Layer Packet</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Header (3–4 DW): type, address, length, requester/completer ID, tag</li>
+          <li>Data payload: 1–1024 DW (4–4096 bytes)</li>
+          <li>ECRC: end-to-end CRC (optional)</li>
+          <li>Transaction types: Memory, I/O, Config, Message, AtomicOp (FetchAdd, CAS, Swap)</li>
+        </ul>
+      </div>
+      <div class="card card-g" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent2)">Flow Control</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Credit-based: receiver advertises header + data credits per VC</li>
+          <li>Transmitter counts credits before sending; no retransmit needed</li>
+          <li>3 traffic classes × 2 VC queues; QoS isolation</li>
+          <li>DLLP Ack/Nak: link-level retry on LCRC failure</li>
+        </ul>
+      </div>
+      <div class="card card-r">
+        <strong style="color:var(--accent5)">PCIe 6.0 — FLIT Mode</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Fixed-size 256-byte FLIT (Flow Control Unit) replaces variable TLP framing</li>
+          <li>Enables FEC (Reed-Solomon + CRC-6) → BER &lt;10⁻¹⁸ from raw 10⁻⁴ PAM4</li>
+          <li>Retransmit removed: FLIT errors recovered by FEC → lower latency</li>
+          <li>64 GT/s per lane × 16 lanes = 256 GB/s (bi-directional: 512 GB/s)</li>
+        </ul>
+      </div>
+      <table style="font-size:0.7em; margin-top:0.5em">
+        <tr><th>Generation</th><th>Encoding</th><th>GT/s</th><th>BW ×16</th><th>Modulation</th></tr>
+        <tr><td>PCIe 3</td><td>128b/130b</td><td>8</td><td>16 GB/s</td><td>NRZ</td></tr>
+        <tr><td>PCIe 4</td><td>128b/130b</td><td>16</td><td>32 GB/s</td><td>NRZ</td></tr>
+        <tr><td>PCIe 5</td><td>128b/130b</td><td>32</td><td>64 GB/s</td><td>NRZ</td></tr>
+        <tr><td>PCIe 6</td><td>FLIT/256B</td><td>64</td><td>128 GB/s</td><td>PAM4</td></tr>
+        <tr><td>PCIe 7*</td><td>FLIT/256B</td><td>128</td><td>256 GB/s</td><td>PAM4</td></tr>
+      </table>
+      <div style="font-size:0.6em; color:var(--text-lo); margin-top:0.2em">* PCIe 7 in specification development (PCI-SIG)</div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 11  –  PCIe LINK TRAINING
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>PCIe Link Training &amp; State Machine (LTSSM)</h2>
+  <div class="cols">
+    <div class="col2">
+      <p style="font-size:0.81em; margin-bottom:0.5em">Before data flows, each PCIe link must negotiate parameters and equalise the channel. The <strong>Link Training and Status State Machine (LTSSM)</strong> manages this sequence.</p>
+
+      <div class="card card-h" style="margin-bottom:0.4em">
+        <strong style="color:var(--accent1)">LTSSM Key States</strong>
+        <div class="cols" style="margin-top:0.3em">
+          <div class="col">
+            <ul style="font-size:0.77em">
+              <li><strong>Detect:</strong> RX detects electrical termination; confirms far-end present</li>
+              <li><strong>Polling:</strong> TX sends TS1/TS2 ordered sets; bit lock</li>
+              <li><strong>Configuration:</strong> lane width + link number negotiated</li>
+              <li><strong>Recovery:</strong> re-equalises on link errors or speed change</li>
+            </ul>
+          </div>
+          <div class="col">
+            <ul style="font-size:0.77em">
+              <li><strong>L0:</strong> normal active operation</li>
+              <li><strong>L0s:</strong> electrical idle; fast exit (~1 µs)</li>
+              <li><strong>L1:</strong> deeper power-down; slow exit (~10–100 µs)</li>
+              <li><strong>L2/L3:</strong> link off; power removed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-a" style="margin-bottom:0.4em">
+        <strong style="color:var(--accent3)">Equalization Phases (PCIe 3+)</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>Phase 1:</strong> TX uses default preset (P0–P10 for PCIe 4/5)</li>
+          <li><strong>Phase 2:</strong> receiver requests TX preset changes via TS2; optimises TX FIR</li>
+          <li><strong>Phase 3:</strong> receiver adapts CTLE &amp; DFE to current TX setting</li>
+          <li><strong>Phase 4:</strong> (PCIe 6) additional FLIT-mode training with FEC check</li>
+          <li>Full 3-phase EQ: ~10–50 ms; critical for boot time &amp; hot-plug latency</li>
+        </ul>
+      </div>
+
+      <div class="card card-g" style="font-size:0.78em">
+        <strong style="color:var(--accent2)">ASPM — Active-State Power Management</strong><br/>
+        Hardware autonomously transitions idle links to L0s/L1 to save power. L1 substates (L1.1, L1.2) use CLKREQ# handshake to gate reference clocks. Critical for edge AI SoCs: a PCIe 5 ×16 link idles at &gt;2 W.
+      </div>
+    </div>
+    <div class="col">
+      <!-- LTSSM simplified state flow -->
+      <div class="card" style="text-align:center; padding:0.5em 0.3em">
+        <svg width="170" height="290" viewBox="0 0 170 290">
+          <!-- States -->
+          <rect x="35" y="5"   width="100" height="24" rx="12" fill="#1e2736" stroke="#f78166" stroke-width="1.5"/>
+          <text x="85" y="21" text-anchor="middle" font-size="8.5" fill="#f78166">Detect</text>
+
+          <rect x="35" y="42"  width="100" height="24" rx="12" fill="#1e2736" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="85" y="58" text-anchor="middle" font-size="8.5" fill="#d2a679">Polling</text>
+
+          <rect x="35" y="79"  width="100" height="24" rx="12" fill="#1e2736" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="85" y="95" text-anchor="middle" font-size="8.5" fill="#d2a679">Configuration</text>
+
+          <rect x="35" y="116" width="100" height="24" rx="12" fill="#1e2736" stroke="#58a6ff" stroke-width="2"/>
+          <text x="85" y="132" text-anchor="middle" font-size="8.5" fill="#58a6ff" font-weight="bold">L0 (Active)</text>
+
+          <rect x="35" y="153" width="100" height="24" rx="12" fill="#1e2736" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="85" y="169" text-anchor="middle" font-size="8.5" fill="#3fb950">L0s</text>
+
+          <rect x="35" y="190" width="100" height="24" rx="12" fill="#1e2736" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="85" y="206" text-anchor="middle" font-size="8.5" fill="#3fb950">L1</text>
+
+          <rect x="35" y="227" width="100" height="24" rx="12" fill="#1e2736" stroke="#bc8cff" stroke-width="1.5"/>
+          <text x="85" y="243" text-anchor="middle" font-size="8.5" fill="#bc8cff">Recovery</text>
+
+          <rect x="35" y="262" width="100" height="24" rx="12" fill="#13191e" stroke="#30363d" stroke-width="1"/>
+          <text x="85" y="278" text-anchor="middle" font-size="8.5" fill="#8b949e">L2 / L3 (Off)</text>
+
+          <!-- Arrows down -->
+          <line x1="85" y1="29"  x2="85" y2="42" stroke="#8b949e" stroke-width="1.2" marker-end="url(#arr3)"/>
+          <line x1="85" y1="66"  x2="85" y2="79" stroke="#8b949e" stroke-width="1.2" marker-end="url(#arr3)"/>
+          <line x1="85" y1="103" x2="85" y2="116" stroke="#8b949e" stroke-width="1.2" marker-end="url(#arr3)"/>
+          <!-- L0 to power states -->
+          <line x1="85" y1="140" x2="85" y2="153" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="85" y1="177" x2="85" y2="190" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="85" y1="214" x2="85" y2="227" stroke="#bc8cff" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="85" y1="251" x2="85" y2="262" stroke="#30363d" stroke-width="1"/>
+          <!-- Recovery back to L0 -->
+          <path d="M 135,239 L 160,239 L 160,128 L 135,128" fill="none" stroke="#bc8cff" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr3)"/>
+
+          <defs>
+            <marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#8b949e"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 12  –  SECTION: UCIe DIE-TO-DIE
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 04</div>
+    <h2>UCIe — Universal Chiplet Interconnect Express</h2>
+    <p>Die-to-die PHY · Bump pitch · Protocol stack · Bandwidth density</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 13  –  UCIe ARCHITECTURE
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>UCIe — Die-to-Die Interconnect Standard</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-v" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent4)">Why a Die-to-Die Standard?</strong><br/>
+        <span style="font-size:0.8em">Chiplet architectures (AMD, Intel, Apple, NVIDIA) use proprietary die-to-die interconnects. UCIe (announced 2022, now v2.0) provides an open standard so chiplets from different vendors can interoperate — the "PCIe of the package."</span>
+      </div>
+
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h">
+            <strong style="color:var(--accent1); font-size:0.85em">UCIe Physical Layer</strong>
+            <ul style="font-size:0.77em; margin-top:0.3em">
+              <li><strong>Standard package:</strong> 55 µm bump pitch; up to 16 GT/s NRZ</li>
+              <li><strong>Advanced package:</strong> 25 µm bump pitch (CoWoS/SoIC); up to 32 GT/s</li>
+              <li>64-bit data bus per module; sideband channel</li>
+              <li>LPCLK forwarded; no CDR needed (common clock)</li>
+              <li>FDI (flexible die interface) optional FEC</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-a">
+            <strong style="color:var(--accent3); font-size:0.85em">Bandwidth Density</strong>
+            <ul style="font-size:0.77em; margin-top:0.3em">
+              <li>Standard: ~1 Tb/s/mm edge bandwidth</li>
+              <li>Advanced: ~10 Tb/s/mm (2 TB/s per mm)</li>
+              <li>PCIe 5 off-package: ~2 GB/s/mm²</li>
+              <li>UCIe advanced: ~10–40 GB/s/mm²</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-g" style="margin-top:0.5em">
+        <strong style="color:var(--accent2)">UCIe Protocol Stack</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>Protocol layer:</strong> PCIe TLP or CXL.io/cache/mem — runs unchanged over UCIe</li>
+          <li><strong>Die-to-Die Adapter (D2D):</strong> flow control, credit management, protocol arbitration</li>
+          <li><strong>Physical layer:</strong> bump interface, clocking, link training, low-power states</li>
+          <li>UCIe 2.0: adds 1.6 Tbps modules, enhanced PM, streaming protocol</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <!-- UCIe vs PCIe bandwidth density comparison -->
+      <div class="card" style="text-align:center; padding:0.6em 0.4em; margin-bottom:0.5em">
+        <svg width="185" height="175" viewBox="0 0 185 175">
+          <text x="92" y="12" text-anchor="middle" font-size="8" fill="#8b949e">Bandwidth density comparison</text>
+          <!-- Bars -->
+          <!-- PCIe 5 off-pkg -->
+          <rect x="15" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="15" y="121" width="20" height="24" rx="2" fill="#58a6ff"/>
+          <text x="25" y="158" text-anchor="middle" font-size="7" fill="#58a6ff">PCIe 5</text>
+          <!-- UCIe std -->
+          <rect x="55" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="55" y="89" width="20" height="56" rx="2" fill="#3fb950"/>
+          <text x="65" y="158" text-anchor="middle" font-size="7" fill="#3fb950">UCIe Std</text>
+          <!-- UCIe adv -->
+          <rect x="95" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="95" y="25" width="20" height="120" rx="2" fill="#d2a679"/>
+          <text x="105" y="158" text-anchor="middle" font-size="7" fill="#d2a679">UCIe Adv</text>
+          <!-- HBM interface -->
+          <rect x="135" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="135" y="50" width="20" height="95" rx="2" fill="#bc8cff"/>
+          <text x="145" y="158" text-anchor="middle" font-size="7" fill="#bc8cff">HBM PHY</text>
+          <!-- Y axis label -->
+          <text x="8" y="25" font-size="7" fill="#8b949e" writing-mode="vertical-rl">BW density →</text>
+          <!-- Value labels -->
+          <text x="25" y="118" text-anchor="middle" font-size="7" fill="#e6edf3">2</text>
+          <text x="65" y="86" text-anchor="middle" font-size="7" fill="#e6edf3">10</text>
+          <text x="105" y="44" text-anchor="middle" font-size="7" fill="#1e1e1e">40</text>
+          <text x="145" y="66" text-anchor="middle" font-size="7" fill="#1e1e1e">30</text>
+          <text x="168" y="145" font-size="6.5" fill="#8b949e">GB/s/mm²</text>
+        </svg>
+      </div>
+      <div class="stat stat-v">
+        <div class="num">20×</div>
+        <div class="lbl">UCIe advanced vs PCIe 5<br/>bandwidth density</div>
+      </div>
+      <div class="card card-r" style="margin-top:0.4em; font-size:0.76em">
+        <strong style="color:var(--accent5)">Key benefit:</strong> UCIe collapses the on-package BW gap — a 1 mm edge of UCIe advanced delivers more bandwidth than an entire PCIe 5 ×16 link.
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 14  –  SECTION: HIGH-SPEED ETHERNET
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 05</div>
+    <h2>High-Speed Ethernet &amp; Network I/O</h2>
+    <p>400G · 800G · 1.6T · RDMA · SmartNIC integration in ML SoCs</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 15  –  400G / 800G ETHERNET
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>400G / 800G / 1.6T Ethernet for AI Clusters</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-h">
+        <strong style="color:var(--accent1)">Ethernet Rate Ladder</strong>
+        <table style="font-size:0.73em; margin-top:0.4em">
+          <tr><th>Standard</th><th>Lanes</th><th>Rate/lane</th><th>Modulation</th></tr>
+          <tr><td>100GbE</td><td>4</td><td>25G NRZ</td><td>NRZ</td></tr>
+          <tr><td>400GbE</td><td>8</td><td>50G PAM4</td><td>PAM4</td></tr>
+          <tr><td>800GbE</td><td>8</td><td>100G PAM4</td><td>PAM4</td></tr>
+          <tr><td>1.6TbE</td><td>8</td><td>200G PAM4</td><td>PAM4</td></tr>
+        </table>
+      </div>
+      <div class="card card-a" style="margin-top:0.5em">
+        <strong style="color:var(--accent3)">FEC — Forward Error Correction</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Raw PAM4 BER ~10⁻⁴ → must correct to &lt;10⁻¹⁵ for Ethernet</li>
+          <li><strong>RS(544,514) KP4:</strong> standard for 100G+ PAM4; adds 6% overhead</li>
+          <li><strong>RS(272,258) KR4:</strong> lower latency; used in 25G NRZ backplane</li>
+          <li>FEC latency: ~50–200 ns; must be budgeted in cut-through switch design</li>
+          <li>OFEC (Open FEC): IEEE 802.3df for 800G+; enhanced error floors</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-g">
+        <strong style="color:var(--accent2)">RDMA &amp; SmartNIC Integration</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>RDMA over Converged Ethernet (RoCEv2):</strong> GPU-to-GPU memory transfers without CPU involvement</li>
+          <li>NVIDIA NCCL uses RoCEv2 (or NVLink) for all-reduce collective operations</li>
+          <li><strong>SmartNIC / DPU:</strong> offloads transport layer (TCP/RDMA), encryption, compression onto ARM cores + FPGA fabric — e.g. NVIDIA BlueField-3, Intel IPU</li>
+          <li>Integrated in SoC: Qualcomm Cloud AI 100, Amazon Trainium2 — custom Ethernet MAC embedded with the ML accelerator</li>
+        </ul>
+      </div>
+      <div class="card card-v" style="margin-top:0.5em">
+        <strong style="color:var(--accent4)">AI Cluster Networking</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Scale-up (intra-server): NVLink 4 @ 900 GB/s, UCIe</li>
+          <li>Scale-out (inter-server): 400G/800G InfiniBand or RoCEv2 Ethernet</li>
+          <li>NVIDIA Quantum-X800: 800G IB, 1.6 Tbps switch capacity</li>
+          <li>Google Jupiter: petabit-scale fabric, 100G per host link</li>
+        </ul>
+      </div>
+      <div class="stat stat-g" style="margin-top:0.4em">
+        <div class="num">1.6 Tb/s</div>
+        <div class="lbl">per-port Ethernet<br/>target for AI fabric (2025+)</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 16  –  SECTION: SIGNAL INTEGRITY
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 06</div>
+    <h2>Signal Integrity</h2>
+    <p>Channel modelling · S-parameters · Eye mask · Jitter decomposition · SI closure</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 17  –  SIGNAL INTEGRITY FUNDAMENTALS
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Signal Integrity — Channel Modelling &amp; Closure</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-r">
+        <strong style="color:var(--accent5)">Loss Budget</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>PCB trace:</strong> 0.5–1.5 dB/GHz (FR4); lower loss with low-Dk/Df laminates (Megtron 7, Tachyon 100G)</li>
+          <li><strong>Via transition:</strong> 0.5–2 dB stub resonance; back-drilling mandatory at 56G+</li>
+          <li><strong>Connector:</strong> 1–4 dB at Nyquist</li>
+          <li><strong>Package:</strong> 0.5–1.5 dB (RDL trace + bump stack)</li>
+          <li>Total PCIe 5 channel loss budget: ≤36 dB at Nyquist (16 GHz)</li>
+          <li>PCIe 6 PAM4: ≤32 dB at half-Nyquist (16 GHz)</li>
+        </ul>
+      </div>
+      <div class="card card-h" style="margin-top:0.5em">
+        <strong style="color:var(--accent1)">S-Parameters &amp; Channel Characterisation</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>S21: insertion loss (signal path); S11: return loss (reflection)</li>
+          <li>NEXT/FEXT: near/far-end crosstalk between differential pairs</li>
+          <li>Measured via VNA; simulated with 3D EM (HFSS, CST, Cadence SI)</li>
+          <li>COM (Channel Operating Margin): IEEE 802.3 figure of merit; COM ≥ 3 dB required</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-a">
+        <strong style="color:var(--accent3)">Jitter Decomposition</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>TJ (Total Jitter):</strong> measured at BER 10⁻¹²; TJ = DJ + Q×RJ</li>
+          <li><strong>DJ (Deterministic Jitter):</strong> bounded; ISI, crosstalk, PJ, DCD</li>
+          <li><strong>RJ (Random Jitter):</strong> Gaussian; from thermal noise and PLL phase noise</li>
+          <li>BERT: Bit Error Rate Tester measures bathtub curve at each pattern</li>
+          <li>PRBS31: pseudo-random pattern stresses ISI; PRBS7 for conformance</li>
+        </ul>
+      </div>
+      <div class="card card-g" style="margin-top:0.5em">
+        <strong style="color:var(--accent2)">SI Closure Flow</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>Schematic: impedance stack-up, via models, connector IBIS-AMI</li>
+          <li>Pre-layout: topology analysis, loss budget spreadsheet</li>
+          <li>Post-layout: channel extraction (Q3D, HyperLynx), COM simulation</li>
+          <li>IBIS-AMI co-simulation: TX model → channel → RX model with EQ enabled</li>
+          <li>Post-silicon: VNA S-param measurement + BERT margin sweep</li>
+        </ul>
+      </div>
+      <div class="stat stat-r" style="margin-top:0.3em">
+        <div class="num">36 dB</div>
+        <div class="lbl">max channel insertion loss<br/>PCIe 5.0 at 16 GHz Nyquist</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 18  –  SECTION: CO-PACKAGED OPTICS
+====================================================================== -->
+<section data-background-color="#0a0f1a">
+  <div class="section-slide">
+    <div class="section-num">SECTION 07</div>
+    <h2>Co-Packaged Optics</h2>
+    <p>CPO · Silicon photonics · EIC+PIC integration · Pluggable vs CPO</p>
+  </div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 19  –  CO-PACKAGED OPTICS
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Co-Packaged Optics (CPO)</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-r" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent5)">The Pluggable Optical Module Problem</strong><br/>
+        <span style="font-size:0.8em">At 400G+, pluggable QSFP modules sit at the front panel — 1–2 metres of electrical trace between switch ASIC and optics. At 112 Gbps PAM4 per lane this trace dissipates ~5–10 W per module just in SerDes and retimer power. CPO moves the photonic engine inside the package, replacing long electrical traces with micron-scale optical waveguides.</span>
+      </div>
+
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h">
+            <strong style="color:var(--accent1); font-size:0.85em">Silicon Photonics PIC</strong>
+            <ul style="font-size:0.77em; margin-top:0.3em">
+              <li>Mach-Zehnder modulators (MZM) or micro-ring modulators (MRM)</li>
+              <li>Germanium photodetectors (25+ GHz BW)</li>
+              <li>Spot-size converters for fibre coupling</li>
+              <li>Fabricated on 200–300 mm Si wafer (GlobalFoundries, TSMC, imec)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-a">
+            <strong style="color:var(--accent3); font-size:0.85em">EIC + PIC Integration</strong>
+            <ul style="font-size:0.77em; margin-top:0.3em">
+              <li>Electronic IC (laser driver, TIA) flip-chipped onto PIC</li>
+              <li>Bump pitch 50–100 µm; µm-scale electrical trace to modulator</li>
+              <li>External CW laser (co-packaged or fibre-in)</li>
+              <li>WDM multiplexing: 8–16 wavelengths per fibre</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-g" style="margin-top:0.5em">
+        <strong style="color:var(--accent2)">CPO vs Pluggable: Power Comparison</strong>
+        <table style="font-size:0.73em; margin-top:0.3em">
+          <tr><th></th><th>Pluggable 400G</th><th>CPO 400G</th><th>CPO 1.6T</th></tr>
+          <tr><td>Optical module power</td><td>~12 W</td><td>~3 W</td><td>~6 W</td></tr>
+          <tr><td>SerDes reach required</td><td>Long (PCB)</td><td>Ultra-short</td><td>Ultra-short</td></tr>
+          <tr><td>pJ/bit (optical)</td><td>~30</td><td>~8</td><td>~4</td></tr>
+          <tr><td>Board area</td><td>Front-panel</td><td>Co-packaged</td><td>Co-packaged</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="col">
+      <!-- CPO architecture diagram -->
+      <div class="card" style="text-align:center; padding:0.6em 0.3em; margin-bottom:0.5em">
+        <svg width="180" height="240" viewBox="0 0 180 240">
+          <!-- Switch ASIC -->
+          <rect x="20" y="10" width="140" height="45" rx="4" fill="#1e2736" stroke="#58a6ff" stroke-width="2"/>
+          <text x="90" y="30" text-anchor="middle" font-size="9" fill="#58a6ff" font-weight="bold">Switch ASIC</text>
+          <text x="90" y="45" text-anchor="middle" font-size="7.5" fill="#8b949e">SerDes (ultra-short reach)</text>
+
+          <!-- PIC -->
+          <rect x="20" y="70" width="140" height="45" rx="4" fill="#192035" stroke="#3fb950" stroke-width="2"/>
+          <text x="90" y="88" text-anchor="middle" font-size="9" fill="#3fb950" font-weight="bold">Silicon Photonics PIC</text>
+          <text x="90" y="103" text-anchor="middle" font-size="7.5" fill="#8b949e">MZM · Ge PD · WDM MUX</text>
+
+          <!-- EIC -->
+          <rect x="20" y="130" width="140" height="38" rx="4" fill="#1e2048" stroke="#bc8cff" stroke-width="1.5"/>
+          <text x="90" y="147" text-anchor="middle" font-size="9" fill="#bc8cff" font-weight="bold">EIC (Driver + TIA)</text>
+          <text x="90" y="160" text-anchor="middle" font-size="7.5" fill="#8b949e">flip-chipped on PIC</text>
+
+          <!-- Fibre -->
+          <rect x="50" y="183" width="80" height="25" rx="12" fill="#13191e" stroke="#d2a679" stroke-width="1.5"/>
+          <text x="90" y="199" text-anchor="middle" font-size="8.5" fill="#d2a679">Optical Fibre</text>
+
+          <!-- CW Laser -->
+          <rect x="130" y="183" width="45" height="25" rx="4" fill="#13191e" stroke="#f78166" stroke-width="1"/>
+          <text x="152" y="197" text-anchor="middle" font-size="7.5" fill="#f78166">CW Laser</text>
+
+          <!-- Connections -->
+          <line x1="90" y1="55"  x2="90" y2="70" stroke="#58a6ff" stroke-width="2"/>
+          <line x1="90" y1="115" x2="90" y2="130" stroke="#3fb950" stroke-width="1.5"/>
+          <line x1="90" y1="168" x2="90" y2="183" stroke="#d2a679" stroke-width="1.5"/>
+          <line x1="145" y1="155" x2="145" y2="183" stroke="#f78166" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- Package boundary -->
+          <rect x="5" y="3" width="170" height="220" rx="8" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="6,4"/>
+          <text x="90" y="235" text-anchor="middle" font-size="7" fill="#30363d">Package boundary</text>
+        </svg>
+      </div>
+      <div class="stat stat-g">
+        <div class="num">4×</div>
+        <div class="lbl">lower power vs<br/>pluggable at 400G</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 20  –  OTHER HIGH-SPEED I/O: NVLink, CXL, USB4
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Other Critical High-Speed I/O Standards</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card card-v">
+        <strong style="color:var(--accent4)">NVLink 4 &amp; NVLink-C2C</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li><strong>NVLink 4:</strong> 900 GB/s bidirectional between H100 GPUs (18 links × 50 GB/s)</li>
+          <li>Proprietary NVIDIA protocol; cache-coherent GPU-to-GPU</li>
+          <li>NVSwitch 3: 57.6 TB/s bisection BW for 256-GPU DGX SuperPOD</li>
+          <li><strong>NVLink-C2C:</strong> Grace-Hopper Superchip — chip-to-chip 900 GB/s, replaces PCIe</li>
+          <li>C2C uses UCIe-like short-reach die-to-die at 25 µm bump pitch</li>
+        </ul>
+      </div>
+      <div class="card card-a" style="margin-top:0.5em">
+        <strong style="color:var(--accent3)">USB4 v2.0 / Thunderbolt 5</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>80 Gbps asymmetric; PAM4 on existing USB-C cable</li>
+          <li>Tunnels: DisplayPort 2.1, PCIe 4, USB 3.2</li>
+          <li>Thunderbolt 5: Intel brand; 120 Gbps burst (asymmetric bandwidth boost)</li>
+          <li>Used in Edge AI laptops for external GPU / accelerator dongles</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-g">
+        <strong style="color:var(--accent2)">CXL PHY (CXL 2.0 / 3.1)</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>CXL runs over PCIe PHY — same SerDes, same lane speeds</li>
+          <li>CXL 2.0: PCIe 5.0 PHY (32 GT/s NRZ)</li>
+          <li>CXL 3.1: PCIe 6.0 PHY (64 GT/s PAM4 FLIT)</li>
+          <li>Enables coherent memory pooling over standard PCIe infrastructure</li>
+          <li>No dedicated PHY needed — leverage existing PCIe IP</li>
+        </ul>
+      </div>
+      <div class="card card-h" style="margin-top:0.5em">
+        <strong style="color:var(--accent1)">Infinity Fabric / xGMI (AMD)</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>AMD scale-out link connecting GPUs and APUs</li>
+          <li>MI300X: xGMI3 @ 128 GB/s per link</li>
+          <li>Coherent: GPU HSA peer access; unified address space</li>
+          <li>Evolved from HyperTransport; proprietary but open to partners</li>
+        </ul>
+      </div>
+      <table style="font-size:0.68em; margin-top:0.5em">
+        <tr><th>Standard</th><th>BW</th><th>Coherent</th><th>Reach</th></tr>
+        <tr><td>NVLink 4</td><td>900 GB/s</td><td>Yes</td><td>On-board</td></tr>
+        <tr><td>UCIe Adv</td><td>10+ TB/s/mm</td><td>Via PCIe/CXL</td><td>On-pkg</td></tr>
+        <tr><td>PCIe 6 ×16</td><td>128 GB/s</td><td>Via CXL</td><td>Board</td></tr>
+        <tr><td>800GbE</td><td>100 GB/s</td><td>No (RDMA)</td><td>Rack</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 21  –  SERDES POWER & NEXT-GEN TRENDS
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>SerDes Power Trends &amp; Next-Generation Directions</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="card card-r" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent5)">SerDes Power — The Key Bottleneck</strong>
+        <ul style="font-size:0.8em; margin-top:0.3em">
+          <li>56G NRZ SerDes: ~5–8 pJ/bit (TX+RX); 10 Tbps aggregate = 50–80 W</li>
+          <li>112G PAM4 SerDes: ~3–5 pJ/bit; DSP ADC dominates power</li>
+          <li>UCIe short-reach: ~0.5–1 pJ/bit; no equalisation needed</li>
+          <li>Optical (CPO): ~4–8 pJ/bit total including laser; but scales better with reach</li>
+          <li>Target for 1.6T: &lt;2 pJ/bit electrical SerDes</li>
+        </ul>
+      </div>
+
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h">
+            <strong style="color:var(--accent1); font-size:0.85em">Process Node Scaling</strong>
+            <ul style="font-size:0.76em; margin-top:0.3em">
+              <li>SerDes benefits from digital node shrink (DSP, CDR)</li>
+              <li>Analogue (VCO, driver) needs specialised device options</li>
+              <li>Mixed-signal design at N3/N5: NMOS-only SerDes PHY emerging</li>
+              <li>3D integration: SerDes on mature node, digital on leading node</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-a">
+            <strong style="color:var(--accent3); font-size:0.85em">224G PAM4 / Beyond</strong>
+            <ul style="font-size:0.76em; margin-top:0.3em">
+              <li>224G PAM4 in R&D: ~112 GBaud symbol rate</li>
+              <li>Requires DSP with &gt;8-bit ADC; full digital EQ</li>
+              <li>Channel loss at 56 GHz Nyquist: &gt;40 dB → optical inevitable</li>
+              <li>PAM6 / PAM8 explored for beyond 224G; severe SNR penalty</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card-g" style="margin-bottom:0.5em">
+        <strong style="color:var(--accent2)">Photonic Roadmap</strong>
+        <ul style="font-size:0.78em; margin-top:0.3em">
+          <li>2024: 400G CPO sampling (Broadcom Humboldt, Marvell Spica)</li>
+          <li>2025–26: 800G CPO in hyperscale switch ASIC ramp</li>
+          <li>2027+: 1.6T CPO; per-chip optical I/O &gt;10 Tbps</li>
+          <li>ML SoC: co-packaged photonic die for scale-out interconnect</li>
+        </ul>
+      </div>
+      <div class="stat stat-a">
+        <div class="num">224G</div>
+        <div class="lbl">next-gen lane rate<br/>PAM4 in R&amp;D (2025+)</div>
+      </div>
+      <div class="stat stat-v" style="margin-top:0.4em">
+        <div class="num">&lt;2 pJ</div>
+        <div class="lbl">target energy/bit for<br/>1.6T-era SerDes</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 22  –  SUMMARY
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <h2>Summary</h2>
+  <div class="cols">
+    <div class="col2">
+      <div class="cols">
+        <div class="col">
+          <div class="card card-h" style="font-size:0.78em">
+            <strong style="color:var(--accent1)">SerDes Architecture</strong><br/>
+            TX PLL + FIR serialiser; RX CTLE + DFE + CDR deserialiser. 112G PAM4 state-of-art with ADC-based digital DSP. Jitter budget &lt;3 ps rms at 1 UI = 9 ps.
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-a" style="font-size:0.78em">
+            <strong style="color:var(--accent3)">NRZ vs PAM4</strong><br/>
+            PAM4 halves baud rate for same bit rate; reduces channel bandwidth requirement. 9.5 dB SNR penalty demands aggressive EQ and mandatory FEC (RS KP4).
+          </div>
+        </div>
+      </div>
+      <div class="cols" style="margin-top:0.5em">
+        <div class="col">
+          <div class="card card-v" style="font-size:0.78em">
+            <strong style="color:var(--accent4)">PCIe 5 &amp; 6</strong><br/>
+            PCIe 5: 32 GT/s NRZ, 64 GB/s ×16. PCIe 6: 64 GT/s PAM4 FLIT mode, 128 GB/s ×16, inline FEC. PCIe 7 targets 256 GB/s.
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-g" style="font-size:0.78em">
+            <strong style="color:var(--accent2)">UCIe</strong><br/>
+            Open die-to-die standard. Advanced package: 25 µm pitch, 10+ TB/s/mm bandwidth density — 20× denser than PCIe off-package. PCIe/CXL protocol tunnelled unchanged.
+          </div>
+        </div>
+      </div>
+      <div class="card card-r" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--accent5)">The Trajectory:</strong>
+        Electrical SerDes pushes toward 224G PAM4; beyond that, insertion loss mandates optical solutions.
+        Co-packaged optics will dominate rack-scale AI interconnect by 2027, reducing the optical module power by 4–8× vs pluggables and enabling per-chip I/O bandwidths exceeding 10 Tbps.
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="font-size:0.78em; margin-bottom:0.5em">
+        <strong>Up Next in the Series</strong>
+        <ul style="margin-top:0.3em">
+          <li>05 · AI / ML Accelerator Architectures</li>
+          <li>06 · SoCs for ML Inference</li>
+          <li>07 · Security in SoC Design</li>
+        </ul>
+      </div>
+      <div class="card" style="font-size:0.7em">
+        <strong>References</strong>
+        <ul style="font-size:0.9em">
+          <li>PCI-SIG: PCIe 5.0 / 6.0 Base Specifications</li>
+          <li>UCIe Consortium: UCIe 1.1 / 2.0 Specifications</li>
+          <li>IEEE 802.3 (400G/800G/1.6T Ethernet)</li>
+          <li>JEDEC JESD239 (GDDR7 — PAM4 signalling)</li>
+          <li>Razavi, B., <em>Design of Analog CMOS Integrated Circuits</em>, 2nd ed.</li>
+          <li>Dally &amp; Poulton, <em>Digital Systems Engineering</em>, Cambridge</li>
+          <li>Horii, Y. et al., "112 Gbps PAM4 SerDes in 5nm CMOS," ISSCC 2023</li>
+          <li>Nagarajan, V. et al., "Co-packaged Optics for AI," OFC 2024</li>
+          <li>NVIDIA H100 / NVLink-C2C Architecture White Papers</li>
+          <li>Broadcom Humboldt CPO Switch ASIC, 2024</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
+</section>
+
+<!-- =====================================================================
+     SLIDE 23  –  CLOSING
+====================================================================== -->
+<section data-background-color="#0d1117">
+  <div class="title-slide" style="padding-top:2em">
+    <div class="hex-badge">⬡</div>
+    <div class="series">Modern SoC Design · Presentation 04</div>
+    <h1 style="font-size:1.7em">High-Speed SerDes &amp; I/O</h1>
+    <p style="margin-top:1em; font-size:0.75em; color:var(--text-lo)">
+      Part of an open series exploring modern SoC design end-to-end.<br/>
+      All presentations available at
+      <a href="https://brendanjameslynskey.github.io/SoC/">brendanjameslynskey.github.io/SoC</a>
+    </p>
+    <div style="margin-top:1.2em">
+      <span class="tag tag-b">SerDes</span><span class="tag tag-g">PCIe 6</span>
+      <span class="tag tag-a">PAM4</span><span class="tag tag-v">UCIe</span>
+      <span class="tag tag-r">CDR</span><span class="tag">CTLE / DFE</span>
+      <span class="tag">Co-packaged Optics</span><span class="tag">800G Ethernet</span>
+    </div>
+    <p style="margin-top:1.5em; font-size:0.6em; color:var(--text-lo)">
+      Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf to URL
+    </p>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    controls: true,
+    progress: true,
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    plugins: [ RevealHighlight, RevealNotes ],
+    highlight: { highlightOnLoad: true }
+  });
+</script>
+</body>
+</html>
