@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Security in SoC Design — Modern SoC Series</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css"/>
+<style>
+:root {
+  --bg:      #0d0f14;
+  --surface: #13161e;
+  --panel:   #1a1f2e;
+  --border:  #2a3048;
+  --accent:  #7eb8f7;
+  --accent2: #f7a05a;
+  --accent3: #7ef7c0;
+  --accent4: #f76e7e;
+  --muted:   #8892aa;
+  --text:    #dde4f0;
+  --white:   #ffffff;
+}
+
+.reveal-viewport { background: var(--bg); }
+.reveal .slides { font-family: 'DM Sans', sans-serif; }
+
+/* ── slide base ── */
+.reveal .slides section {
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ── top accent bar ── */
+.reveal .slides section::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+}
+
+/* ── headings ── */
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: 'Playfair Display', serif;
+  color: var(--white);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.reveal h1 { font-size: 2.2em; line-height: 1.1; }
+.reveal h2 { font-size: 1.55em; line-height: 1.15; margin-bottom: 0.6em; }
+.reveal h3 { font-size: 1.1em; color: var(--accent); margin-bottom: 0.4em; }
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.8em; display: block;
+}
+
+/* ── body text ── */
+.reveal p { font-size: 0.78em; line-height: 1.7; color: var(--text); margin: 0.4em 0; }
+.reveal ul { list-style: none; padding: 0; margin: 0; }
+.reveal ul li {
+  font-size: 0.75em; line-height: 1.65; color: var(--text);
+  padding-left: 1.2em; position: relative; margin-bottom: 0.18em;
+}
+.reveal ul li::before { content: '·'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+.reveal ul li.a2::before { color: var(--accent2); }
+.reveal ul li.a3::before { color: var(--accent3); }
+.reveal ul li.a4::before { color: var(--accent4); }
+
+/* ── layout helpers ── */
+.cols { display: grid; gap: 1.4em; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-60-40 { grid-template-columns: 60fr 40fr; }
+.cols-40-60 { grid-template-columns: 40fr 60fr; }
+
+.panel {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 5px; padding: 1em 1.1em;
+}
+.panel.accent-left  { border-left: 3px solid var(--accent);  }
+.panel.accent2-left { border-left: 3px solid var(--accent2); }
+.panel.accent3-left { border-left: 3px solid var(--accent3); }
+.panel.accent4-left { border-left: 3px solid var(--accent4); }
+.panel h3 { margin-top: 0; }
+
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52em; letter-spacing: 0.06em;
+  padding: 0.2em 0.6em; border-radius: 2px; display: inline-block;
+  margin-bottom: 0.5em;
+}
+.tag-blue  { background: rgba(126,184,247,0.15); color: var(--accent);  border: 1px solid rgba(126,184,247,0.3); }
+.tag-amber { background: rgba(247,160, 90,0.15); color: var(--accent2); border: 1px solid rgba(247,160, 90,0.3); }
+.tag-green { background: rgba(126,247,192,0.15); color: var(--accent3); border: 1px solid rgba(126,247,192,0.3); }
+.tag-red   { background: rgba(247,110,126,0.15); color: var(--accent4); border: 1px solid rgba(247,110,126,0.3); }
+
+.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
+.dim  { color: var(--muted); }
+.hl   { color: var(--accent); font-weight: 600; }
+.hl2  { color: var(--accent2); font-weight: 600; }
+.hl3  { color: var(--accent3); font-weight: 600; }
+.hl4  { color: var(--accent4); font-weight: 600; }
+
+.slide-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5em; color: var(--muted);
+  position: absolute; top: 1.2em; right: 1.4em;
+  letter-spacing: 0.12em;
+}
+
+hr.div { border: none; border-top: 1px solid var(--border); margin: 0.8em 0; }
+
+/* ── canvas / viz containers ── */
+.canvas-wrap {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 5px; padding: 0.6em;
+  display: flex; align-items: center; justify-content: center;
+}
+canvas { display: block; }
+
+/* ── code blocks ── */
+.reveal pre {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; font-size: 0.6em; margin: 0;
+  box-shadow: none;
+}
+.reveal pre code { padding: 0.8em 1em; }
+
+/* ── title slide ── */
+.title-slide {
+  display: flex; flex-direction: column;
+  justify-content: center; padding: 2.5rem 3rem;
+  min-height: 100%;
+}
+.title-slide h1 { font-size: 2.6em; margin-bottom: 0.3em; }
+.title-slide .subtitle {
+  font-size: 0.8em; color: var(--muted); max-width: 36em; line-height: 1.7;
+  margin-top: 0.6em;
+}
+.title-slide .meta {
+  margin-top: 2em;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em; color: var(--muted); letter-spacing: 0.1em;
+  border-top: 1px solid var(--border); padding-top: 1em;
+  display: flex; gap: 2.5em;
+}
+
+/* ── diagram elements ── */
+.box {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.4em 0.7em;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62em;
+  text-align: center; color: var(--text);
+}
+.box.blue  { border-color: var(--accent);  color: var(--accent);  }
+.box.amber { border-color: var(--accent2); color: var(--accent2); }
+.box.green { border-color: var(--accent3); color: var(--accent3); }
+.box.red   { border-color: var(--accent4); color: var(--accent4); }
+
+.stat-row { display: flex; gap: 1em; margin: 0.6em 0; }
+.stat {
+  flex: 1; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.7em 0.9em; text-align: center;
+}
+.stat .val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5em; color: var(--accent); display: block; line-height: 1;
+}
+.stat .lbl { font-size: 0.55em; color: var(--muted); display: block; margin-top: 0.3em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ══════════════════════════════════════════════
+     01 · TITLE
+     ══════════════════════════════════════════════ -->
+<section>
+<div class="title-slide">
+  <span class="eyebrow">Modern SoC Design · 07</span>
+  <h1>Security in<br/>SoC Design</h1>
+  <p class="subtitle">
+    Hardware root of trust · Secure boot · TrustZone · Side-channel countermeasures ·
+    Physical Unclonable Functions · Crypto accelerators · Supply-chain security
+  </p>
+  <div class="meta">
+    <span>22 slides</span>
+    <span>Modern SoC Design Series</span>
+    <span>← → to navigate · Esc overview · F fullscreen</span>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     02 · WHY HARDWARE SECURITY MATTERS
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">02 / 22</div>
+<span class="eyebrow">Motivation</span>
+<h2>Why Hardware Security Matters</h2>
+<div class="stat-row">
+  <div class="stat"><span class="val">$8T</span><span class="lbl">Projected global cybercrime cost 2025</span></div>
+  <div class="stat"><span class="val">~40%</span><span class="lbl">Attacks exploit hardware/firmware, not software alone</span></div>
+  <div class="stat"><span class="val">∞</span><span class="lbl">Hardware vulns often unpatchable in field</span></div>
+</div>
+<div class="cols cols-2" style="margin-top:0.9em;">
+  <div class="panel accent-left">
+    <h3>The Threat Landscape</h3>
+    <ul>
+      <li>Software security depends on hardware trust — if silicon is compromised, all SW protections fail</li>
+      <li>Side-channel attacks extract secrets without breaking algorithms (Spectre, Meltdown, power analysis)</li>
+      <li>Supply-chain attacks: counterfeit ICs, malicious foundry modifications, Trojan insertion</li>
+      <li>Physical attacks: fault injection, probing, reverse engineering of packaged die</li>
+      <li>AI/ML inference models are high-value IP requiring protection at inference time</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Why SW-Only Security Fails</h3>
+    <ul>
+      <li class="a2">DRAM cold-boot: keys extracted from powered-off DRAM at −20 °C</li>
+      <li class="a2">DMA attacks via PCIe/Thunderbolt bypass OS memory protection</li>
+      <li class="a2">Hypervisor exploits: VM escape breaks confidential compute guarantees</li>
+      <li class="a2">Rowhammer: bit-flip via DRAM access patterns bypasses privilege separation</li>
+      <li class="a2">Hardware root of trust is the only reliable anchor for the chain of trust</li>
+    </ul>
+  </div>
+</div>
+<p style="margin-top:0.8em;" class="dim">
+  Regulation is hardening requirements: PSA Certified, FIPS 140-3, Common Criteria EAL5+, DO-326A for avionics, and
+  the EU Cyber Resilience Act mandate hardware security attestation for connected products.
+</p>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     03 · SECURITY ARCHITECTURE OVERVIEW
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">03 / 22</div>
+<span class="eyebrow">Architecture</span>
+<h2>SoC Security Architecture Overview</h2>
+<p style="margin-bottom:0.8em;">A secure SoC is built in concentric rings of trust anchored in immutable hardware.</p>
+<div id="arch-canvas-wrap" class="canvas-wrap" style="height:300px;">
+  <canvas id="archCanvas" width="860" height="280"></canvas>
+</div>
+<div class="cols cols-3" style="margin-top:0.9em;">
+  <div class="panel accent-left" style="font-size:0.9em;">
+    <h3>Hardware (immutable)</h3>
+    <ul>
+      <li>Root-of-Trust silicon block</li>
+      <li>OTP/eFuse key storage</li>
+      <li>True random number generator (TRNG)</li>
+      <li>Crypto engine (AES, SHA, RSA/ECC)</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left" style="font-size:0.9em;">
+    <h3>Firmware (attested)</h3>
+    <ul>
+      <li class="a2">Secure Boot ROM (immutable)</li>
+      <li class="a2">Trusted Firmware-A / OP-TEE</li>
+      <li class="a2">Measured boot, PCR extension</li>
+      <li class="a2">Secure OS / TEE runtime</li>
+    </ul>
+  </div>
+  <div class="panel accent3-left" style="font-size:0.9em;">
+    <h3>Software (isolated)</h3>
+    <ul>
+      <li class="a3">TrustZone Secure World apps</li>
+      <li class="a3">Hypervisor confidential VMs</li>
+      <li class="a3">OS kernel, user apps (Normal World)</li>
+      <li class="a3">Remote attestation endpoint</li>
+    </ul>
+  </div>
+</div>
+<script>
+(function(){
+  const c = document.getElementById('archCanvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  const layers = [
+    { label:'Application Layer (Rich OS, User Apps)', color:'#2a3048', text:'#8892aa', y:0,   h:46 },
+    { label:'Trusted Execution Environment (TEE / Secure OS)', color:'#1e2a3a', text:'#7eb8f7', y:48,  h:46 },
+    { label:'Secure Boot & Trusted Firmware', color:'#1a2535', text:'#f7a05a', y:96,  h:46 },
+    { label:'Hardware Root of Trust (HRoT)', color:'#151d2c', text:'#7ef7c0', y:144, h:46 },
+    { label:'Silicon (Physical Unclonable Functions, eFuse OTP)', color:'#101620', text:'#f76e7e', y:192, h:44 },
+  ];
+  layers.forEach(l => {
+    ctx.fillStyle = l.color;
+    ctx.strokeStyle = '#2a3048';
+    ctx.lineWidth = 1;
+    const margin = (l.y / 240) * 40;
+    ctx.beginPath();
+    ctx.roundRect(margin, l.y+4, W - margin*2, l.h, 4);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = l.text;
+    ctx.font = '500 13px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(l.label, W/2, l.y + l.h/2 + 5);
+  });
+  // lock icon at bottom right
+  ctx.fillStyle = '#f76e7e';
+  ctx.font = '22px serif';
+  ctx.fillText('🔒', W - 52, 228);
+})();
+</script>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     04 · HARDWARE ROOT OF TRUST
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">04 / 22</div>
+<span class="eyebrow">Hardware Root of Trust</span>
+<h2>Hardware Root of Trust (HRoT)</h2>
+<div class="cols cols-60-40">
+  <div>
+    <p>The HRoT is a dedicated, tamper-resistant hardware block that provides the first and most fundamental layer of security. Its code and keys are immutable after manufacture.</p>
+    <div class="panel accent-left" style="margin-top:0.8em;">
+      <h3>Core Components</h3>
+      <ul>
+        <li><span class="hl">Boot ROM</span> — factory-programmed, immutable first-stage code; measured and verified before any mutable code runs</li>
+        <li><span class="hl">OTP / eFuse array</span> — one-time-programmable cells store device keys, lifecycle state, feature fuses</li>
+        <li><span class="hl">TRNG</span> — entropy source for key generation; ring oscillator or shot noise based</li>
+        <li><span class="hl">Crypto engine</span> — AES-256-GCM, SHA-2/3, RSA-4096, ECC-P384 in dedicated logic</li>
+        <li><span class="hl">Secure key vault</span> — isolated SRAM for runtime key material; cleared on tamper detect</li>
+        <li><span class="hl">Tamper detection</span> — voltage, frequency, temperature, and light sensors; active mesh</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Lifecycle States</h3>
+      <ul>
+        <li class="a2"><span class="mono">TEST</span> — manufacturing JTAG open</li>
+        <li class="a2"><span class="mono">PROVISIONING</span> — key injection</li>
+        <li class="a2"><span class="mono">PRODUCTION</span> — debug locked</li>
+        <li class="a2"><span class="mono">FIELD_RETURN</span> — limited RMA access</li>
+        <li class="a2"><span class="mono">END_OF_LIFE</span> — irreversible brick fuse</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Commercial HRoT IPs</h3>
+      <ul>
+        <li class="a3">Arm CryptoIsland / RSS</li>
+        <li class="a3">Rambus RT-630 / RT-660</li>
+        <li class="a3">Synopsys tRoot HSM</li>
+        <li class="a3">Google Titan M2</li>
+        <li class="a3">Apple Secure Enclave Processor</li>
+        <li class="a3">Microsoft Pluton</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     05 · SECURE BOOT
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">05 / 22</div>
+<span class="eyebrow">Secure Boot</span>
+<h2>Secure Boot &amp; Chain of Trust</h2>
+<p>Secure boot cryptographically verifies each stage of firmware before execution, forming an unbroken chain of trust anchored in immutable hardware.</p>
+<div id="boot-canvas-wrap" class="canvas-wrap" style="height:220px; margin:0.8em 0;">
+  <canvas id="bootCanvas" width="860" height="210"></canvas>
+</div>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div class="panel accent-left">
+    <h3>Boot Sequence Detail</h3>
+    <ul>
+      <li><span class="hl">Stage 0 — BootROM:</span> Immutable; reads BL1 from flash, verifies ECDSA signature against OTP public key hash; no fallback</li>
+      <li><span class="hl">Stage 1 — BL1/BL2:</span> Trusted Firmware-A first-stage; initialises DRAM, verifies BL31/BL32</li>
+      <li><span class="hl">Stage 2 — BL31:</span> EL3 runtime firmware; sets up PSCI, SMC dispatch</li>
+      <li><span class="hl">Stage 3 — BL33:</span> Normal world bootloader (U-Boot / UEFI); Secure World TEE (OP-TEE)</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Measured vs Verified Boot</h3>
+    <ul>
+      <li class="a2"><span class="hl2">Verified boot</span> — each stage halts on signature failure; enforces exact known-good images</li>
+      <li class="a2"><span class="hl2">Measured boot</span> — hashes are recorded in PCRs (TPM / TEE) but execution is not blocked; enables remote attestation</li>
+      <li class="a2">Production systems use <em>both</em>: verify for policy enforcement, measure for audit</li>
+      <li class="a2">Rollback protection via monotonic counter in OTP; minimum version number enforced</li>
+    </ul>
+  </div>
+</div>
+<script>
+(function(){
+  const c = document.getElementById('bootCanvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const stages = [
+    { name:'BootROM\n(OTP key)', color:'#7ef7c0' },
+    { name:'BL1/BL2\n(TF-A)', color:'#7eb8f7' },
+    { name:'BL31\nEL3 RT', color:'#7eb8f7' },
+    { name:'BL32\nOP-TEE', color:'#f7a05a' },
+    { name:'BL33\nU-Boot/UEFI', color:'#f7a05a' },
+    { name:'Kernel +\nSecure Apps', color:'#f76e7e' },
+  ];
+  const bw = 116, bh = 72, gap = 24, startX = 24, y = 68;
+  stages.forEach((s, i) => {
+    const x = startX + i*(bw+gap);
+    // box
+    ctx.fillStyle = '#1a1f2e';
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 4); ctx.fill(); ctx.stroke();
+    // label
+    ctx.fillStyle = s.color;
+    ctx.font = '500 11.5px "DM Sans",sans-serif';
+    ctx.textAlign = 'center';
+    const lines = s.name.split('\n');
+    lines.forEach((l,li) => ctx.fillText(l, x+bw/2, y+bh/2 - 6 + li*17));
+    // arrow
+    if(i < stages.length-1){
+      const ax = x + bw + 4, ay = y + bh/2;
+      ctx.strokeStyle = '#2a3048'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax+gap-8, ay); ctx.stroke();
+      ctx.fillStyle = '#2a3048';
+      ctx.beginPath(); ctx.moveTo(ax+gap-8, ay-5); ctx.lineTo(ax+gap, ay); ctx.lineTo(ax+gap-8, ay+5); ctx.fill();
+      // verify label
+      ctx.fillStyle = '#8892aa';
+      ctx.font = '10px "JetBrains Mono",monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('verify', ax + gap/2 - 4, ay - 9);
+    }
+  });
+  // title
+  ctx.fillStyle = '#8892aa';
+  ctx.font = '11px "JetBrains Mono",monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('CHAIN OF TRUST  ──────────────────────────────────────────────────────────────────────── immutable ▶ mutable', 24, 24);
+  // anchor
+  ctx.fillStyle = '#7ef7c0';
+  ctx.font = '11px "JetBrains Mono",monospace';
+  ctx.fillText('⬢ HRoT anchor', 24, 158);
+})();
+</script>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     06 · TRUSTZONE
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">06 / 22</div>
+<span class="eyebrow">Isolation</span>
+<h2>Arm TrustZone &amp; Confidential Compute</h2>
+<div class="cols cols-2">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>TrustZone Fundamentals</h3>
+      <ul>
+        <li>Hardware-enforced CPU mode: <span class="hl">Secure World</span> (EL3/EL1-S/EL0-S) vs <span class="hl2">Normal World</span> (EL2/EL1/EL0)</li>
+        <li>NS-bit propagated on AXI bus; interconnect and memory controllers enforce partition</li>
+        <li>Secure Monitor at EL3 handles world switches via <span class="mono">SMC</span> instruction</li>
+        <li>TZASC (TrustZone Address Space Controller) partitions DRAM regions</li>
+        <li>TZPC (TrustZone Protection Controller) marks peripherals Secure/Non-Secure</li>
+        <li>OP-TEE OS provides POSIX-like Trusted Application (TA) runtime in Secure World</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>RME: Realm Management Extension</h3>
+      <ul>
+        <li class="a3">Armv9 adds a 4th security state: <span class="hl3">Realm</span></li>
+        <li class="a3">Realm VMs isolated from both Secure World and Normal World hypervisor</li>
+        <li class="a3">Enables confidential VMs without trusting the hypervisor (CCA)</li>
+        <li class="a3">Realm Management Monitor (RMM) at EL2-R manages realm lifecycle</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div id="tz-canvas-wrap" class="canvas-wrap" style="height:320px;">
+      <canvas id="tzCanvas" width="360" height="308"></canvas>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const c = document.getElementById('tzCanvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const W = c.width;
+  const zones = [
+    { label:'Normal World (EL0–EL2)', sub:'Rich OS, Apps, Hypervisor', color:'#f7a05a', x:10,  w:155, y:40,  h:220 },
+    { label:'Secure World (EL0-S–EL3)', sub:'TEE, TAs, Firmware', color:'#7eb8f7', x:195, w:155, y:40,  h:220 },
+  ];
+  // EL3 bar at bottom
+  ctx.fillStyle = '#151d2c'; ctx.strokeStyle = '#7ef7c0'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(10, 272, 340, 28, 3); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7ef7c0'; ctx.font='bold 12px "DM Sans"'; ctx.textAlign='center';
+  ctx.fillText('Secure Monitor EL3  (SMC handler, world switch)', 180, 291);
+
+  zones.forEach(z => {
+    ctx.fillStyle = '#1a1f2e'; ctx.strokeStyle = z.color; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(z.x, z.y, z.w, z.h, 4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = z.color; ctx.font='bold 11px "DM Sans"'; ctx.textAlign='center';
+    ctx.fillText(z.label, z.x + z.w/2, z.y+22);
+    ctx.fillStyle='#8892aa'; ctx.font='10px "DM Sans"';
+    ctx.fillText(z.sub, z.x + z.w/2, z.y+38);
+  });
+
+  // EL labels inside Normal
+  const els_n = ['EL2 Hypervisor','EL1 Rich OS','EL0 Apps'];
+  els_n.forEach((e,i) => {
+    ctx.fillStyle='#2a3048';
+    ctx.beginPath(); ctx.roundRect(18, 60+i*58, 139, 44, 3); ctx.fill();
+    ctx.fillStyle='#f7a05a'; ctx.font='10.5px "DM Sans"'; ctx.textAlign='center';
+    ctx.fillText(e, 87, 86+i*58);
+  });
+  // EL labels inside Secure
+  const els_s = ['EL1-S Secure OS','EL0-S Trust Apps','Key/Crypto store'];
+  els_s.forEach((e,i) => {
+    ctx.fillStyle='#1e2a3a';
+    ctx.beginPath(); ctx.roundRect(203, 60+i*58, 139, 44, 3); ctx.fill();
+    ctx.fillStyle='#7eb8f7'; ctx.font='10.5px "DM Sans"'; ctx.textAlign='center';
+    ctx.fillText(e, 272, 86+i*58);
+  });
+
+  // SMC arrow
+  ctx.strokeStyle='#8892aa'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(175, 170); ctx.lineTo(185, 170); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#8892aa'; ctx.font='9px "JetBrains Mono"'; ctx.textAlign='center';
+  ctx.fillText('SMC', 180, 162);
+
+  ctx.fillStyle='#8892aa'; ctx.font='10px "JetBrains Mono"'; ctx.textAlign='center';
+  ctx.fillText('NS-bit on AXI bus', 180, 18);
+})();
+</script>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     07 · PHYSICAL UNCLONABLE FUNCTIONS
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">07 / 22</div>
+<span class="eyebrow">Device Identity</span>
+<h2>Physical Unclonable Functions (PUFs)</h2>
+<p>PUFs exploit uncontrollable manufacturing variations to create a unique, unclonable device fingerprint — a hardware "DNA" that cannot be cloned even with identical masks.</p>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>How PUFs Work</h3>
+      <ul>
+        <li>Apply a <span class="hl">Challenge</span> (stimulus) → measure <span class="hl">Response</span> determined by random process variation</li>
+        <li>Same challenge always yields same response on a given device (reproducible)</li>
+        <li>Different devices give uncorrelated responses to same challenge (unique)</li>
+        <li>Response cannot be predicted without physically probing the device (unclonable)</li>
+        <li>Key derived from PUF eliminates storing secrets in NVM — key exists only when needed</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>PUF Failure Modes</h3>
+      <ul>
+        <li class="a4">Temperature/voltage instability → error-correcting codes (BCH, polar) required</li>
+        <li class="a4">Aging degrades response reliability — helper data algorithms compensate</li>
+        <li class="a4">Machine-learning modelling attacks on APUF with large CRP sets</li>
+        <li class="a4">Side-channel leakage during PUF evaluation</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>PUF Taxonomy</h3>
+      <ul>
+        <li class="a2"><span class="hl2">SRAM PUF</span> — power-up state of SRAM cells; strong, widely deployed (Intrinsic ID SRAM PUF)</li>
+        <li class="a2"><span class="hl2">Ring Oscillator PUF</span> — frequency mismatch between matched RO pairs; simple but moderate uniqueness</li>
+        <li class="a2"><span class="hl2">Arbiter PUF (APUF)</span> — race condition in matched delay paths; large CRP space but ML-vulnerable</li>
+        <li class="a2"><span class="hl2">Butterfly PUF</span> — bistable latch metastability; strong, FPGA-friendly</li>
+        <li class="a2"><span class="hl2">Oxide Breakdown PUF</span> — irreversible; write-once identity</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Key Applications</h3>
+      <ul>
+        <li class="a3">Device-unique key derivation (no NVM storage)</li>
+        <li class="a3">Anti-counterfeiting / IC authentication</li>
+        <li class="a3">IP protection (bitstream encryption on FPGAs)</li>
+        <li class="a3">Remote attestation anchor</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     08 · TRNG
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">08 / 22</div>
+<span class="eyebrow">Entropy</span>
+<h2>True Random Number Generators (TRNG)</h2>
+<p>Cryptographic security ultimately depends on unpredictable entropy. A compromised TRNG undermines all downstream key material.</p>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div class="panel accent-left">
+    <h3>Entropy Sources</h3>
+    <ul>
+      <li><span class="hl">Thermal noise (Johnson-Nyquist)</span> — resistor shot noise amplified and sampled; high quality but large area</li>
+      <li><span class="hl">Ring oscillator jitter</span> — clock jitter from process/thermal noise; compact, most common in SoCs (NIST SP 800-90B compliant)</li>
+      <li><span class="hl">Metastability harvesting</span> — sampling SR-latch in metastable state; compact but lower throughput</li>
+      <li><span class="hl">Quantum noise</span> — photon shot noise in reverse-biased photodiode; highest quality, rarely on-chip</li>
+    </ul>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>TRNG Architecture</h3>
+      <ul>
+        <li class="a2">Raw entropy source → digitiser → health tests (NIST SP 800-90B)</li>
+        <li class="a2">Conditioning with SHA-3 or AES-CBC-MAC to whiten output</li>
+        <li class="a2">DRBG (CTR-DRBG or Hash-DRBG per NIST SP 800-90A) seeds from conditioned entropy</li>
+        <li class="a2">Continuous health tests detect failure: repetition count, adaptive proportion test</li>
+        <li class="a2">Stall or alarm on failure; never output from failed generator</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Standards &amp; Certification</h3>
+      <ul>
+        <li class="a3">NIST SP 800-90A/B/C — DRBG, entropy source, conditioning</li>
+        <li class="a3">BSI AIS 20/31 — German certification class PTG.2/PTG.3</li>
+        <li class="a3">FIPS 140-3 — mandatory TRNG self-test at power-on</li>
+        <li class="a3">CC EAL — entropy assessment for high-assurance products</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<pre><code class="language-verilog">// Minimal ring-oscillator TRNG cell (illustrative)
+module ro_trng_cell (
+  input  wire clk_sys,       // slow system clock (sampling)
+  output reg  raw_bit        // raw entropy output
+);
+  // Free-running ring oscillator (odd number of inverters, no reset)
+  (* KEEP = "TRUE" *) wire [4:0] ro;
+  assign ro[0] = ~ro[4];
+  genvar i;
+  generate for(i=1;i<5;i=i+1) assign ro[i] = ~ro[i-1]; endgenerate
+  // Sample RO with slow clock — captures jitter as LSB
+  always @(posedge clk_sys) raw_bit <= ro[0];
+endmodule</code></pre>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     09 · CRYPTO ACCELERATORS
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">09 / 22</div>
+<span class="eyebrow">Crypto Hardware</span>
+<h2>Cryptographic Accelerator Architecture</h2>
+<div class="cols cols-2">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>Symmetric — AES Engine</h3>
+      <ul>
+        <li>128/192/256-bit key; modes: ECB, CBC, CTR, GCM, XTS, CCM</li>
+        <li>Pipelined round implementation: 1 round/cycle × 10–14 rounds, or fully unrolled (1 block/cycle)</li>
+        <li>Key schedule hardware or pre-expanded key RAM</li>
+        <li>GCM requires parallel GHASH: carry-less multiply (CLMUL) in GF(2¹²⁸)</li>
+        <li>XTS mode for storage encryption (two AES keys, ⊕ tweak)</li>
+        <li>Throughput: 100 Gbps+ in TSMC N5 unrolled AES-GCM-256</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Hash Engines</h3>
+      <ul>
+        <li class="a3">SHA-256/384/512 — 64/80 round iterative or folded pipeline</li>
+        <li class="a3">SHA-3/SHAKE — Keccak-f[1600] permutation; 24 rounds, 5×5×64 state</li>
+        <li class="a3">HMAC: H(K⊕opad ∥ H(K⊕ipad ∥ m)) — two hash passes</li>
+        <li class="a3">Combined AES-SHA co-processor saves DMA overhead for TLS record processing</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Asymmetric — PKA Engine</h3>
+      <ul>
+        <li class="a2">RSA 2048–8192: Montgomery modular multiply; hardware for large-integer arithmetic</li>
+        <li class="a2">ECC P-256/P-384/P-521, Curve25519: point multiplication via double-and-add; constant-time essential</li>
+        <li class="a2">EdDSA / Ed25519: hardware point addition in twisted Edwards coordinates</li>
+        <li class="a2">ECDH key exchange: dominated by scalar multiplication (~10 ms SW → ~0.1 ms HW in N7)</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>Post-Quantum (PQC) Engines</h3>
+      <ul>
+        <li class="a4">NIST FIPS 203: ML-KEM (Kyber) — NTT-based polynomial multiply</li>
+        <li class="a4">NIST FIPS 204: ML-DSA (Dilithium) — lattice signature</li>
+        <li class="a4">NIST FIPS 205: SLH-DSA (SPHINCS+) — hash-based, no lattice</li>
+        <li class="a4">Number Theoretic Transform (NTT) is shared accelerator primitive across ML-KEM and ML-DSA</li>
+        <li class="a4">Hybrid classical+PQC operation during migration period</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     10 · SIDE-CHANNEL ATTACKS
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">10 / 22</div>
+<span class="eyebrow">Side-Channel Attacks</span>
+<h2>Side-Channel Attack Taxonomy</h2>
+<p>Side-channel attacks exploit physical information leakage rather than cryptographic weaknesses. Hardware countermeasures are essential — software alone cannot fully protect against them.</p>
+<div class="cols cols-3" style="margin-top:0.8em;">
+  <div class="panel accent-left">
+    <h3>Power Analysis</h3>
+    <ul>
+      <li><span class="hl">SPA</span> — simple power analysis; visual inspection of single trace reveals algorithm flow</li>
+      <li><span class="hl">DPA</span> — differential power analysis; statistical correlation across many traces extracts key bits (Kocher 1999)</li>
+      <li><span class="hl">CPA</span> — correlation power analysis; Hamming weight model improves DPA efficiency</li>
+      <li><span class="hl">Template attacks</span> — profiling phase; near-optimal Bayesian classifier</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>EM &amp; Timing</h3>
+    <ul>
+      <li class="a2"><span class="hl2">DEMA</span> — differential EM analysis; local probe targets specific module; no access to power rail needed</li>
+      <li class="a2"><span class="hl2">Timing attacks</span> — variable-time implementations leak secret-dependent branches (RSA square-and-multiply)</li>
+      <li class="a2"><span class="hl2">Cache-timing</span> — Flush+Reload, Prime+Probe; exploits shared LLC in multi-tenant SoCs</li>
+      <li class="a2"><span class="hl2">Spectre/Meltdown</span> — microarchitectural side-channels via speculative execution</li>
+    </ul>
+  </div>
+  <div class="panel accent4-left">
+    <h3>Fault Injection</h3>
+    <ul>
+      <li class="a4"><span class="hl4">Voltage glitching</span> — brief supply undershoot skips instructions or corrupts computation</li>
+      <li class="a4"><span class="hl4">Clock glitching</span> — short/long clock pulse causes setup/hold violation</li>
+      <li class="a4"><span class="hl4">Laser fault injection</span> — focused photon beam flips specific bits; precise but expensive</li>
+      <li class="a4"><span class="hl4">EM pulse injection (EMFI)</span> — local coil induces transient; cheaper than laser</li>
+      <li class="a4">Differential fault analysis (DFA) extracts AES key from two ciphertexts with 1-byte fault</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     11 · SIDE-CHANNEL COUNTERMEASURES
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">11 / 22</div>
+<span class="eyebrow">Countermeasures</span>
+<h2>Hardware Side-Channel Countermeasures</h2>
+<div class="cols cols-2">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>Power / EM Countermeasures</h3>
+      <ul>
+        <li><span class="hl">Masking</span> — secret <em>d</em> split into <em>d</em>+1 shares; each share individually processed; XOR recombined only at output. Breaking requires correlation across all shares simultaneously (order-<em>d</em> DPA resistance)</li>
+        <li><span class="hl">Hiding — randomise power:</span> random pre-charge, dual-rail logic (SABL/WDDL), constant-weight encode</li>
+        <li><span class="hl">Power supply filtering:</span> on-die decoupling capacitors, LDO regulation before crypto core, differential power distribution</li>
+        <li><span class="hl">EM shielding:</span> active mesh, metal-fill power guard rings, module-level metal lid</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Timing &amp; Microarchitecture</h3>
+      <ul>
+        <li class="a3">Constant-time implementation: no secret-dependent branches or memory addresses</li>
+        <li class="a3">ECC: Montgomery ladder (uniform point operations); Curve25519 by design constant-time</li>
+        <li class="a3">AES: bit-sliced software or hardware S-box with uniform activity</li>
+        <li class="a3">Cache partitioning / flushing for side-channel isolation between security domains</li>
+        <li class="a3">Spectre mitigations: serialising barriers, SB flush on domain switch, retpoline</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Fault Injection Countermeasures</h3>
+      <ul>
+        <li class="a2"><span class="hl2">Voltage/frequency monitors:</span> always-on sensors halt/reset/zeroize on out-of-spec conditions</li>
+        <li class="a2"><span class="hl2">Temporal redundancy:</span> compute twice, compare; or compute-compare-compute</li>
+        <li class="a2"><span class="hl2">Spatial redundancy:</span> dual-rail or TMR for critical paths (key loading, secure boot checks)</li>
+        <li class="a2"><span class="hl2">Error detection codes:</span> parity on secure SRAM, ECC on crypto state registers</li>
+        <li class="a2"><span class="hl2">Infective computation:</span> random errors propagate throughout to prevent DFA</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>Physical Security</h3>
+      <ul>
+        <li class="a4">Active tamper-detection mesh: fine wire grid detects probing</li>
+        <li class="a4">Temperature, light, and X-ray sensors trigger zeroisation</li>
+        <li class="a4">Metal shield layers over crypto and key storage cells</li>
+        <li class="a4">Passivation layer over top metal; bus scrambling in layout</li>
+        <li class="a4">Package-level: opaque epoxy, gravel-fill, anti-delayering treatments</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     12 · SECURE STORAGE & KEY MANAGEMENT
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">12 / 22</div>
+<span class="eyebrow">Key Management</span>
+<h2>Secure Storage &amp; Key Management</h2>
+<div class="cols cols-60-40">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>Key Hierarchy</h3>
+      <ul>
+        <li><span class="hl">Root key (RK)</span> — derived from PUF or burned into OTP at provisioning; never leaves HRoT; 256-bit AES or ECC key</li>
+        <li><span class="hl">Device Identity Key (DIK)</span> — derived from RK + device serial via HKDF; used for attestation certificates</li>
+        <li><span class="hl">Content Encryption Key (CEK)</span> — wraps media/model IP; encrypted under KEK stored in NVM</li>
+        <li><span class="hl">Session keys</span> — ephemeral; derived per TLS session via ECDHE; never stored</li>
+        <li><span class="hl">Key wrapping:</span> AES-256-KeyWrap (RFC 3394) or AES-SIV for key transport between security contexts</li>
+      </ul>
+    </div>
+    <div class="panel accent2-left">
+      <h3>OTP / eFuse Provisioning</h3>
+      <ul>
+        <li class="a2">Anti-fuse OTP: poly/diffusion breakdown; irreversible; secure against most probing</li>
+        <li class="a2">eFuse: electromigration blows link; cheaper but lower density</li>
+        <li class="a2">Typical budget: 4–16 Kbit for keys + lifecycle + feature fuses</li>
+        <li class="a2">Provisioned in secure facility; hash only stored (full key in HSM)</li>
+        <li class="a2">Redundant rows for ECC on stored key bits</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent3-left" style="margin-bottom:0.8em;">
+      <h3>Secure NVM Encryption</h3>
+      <ul>
+        <li class="a3">Flash encrypted with AES-XTS-256; key derived from PUF at boot</li>
+        <li class="a3">DRAM encryption: inline AES-128 between memory controller and PHY</li>
+        <li class="a3">Integrity tree (Merkle tree) over DRAM for replay and tampering detection</li>
+        <li class="a3">AMD SME / Intel TME: total memory encryption in x86 SoCs</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>Key Zeroisation</h3>
+      <ul>
+        <li class="a4">On tamper detect: active zeroisation of all key registers within microseconds</li>
+        <li class="a4">Zeroisation bus from security controller to all crypto and key-holding flip-flops</li>
+        <li class="a4">FIPS 140-3: demonstrated zeroisation under power loss required</li>
+        <li class="a4">Secure SRAM: cells scrambled and power-cycled; capacitive coupling prevents remanence</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     13 · DEBUG SECURITY
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">13 / 22</div>
+<span class="eyebrow">Debug Security</span>
+<h2>JTAG &amp; Debug Security</h2>
+<p>JTAG/SWD interfaces are the most powerful attack vector on a produced device. Debug access must be tightly controlled without preventing legitimate failure analysis.</p>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div class="panel accent-left">
+    <h3>Attack Surface</h3>
+    <ul>
+      <li>JTAG boundary scan reads/writes all chip pins and internal scan chains</li>
+      <li>CoreSight debug port grants full CPU register, memory, and breakpoint access</li>
+      <li>JTAG debug allows bypassing secure boot (halt-and-modify attack)</li>
+      <li>Production boards with exposed test points enable probing and glitching</li>
+      <li>SoC debug unlock codes leaked from firmware allow persistent debug access</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Secure Debug Architecture</h3>
+    <ul>
+      <li class="a2"><span class="hl2">Debug authentication:</span> challenge-response using device private key; unlock token signed by OEM private key — device verifies against OEM certificate chain</li>
+      <li class="a2"><span class="hl2">Lifecycle-gated access:</span> JTAG disabled in PRODUCTION lifecycle; re-enabled only after authenticated RMA unlock</li>
+      <li class="a2"><span class="hl2">Granular port control:</span> secure JTAG can allow customer debug (EL0/EL1 access) without Secure World access</li>
+      <li class="a2"><span class="hl2">One-time debug fuse:</span> single-use unlock; logged in OTP counter; auditable</li>
+      <li class="a2">Arm CoreSight authentication signals: DBGEN, NIDEN, SPIDEN, SPNIDEN</li>
+    </ul>
+  </div>
+</div>
+<div class="panel accent3-left" style="margin-top:0.8em;">
+  <h3>Implementation: Secure Debug Protocol (SDP)</h3>
+  <p style="font-size:0.8em;">
+    HRoT generates a 256-bit nonce → sent to debugger → OEM signs (nonce ∥ target scope ∥ expiry) with OEM private key →
+    token returned to device → HRoT verifies signature → asserts debug enables for granted scope only.
+    Arm DesignStart and Rambus both supply certified SDP IP.
+  </p>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     14 · DMA & IOMMU SECURITY
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">14 / 22</div>
+<span class="eyebrow">Peripheral Isolation</span>
+<h2>DMA Security &amp; IOMMU / SMMU</h2>
+<div class="cols cols-2">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>The DMA Attack Problem</h3>
+      <ul>
+        <li>DMA masters (network, USB, PCIe, GPU) access physical memory directly, bypassing CPU MMU</li>
+        <li>Malicious PCIe device can scan and read all DRAM regardless of OS page tables</li>
+        <li>Thunderbolt DMA historically allowed complete DRAM access within seconds</li>
+        <li>GPU compute DMA can escape sandbox and read host memory (cross-VM leakage in CSPs)</li>
+        <li>DMA coherency issues create TOCTOU (time-of-check-time-of-use) vulnerabilities</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>Threat Scenarios</h3>
+      <ul>
+        <li class="a4">Rogue Thunderbolt/USB4 device: plug-in DMA attack in &lt;60 s</li>
+        <li class="a4">Compromised NIC firmware reading TLS keys from host DRAM</li>
+        <li class="a4">PCIe ATS abuse: device-side address translation bypass</li>
+        <li class="a4">GPU-side DMA attacks in confidential compute environments</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Arm SMMU (System MMU)</h3>
+      <ul>
+        <li class="a2">Intercepts all DMA transactions; provides per-device virtual address space</li>
+        <li class="a2">Stage-1 translation: device VA → IPA (controlled by OS driver)</li>
+        <li class="a2">Stage-2 translation: IPA → PA (controlled by hypervisor)</li>
+        <li class="a2">StreamID (RID equivalent) identifies bus master; assigned per peripheral</li>
+        <li class="a2">Arm SMMU v3.2: PCIe ATS/PRI support; SVA (shared virtual addressing)</li>
+        <li class="a2">Fault on unauthorised access: abort + interrupt; no silent data corruption</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>PCIe ACS &amp; ARI</h3>
+      <ul>
+        <li class="a3">PCIe Access Control Services (ACS): blocks peer-to-peer DMA between endpoints</li>
+        <li class="a3">P2P peer-to-peer disabled unless explicitly enabled — isolates GPU↔NIC paths</li>
+        <li class="a3">Requester ID (RID) + PASID tag: fine-grained per-process isolation for SR-IOV VFs</li>
+        <li class="a3">CXL.mem: coherent access requires CDAT and RAS security extensions</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     15 · MEMORY ENCRYPTION
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">15 / 22</div>
+<span class="eyebrow">Memory Protection</span>
+<h2>Memory Encryption &amp; Integrity</h2>
+<p>Off-chip memory (LPDDR5, HBM, NVMe) is physically accessible; inline encryption and integrity protection are essential for confidential computing and edge AI deployments.</p>
+<div class="cols cols-3" style="margin-top:0.8em;">
+  <div class="panel accent-left">
+    <h3>Inline Memory Encryption</h3>
+    <ul>
+      <li>AES-XTS-128/256 between memory controller and PHY — transparent to CPU and DMA masters</li>
+      <li>XTS tweak = physical address; each 512B sector uniquely encrypted</li>
+      <li>AMD SME (Secure Memory Encryption): C-bit in page table enables per-page encryption</li>
+      <li>AMD SEV-SNP: full VM memory encrypted + integrity protected; hypervisor cannot read VM memory</li>
+      <li>Intel TDX (Trust Domain Extensions): hardware-isolated Trust Domains with encrypted DRAM</li>
+      <li>HBM encryption: AXI encryption layer inside PHY straddle; no external side-channel</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Memory Integrity</h3>
+    <ul>
+      <li class="a2">Encryption alone does not prevent replay or bitflip attacks</li>
+      <li class="a2"><span class="hl2">MAC tags</span> stored alongside ciphertext (ECC bits repurposed, or separate tag DRAM)</li>
+      <li class="a2"><span class="hl2">Merkle tree (Counter tree)</span> over memory blocks: root in trusted hardware; tamper-evident</li>
+      <li class="a2">Arity-8 tree over 4 GB DRAM requires ~67 MB metadata overhead</li>
+      <li class="a2">AMD SEV-SNP Reverse Map Table (RMP) maps each 4K page to owning VM; hardware-enforced</li>
+      <li class="a2">Tree traversal adds 2–5% latency; caching upper tree nodes reduces overhead</li>
+    </ul>
+  </div>
+  <div class="panel accent3-left">
+    <h3>Storage Encryption</h3>
+    <ul>
+      <li class="a3">NVMe inline encryption: TCG Opal 2.0 / NVMe Base Specification §16</li>
+      <li class="a3">Key per namespace; hardware engine inside NVMe controller</li>
+      <li class="a3">eMMC/UFS: JEDEC full-device hardware encryption (RPMB secure replay-protected area)</li>
+      <li class="a3">Flash Translation Layer (FTL) encryption: AES-XTS with sector address tweak; wear-levelling transparent</li>
+      <li class="a3">Secure erase: cryptographic erase (key destruction) vs physical overwrite</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     16 · ATTESTATION
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">16 / 22</div>
+<span class="eyebrow">Remote Attestation</span>
+<h2>Remote Attestation &amp; DICE</h2>
+<p>Remote attestation allows a verifier to cryptographically confirm what software is running on a device — essential for zero-trust deployments and confidential cloud.</p>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div class="panel accent-left">
+    <h3>DICE: Device Identifier Composition Engine</h3>
+    <ul>
+      <li>DICE (TCG standard) provides a hardware-rooted identity that evolves with measured boot</li>
+      <li><span class="hl">UDS (Unique Device Secret)</span> — seeded by PUF or OTP; never leaves device</li>
+      <li><span class="hl">CDI (Compound Device Identifier)</span> — HMAC(UDS, H(firmware)) — unique per UDS+firmware combination</li>
+      <li>CDI seeds an asymmetric key pair; public key forms an alias certificate</li>
+      <li>Certificate chain: Alias Cert → DevID Cert → OEM Root CA — all bound to specific firmware measurements</li>
+      <li>DICE layer N passes CDI₍ₙ₎ = HMAC(CDI₍ₙ₋₁₎, H(layer_N_firmware)) up the boot chain</li>
+    </ul>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>TPM 2.0 &amp; fTPM</h3>
+      <ul>
+        <li class="a2">Discrete TPM or firmware TPM (fTPM in TrustZone Secure World / AMD PSP)</li>
+        <li class="a2">PCR (Platform Configuration Register) — extend-only SHA-256 register; records boot measurements</li>
+        <li class="a2">PCR[0] = UEFI firmware; PCR[4] = bootloader; PCR[7] = Secure Boot policy</li>
+        <li class="a2">Sealed storage: TPM releases secret only if PCRs match expected values</li>
+        <li class="a2">Remote attestation: TPM signs PCR quote with AIK (Attestation Identity Key); verifier checks against golden values</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Confidential Computing Attestation</h3>
+      <ul>
+        <li class="a3">AMD SEV-SNP: attestation report signed by VCEK (Versioned Chip Endorsement Key) derived from chip-unique fuse + SVN</li>
+        <li class="a3">Intel TDX: TD Quote signed by Intel DCAP (Data Center Attestation Primitives)</li>
+        <li class="a3">Arm CCA: Realm attestation token signed by RMM; verified by Veraison service</li>
+        <li class="a3">IETF RATS architecture: Attester → Verifier → Relying Party token flow</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     17 · SUPPLY CHAIN SECURITY
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">17 / 22</div>
+<span class="eyebrow">Supply Chain</span>
+<h2>IC Supply Chain Security</h2>
+<p>The global semiconductor supply chain introduces attack surfaces at every stage — from RTL design through wafer fabrication, packaging, PCB assembly, and field deployment.</p>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div>
+    <div class="panel accent4-left" style="margin-bottom:0.8em;">
+      <h3>Threat Vectors</h3>
+      <ul>
+        <li class="a4"><span class="hl4">Hardware Trojans</span> — malicious circuits inserted at RTL, synthesis, or mask level; activated by rare trigger conditions</li>
+        <li class="a4"><span class="hl4">Counterfeit ICs</span> — recycled, remarked, or cloned chips; performance/reliability degraded</li>
+        <li class="a4"><span class="hl4">IP theft</span> — RTL or GDSII stolen from design house or EDA tool server</li>
+        <li class="a4"><span class="hl4">Overproduction</span> — foundry produces excess dies without OEM knowledge; grey-market sales</li>
+        <li class="a4"><span class="hl4">FPGA bitstream theft</span> — bitstream cloned to clone product; IP extracted by partial readback</li>
+      </ul>
+    </div>
+    <div class="panel accent-left">
+      <h3>Trojan Detection Techniques</h3>
+      <ul>
+        <li>Gate-level netlist verification against trusted golden reference</li>
+        <li>Side-channel fingerprinting: power/timing deviation from Trojan activity</li>
+        <li>Formal verification of security properties post-synthesis</li>
+        <li>Built-In Self-Test (BIST) coverage of rare state spaces where Trojans hide</li>
+        <li>X-ray / SEM cross-section destructive analysis (sampling)</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Counterfeit Countermeasures</h3>
+      <ul>
+        <li class="a2"><span class="hl2">PUF-based authentication</span> — unique fingerprint verified at incoming inspection</li>
+        <li class="a2"><span class="hl2">Secure provisioning</span> — OEM private HSM provisions unique key at secure facility; key linked to serial + PUF response</li>
+        <li class="a2"><span class="hl2">Monotonic counter</span> — eFuse counter incremented on each firmware update; reused parts detected by stale counter</li>
+        <li class="a2">Electrical characterisation at assembly: I(V) curves reveal recycled/remarked parts</li>
+        <li class="a2">SEMI T20 supply chain standard; IPC-1782 traceability</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Split Manufacturing</h3>
+      <ul>
+        <li class="a3">FEOL (transistors) at untrusted foundry; BEOL (metal interconnect) at trusted facility</li>
+        <li class="a3">Proximity attack vulnerability: adversary infers connections from component placement</li>
+        <li class="a3">Layout camouflage: indistinguishable gate styles; makes reverse engineering harder</li>
+        <li class="a3">Logic locking: XOR/AND key gates inserted; chip functional only with correct key loaded post-manufacture</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     18 · ML MODEL SECURITY
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">18 / 22</div>
+<span class="eyebrow">AI / ML Security</span>
+<h2>Securing ML Models on SoCs</h2>
+<p>Inference SoCs deploy high-value model IP to potentially hostile environments (edge devices, shared cloud). Hardware protections are required to prevent theft, tampering, and adversarial attack.</p>
+<div class="cols cols-3" style="margin-top:0.8em;">
+  <div class="panel accent-left">
+    <h3>Model IP Protection</h3>
+    <ul>
+      <li>Model weights represent massive training investment ($10M–$100M+); must be treated as crown-jewel IP</li>
+      <li>Weights encrypted at rest with AES-256-XTS on flash; decrypted inline to NPU SRAM only</li>
+      <li>CEK (Content Encryption Key) wrapped under device-unique key derived from PUF</li>
+      <li>Encrypted transfer from cloud to device: TLS + attestation-verified recipient</li>
+      <li>DRAM encryption prevents cold-boot extraction of weights from off-chip LPDDR/HBM</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Model Integrity</h3>
+    <ul>
+      <li class="a2">Signed model manifest: SHA-3-256 hash over each weight tensor; ECDSA-P384 signature</li>
+      <li class="a2">NPU verifies manifest before loading any layer weights into execution SRAM</li>
+      <li class="a2">Weight poisoning attacks: adversary flips bits in stored weights to backdoor model — DRAM integrity tree detects this</li>
+      <li class="a2">Secure version number in OTP prevents rollback to exploitable model version</li>
+      <li class="a2">TEE-hosted inference for sensitive applications: Apple Private Cloud Compute model</li>
+    </ul>
+  </div>
+  <div class="panel accent3-left">
+    <h3>Adversarial &amp; Privacy Attacks</h3>
+    <ul>
+      <li class="a3"><span class="hl3">Model extraction</span> — repeated black-box queries reconstruct model; rate limiting + output perturbation countermeasures</li>
+      <li class="a3"><span class="hl3">Membership inference</span> — determines if a sample was in training data; differential privacy during training</li>
+      <li class="a3"><span class="hl3">Adversarial inputs</span> — imperceptible perturbations cause misclassification; input pre-processing filters (feature squeezing)</li>
+      <li class="a3"><span class="hl3">Prompt injection</span> — LLM jailbreaks; sandboxed inference environments on-chip</li>
+      <li class="a3">Secure enclaves for inference: weights and activations never in plaintext outside TEE SRAM</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     19 · INTERACTIVE: SIDE-CHANNEL VISUALISER
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">19 / 22</div>
+<span class="eyebrow">Interactive Demo</span>
+<h2>Power Analysis Attack Visualiser</h2>
+<p style="margin-bottom:0.6em;">Simulated DPA attack on an AES S-box implementation. Observe how correlation builds over increasing trace count.</p>
+<div style="display:flex; gap:1.2em; align-items:flex-start;">
+  <div style="flex:1;">
+    <canvas id="dpaCanvas" width="540" height="310" style="background:#13161e; border:1px solid #2a3048; border-radius:4px; display:block;"></canvas>
+  </div>
+  <div style="width:220px;">
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>Controls</h3>
+      <div style="margin:0.5em 0;">
+        <label style="font-size:0.65em; color:var(--muted);">Traces: <span id="traceCount">50</span></label><br/>
+        <input type="range" id="traceSlider" min="10" max="500" value="50" style="width:100%; margin-top:0.3em;"/>
+      </div>
+      <div style="margin:0.5em 0;">
+        <label style="font-size:0.65em; color:var(--muted);">Key byte hypothesis: <span id="keyHyp">0x2B</span></label><br/>
+        <input type="range" id="keySlider" min="0" max="255" value="43" style="width:100%; margin-top:0.3em;"/>
+      </div>
+    </div>
+    <div class="panel accent2-left">
+      <h3>Result</h3>
+      <p id="dpaResult" style="font-family:'JetBrains Mono',monospace; font-size:0.65em; color:var(--accent3);">Run simulation…</p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const TRUE_KEY = 0x2B; // the "secret"
+  const canvas = document.getElementById('dpaCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  function hw(x){ let c=0; while(x){c+=x&1;x>>>=1;} return c; }
+  const sbox = [
+    0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
+    0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,
+    0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15,
+    0x04,0xc7,0x23,0xc3,0x18,0x96,0x05,0x9a,0x07,0x12,0x80,0xe2,0xeb,0x27,0xb2,0x75,
+    0x09,0x83,0x2c,0x1a,0x1b,0x6e,0x5a,0xa0,0x52,0x3b,0xd6,0xb3,0x29,0xe3,0x2f,0x84,
+    0x53,0xd1,0x00,0xed,0x20,0xfc,0xb1,0x5b,0x6a,0xcb,0xbe,0x39,0x4a,0x4c,0x58,0xcf,
+    0xd0,0xef,0xaa,0xfb,0x43,0x4d,0x33,0x85,0x45,0xf9,0x02,0x7f,0x50,0x3c,0x9f,0xa8,
+    0x51,0xa3,0x40,0x8f,0x92,0x9d,0x38,0xf5,0xbc,0xb6,0xda,0x21,0x10,0xff,0xf3,0xd2,
+    0xcd,0x0c,0x13,0xec,0x5f,0x97,0x44,0x17,0xc4,0xa7,0x7e,0x3d,0x64,0x5d,0x19,0x73,
+    0x60,0x81,0x4f,0xdc,0x22,0x2a,0x90,0x88,0x46,0xee,0xb8,0x14,0xde,0x5e,0x0b,0xdb,
+    0xe0,0x32,0x3a,0x0a,0x49,0x06,0x24,0x5c,0xc2,0xd3,0xac,0x62,0x91,0x95,0xe4,0x79,
+    0xe7,0xc8,0x37,0x6d,0x8d,0xd5,0x4e,0xa9,0x6c,0x56,0xf4,0xea,0x65,0x7a,0xae,0x08,
+    0xba,0x78,0x25,0x2e,0x1c,0xa6,0xb4,0xc6,0xe8,0xdd,0x74,0x1f,0x4b,0xbd,0x8b,0x8a,
+    0x70,0x3e,0xb5,0x66,0x48,0x03,0xf6,0x0e,0x61,0x35,0x57,0xb9,0x86,0xc1,0x1d,0x9e,
+    0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf,
+    0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16,
+  ];
+
+  function draw(){
+    const N = parseInt(document.getElementById('traceSlider').value);
+    const khyp = parseInt(document.getElementById('keySlider').value);
+    document.getElementById('traceCount').textContent = N;
+    document.getElementById('keyHyp').textContent = '0x' + khyp.toString(16).toUpperCase().padStart(2,'0');
+
+    // simulate traces
+    const TIME_POINTS = 80;
+    const TARGET_T = 32; // leaky time point
+    let corr = new Array(TIME_POINTS).fill(0);
+    let sumX=0, sumX2=0;
+    let powerTraces = [];
+    let hyp = [];
+
+    for(let n=0;n<N;n++){
+      const pt = Math.floor(Math.random()*256);
+      const noise = () => (Math.random()-0.5)*2.5;
+      let trace = new Array(TIME_POINTS).fill(0).map((_,t)=>{
+        let base = noise();
+        if(t===TARGET_T) base += hw(sbox[pt^TRUE_KEY])*0.35; // true leakage
+        return base;
+      });
+      powerTraces.push({pt, trace});
+      const h = hw(sbox[pt^khyp]);
+      hyp.push(h);
+      sumX += h; sumX2 += h*h;
+    }
+    const meanH = sumX/N;
+    const stdH = Math.sqrt(sumX2/N - meanH*meanH) || 1;
+
+    for(let t=0;t<TIME_POINTS;t++){
+      let meanP=0, crossSum=0, p2sum=0;
+      for(let n=0;n<N;n++) meanP += powerTraces[n].trace[t];
+      meanP /= N;
+      let stdP = 0;
+      for(let n=0;n<N;n++){
+        const dp = powerTraces[n].trace[t]-meanP;
+        const dh = hyp[n]-meanH;
+        crossSum += dp*dh;
+        p2sum += dp*dp;
+      }
+      stdP = Math.sqrt(p2sum/N)||1;
+      corr[t] = (crossSum/N)/(stdH*stdP);
+    }
+
+    // draw
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#13161e'; ctx.fillRect(0,0,W,H);
+
+    // axes
+    ctx.strokeStyle='#2a3048'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(50,H-40); ctx.lineTo(W-20,H-40); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(50,20); ctx.lineTo(50,H-40); ctx.stroke();
+
+    // zero line
+    ctx.strokeStyle='#2a3048'; ctx.lineWidth=0.5; ctx.setLineDash([4,4]);
+    const midY = (H-40)/2+20;
+    ctx.beginPath(); ctx.moveTo(50,midY); ctx.lineTo(W-20,midY); ctx.stroke();
+    ctx.setLineDash([]);
+
+    const isCorrect = khyp === TRUE_KEY;
+    const peakCorr = Math.max(...corr.map(Math.abs));
+
+    // correlation line
+    const xscale = (W-70)/(TIME_POINTS-1);
+    const yscale = ((H-60)/2)*0.85;
+    ctx.strokeStyle = isCorrect ? '#7ef7c0' : '#f76e7e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    corr.forEach((v,i)=>{
+      const px = 50 + i*xscale;
+      const py = midY - v*yscale;
+      i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+    });
+    ctx.stroke();
+
+    // peak marker
+    const peakIdx = corr.indexOf(Math.max(...corr));
+    const px2 = 50 + peakIdx*xscale;
+    const py2 = midY - corr[peakIdx]*yscale;
+    ctx.fillStyle='#f7a05a';
+    ctx.beginPath(); ctx.arc(px2,py2,4,0,Math.PI*2); ctx.fill();
+
+    // labels
+    ctx.fillStyle='#8892aa'; ctx.font='11px "JetBrains Mono"'; ctx.textAlign='center';
+    ctx.fillText('Time sample', W/2, H-10);
+    ctx.save(); ctx.translate(14, H/2); ctx.rotate(-Math.PI/2);
+    ctx.fillText('Correlation', 0, 0); ctx.restore();
+    ctx.fillStyle='#dde4f0'; ctx.font='11px "DM Sans"'; ctx.textAlign='left';
+    ctx.fillText(`N=${N} traces   Peak |r| = ${peakCorr.toFixed(3)}`, 56, 16);
+
+    document.getElementById('dpaResult').textContent =
+      isCorrect
+        ? `✅ Correct key (${N} traces)\nPeak corr: ${peakCorr.toFixed(3)}\n${N>=100?'Key recovered!':'Need more traces'}`
+        : `❌ Wrong hypothesis\nPeak corr: ${peakCorr.toFixed(3)}\nNo key leakage`;
+  }
+
+  document.getElementById('traceSlider').addEventListener('input', draw);
+  document.getElementById('keySlider').addEventListener('input', draw);
+  draw();
+})();
+</script>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     20 · SECURITY STANDARDS & CERTIFICATION
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">20 / 22</div>
+<span class="eyebrow">Standards</span>
+<h2>Security Standards &amp; Certification</h2>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>FIPS 140-3</h3>
+      <ul>
+        <li>NIST standard for cryptographic modules; four security levels (1–4)</li>
+        <li>Level 2: tamper-evident coatings/seals; role-based authentication</li>
+        <li>Level 3: tamper-responsive with zeroisation; identity-based auth; physical protection</li>
+        <li>Level 4: complete physical protection envelope; operates in unprotected environment</li>
+        <li>Mandatory for US federal procurement; de facto global standard for HSMs</li>
+        <li>Testing by NVLAP-accredited labs; CMVP certificate required</li>
+      </ul>
+    </div>
+    <div class="panel accent2-left">
+      <h3>Common Criteria (CC)</h3>
+      <ul>
+        <li class="a2">ISO/IEC 15408; EAL 1–7 (assurance levels); Protection Profiles define product requirements</li>
+        <li class="a2">EAL4+: methodically designed, tested, reviewed — typical for smartcard ICs and HSMs</li>
+        <li class="a2">EAL5–7: semi-formally or formally verified design; required for high-security SoCs</li>
+        <li class="a2">PP-0084/0117: Platform Security Requirements for IoT; PP-0035: SmartCard IC</li>
+        <li class="a2">Mutual recognition via CCRA and SOGIS arrangements</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent3-left" style="margin-bottom:0.8em;">
+      <h3>PSA Certified</h3>
+      <ul>
+        <li class="a3">Arm's Platform Security Architecture framework; three levels (L1–L3)</li>
+        <li class="a3">L1: questionnaire-based; L2: lab-tested (independent); L3: resistance against scalable attacks</li>
+        <li class="a3">PSA-RoT API: standardised interface to HRoT services for OS/middleware</li>
+        <li class="a3">Widely adopted in IoT MCUs (STM32, nRF9160, LPC55S)</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>Industry Standards</h3>
+      <ul>
+        <li class="a4"><span class="hl4">ISO/SAE 21434</span> — automotive cybersecurity engineering</li>
+        <li class="a4"><span class="hl4">IEC 62443</span> — industrial control system security</li>
+        <li class="a4"><span class="hl4">DO-326A / ED-202A</span> — airborne system security</li>
+        <li class="a4"><span class="hl4">SESIP</span> — Security Evaluation Standard for IoT Platforms; maps to CC EAL</li>
+        <li class="a4"><span class="hl4">EU CRA</span> — Cyber Resilience Act; mandatory CE marking with security requirements for all connected products</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     21 · CASE STUDIES
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">21 / 22</div>
+<span class="eyebrow">Case Studies</span>
+<h2>Security Architecture Case Studies</h2>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div>
+    <div class="panel accent-left" style="margin-bottom:0.8em;">
+      <h3>Apple Secure Enclave (SEP)</h3>
+      <ul>
+        <li>Dedicated ART (ARMv8.3) secure processor; fully isolated from Application Processor</li>
+        <li>Unique UID key fused at manufacture; inaccessible to Secure Boot firmware, Apple, or any software</li>
+        <li>Secure Element (SE) for payment keys (NFC); separate from SEP silicon</li>
+        <li>Inline AES engine between DRAM and SEP; memory encryption at full bandwidth</li>
+        <li>Effaceable Storage: fast cryptographic erase of NAND encryption key on "Erase All"</li>
+        <li>Touch ID / Face ID biometric data encrypted and only interpretable inside SEP</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>AMD EPYC — SEV-SNP</h3>
+      <ul>
+        <li class="a3">AMD Secure Processor (PSP): ARM Cortex-A5 dedicated security core on same die</li>
+        <li class="a3">SME: all DRAM encrypted with single key; transparent, ~0.5% performance overhead</li>
+        <li class="a3">SEV: per-VM DRAM encryption; hypervisor cannot read VM memory</li>
+        <li class="a3">SEV-SNP adds memory integrity (RMP table) and attestation; defends against hypervisor-level attacker</li>
+        <li class="a3">VCEK (Versioned Chip Endorsement Key): attestation signature bound to chip UID + firmware version</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Google Titan M2</h3>
+      <ul>
+        <li class="a2">Custom RISC-V security chip on Pixel; separate from Application Processor</li>
+        <li class="a2">Secure boot: immutable ROM verifying Titan firmware; separate from AP boot</li>
+        <li class="a2">Stores Android Verified Boot keys; Pixel lock/unlock state</li>
+        <li class="a2">Anti-rollback: cryptographic enforcement of minimum OS version</li>
+        <li class="a2">Strongbox Keymaster: Android keystore backed by Titan hardware</li>
+        <li class="a2">FIPS 140-2 Level 2 certified; physical tamper resistance</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>NVIDIA H100 — Confidential Computing</h3>
+      <ul>
+        <li class="a4">Hopper GPU adds hardware confidential compute support (first GPU CC implementation)</li>
+        <li class="a4">CC mode: PCIe/NVLink traffic encrypted; GPU DRAM encrypted; attestation via NVIDIA RIM</li>
+        <li class="a4">Firmware attestation: GPU firmware measurements signed by NVIDIA PPCIE key</li>
+        <li class="a4">TEE integration: AMD SEV-SNP or Intel TDX VM can attest GPU as trusted accelerator</li>
+        <li class="a4">RoT: on-die GSP (GPU System Processor) acts as secure management controller</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     22 · SUMMARY
+     ══════════════════════════════════════════════ -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">22 / 22</div>
+<span class="eyebrow">Summary</span>
+<h2>Security in SoC Design — Key Takeaways</h2>
+<div class="cols cols-3" style="margin-top:0.8em;">
+  <div>
+    <span class="tag tag-green">Hardware Foundation</span>
+    <ul>
+      <li>HRoT is the non-negotiable anchor — all software security inherits trust from hardware</li>
+      <li>PUF-based keys eliminate NVM key storage; derived secrets exist only transiently</li>
+      <li>TRNG quality is fundamental — a weak entropy source undermines all cryptography</li>
+      <li>Secure boot chain: each stage verified before execution; measured boot enables attestation</li>
+    </ul>
+  </div>
+  <div>
+    <span class="tag tag-blue">Attack Resistance</span>
+    <ul>
+      <li>Side-channel attacks require hardware countermeasures: masking, hiding, constant-time logic</li>
+      <li>Fault injection demands voltage/clock monitoring + temporal/spatial redundancy</li>
+      <li>IOMMU / SMMU essential: DMA masters are as powerful as CPUs without isolation</li>
+      <li>Memory encryption + integrity tree for DRAM protects against physical and software attacks</li>
+    </ul>
+  </div>
+  <div>
+    <span class="tag tag-amber">Ecosystem &amp; Compliance</span>
+    <ul>
+      <li>Debug access requires authentication protocol; lifecycle gating is non-optional in production</li>
+      <li>Supply chain threats are real: PUF authentication + secure provisioning defend against counterfeits and Trojans</li>
+      <li>FIPS 140-3 / CC EAL / PSA Certified define the certification ladder; know which your market requires</li>
+      <li>ML model IP protection requires hardware encryption + integrity + attestation from storage to NPU SRAM</li>
+    </ul>
+  </div>
+</div>
+<hr class="div" style="margin:1em 0;"/>
+<div style="display:flex; gap:1.2em; flex-wrap:wrap; margin-top:0.2em;">
+  <div class="panel" style="flex:1; min-width:180px;">
+    <p style="font-size:0.7em;"><span class="hl">Next:</span> <em>CXL in ML Accelerator SoCs</em> — coherent memory expansion, Type 1/2/3 devices, and fabric switch architectures</p>
+  </div>
+  <div class="panel" style="flex:1; min-width:180px;">
+    <p style="font-size:0.7em; color:var(--muted);">
+      Key references: NIST SP 800-90A/B · FIPS 203/204/205 · TCG DICE · Arm TrustZone / CCA · AMD SEV-SNP Architecture · Kocher et al., "Differential Power Analysis," CRYPTO 1999 · Mangard, Oswald &amp; Popp, <em>Power Analysis Attacks</em>, Springer 2007
+    </p>
+  </div>
+</div>
+<div style="margin-top:1em; text-align:center; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:0.55em; letter-spacing:0.1em;">
+  Modern SoC Design Series · Presentation 07/13 · Navigate: ← → · Overview: Esc · Fullscreen: F
+</div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: false,
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'none',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1200,
+  height: 700,
+  margin: 0.04,
+  plugins: [],
+});
+hljs.highlightAll();
+</script>
+</body>
+</html>
