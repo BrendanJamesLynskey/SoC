@@ -175,6 +175,7 @@ canvas { display: block; }
   font-size: 1.5em; color: var(--accent); display: block; line-height: 1;
 }
 .stat .lbl { font-size: 0.55em; color: var(--muted); display: block; margin-top: 0.3em; }
+.reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
@@ -1468,11 +1469,26 @@ Reveal.initialize({
   progress: true,
   center: false,
   width: 1200,
-  height: 700,
-  margin: 0.04,
+  height: 900,
+  margin: 0.02,
   plugins: [],
 });
 hljs.highlightAll();
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
 </script>
 </body>
 </html>

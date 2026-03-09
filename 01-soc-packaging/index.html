@@ -132,6 +132,7 @@
 
   /* Footer attribution */
   .slide-footer { position: absolute; bottom: 1em; left: 50%; transform: translateX(-50%); font-size: 0.35em; color: var(--dim); font-family: var(--r-code-font); }
+.reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
@@ -1009,12 +1010,27 @@ Reveal.initialize({
   transition: 'fade',
   transitionSpeed: 'fast',
   backgroundTransition: 'fade',
-  center: true,
-  margin: 0.08,
+  center: false,
+  margin: 0.02,
   width: 1280,
-  height: 720,
+  height: 900,
   plugins: [ RevealHighlight ]
 });
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
 </script>
 </body>
 </html>

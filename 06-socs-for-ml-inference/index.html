@@ -41,7 +41,7 @@
 .reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; font-size: 0.78em; line-height: 1.5; }
 .reveal ul li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
 .reveal ul ul li::before { color: var(--accent2); content: "◦"; }
-.reveal section { padding: 0 !important; }
+.reveal section { padding: 0 !important; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
 
 /* ─── slide shell ─── */
 .slide {
@@ -1781,14 +1781,29 @@ Reveal.initialize({
   progress: true,
   center: false,
   width: 1280,
-  height: 720,
-  margin: 0,
+  height: 900,
+  margin: 0.02,
   plugins: [ RevealHighlight ],
   keyboard: {
     39: 'next',
     37: 'prev'
   }
 });
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
 </script>
 </body>
 </html>

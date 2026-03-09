@@ -130,6 +130,7 @@
   /* Protocol stack layers */
   .proto-stack { display: flex; flex-direction: column; gap: 2px; max-width: 350px; margin: 0.3em auto; }
   .proto-layer { padding: 0.35em 0.6em; border-radius: 5px; text-align: center; font-size: 0.55em; font-weight: 700; font-family: var(--r-code-font); }
+.reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
@@ -532,7 +533,8 @@
         .wf-annot  { font: 500 9.5px 'DM Sans', sans-serif; fill: #6a6660; }
         .wf-data   { font: 700 10px 'JetBrains Mono', monospace; }
         .wf-grid   { stroke: #1e1e28; stroke-width: 0.5; }
-      </style>
+      .reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+</style>
     </defs>
 
     <!-- Clock ticks (vertical gridlines) -->
@@ -1160,12 +1162,27 @@ Reveal.initialize({
   transition: 'fade',
   transitionSpeed: 'fast',
   backgroundTransition: 'fade',
-  center: true,
-  margin: 0.08,
+  center: false,
+  margin: 0.02,
   width: 1280,
-  height: 720,
+  height: 900,
   plugins: [ RevealHighlight ]
 });
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
 </script>
 </body>
 </html>
