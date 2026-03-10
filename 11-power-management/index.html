@@ -1,138 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Power Management in ML Accelerator SoCs — Modern SoC Design Series</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
-
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --r-background-color: #0a0a0f;
-    --r-main-font: 'DM Sans', sans-serif;
-    --r-heading-font: 'Playfair Display', serif;
-    --r-code-font: 'JetBrains Mono', monospace;
-    --r-main-font-size: 28px;
-    --r-heading-color: #e8e4df;
-    --r-main-color: #c8c4bf;
-    --r-link-color: #7eb8da;
-    --r-link-color-hover: #a8d4ef;
-    --r-selection-background-color: #2a5a7a;
-    --accent: #7eb8da;
-    --accent2: #e8a87c;
-    --accent3: #8fd4a4;
-    --accent4: #c49dd8;
-    --dim: #6a6660;
-    --surface: #16161e;
-    --surface2: #1e1e28;
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
   }
 
-  .reveal { font-weight: 400; }
-  .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-shadow: none; }
-  .reveal h1 { font-size: 2.0em; font-weight: 900; }
-  .reveal h2 { font-size: 1.35em; }
-  .reveal h3 { font-size: 1.0em; color: var(--accent); font-family: var(--r-main-font); font-weight: 700; }
-  .reveal p, .reveal li { line-height: 1.6; }
-  .reveal ul { list-style: none; padding-left: 0; }
-  .reveal ul li { position: relative; padding-left: 1.4em; margin-bottom: 0.4em; }
-  .reveal ul li::before { content: '\25b8'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
-  .reveal code { font-family: var(--r-code-font); font-size: 0.85em; }
-  .reveal pre { width: 100%; box-shadow: none; }
-  .reveal pre code { padding: 1em 1.2em; border-radius: 8px; background: var(--surface); border: 1px solid #2a2a35; max-height: 520px; font-size: 0.55em; line-height: 1.55; }
-  .reveal .slide-number { font-family: var(--r-code-font); font-size: 0.6em; color: var(--dim); background: transparent; }
-  .reveal blockquote { background: var(--surface); border-left: 4px solid var(--accent); padding: 0.8em 1.2em; font-style: normal; border-radius: 0 8px 8px 0; width: 90%; margin: 0.8em auto; font-size: 0.85em; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
 
-  /* Utility */
-  .accent  { color: var(--accent) !important; }
-  .accent2 { color: var(--accent2) !important; }
-  .accent3 { color: var(--accent3) !important; }
-  .accent4 { color: var(--accent4) !important; }
-  .dim     { color: var(--dim) !important; }
-  .mono    { font-family: var(--r-code-font) !important; }
-  .small   { font-size: 0.7em !important; }
-  .smaller { font-size: 0.6em !important; }
-  .tiny    { font-size: 0.5em !important; }
-  .left    { text-align: left !important; }
-  .center  { text-align: center !important; }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
 
-  /* Tag / badge */
-  .tag { display: inline-block; padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.55em; font-family: var(--r-code-font); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; margin: 0 0.15em; }
-  .tag-blue   { background: rgba(126,184,218,0.18); color: var(--accent); }
-  .tag-orange { background: rgba(232,168,124,0.18); color: var(--accent2); }
-  .tag-green  { background: rgba(143,212,164,0.18); color: var(--accent3); }
-  .tag-purple { background: rgba(196,157,216,0.18); color: var(--accent4); }
-  .tag-dim    { background: rgba(106,102,96,0.18);  color: var(--dim); }
-
-  /* Tables */
-  .reveal table { border-collapse: collapse; margin: 0.6em auto; font-size: 0.65em; width: 95%; }
-  .reveal table th { background: var(--surface2); color: var(--accent); font-weight: 700; padding: 0.5em 0.7em; border-bottom: 2px solid var(--accent); text-align: left; }
-  .reveal table td { padding: 0.45em 0.7em; border-bottom: 1px solid #2a2a35; }
-  .reveal table tr:last-child td { border-bottom: none; }
-
-  /* Diagrams / boxes */
-  .box-row { display: flex; gap: 0.8em; justify-content: center; flex-wrap: wrap; margin: 0.6em 0; }
-  .box { background: var(--surface); border: 1px solid #2a2a35; border-radius: 8px; padding: 0.7em 1em; flex: 1; min-width: 180px; max-width: 320px; text-align: center; }
-  .box h3 { margin: 0 0 0.3em; font-size: 0.85em; }
-  .box p, .box ul { font-size: 0.65em; margin: 0; }
-
-  /* Two-col */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; align-items: start; }
-  .two-col.wide-left { grid-template-columns: 1.3fr 0.7fr; }
-  .two-col.wide-right { grid-template-columns: 0.7fr 1.3fr; }
-
-  /* Numbered steps */
-  .steps { counter-reset: step; padding-left: 0; }
-  .steps li { counter-increment: step; padding-left: 2.2em; }
-  .steps li::before { content: counter(step); position: absolute; left: 0; width: 1.5em; height: 1.5em; background: var(--accent); color: var(--r-background-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 700; }
-
-  /* Slide-specific */
-  .title-slide h1 { font-size: 2.2em; margin-bottom: 0.15em; }
-  .title-slide .subtitle { font-size: 0.85em; color: var(--accent); margin-bottom: 0.5em; font-family: var(--r-main-font); }
-  .title-slide .meta { font-size: 0.55em; color: var(--dim); }
-
-  .section-slide { background: linear-gradient(135deg, #0d1420 0%, #0a0a0f 100%); }
-  .section-slide h2 { font-size: 1.8em; }
-  .section-slide .section-num { font-family: var(--r-code-font); font-size: 0.6em; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.3em; }
-
-  /* Architecture diagram via CSS */
-  .arch-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0.5em auto; max-width: 700px; }
-  .arch-layer { width: 100%; padding: 0.4em 0.8em; border-radius: 6px; text-align: center; font-size: 0.6em; font-weight: 700; font-family: var(--r-code-font); }
-
-  /* Animated underline on headings */
-  .reveal section h2::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 3px;
-    background: var(--accent);
-    margin: 0.25em auto 0;
-    border-radius: 2px;
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
   }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
 
-  .section-slide h2::after,
-  .title-slide h1::after { display: none; }
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
 
-  /* Key-value layout */
-  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2em 1em; font-size: 0.7em; text-align: left; margin: 0.5em auto; max-width: 90%; }
-  .kv dt { color: var(--accent); font-weight: 700; white-space: nowrap; font-family: var(--r-code-font); font-size: 0.9em; }
-  .kv dd { margin: 0; }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
 
-  /* Flow arrow */
-  .flow-arrow { color: var(--dim); font-size: 1.4em; margin: 0.15em 0; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
 
-  /* Highlight bar */
-  .highlight-bar { background: linear-gradient(90deg, rgba(126,184,218,0.12) 0%, transparent 100%); border-left: 3px solid var(--accent); padding: 0.5em 1em; margin: 0.5em 0; border-radius: 0 6px 6px 0; font-size: 0.75em; }
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-  /* Footer attribution */
-  .slide-footer { position: absolute; bottom: 1em; left: 50%; transform: translateX(-50%); font-size: 0.35em; color: var(--dim); font-family: var(--r-code-font); }
-  .reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
+
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
@@ -142,147 +130,140 @@
 <!-- ============================================================ -->
 <!-- SLIDE 1: Title -->
 <!-- ============================================================ -->
-<section class="title-slide" data-background-gradient="radial-gradient(ellipse at 30% 50%, #111828 0%, #0a0a0f 70%)">
-  <p class="mono small accent" style="letter-spacing:0.15em;">MODERN SOC DESIGN &middot; PRESENTATION 11</p>
+<section class="title-slide" data-background-color="#0a0a0f">
+  <p class="meta">MODERN SOC DESIGN &middot; PRESENTATION 11</p>
   <h1>Power Management in ML Accelerator SoCs</h1>
+  <div style="width:60px;height:3px;background:var(--amber);margin:.3em 0"></div>
   <p class="subtitle">DVFS, Power Gating &amp; Dark Silicon in the AI Era</p>
-  <p class="meta" style="margin-top:1.5em;">
-    DVFS &middot; Power domains &middot; PMICs &middot; LDO vs switching regulators &middot; Dark silicon &middot; Power gating strategies
-  </p>
-  <p class="meta" style="margin-top:1em;">Navigate: <span class="mono">&rarr; &larr;</span> &nbsp;|&nbsp; Overview: <span class="mono">Esc</span> &nbsp;|&nbsp; Fullscreen: <span class="mono">F</span></p>
+  <div style="display:flex;gap:.3em;flex-wrap:wrap;margin-top:.4em;"><span class="pill amber">DVFS</span> <span class="pill amber">Power domains</span> <span class="pill amber">PMICs</span> <span class="pill amber">LDO vs switching regulators</span> <span class="pill amber">Dark silicon</span> <span class="pill amber">Power gating strategies</span></div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 2: Power Challenge in ML SoCs -->
 <!-- ============================================================ -->
-<section>
-  <h2>The Power Challenge in ML SoCs</h2>
-  <div class="two-col" style="margin-top:0.6em;">
-    <div class="left">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">01</span><h2>The Power Challenge in ML SoCs</h2></div>
+  <div class="cols cols-2" style="margin-top:0.6em;">
+    <div>
       <ul style="font-size:0.75em;">
-        <li><strong class="accent">TDP scaling</strong> &mdash; datacenter accelerators have surged from ~100 W (K80, 2014) to 300 W (A100), 700 W (H100 SXM5), and beyond 1000 W (B200 rack modules) in a decade</li>
-        <li><strong class="accent2">Power density</strong> &mdash; advanced nodes (3 nm, 2 nm) pack more transistors but thermal density now exceeds 1 W/mm&sup2;; local hotspots reach 2&ndash;3 W/mm&sup2; in MAC arrays</li>
-        <li><strong class="accent3">Utilization wall</strong> &mdash; at 3 nm, only ~30&ndash;50% of transistors can switch simultaneously within TDP; rest must be dark or voltage-scaled</li>
-        <li><strong class="accent4">Dark silicon</strong> &mdash; Esmaeilzadeh et al. predicted 50&ndash;80% dark silicon by 2025; ML SoCs embrace this via specialized accelerator blocks activated on demand</li>
+        <li><strong class="b">TDP scaling</strong> &mdash; datacenter accelerators have surged from ~100 W (K80, 2014) to 300 W (A100), 700 W (H100 SXM5), and beyond 1000 W (B200 rack modules) in a decade</li>
+        <li><strong class="a">Power density</strong> &mdash; advanced nodes (3 nm, 2 nm) pack more transistors but thermal density now exceeds 1 W/mm&sup2;; local hotspots reach 2&ndash;3 W/mm&sup2; in MAC arrays</li>
+        <li><strong class="g">Utilization wall</strong> &mdash; at 3 nm, only ~30&ndash;50% of transistors can switch simultaneously within TDP; rest must be dark or voltage-scaled</li>
+        <li><strong class="p">Dark silicon</strong> &mdash; Esmaeilzadeh et al. predicted 50&ndash;80% dark silicon by 2025; ML SoCs embrace this via specialized accelerator blocks activated on demand</li>
       </ul>
     </div>
     <div>
       <table>
         <tr><th>Accelerator</th><th>Year</th><th>TDP (W)</th><th>Node</th></tr>
-        <tr><td>NVIDIA K80</td><td>2014</td><td class="accent">150</td><td>28 nm</td></tr>
-        <tr><td>NVIDIA V100</td><td>2017</td><td class="accent">300</td><td>12 nm</td></tr>
-        <tr><td>NVIDIA A100</td><td>2020</td><td class="accent">400</td><td>7 nm</td></tr>
-        <tr><td>NVIDIA H100 SXM5</td><td>2022</td><td class="accent2">700</td><td>4 nm</td></tr>
-        <tr><td>NVIDIA B200</td><td>2024</td><td class="accent2">1000</td><td>4NP</td></tr>
-        <tr><td>Google TPU v5p</td><td>2023</td><td class="accent3">~250</td><td>7 nm</td></tr>
-        <tr><td>AMD MI300X</td><td>2023</td><td class="accent3">750</td><td>5/6 nm</td></tr>
+        <tr><td>NVIDIA K80</td><td>2014</td><td class="b">150</td><td>28 nm</td></tr>
+        <tr><td>NVIDIA V100</td><td>2017</td><td class="b">300</td><td>12 nm</td></tr>
+        <tr><td>NVIDIA A100</td><td>2020</td><td class="b">400</td><td>7 nm</td></tr>
+        <tr><td>NVIDIA H100 SXM5</td><td>2022</td><td class="a">700</td><td>4 nm</td></tr>
+        <tr><td>NVIDIA B200</td><td>2024</td><td class="a">1000</td><td>4NP</td></tr>
+        <tr><td>Google TPU v5p</td><td>2023</td><td class="g">~250</td><td>7 nm</td></tr>
+        <tr><td>AMD MI300X</td><td>2023</td><td class="g">750</td><td>5/6 nm</td></tr>
       </table>
-      <div class="highlight-bar" style="margin-top:0.6em;">
-        Power management is no longer a feature&mdash;it is <strong class="accent">the</strong> architectural constraint that determines ML SoC performance.
+      <div class="card amber" style="margin-top:0.6em;">
+        Power management is no longer a feature&mdash;it is <strong class="b">the</strong> architectural constraint that determines ML SoC performance.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 3: Section — Power Domain Architecture -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section I</p>
-  <h2>Power Domain Architecture</h2>
-  <p class="dim" style="font-size:0.75em; margin-top:0.5em;">Partitioning, isolation, retention &amp; the physical infrastructure of multi-domain SoCs</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section I</span><h2>Power Domain Architecture</h2></div>
+  <p>Partitioning, isolation, retention &amp; the physical infrastructure of multi-domain SoCs</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 4: Power Domain Partitioning -->
 <!-- ============================================================ -->
-<section>
-  <h2>Power Domain Partitioning</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>Power Domain Partitioning</h2></div>
   <p style="font-size:0.72em;">An ML SoC is divided into independently controllable power domains, each with its own supply rail and switching capability.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Domain Types</h3>
+      <h3 style="color:var(--blue);">Domain Types</h3>
       <ul style="font-size:0.7em;">
-        <li><strong class="accent">Always-on (AON)</strong> &mdash; PMU controller, RTC, wakeup logic, retention SRAM; typically 5&ndash;20 mW; never powered off</li>
-        <li><strong class="accent2">Switchable compute</strong> &mdash; NPU clusters, GPU shader arrays, CPU cores; independently gated; 10&ndash;200 W per domain</li>
-        <li><strong class="accent3">Switchable I/O</strong> &mdash; PCIe, HBM PHYs, SerDes; gated when link is idle; careful sequencing required</li>
-        <li><strong class="accent4">Retention domains</strong> &mdash; subset of switchable domains that maintain register/SRAM state via retention cells at reduced voltage (~0.4 V)</li>
+        <li><strong class="b">Always-on (AON)</strong> &mdash; PMU controller, RTC, wakeup logic, retention SRAM; typically 5&ndash;20 mW; never powered off</li>
+        <li><strong class="a">Switchable compute</strong> &mdash; NPU clusters, GPU shader arrays, CPU cores; independently gated; 10&ndash;200 W per domain</li>
+        <li><strong class="g">Switchable I/O</strong> &mdash; PCIe, HBM PHYs, SerDes; gated when link is idle; careful sequencing required</li>
+        <li><strong class="p">Retention domains</strong> &mdash; subset of switchable domains that maintain register/SRAM state via retention cells at reduced voltage (~0.4 V)</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        Modern ML SoCs have <strong class="accent">15&ndash;30+ independent power domains</strong>; the NVIDIA H100 has &gt;20 voltage rails.
+      <div class="card amber" style="margin-top:0.5em;">
+        Modern ML SoCs have <strong class="b">15&ndash;30+ independent power domains</strong>; the NVIDIA H100 has &gt;20 voltage rails.
       </div>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Isolation &amp; Level Shifting</h3>
+      <h3 style="color:var(--amber);">Isolation &amp; Level Shifting</h3>
       <ul style="font-size:0.7em;">
-        <li><strong class="accent2">Isolation cells</strong> &mdash; clamp outputs of powered-off domains to known values (0/1/latch) to prevent floating signals from causing crowbar current in active domains</li>
-        <li><strong class="accent2">Level shifters</strong> &mdash; translate signals between domains at different voltages; HL (high-to-low) and LH (low-to-high) variants</li>
-        <li><strong class="accent2">Retention registers</strong> &mdash; balloon-latch or shadow-latch flip-flops; save state on SAVE signal, restore on RESTORE; ~15% area overhead per FF</li>
-        <li><strong class="accent2">Always-on buffers</strong> &mdash; repeaters in AON domain carry signals across gated regions without interruption</li>
+        <li><strong class="a">Isolation cells</strong> &mdash; clamp outputs of powered-off domains to known values (0/1/latch) to prevent floating signals from causing crowbar current in active domains</li>
+        <li><strong class="a">Level shifters</strong> &mdash; translate signals between domains at different voltages; HL (high-to-low) and LH (low-to-high) variants</li>
+        <li><strong class="a">Retention registers</strong> &mdash; balloon-latch or shadow-latch flip-flops; save state on SAVE signal, restore on RESTORE; ~15% area overhead per FF</li>
+        <li><strong class="a">Always-on buffers</strong> &mdash; repeaters in AON domain carry signals across gated regions without interruption</li>
       </ul>
-      <div class="arch-stack" style="margin-top:0.6em;">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent);">NPU Domain (0.65&ndash;0.95 V) &mdash; Switchable</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">Isolation Cells &amp; Level Shifters</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">Always-On Domain (0.75 V) &mdash; PMU + Wakeup</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--accent4);">Retention Domain (0.4 V) &mdash; State Preservation</div>
+      <div style="display:flex;flex-direction:column;gap:0" style="margin-top:0.6em;">
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.15); color:var(--blue);">NPU Domain (0.65&ndash;0.95 V) &mdash; Switchable</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.12); color:var(--amber);">Isolation Cells &amp; Level Shifters</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(143,212,164,0.12); color:var(--green);">Always-On Domain (0.75 V) &mdash; PMU + Wakeup</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(196,157,216,0.12); color:var(--purple);">Retention Domain (0.4 V) &mdash; State Preservation</div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 5: Power Gating -->
 <!-- ============================================================ -->
-<section>
-  <h2>Power Gating</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>Power Gating</h2></div>
   <p style="font-size:0.72em;">Power gating eliminates leakage by disconnecting supply rails using high-Vt header or footer transistors.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Header vs Footer Switches</h3>
+      <h3 style="color:var(--blue);">Header vs Footer Switches</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Header switch (PMOS)</strong> &mdash; placed between VDD and virtual-VDD (VVDD); most common in CMOS; better noise isolation</li>
-        <li><strong class="accent2">Footer switch (NMOS)</strong> &mdash; placed between virtual-VSS (VVSS) and ground; higher drive strength per unit area; used in some Intel designs</li>
-        <li><strong class="accent3">Rush current control</strong> &mdash; switches are daisy-chained with staggered enable (100&ndash;500 ns delays) to limit di/dt; typical inrush limit: 100&ndash;500 mA/ns</li>
-        <li><strong class="accent4">Switch sizing</strong> &mdash; ~5&ndash;10% of total gated area; IR drop across switch: &lt;10 mV at peak current; on-resistance: 1&ndash;5 m&Omega;</li>
+        <li><strong class="b">Header switch (PMOS)</strong> &mdash; placed between VDD and virtual-VDD (VVDD); most common in CMOS; better noise isolation</li>
+        <li><strong class="a">Footer switch (NMOS)</strong> &mdash; placed between virtual-VSS (VVSS) and ground; higher drive strength per unit area; used in some Intel designs</li>
+        <li><strong class="g">Rush current control</strong> &mdash; switches are daisy-chained with staggered enable (100&ndash;500 ns delays) to limit di/dt; typical inrush limit: 100&ndash;500 mA/ns</li>
+        <li><strong class="p">Switch sizing</strong> &mdash; ~5&ndash;10% of total gated area; IR drop across switch: &lt;10 mV at peak current; on-resistance: 1&ndash;5 m&Omega;</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.6em;">Wake-up Latency</h3>
+      <h3 style="color:var(--amber); margin-top:0.6em;">Wake-up Latency</h3>
       <ul style="font-size:0.68em;">
-        <li>Power gate turn-on: <strong class="accent">0.5&ndash;5 &mu;s</strong> (switch chain stagger)</li>
-        <li>Rail stabilization: <strong class="accent2">5&ndash;20 &mu;s</strong> (decap charging)</li>
-        <li>State restore (retention): <strong class="accent3">1&ndash;10 &mu;s</strong></li>
-        <li>PLL/clock relock: <strong class="accent4">10&ndash;50 &mu;s</strong></li>
+        <li>Power gate turn-on: <strong class="b">0.5&ndash;5 &mu;s</strong> (switch chain stagger)</li>
+        <li>Rail stabilization: <strong class="a">5&ndash;20 &mu;s</strong> (decap charging)</li>
+        <li>State restore (retention): <strong class="g">1&ndash;10 &mu;s</strong></li>
+        <li>PLL/clock relock: <strong class="p">10&ndash;50 &mu;s</strong></li>
         <li>Total cold wake-up: <strong>~20&ndash;80 &mu;s</strong> per domain</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Power Gating Sequence</h3>
-      <div class="arch-stack" style="margin-top:0.3em;">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent);">1. SAVE &mdash; Assert retention save signal</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">2. ISOLATE &mdash; Enable isolation cells</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--accent4);">3. CLAMP &mdash; Clamp outputs to safe values</div>
-        <div class="arch-layer" style="background:rgba(106,102,96,0.15); color:var(--dim);">4. GATE &mdash; Disable header/footer switches</div>
-        <div class="arch-layer" style="background:var(--surface2); color:var(--dim);">--- Domain is OFF (leakage &lt; 1% of active) ---</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">5. UNGATE &mdash; Staggered switch enable</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">6. DE-ISOLATE &mdash; Release isolation</div>
-        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent);">7. RESTORE &mdash; Restore retained state</div>
+      <h3 style="color:var(--green);">Power Gating Sequence</h3>
+      <div style="display:flex;flex-direction:column;gap:0" style="margin-top:0.3em;">
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.15); color:var(--blue);">1. SAVE &mdash; Assert retention save signal</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.12); color:var(--amber);">2. ISOLATE &mdash; Enable isolation cells</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(196,157,216,0.12); color:var(--purple);">3. CLAMP &mdash; Clamp outputs to safe values</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(106,102,96,0.15); color:var(--muted);">4. GATE &mdash; Disable header/footer switches</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:var(--bg2); color:var(--muted);">--- Domain is OFF (leakage &lt; 1% of active) ---</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(143,212,164,0.12); color:var(--green);">5. UNGATE &mdash; Staggered switch enable</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.12); color:var(--amber);">6. DE-ISOLATE &mdash; Release isolation</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.15); color:var(--blue);">7. RESTORE &mdash; Restore retained state</div>
       </div>
-      <blockquote style="margin-top:0.5em; font-size:0.72em;">
-        "The break-even time for power gating is typically 1&ndash;10 &mu;s of idle time to offset the energy cost of the gating sequence itself."
-      </blockquote>
+      <div class="card blue" style="margin-top:0.5em; font-size:0.72em;">"The break-even time for power gating is typically 1&ndash;10 &mu;s of idle time to offset the energy cost of the gating sequence itself."
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 6: UPF/CPF Power Intent -->
 <!-- ============================================================ -->
-<section>
-  <h2>UPF/CPF Power Intent</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>UPF/CPF Power Intent</h2></div>
   <p style="font-size:0.72em;">IEEE 1801 (Unified Power Format) formally describes the power architecture for EDA tools to implement and verify.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">UPF Key Concepts</h3>
-      <dl class="kv">
+      <h3 style="color:var(--blue);">UPF Key Concepts</h3>
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em">
         <dt>Power Domain</dt>
         <dd>Logical grouping of cells sharing a supply set</dd>
         <dt>Supply Network</dt>
@@ -298,12 +279,12 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Power-Aware Verification</h3>
+      <h3 style="color:var(--amber);">Power-Aware Verification</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Simulation</strong> &mdash; UPF-aware simulators (Synopsys VCS, Cadence Xcelium) corrupt signals from gated domains; catch missing isolation bugs</li>
-        <li><strong class="accent2">Static checks</strong> &mdash; formal verification of isolation completeness, level shifter coverage, and state table consistency</li>
-        <li><strong class="accent2">Power-aware synthesis</strong> &mdash; Synopsys DC inserts isolation, retention, and level shifter cells per UPF directives</li>
-        <li><strong class="accent2">P&amp;R integration</strong> &mdash; Innovus/ICC2 places power switches, routes virtual rails, and checks IR drop per domain</li>
+        <li><strong class="a">Simulation</strong> &mdash; UPF-aware simulators (Synopsys VCS, Cadence Xcelium) corrupt signals from gated domains; catch missing isolation bugs</li>
+        <li><strong class="a">Static checks</strong> &mdash; formal verification of isolation completeness, level shifter coverage, and state table consistency</li>
+        <li><strong class="a">Power-aware synthesis</strong> &mdash; Synopsys DC inserts isolation, retention, and level shifter cells per UPF directives</li>
+        <li><strong class="a">P&amp;R integration</strong> &mdash; Innovus/ICC2 places power switches, routes virtual rails, and checks IR drop per domain</li>
       </ul>
       <pre><code class="language-tcl" style="font-size:0.9em;">## UPF snippet — NPU power domain
 create_power_domain PD_NPU \
@@ -322,175 +303,165 @@ set_retention ret_npu \
   -save_signal {save_npu posedge} \
   -restore_signal {restore_npu posedge}</code></pre>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 7: Section — DVFS -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section II</p>
-  <h2>Dynamic Voltage &amp; Frequency Scaling</h2>
-  <p class="dim" style="font-size:0.75em; margin-top:0.5em;">The most effective runtime power optimization: trading voltage for cubic power savings</p>
-</section>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section II</span><h2>Dynamic Voltage &amp; Frequency Scaling</h2></section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 8: DVFS Fundamentals -->
 <!-- ============================================================ -->
-<section>
-  <h2>DVFS Fundamentals</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>DVFS Fundamentals</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">The Power Equation</h3>
-      <div class="highlight-bar" style="margin-top:0.3em;">
-        <strong class="accent" style="font-size:1.1em;">P<sub>dynamic</sub> = &alpha; &middot; C &middot; V&sup2; &middot; f</strong><br>
-        <span class="dim small">&alpha; = activity factor, C = capacitance, V = supply voltage, f = clock frequency</span>
+      <h3 style="color:var(--blue);">The Power Equation</h3>
+      <div class="card amber" style="margin-top:0.3em;">
+        <strong class="b" style="font-size:1.1em;">P<sub>dynamic</sub> = &alpha; &middot; C &middot; V&sup2; &middot; f</strong><br>
+        <span  style="color:var(--muted)">&alpha; = activity factor, C = capacitance, V = supply voltage, f = clock frequency</span>
       </div>
       <ul style="font-size:0.68em; margin-top:0.5em;">
-        <li><strong class="accent">Quadratic voltage</strong> &mdash; reducing V by 20% cuts dynamic power by ~36%, but frequency must also drop (V &prop; f in near-threshold)</li>
-        <li><strong class="accent2">Cubic savings</strong> &mdash; since f scales roughly with V, effective power scales as ~V&sup3;; 0.8&times; voltage &rarr; ~0.5&times; power</li>
-        <li><strong class="accent3">Leakage floor</strong> &mdash; P<sub>leak</sub> = I<sub>sub</sub>(V,T) + I<sub>gate</sub>(V); at advanced nodes, leakage is 30&ndash;50% of total power at nominal voltage</li>
-        <li><strong class="accent4">P<sub>total</sub></strong> = P<sub>dynamic</sub> + P<sub>leak</sub> + P<sub>short-circuit</sub></li>
+        <li><strong class="b">Quadratic voltage</strong> &mdash; reducing V by 20% cuts dynamic power by ~36%, but frequency must also drop (V &prop; f in near-threshold)</li>
+        <li><strong class="a">Cubic savings</strong> &mdash; since f scales roughly with V, effective power scales as ~V&sup3;; 0.8&times; voltage &rarr; ~0.5&times; power</li>
+        <li><strong class="g">Leakage floor</strong> &mdash; P<sub>leak</sub> = I<sub>sub</sub>(V,T) + I<sub>gate</sub>(V); at advanced nodes, leakage is 30&ndash;50% of total power at nominal voltage</li>
+        <li><strong class="p">P<sub>total</sub></strong> = P<sub>dynamic</sub> + P<sub>leak</sub> + P<sub>short-circuit</sub></li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Operating Points &amp; Guardbands</h3>
+      <h3 style="color:var(--amber);">Operating Points &amp; Guardbands</h3>
       <table>
         <tr><th>OPP</th><th>Voltage</th><th>Frequency</th><th>Rel. Power</th></tr>
-        <tr><td>Ultra-low</td><td class="accent">0.55 V</td><td>400 MHz</td><td class="accent3">0.15&times;</td></tr>
-        <tr><td>Low</td><td class="accent">0.65 V</td><td>800 MHz</td><td class="accent3">0.30&times;</td></tr>
-        <tr><td>Nominal</td><td class="accent">0.75 V</td><td>1.2 GHz</td><td>0.55&times;</td></tr>
-        <tr><td>Turbo</td><td class="accent2">0.85 V</td><td>1.6 GHz</td><td class="accent2">1.00&times;</td></tr>
-        <tr><td>Boost</td><td class="accent4">0.95 V</td><td>2.0 GHz</td><td class="accent4">1.65&times;</td></tr>
+        <tr><td>Ultra-low</td><td class="b">0.55 V</td><td>400 MHz</td><td class="g">0.15&times;</td></tr>
+        <tr><td>Low</td><td class="b">0.65 V</td><td>800 MHz</td><td class="g">0.30&times;</td></tr>
+        <tr><td>Nominal</td><td class="b">0.75 V</td><td>1.2 GHz</td><td>0.55&times;</td></tr>
+        <tr><td>Turbo</td><td class="a">0.85 V</td><td>1.6 GHz</td><td class="a">1.00&times;</td></tr>
+        <tr><td>Boost</td><td class="p">0.95 V</td><td>2.0 GHz</td><td class="p">1.65&times;</td></tr>
       </table>
-      <h3 style="color:var(--accent3); margin-top:0.5em;">Adaptive Voltage Scaling (AVS)</h3>
+      <h3 style="color:var(--green); margin-top:0.5em;">Adaptive Voltage Scaling (AVS)</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent3">Per-chip calibration</strong> &mdash; critical-path ring oscillators (CPMs) measure actual silicon speed</li>
-        <li><strong class="accent3">Guardband reduction</strong> &mdash; AVS eliminates 50&ndash;100 mV of design margin, saving 10&ndash;20% power</li>
-        <li><strong class="accent3">Closed-loop AVS</strong> &mdash; continuous voltage adjustment based on speed monitors; used in Apple M-series, AMD Zen, Intel SpeedShift</li>
+        <li><strong class="g">Per-chip calibration</strong> &mdash; critical-path ring oscillators (CPMs) measure actual silicon speed</li>
+        <li><strong class="g">Guardband reduction</strong> &mdash; AVS eliminates 50&ndash;100 mV of design margin, saving 10&ndash;20% power</li>
+        <li><strong class="g">Closed-loop AVS</strong> &mdash; continuous voltage adjustment based on speed monitors; used in Apple M-series, AMD Zen, Intel SpeedShift</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 9: DVFS Implementation -->
 <!-- ============================================================ -->
-<section>
-  <h2>DVFS Implementation</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>DVFS Implementation</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Voltage Droop Detection</h3>
+      <h3 style="color:var(--blue);">Voltage Droop Detection</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">On-die voltage droop</strong> &mdash; sudden current transients (e.g., cache miss &rarr; all-bank activation) cause supply to droop 50&ndash;150 mV in &lt;1 ns</li>
-        <li><strong class="accent">Droop detectors</strong> &mdash; analog comparators or critical-path replica monitors; Intel uses &gt;100 distributed sensors per core</li>
-        <li><strong class="accent">Response</strong> &mdash; hardware clock stretching or frequency throttle within 1&ndash;5 ns; prevents timing violations</li>
-        <li><strong class="accent">Proactive mitigation</strong> &mdash; microarchitectural throttling (e.g., limit concurrent vector operations) to bound di/dt</li>
+        <li><strong class="b">On-die voltage droop</strong> &mdash; sudden current transients (e.g., cache miss &rarr; all-bank activation) cause supply to droop 50&ndash;150 mV in &lt;1 ns</li>
+        <li><strong class="b">Droop detectors</strong> &mdash; analog comparators or critical-path replica monitors; Intel uses &gt;100 distributed sensors per core</li>
+        <li><strong class="b">Response</strong> &mdash; hardware clock stretching or frequency throttle within 1&ndash;5 ns; prevents timing violations</li>
+        <li><strong class="b">Proactive mitigation</strong> &mdash; microarchitectural throttling (e.g., limit concurrent vector operations) to bound di/dt</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">PLL/FLL Relock Time</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">PLL/FLL Relock Time</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">PLL relock</strong> &mdash; 5&ndash;50 &mu;s for phase-locked loop to acquire new frequency; domain stalls during transition</li>
-        <li><strong class="accent2">FLL (frequency-locked loop)</strong> &mdash; 1&ndash;5 &mu;s relock; preferred for fast DVFS; used in Arm DynamIQ, Apple M-series</li>
-        <li><strong class="accent2">Glitch-free mux</strong> &mdash; switch between PLL output and backup clock during transitions to maintain operation</li>
+        <li><strong class="a">PLL relock</strong> &mdash; 5&ndash;50 &mu;s for phase-locked loop to acquire new frequency; domain stalls during transition</li>
+        <li><strong class="a">FLL (frequency-locked loop)</strong> &mdash; 1&ndash;5 &mu;s relock; preferred for fast DVFS; used in Arm DynamIQ, Apple M-series</li>
+        <li><strong class="a">Glitch-free mux</strong> &mdash; switch between PLL output and backup clock during transitions to maintain operation</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Voltage Regulator Response</h3>
+      <h3 style="color:var(--green);">Voltage Regulator Response</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent3">Slew rate</strong> &mdash; external VRMs: 10&ndash;50 mV/&mu;s; on-die regulators: 100&ndash;500 mV/&mu;s</li>
-        <li><strong class="accent3">Voltage first or frequency first?</strong> &mdash; scaling up: raise voltage, wait, then raise frequency; scaling down: lower frequency first, then voltage</li>
-        <li><strong class="accent3">Transition energy</strong> &mdash; total energy for V/F transition: 10&ndash;100 &mu;J depending on domain capacitance and voltage delta</li>
+        <li><strong class="g">Slew rate</strong> &mdash; external VRMs: 10&ndash;50 mV/&mu;s; on-die regulators: 100&ndash;500 mV/&mu;s</li>
+        <li><strong class="g">Voltage first or frequency first?</strong> &mdash; scaling up: raise voltage, wait, then raise frequency; scaling down: lower frequency first, then voltage</li>
+        <li><strong class="g">Transition energy</strong> &mdash; total energy for V/F transition: 10&ndash;100 &mu;J depending on domain capacitance and voltage delta</li>
       </ul>
-      <h3 style="color:var(--accent4); margin-top:0.5em;">Firmware DVFS Governor</h3>
+      <h3 style="color:var(--purple); margin-top:0.5em;">Firmware DVFS Governor</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent4">Performance governor</strong> &mdash; always max OPP; used for latency-critical inference</li>
-        <li><strong class="accent4">On-demand governor</strong> &mdash; samples utilization every 1&ndash;10 ms; scales up on &gt;80% busy, down on &lt;30%</li>
-        <li><strong class="accent4">Predictive governor</strong> &mdash; ML workload phase detection; pre-scale voltage before compute burst arrives</li>
-        <li><strong class="accent4">Cooperative firmware/HW</strong> &mdash; hardware handles fast droops (ns); firmware handles OPP transitions (ms); OS provides policy hints</li>
+        <li><strong class="p">Performance governor</strong> &mdash; always max OPP; used for latency-critical inference</li>
+        <li><strong class="p">On-demand governor</strong> &mdash; samples utilization every 1&ndash;10 ms; scales up on &gt;80% busy, down on &lt;30%</li>
+        <li><strong class="p">Predictive governor</strong> &mdash; ML workload phase detection; pre-scale voltage before compute burst arrives</li>
+        <li><strong class="p">Cooperative firmware/HW</strong> &mdash; hardware handles fast droops (ns); firmware handles OPP transitions (ms); OS provides policy hints</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 10: Per-Domain DVFS in ML SoCs -->
 <!-- ============================================================ -->
-<section>
-  <h2>Per-Domain DVFS in ML SoCs</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>Per-Domain DVFS in ML SoCs</h2></div>
   <p style="font-size:0.72em;">ML accelerators partition compute into independently voltage/frequency-scaled domains to match heterogeneous workload phases.</p>
-  <div class="box-row" style="margin-top:0.5em;">
-    <div class="box">
-      <h3 style="color:var(--accent);">NPU / Tensor Cores</h3>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div class="card">
+      <h3 style="color:var(--blue);">NPU / Tensor Cores</h3>
       <p>0.65&ndash;0.95 V &bull; 1.0&ndash;2.1 GHz<br>Highest power domain: 200&ndash;500 W<br>DVFS governor: workload-phase aware</p>
     </div>
-    <div class="box">
-      <h3 style="color:var(--accent2);">GPU Shaders / CUDA</h3>
+    <div class="card">
+      <h3 style="color:var(--amber);">GPU Shaders / CUDA</h3>
       <p>0.60&ndash;0.90 V &bull; 0.8&ndash;1.8 GHz<br>Separate from tensor domain<br>Boost clocks limited by thermal headroom</p>
     </div>
-    <div class="box">
-      <h3 style="color:var(--accent3);">CPU Complex</h3>
+    <div class="card">
+      <h3 style="color:var(--green);">CPU Complex</h3>
       <p>0.55&ndash;0.95 V &bull; 0.4&ndash;3.5 GHz<br>Host control plane; low power during inference<br>big.LITTLE or hybrid DVFS</p>
     </div>
-    <div class="box">
-      <h3 style="color:var(--accent4);">Memory Controller</h3>
+    <div class="card">
+      <h3 style="color:var(--purple);">Memory Controller</h3>
       <p>Fixed V, frequency-scaled<br>HBM: 1.2&ndash;2.0 GHz effective<br>Power: 30&ndash;80 W (HBM PHY + controller)</p>
     </div>
   </div>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Coordinated Scaling</h3>
+      <h3 style="color:var(--blue);">Coordinated Scaling</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Shared power budget</strong> &mdash; total SoC power capped (e.g., 700 W for H100); domains compete for thermal headroom</li>
-        <li><strong class="accent">Cross-domain dependencies</strong> &mdash; NPU must not outrun memory controller bandwidth; coordinated OPP tables</li>
-        <li><strong class="accent">Power balancing</strong> &mdash; if NPU is idle during all-reduce, shift power budget to NVLink/network domain</li>
+        <li><strong class="b">Shared power budget</strong> &mdash; total SoC power capped (e.g., 700 W for H100); domains compete for thermal headroom</li>
+        <li><strong class="b">Cross-domain dependencies</strong> &mdash; NPU must not outrun memory controller bandwidth; coordinated OPP tables</li>
+        <li><strong class="b">Power balancing</strong> &mdash; if NPU is idle during all-reduce, shift power budget to NVLink/network domain</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Workload-Aware Policies</h3>
+      <h3 style="color:var(--amber);">Workload-Aware Policies</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Training: compute phase</strong> &mdash; NPU/tensor at max OPP; GPU shaders at nominal; CPU idle</li>
-        <li><strong class="accent2">Training: gradient sync</strong> &mdash; NPU throttled; NVLink/network at max; memory at peak bandwidth OPP</li>
-        <li><strong class="accent2">Inference: batched</strong> &mdash; NPU at moderate OPP for energy efficiency; latency budget allows lower clocks</li>
-        <li><strong class="accent2">Inference: real-time</strong> &mdash; NPU at turbo OPP; tail-latency SLA requires max frequency</li>
+        <li><strong class="a">Training: compute phase</strong> &mdash; NPU/tensor at max OPP; GPU shaders at nominal; CPU idle</li>
+        <li><strong class="a">Training: gradient sync</strong> &mdash; NPU throttled; NVLink/network at max; memory at peak bandwidth OPP</li>
+        <li><strong class="a">Inference: batched</strong> &mdash; NPU at moderate OPP for energy efficiency; latency budget allows lower clocks</li>
+        <li><strong class="a">Inference: real-time</strong> &mdash; NPU at turbo OPP; tail-latency SLA requires max frequency</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 11: Section — Voltage Regulation -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section III</p>
-  <h2>Voltage Regulation</h2>
-  <p class="dim" style="font-size:0.75em; margin-top:0.5em;">PMICs, LDOs, switching regulators &amp; the move to on-die voltage regulation</p>
-</section>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section III</span><h2>Voltage Regulation</h2></section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 12: PMIC Architecture -->
 <!-- ============================================================ -->
-<section>
-  <h2>PMIC Architecture</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>PMIC Architecture</h2></div>
   <p style="font-size:0.72em;">Power Management ICs provide multi-rail voltage regulation, sequencing, and fault protection for ML accelerator boards.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Multi-Rail PMICs</h3>
+      <h3 style="color:var(--blue);">Multi-Rail PMICs</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Rail count</strong> &mdash; modern AI accelerator PMICs supply 8&ndash;20+ independent rails (core, I/O, SRAM, PLL, analog, HBM)</li>
-        <li><strong class="accent">Current capacity</strong> &mdash; core rails: 200&ndash;1000 A per phase; multiphase buck converters (6&ndash;16 phases) for high-current domains</li>
-        <li><strong class="accent">Vendors</strong> &mdash; Renesas (Intersil), MPS, Infineon, TI, onsemi; custom PMICs for hyperscaler designs</li>
-        <li><strong class="accent">Efficiency</strong> &mdash; modern multiphase bucks achieve 90&ndash;95% efficiency at full load; drops to 70&ndash;80% at light load</li>
+        <li><strong class="b">Rail count</strong> &mdash; modern AI accelerator PMICs supply 8&ndash;20+ independent rails (core, I/O, SRAM, PLL, analog, HBM)</li>
+        <li><strong class="b">Current capacity</strong> &mdash; core rails: 200&ndash;1000 A per phase; multiphase buck converters (6&ndash;16 phases) for high-current domains</li>
+        <li><strong class="b">Vendors</strong> &mdash; Renesas (Intersil), MPS, Infineon, TI, onsemi; custom PMICs for hyperscaler designs</li>
+        <li><strong class="b">Efficiency</strong> &mdash; modern multiphase bucks achieve 90&ndash;95% efficiency at full load; drops to 70&ndash;80% at light load</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">Sequencing &amp; Soft-Start</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">Sequencing &amp; Soft-Start</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Power-up sequence</strong> &mdash; core VDD &rarr; I/O VDD &rarr; PLL supply &rarr; memory VDD; strict ordering prevents latch-up and ESD damage</li>
-        <li><strong class="accent2">Soft-start</strong> &mdash; ramp rate limited to 1&ndash;10 mV/&mu;s; limits inrush current; prevents supply overshoot</li>
-        <li><strong class="accent2">Power-down</strong> &mdash; reverse sequence; graceful shutdown with drain timeout; emergency fast-discharge on fault</li>
+        <li><strong class="a">Power-up sequence</strong> &mdash; core VDD &rarr; I/O VDD &rarr; PLL supply &rarr; memory VDD; strict ordering prevents latch-up and ESD damage</li>
+        <li><strong class="a">Soft-start</strong> &mdash; ramp rate limited to 1&ndash;10 mV/&mu;s; limits inrush current; prevents supply overshoot</li>
+        <li><strong class="a">Power-down</strong> &mdash; reverse sequence; graceful shutdown with drain timeout; emergency fast-discharge on fault</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Control Interfaces</h3>
-      <dl class="kv">
+      <h3 style="color:var(--green);">Control Interfaces</h3>
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em">
         <dt>I2C / PMBus</dt>
         <dd>Standard management bus; voltage margining, telemetry, OCP thresholds; 100&ndash;400 kHz</dd>
         <dt>SPI</dt>
@@ -502,98 +473,97 @@ set_retention ret_npu \
         <dt>GPIO/PWM</dt>
         <dd>Simple VID codes for coarse voltage selection; legacy but still used in cost-sensitive edge AI</dd>
       </dl>
-      <h3 style="color:var(--accent4); margin-top:0.5em;">Fault Protection</h3>
+      <h3 style="color:var(--purple); margin-top:0.5em;">Fault Protection</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent4">OVP</strong> &mdash; over-voltage protection; crowbar or shunt; response &lt;1 &mu;s</li>
-        <li><strong class="accent4">OCP</strong> &mdash; over-current protection; hiccup mode or latch-off; per-phase current sensing</li>
-        <li><strong class="accent4">OTP</strong> &mdash; over-temperature protection; PMIC-internal thermal shutdown at 125&ndash;150 &deg;C junction</li>
-        <li><strong class="accent4">UVP</strong> &mdash; under-voltage lockout; prevents SoC from operating at dangerously low voltage</li>
+        <li><strong class="p">OVP</strong> &mdash; over-voltage protection; crowbar or shunt; response &lt;1 &mu;s</li>
+        <li><strong class="p">OCP</strong> &mdash; over-current protection; hiccup mode or latch-off; per-phase current sensing</li>
+        <li><strong class="p">OTP</strong> &mdash; over-temperature protection; PMIC-internal thermal shutdown at 125&ndash;150 &deg;C junction</li>
+        <li><strong class="p">UVP</strong> &mdash; under-voltage lockout; prevents SoC from operating at dangerously low voltage</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 13: LDO vs Switching Regulators -->
 <!-- ============================================================ -->
-<section>
-  <h2>LDO vs Switching Regulators</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>LDO vs Switching Regulators</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Low-Dropout Regulator (LDO)</h3>
+      <h3 style="color:var(--blue);">Low-Dropout Regulator (LDO)</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Topology</strong> &mdash; series pass transistor; V<sub>out</sub> = V<sub>in</sub> &minus; V<sub>dropout</sub>; dropout as low as 50&ndash;200 mV</li>
-        <li><strong class="accent">Efficiency</strong> &mdash; &eta; = V<sub>out</sub>/V<sub>in</sub>; if V<sub>in</sub>=1.0V, V<sub>out</sub>=0.75V, &eta;=75%; poor for large V<sub>in</sub>&ndash;V<sub>out</sub> gaps</li>
-        <li><strong class="accent">Noise</strong> &mdash; extremely low output noise (&lt;10 &mu;V<sub>rms</sub>); ideal for PLL, ADC, and analog supplies</li>
-        <li><strong class="accent">Response</strong> &mdash; fast transient response (~10 ns); no switching artifacts</li>
-        <li><strong class="accent">Area</strong> &mdash; small die area; no inductors; integrates well on-die</li>
+        <li><strong class="b">Topology</strong> &mdash; series pass transistor; V<sub>out</sub> = V<sub>in</sub> &minus; V<sub>dropout</sub>; dropout as low as 50&ndash;200 mV</li>
+        <li><strong class="b">Efficiency</strong> &mdash; &eta; = V<sub>out</sub>/V<sub>in</sub>; if V<sub>in</sub>=1.0V, V<sub>out</sub>=0.75V, &eta;=75%; poor for large V<sub>in</sub>&ndash;V<sub>out</sub> gaps</li>
+        <li><strong class="b">Noise</strong> &mdash; extremely low output noise (&lt;10 &mu;V<sub>rms</sub>); ideal for PLL, ADC, and analog supplies</li>
+        <li><strong class="b">Response</strong> &mdash; fast transient response (~10 ns); no switching artifacts</li>
+        <li><strong class="b">Area</strong> &mdash;  die area; no inductors; integrates well on-die</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong>Use LDOs for:</strong> PLL/analog supply, low-noise domains, small voltage drops, low-current rails (&lt;1 A)
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong>Use LDOs for:</strong> PLL/analog supply, low-noise domains,  voltage drops, low-current rails (&lt;1 A)
       </div>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Switching Regulator (Buck/Boost)</h3>
+      <h3 style="color:var(--amber);">Switching Regulator (Buck/Boost)</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Topology</strong> &mdash; inductor-based converter; PWM switching at 1&ndash;10 MHz; requires external L and C</li>
-        <li><strong class="accent2">Efficiency</strong> &mdash; 85&ndash;95% across wide V<sub>in</sub>/V<sub>out</sub> range; dominates for high-current loads</li>
-        <li><strong class="accent2">Noise</strong> &mdash; switching noise at carrier frequency and harmonics; requires filtering for sensitive loads</li>
-        <li><strong class="accent2">Response</strong> &mdash; limited by LC filter bandwidth; 1&ndash;10 &mu;s transient response</li>
-        <li><strong class="accent2">Current</strong> &mdash; scales to 100s of amps with multiphase designs; each phase handles 30&ndash;60 A</li>
+        <li><strong class="a">Topology</strong> &mdash; inductor-based converter; PWM switching at 1&ndash;10 MHz; requires external L and C</li>
+        <li><strong class="a">Efficiency</strong> &mdash; 85&ndash;95% across wide V<sub>in</sub>/V<sub>out</sub> range; dominates for high-current loads</li>
+        <li><strong class="a">Noise</strong> &mdash; switching noise at carrier frequency and harmonics; requires filtering for sensitive loads</li>
+        <li><strong class="a">Response</strong> &mdash; limited by LC filter bandwidth; 1&ndash;10 &mu;s transient response</li>
+        <li><strong class="a">Current</strong> &mdash; scales to 100s of amps with multiphase designs; each phase handles 30&ndash;60 A</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em; border-left-color:var(--accent2);">
+      <div class="card amber" style="margin-top:0.5em; border-left-color:var(--amber);">
         <strong>Use switchers for:</strong> core VDD, memory VDD, I/O rails, any rail &gt;0.5 A or with large input-output voltage difference
       </div>
     </div>
   </div>
   <table style="margin-top:0.5em;">
     <tr><th>Parameter</th><th>LDO</th><th>Buck Converter</th><th>Hybrid (Buck + LDO)</th></tr>
-    <tr><td>Efficiency</td><td class="accent4">V<sub>out</sub>/V<sub>in</sub> (60&ndash;90%)</td><td class="accent3">85&ndash;95%</td><td class="accent3">88&ndash;94%</td></tr>
-    <tr><td>Output noise</td><td class="accent3">&lt;10 &mu;V<sub>rms</sub></td><td class="accent4">1&ndash;10 mV<sub>pp</sub></td><td class="accent3">&lt;50 &mu;V<sub>rms</sub></td></tr>
-    <tr><td>Transient response</td><td class="accent3">~10 ns</td><td class="accent4">1&ndash;10 &mu;s</td><td class="accent">50&ndash;200 ns</td></tr>
-    <tr><td>Max current</td><td class="accent4">&lt;1&ndash;3 A</td><td class="accent3">100s of A</td><td class="accent3">10&ndash;100 A</td></tr>
-    <tr><td>External components</td><td class="accent3">None/capacitor</td><td class="accent4">L + C per phase</td><td class="accent2">L + C (fewer)</td></tr>
+    <tr><td>Efficiency</td><td class="p">V<sub>out</sub>/V<sub>in</sub> (60&ndash;90%)</td><td class="g">85&ndash;95%</td><td class="g">88&ndash;94%</td></tr>
+    <tr><td>Output noise</td><td class="g">&lt;10 &mu;V<sub>rms</sub></td><td class="p">1&ndash;10 mV<sub>pp</sub></td><td class="g">&lt;50 &mu;V<sub>rms</sub></td></tr>
+    <tr><td>Transient response</td><td class="g">~10 ns</td><td class="p">1&ndash;10 &mu;s</td><td class="b">50&ndash;200 ns</td></tr>
+    <tr><td>Max current</td><td class="p">&lt;1&ndash;3 A</td><td class="g">100s of A</td><td class="g">10&ndash;100 A</td></tr>
+    <tr><td>External components</td><td class="g">None/capacitor</td><td class="p">L + C per phase</td><td class="a">L + C (fewer)</td></tr>
   </table>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 14: On-Die Regulation -->
 <!-- ============================================================ -->
-<section>
-  <h2>On-Die Voltage Regulation</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>On-Die Voltage Regulation</h2></div>
   <p style="font-size:0.72em;">Moving voltage regulators onto the die enables granular per-domain regulation with fast transient response.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Digital LDOs</h3>
+      <h3 style="color:var(--blue);">Digital LDOs</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Architecture</strong> &mdash; array of binary-weighted PMOS transistors controlled by a digital loop; replaces analog error amplifier</li>
-        <li><strong class="accent">Quantization</strong> &mdash; 64&ndash;256 unit switches provide 6&ndash;8 bit voltage resolution (~3&ndash;5 mV steps)</li>
-        <li><strong class="accent">Loop bandwidth</strong> &mdash; up to 100 MHz with fast comparator; suitable for suppressing on-die droop</li>
-        <li><strong class="accent">Area</strong> &mdash; 0.01&ndash;0.05 mm&sup2; at 5 nm; dozens of instances per SoC for granular voltage islands</li>
-        <li><strong class="accent">Limitations</strong> &mdash; lower efficiency than analog LDO; quantization ripple; clock noise injection</li>
+        <li><strong class="b">Architecture</strong> &mdash; array of binary-weighted PMOS transistors controlled by a digital loop; replaces analog error amplifier</li>
+        <li><strong class="b">Quantization</strong> &mdash; 64&ndash;256 unit switches provide 6&ndash;8 bit voltage resolution (~3&ndash;5 mV steps)</li>
+        <li><strong class="b">Loop bandwidth</strong> &mdash; up to 100 MHz with fast comparator; suitable for suppressing on-die droop</li>
+        <li><strong class="b">Area</strong> &mdash; 0.01&ndash;0.05 mm&sup2; at 5 nm; dozens of instances per SoC for granular voltage islands</li>
+        <li><strong class="b">Limitations</strong> &mdash; lower efficiency than analog LDO; quantization ripple; clock noise injection</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">FIVR (Intel) / PIVR</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">FIVR (Intel) / PIVR</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Fully Integrated Voltage Regulator</strong> &mdash; on-package buck converter using thin-film inductors on package substrate</li>
-        <li><strong class="accent2">Intel FIVR</strong> &mdash; introduced in Haswell (2013); 140+ MHz switching; sub-ns load response; per-core voltage in Alder Lake / Sapphire Rapids</li>
-        <li><strong class="accent2">Package-Integrated VR (PIVR)</strong> &mdash; inductors embedded in organic substrate or silicon interposer; AMD exploring for Zen 5+</li>
-        <li><strong class="accent2">Efficiency</strong> &mdash; 85&ndash;90% at full load; enables &gt;20 independent voltage domains per die</li>
+        <li><strong class="a">Fully Integrated Voltage Regulator</strong> &mdash; on-package buck converter using thin-film inductors on package substrate</li>
+        <li><strong class="a">Intel FIVR</strong> &mdash; introduced in Haswell (2013); 140+ MHz switching; sub-ns load response; per-core voltage in Alder Lake / Sapphire Rapids</li>
+        <li><strong class="a">Package-Integrated VR (PIVR)</strong> &mdash; inductors embedded in organic substrate or silicon interposer; AMD exploring for Zen 5+</li>
+        <li><strong class="a">Efficiency</strong> &mdash; 85&ndash;90% at full load; enables &gt;20 independent voltage domains per die</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Granular Voltage Islands</h3>
-      <div class="arch-stack" style="margin-top:0.3em;">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.18); color:var(--accent);">Input: 1.8 V from board VRM</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.15); color:var(--accent2);">FIVR / On-Package Buck &rarr; 0.5&ndash;1.1 V per domain</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">Digital LDO Fine Tuning (&plusmn;50 mV per island)</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--accent4);">Voltage Island: NPU Core 0 &mdash; 0.72 V @ 1.4 GHz</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--accent4);">Voltage Island: NPU Core 1 &mdash; 0.68 V @ 1.3 GHz</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--accent4);">Voltage Island: SRAM Array &mdash; 0.75 V (retention: 0.4 V)</div>
+      <h3 style="color:var(--green);">Granular Voltage Islands</h3>
+      <div style="display:flex;flex-direction:column;gap:0" style="margin-top:0.3em;">
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.18); color:var(--blue);">Input: 1.8 V from board VRM</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.15); color:var(--amber);">FIVR / On-Package Buck &rarr; 0.5&ndash;1.1 V per domain</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(143,212,164,0.12); color:var(--green);">Digital LDO Fine Tuning (&plusmn;50 mV per island)</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(196,157,216,0.12); color:var(--purple);">Voltage Island: NPU Core 0 &mdash; 0.72 V @ 1.4 GHz</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(196,157,216,0.12); color:var(--purple);">Voltage Island: NPU Core 1 &mdash; 0.68 V @ 1.3 GHz</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(196,157,216,0.12); color:var(--purple);">Voltage Island: SRAM Array &mdash; 0.75 V (retention: 0.4 V)</div>
       </div>
-      <blockquote style="margin-top:0.5em; font-size:0.72em;">
-        Intel's Meteor Lake uses FIVR with <strong class="accent">5 independent voltage domains</strong> on the compute tile alone. ML accelerators push this to <strong class="accent2">20+ islands</strong>.
-      </blockquote>
-      <dl class="kv" style="margin-top:0.5em;">
+      <div class="card blue" style="margin-top:0.5em; font-size:0.72em;">
+        Intel's Meteor Lake uses FIVR with <strong class="b">5 independent voltage domains</strong> on the compute tile alone. ML accelerators push this to <strong class="a">20+ islands</strong>.
+      </div>
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>Intel FIVR</dt>
         <dd>140 MHz, thin-film inductors, 90% peak &eta;</dd>
         <dt>Apple M3</dt>
@@ -604,124 +574,118 @@ set_retention ret_npu \
         <dd>Custom PMIC with domain-level voltage control</dd>
       </dl>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 15: Section — ML Workload Power Optimization -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section IV</p>
-  <h2>ML Workload Power Optimization</h2>
-  <p class="dim" style="font-size:0.75em; margin-top:0.5em;">Dark silicon, clock gating, workload awareness &amp; low-power design at advanced nodes</p>
-</section>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section IV</span><h2>ML Workload Power Optimization</h2></section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 16: Dark Silicon & Utilization -->
 <!-- ============================================================ -->
-<section>
-  <h2>Dark Silicon &amp; Utilization</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>Dark Silicon &amp; Utilization</h2></div>
   <p style="font-size:0.72em;">Not all transistors can be active simultaneously within TDP. ML SoCs exploit this by activating specialized blocks on demand.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">The Dark Silicon Problem</h3>
+      <h3 style="color:var(--blue);">The Dark Silicon Problem</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Definition</strong> &mdash; transistors that cannot be powered on simultaneously due to thermal/power constraints; coined by Esmaeilzadeh et al. (ISCA 2011)</li>
-        <li><strong class="accent">Scaling trend</strong> &mdash; at 7 nm: ~50% dark; at 3 nm: ~60&ndash;70% dark; Moore's Law adds transistors faster than power budgets grow</li>
-        <li><strong class="accent">ML SoC advantage</strong> &mdash; heterogeneous accelerators (tensor, vector, scalar, DMA) are naturally used in phases; dark silicon becomes "specialized silicon"</li>
-        <li><strong class="accent">Thermal density</strong> &mdash; local hotspot power density of 2&ndash;3 W/mm&sup2; exceeds air cooling limits (~0.5 W/mm&sup2;); liquid cooling extends to ~1.5 W/mm&sup2;</li>
+        <li><strong class="b">Definition</strong> &mdash; transistors that cannot be powered on simultaneously due to thermal/power constraints; coined by Esmaeilzadeh et al. (ISCA 2011)</li>
+        <li><strong class="b">Scaling trend</strong> &mdash; at 7 nm: ~50% dark; at 3 nm: ~60&ndash;70% dark; Moore's Law adds transistors faster than power budgets grow</li>
+        <li><strong class="b">ML SoC advantage</strong> &mdash; heterogeneous accelerators (tensor, vector, scalar, DMA) are naturally used in phases; dark silicon becomes"specialized silicon"</li>
+        <li><strong class="b">Thermal density</strong> &mdash; local hotspot power density of 2&ndash;3 W/mm&sup2; exceeds air cooling limits (~0.5 W/mm&sup2;); liquid cooling extends to ~1.5 W/mm&sup2;</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Power Scheduling Strategies</h3>
+      <h3 style="color:var(--amber);">Power Scheduling Strategies</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Spatial scheduling</strong> &mdash; activate non-adjacent compute tiles to spread thermal load; checkerboard patterns reduce hotspot temperature by 10&ndash;15 &deg;C</li>
-        <li><strong class="accent2">Temporal scheduling</strong> &mdash; rotate active tiles over time (e.g., 100 ms quanta); thermal time constant of silicon die is 1&ndash;10 ms</li>
-        <li><strong class="accent2">Chiplet power budgeting</strong> &mdash; in multi-chiplet designs (MI300X: 12 chiplets), per-chiplet power caps ensure package-level TDP compliance</li>
-        <li><strong class="accent2">NVIDIA H100</strong> &mdash; 132 SMs, but only 114 enabled (yield + power); max SM concurrency further limited by TDP at boost clocks</li>
+        <li><strong class="a">Spatial scheduling</strong> &mdash; activate non-adjacent compute tiles to spread thermal load; checkerboard patterns reduce hotspot temperature by 10&ndash;15 &deg;C</li>
+        <li><strong class="a">Temporal scheduling</strong> &mdash; rotate active tiles over time (e.g., 100 ms quanta); thermal time constant of silicon die is 1&ndash;10 ms</li>
+        <li><strong class="a">Chiplet power budgeting</strong> &mdash; in multi-chiplet designs (MI300X: 12 chiplets), per-chiplet power caps ensure package-level TDP compliance</li>
+        <li><strong class="a">NVIDIA H100</strong> &mdash; 132 SMs, but only 114 enabled (yield + power); max SM concurrency further limited by TDP at boost clocks</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em; border-left-color:var(--accent2);">
-        <strong>Key insight:</strong> dark silicon is not wasted&mdash;it enables <strong class="accent">specialization</strong>, <strong class="accent2">yield recovery</strong>, and <strong class="accent3">thermal headroom</strong> for boosting active blocks.
+      <div class="card amber" style="margin-top:0.5em; border-left-color:var(--amber);">
+        <strong>Key insight:</strong> dark silicon is not wasted&mdash;it enables <strong class="b">specialization</strong>, <strong class="a">yield recovery</strong>, and <strong class="g">thermal headroom</strong> for boosting active blocks.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 17: Clock Gating -->
 <!-- ============================================================ -->
-<section>
-  <h2>Clock Gating</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>Clock Gating</h2></div>
   <p style="font-size:0.72em;">Clock networks consume 30&ndash;50% of dynamic power. Gating unused clock trees is the single most effective RTL-level optimization.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Clock Gating Fundamentals</h3>
+      <h3 style="color:var(--blue);">Clock Gating Fundamentals</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">ICG cells</strong> &mdash; Integrated Clock Gating cells: latch + AND gate; glitch-free clock enable on negative edge; standard cell library primitive</li>
-        <li><strong class="accent">RTL inference</strong> &mdash; synthesis tools (DC, Genus) automatically insert ICG cells for conditional register loads: <code>if(en) q &lt;= d;</code> &rarr; ICG</li>
-        <li><strong class="accent">Clock gating efficiency</strong> &mdash; percentage of clock cycles where gating is active; target &gt;80% for data-path registers</li>
-        <li><strong class="accent">Granularity</strong> &mdash; fine-grained (per-register group, 4&ndash;16 FFs) vs coarse-grained (per-module, 1K&ndash;100K FFs)</li>
+        <li><strong class="b">ICG cells</strong> &mdash; Integrated Clock Gating cells: latch + AND gate; glitch-free clock enable on negative edge; standard cell library primitive</li>
+        <li><strong class="b">RTL inference</strong> &mdash; synthesis tools (DC, Genus) automatically insert ICG cells for conditional register loads: <code>if(en) q &lt;= d;</code> &rarr; ICG</li>
+        <li><strong class="b">Clock gating efficiency</strong> &mdash; percentage of clock cycles where gating is active; target &gt;80% for data-path registers</li>
+        <li><strong class="b">Granularity</strong> &mdash; fine-grained (per-register group, 4&ndash;16 FFs) vs coarse-grained (per-module, 1K&ndash;100K FFs)</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">Fine-Grained vs Coarse-Grained</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">Fine-Grained vs Coarse-Grained</h3>
       <table>
         <tr><th>Aspect</th><th>Fine-Grained</th><th>Coarse-Grained</th></tr>
         <tr><td>Scope</td><td>4&ndash;16 FFs</td><td>Module (1K+ FFs)</td></tr>
-        <tr><td>Power savings</td><td class="accent3">High (per-cycle)</td><td class="accent">Moderate</td></tr>
-        <tr><td>ICG overhead</td><td class="accent4">Higher (many ICGs)</td><td class="accent3">Lower</td></tr>
+        <tr><td>Power savings</td><td class="g">High (per-cycle)</td><td class="b">Moderate</td></tr>
+        <tr><td>ICG overhead</td><td class="p">Higher (many ICGs)</td><td class="g">Lower</td></tr>
         <tr><td>Control</td><td>Automatic (synthesis)</td><td>Explicit (RTL/FW)</td></tr>
       </table>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Clock Mesh Power</h3>
+      <h3 style="color:var(--green);">Clock Mesh Power</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent3">Clock tree power</strong> &mdash; global clock spine + sector buffers + leaf buffers; H-tree or mesh topology; 100K&ndash;1M buffers per GHz domain</li>
-        <li><strong class="accent3">Clock mesh</strong> &mdash; used in high-performance SoCs (Apple, Intel) for low-skew distribution; higher power than tree but better timing</li>
-        <li><strong class="accent3">Mesh gating</strong> &mdash; sector-level clock gating in mesh architectures; when a tile is idle, its entire mesh sector is gated</li>
-        <li><strong class="accent3">Dynamic clock mesh</strong> &mdash; programmable mesh connectivity; disable mesh segments for inactive regions</li>
+        <li><strong class="g">Clock tree power</strong> &mdash; global clock spine + sector buffers + leaf buffers; H-tree or mesh topology; 100K&ndash;1M buffers per GHz domain</li>
+        <li><strong class="g">Clock mesh</strong> &mdash; used in high-performance SoCs (Apple, Intel) for low-skew distribution; higher power than tree but better timing</li>
+        <li><strong class="g">Mesh gating</strong> &mdash; sector-level clock gating in mesh architectures; when a tile is idle, its entire mesh sector is gated</li>
+        <li><strong class="g">Dynamic clock mesh</strong> &mdash; programmable mesh connectivity; disable mesh segments for inactive regions</li>
       </ul>
-      <h3 style="color:var(--accent4); margin-top:0.5em;">ML-Specific Clock Gating</h3>
+      <h3 style="color:var(--purple); margin-top:0.5em;">ML-Specific Clock Gating</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent4">Sparse activation gating</strong> &mdash; in transformers, gating zero-weight MAC units saves 30&ndash;60% dynamic power</li>
-        <li><strong class="accent4">Operand-aware gating</strong> &mdash; gate upper bits of multiplier when operands are narrow (INT8 vs INT16)</li>
-        <li><strong class="accent4">Pipeline stage gating</strong> &mdash; gate empty pipeline stages in systolic arrays during bubble cycles</li>
-        <li><strong class="accent4">Activation sparsity</strong> &mdash; ReLU outputs ~50% zeros; gating corresponding datapath saves proportional energy</li>
+        <li><strong class="p">Sparse activation gating</strong> &mdash; in transformers, gating zero-weight MAC units saves 30&ndash;60% dynamic power</li>
+        <li><strong class="p">Operand-aware gating</strong> &mdash; gate upper bits of multiplier when operands are narrow (INT8 vs INT16)</li>
+        <li><strong class="p">Pipeline stage gating</strong> &mdash; gate empty pipeline stages in systolic arrays during bubble cycles</li>
+        <li><strong class="p">Activation sparsity</strong> &mdash; ReLU outputs ~50% zeros; gating corresponding datapath saves proportional energy</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 18: Workload-Aware Power Management -->
 <!-- ============================================================ -->
-<section>
-  <h2>Workload-Aware Power Management</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>Workload-Aware Power Management</h2></div>
   <p style="font-size:0.72em;">ML workloads have predictable phase behavior that enables proactive power management impossible with general-purpose governors.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Training Phase Behavior</h3>
+      <h3 style="color:var(--blue);">Training Phase Behavior</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Forward pass</strong> &mdash; high MAC utilization (80&ndash;95%); peak power; memory bandwidth demand for weight loading</li>
-        <li><strong class="accent">Backward pass</strong> &mdash; similar compute intensity; slightly different memory access pattern; gradient accumulation</li>
-        <li><strong class="accent">Gradient synchronization</strong> &mdash; all-reduce across GPUs/nodes; compute nearly idle; network at peak; 20&ndash;40% of iteration time in large clusters</li>
-        <li><strong class="accent">Optimizer step</strong> &mdash; element-wise operations; low compute intensity; memory-bound; opportunity for voltage scaling</li>
+        <li><strong class="b">Forward pass</strong> &mdash; high MAC utilization (80&ndash;95%); peak power; memory bandwidth demand for weight loading</li>
+        <li><strong class="b">Backward pass</strong> &mdash; similar compute intensity; slightly different memory access pattern; gradient accumulation</li>
+        <li><strong class="b">Gradient synchronization</strong> &mdash; all-reduce across GPUs/nodes; compute nearly idle; network at peak; 20&ndash;40% of iteration time in large clusters</li>
+        <li><strong class="b">Optimizer step</strong> &mdash; element-wise operations; low compute intensity; memory-bound; opportunity for voltage scaling</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">Inference Batching &amp; Power</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">Inference Batching &amp; Power</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Batch size vs efficiency</strong> &mdash; larger batches amortize power overhead; energy per token decreases 2&ndash;5&times; from batch=1 to batch=64</li>
-        <li><strong class="accent2">Continuous batching</strong> &mdash; vLLM-style batching keeps utilization high, reducing idle power waste by 30&ndash;50%</li>
-        <li><strong class="accent2">Power proportionality</strong> &mdash; ideal: power &prop; throughput; reality: 40&ndash;60% idle power; improving with aggressive gating</li>
+        <li><strong class="a">Batch size vs efficiency</strong> &mdash; larger batches amortize power overhead; energy per token decreases 2&ndash;5&times; from batch=1 to batch=64</li>
+        <li><strong class="a">Continuous batching</strong> &mdash; vLLM-style batching keeps utilization high, reducing idle power waste by 30&ndash;50%</li>
+        <li><strong class="a">Power proportionality</strong> &mdash; ideal: power &prop; throughput; reality: 40&ndash;60% idle power; improving with aggressive gating</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Dynamic Power Capping</h3>
+      <h3 style="color:var(--green);">Dynamic Power Capping</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent3">Hardware power meter</strong> &mdash; on-die current sensors (shunt resistors or replica circuits) + voltage monitors; sampled at 1&ndash;10 kHz</li>
-        <li><strong class="accent3">Rolling average</strong> &mdash; power capping uses exponential moving average (EMA) over 10&ndash;100 ms window; prevents transient violations</li>
-        <li><strong class="accent3">Throttle actions</strong> &mdash; reduce clock frequency &rarr; reduce voltage (if time permits) &rarr; power-gate idle domains &rarr; reduce batch throughput</li>
-        <li><strong class="accent3">Rack-level capping</strong> &mdash; NVIDIA DCGM / AMD ROCm SMI coordinate power caps across GPUs in a node</li>
+        <li><strong class="g">Hardware power meter</strong> &mdash; on-die current sensors (shunt resistors or replica circuits) + voltage monitors; sampled at 1&ndash;10 kHz</li>
+        <li><strong class="g">Rolling average</strong> &mdash; power capping uses exponential moving average (EMA) over 10&ndash;100 ms window; prevents transient violations</li>
+        <li><strong class="g">Throttle actions</strong> &mdash; reduce clock frequency &rarr; reduce voltage (if time permits) &rarr; power-gate idle domains &rarr; reduce batch throughput</li>
+        <li><strong class="g">Rack-level capping</strong> &mdash; NVIDIA DCGM / AMD ROCm SMI coordinate power caps across GPUs in a node</li>
       </ul>
-      <h3 style="color:var(--accent4); margin-top:0.5em;">RAPL-like Interfaces</h3>
-      <dl class="kv">
+      <h3 style="color:var(--purple); margin-top:0.5em;">RAPL-like Interfaces</h3>
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em">
         <dt>Intel RAPL</dt>
         <dd>Running Average Power Limit; MSR-based; per-package, per-core, DRAM domains; 1 ms update rate</dd>
         <dt>NVIDIA NVML</dt>
@@ -732,112 +696,108 @@ set_retention ret_npu \
         <dd>ML SoCs implement proprietary power management units with per-domain telemetry and limits</dd>
       </dl>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 19: Low-Power Design Techniques -->
 <!-- ============================================================ -->
-<section>
-  <h2>Low-Power Design Techniques</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Low-Power Design Techniques</h2></div>
   <p style="font-size:0.72em;">Physical design and library-level techniques that reduce power consumption at the cell and transistor level.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Multi-Vt Libraries</h3>
+      <h3 style="color:var(--blue);">Multi-Vt Libraries</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">SVT (Standard-Vt)</strong> &mdash; baseline speed and leakage; used for most logic</li>
-        <li><strong class="accent">HVT (High-Vt)</strong> &mdash; ~10&times; lower leakage than SVT; ~20% slower; used for non-critical paths</li>
-        <li><strong class="accent">LVT (Low-Vt)</strong> &mdash; ~10&times; higher leakage than SVT; ~15% faster; used for critical paths only</li>
-        <li><strong class="accent">ULVT (Ultra-Low-Vt)</strong> &mdash; fastest; extreme leakage; sparingly used on most-critical timing paths</li>
-        <li><strong class="accent">Typical mix</strong> &mdash; 60% HVT, 30% SVT, 8% LVT, 2% ULVT yields near-maximum performance at 2&ndash;3&times; lower leakage than all-SVT</li>
+        <li><strong class="b">SVT (Standard-Vt)</strong> &mdash; baseline speed and leakage; used for most logic</li>
+        <li><strong class="b">HVT (High-Vt)</strong> &mdash; ~10&times; lower leakage than SVT; ~20% slower; used for non-critical paths</li>
+        <li><strong class="b">LVT (Low-Vt)</strong> &mdash; ~10&times; higher leakage than SVT; ~15% faster; used for critical paths only</li>
+        <li><strong class="b">ULVT (Ultra-Low-Vt)</strong> &mdash; fastest; extreme leakage; sparingly used on most-critical timing paths</li>
+        <li><strong class="b">Typical mix</strong> &mdash; 60% HVT, 30% SVT, 8% LVT, 2% ULVT yields near-maximum performance at 2&ndash;3&times; lower leakage than all-SVT</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">Gate-Length Biasing</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">Gate-Length Biasing</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Longer gate length</strong> &mdash; adding 1&ndash;2 nm to gate length on non-critical paths reduces sub-threshold leakage by 2&ndash;3&times;</li>
-        <li><strong class="accent2">Automated by P&amp;R</strong> &mdash; Innovus/ICC2 can swap cells to long-channel variants post-timing closure</li>
-        <li><strong class="accent2">Stacking effect</strong> &mdash; series-connected transistors in NAND/NOR have exponentially lower leakage than parallel (inverter) structures</li>
+        <li><strong class="a">Longer gate length</strong> &mdash; adding 1&ndash;2 nm to gate length on non-critical paths reduces sub-threshold leakage by 2&ndash;3&times;</li>
+        <li><strong class="a">Automated by P&amp;R</strong> &mdash; Innovus/ICC2 can swap cells to long-channel variants post-timing closure</li>
+        <li><strong class="a">Stacking effect</strong> &mdash; series-connected transistors in NAND/NOR have exponentially lower leakage than parallel (inverter) structures</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Power-Aware Synthesis &amp; P&amp;R</h3>
+      <h3 style="color:var(--green);">Power-Aware Synthesis &amp; P&amp;R</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent3">Power-driven synthesis</strong> &mdash; tools optimize for min-power subject to timing constraints; multi-Vt cell selection, operand isolation, clock gating insertion</li>
-        <li><strong class="accent3">Power-aware placement</strong> &mdash; co-place high-switching cells near decaps; minimize clock routing length; thermal-aware placement for hotspot mitigation</li>
-        <li><strong class="accent3">MCMM optimization</strong> &mdash; multi-corner multi-mode: optimize for both active power (typical corner) and leakage (slow corner, high temp)</li>
-        <li><strong class="accent3">ECO power optimization</strong> &mdash; post-route leakage recovery: swap SVT&rarr;HVT on paths with positive slack; typically recovers 10&ndash;20% leakage</li>
+        <li><strong class="g">Power-driven synthesis</strong> &mdash; tools optimize for min-power subject to timing constraints; multi-Vt cell selection, operand isolation, clock gating insertion</li>
+        <li><strong class="g">Power-aware placement</strong> &mdash; co-place high-switching cells near decaps; minimize clock routing length; thermal-aware placement for hotspot mitigation</li>
+        <li><strong class="g">MCMM optimization</strong> &mdash; multi-corner multi-mode: optimize for both active power (typical corner) and leakage (slow corner, high temp)</li>
+        <li><strong class="g">ECO power optimization</strong> &mdash; post-route leakage recovery: swap SVT&rarr;HVT on paths with positive slack; typically recovers 10&ndash;20% leakage</li>
       </ul>
-      <h3 style="color:var(--accent4); margin-top:0.5em;">Leakage at Advanced Nodes</h3>
+      <h3 style="color:var(--purple); margin-top:0.5em;">Leakage at Advanced Nodes</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent4">FinFET (5&ndash;7 nm)</strong> &mdash; excellent electrostatic control; leakage manageable; gate leakage reduced by high-k dielectric</li>
-        <li><strong class="accent4">GAA/Nanosheet (3&ndash;2 nm)</strong> &mdash; even better electrostatic control; I<sub>off</sub> reduced 20&ndash;30% vs FinFET at same performance</li>
-        <li><strong class="accent4">CFET (future)</strong> &mdash; complementary FET stacks NMOS on PMOS; promises 30&ndash;50% area reduction; leakage TBD</li>
-        <li><strong class="accent4">Backside power delivery (BSPDN)</strong> &mdash; Intel PowerVia, TSMC N2P; decouples power routing from signal routing; 5&ndash;10% power improvement from lower IR drop</li>
+        <li><strong class="p">FinFET (5&ndash;7 nm)</strong> &mdash; excellent electrostatic control; leakage manageable; gate leakage reduced by high-k dielectric</li>
+        <li><strong class="p">GAA/Nanosheet (3&ndash;2 nm)</strong> &mdash; even better electrostatic control; I<sub>off</sub> reduced 20&ndash;30% vs FinFET at same performance</li>
+        <li><strong class="p">CFET (future)</strong> &mdash; complementary FET stacks NMOS on PMOS; promises 30&ndash;50% area reduction; leakage TBD</li>
+        <li><strong class="p">Backside power delivery (BSPDN)</strong> &mdash; Intel PowerVia, TSMC N2P; decouples power routing from signal routing; 5&ndash;10% power improvement from lower IR drop</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 20: Section — System-Level -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section V</p>
-  <h2>System-Level Power &amp; Thermal Management</h2>
-  <p class="dim" style="font-size:0.75em; margin-top:0.5em;">Thermal-power co-management, throttling strategies &amp; real-world case studies</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section V</span><h2>System-Level Power &amp; Thermal Management</h2></div>
+  <p>Thermal-power co-management, throttling strategies &amp; real-world case studies</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 21: Thermal-Power Co-Management -->
 <!-- ============================================================ -->
-<section>
-  <h2>Thermal-Power Co-Management</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>Thermal-Power Co-Management</h2></div>
   <p style="font-size:0.72em;">Power and temperature are coupled: P &rarr; T &rarr; leakage &uarr; &rarr; P &uarr;. Breaking this feedback loop is essential for sustained ML workloads.</p>
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">DTPM (Dynamic Thermal &amp; Power Management)</h3>
+      <h3 style="color:var(--blue);">DTPM (Dynamic Thermal &amp; Power Management)</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Thermal sensors</strong> &mdash; on-die diode sensors (1&ndash;2 &deg;C accuracy); 10&ndash;50 distributed across die; sampled at 1&ndash;10 kHz</li>
-        <li><strong class="accent">T<sub>j,max</sub></strong> &mdash; maximum junction temperature: 100&ndash;105 &deg;C for datacenter GPUs; 110 &deg;C for some mobile SoCs</li>
-        <li><strong class="accent">Thermal throttling</strong> &mdash; progressive: first reduce boost clock &rarr; reduce to nominal &rarr; reduce to minimum &rarr; emergency power-off at T<sub>critical</sub> (125 &deg;C)</li>
-        <li><strong class="accent">Predictive throttling</strong> &mdash; model thermal trajectory; begin throttling before T<sub>j,max</sub> to avoid abrupt performance cliff</li>
+        <li><strong class="b">Thermal sensors</strong> &mdash; on-die diode sensors (1&ndash;2 &deg;C accuracy); 10&ndash;50 distributed across die; sampled at 1&ndash;10 kHz</li>
+        <li><strong class="b">T<sub>j,max</sub></strong> &mdash; maximum junction temperature: 100&ndash;105 &deg;C for datacenter GPUs; 110 &deg;C for some mobile SoCs</li>
+        <li><strong class="b">Thermal throttling</strong> &mdash; progressive: first reduce boost clock &rarr; reduce to nominal &rarr; reduce to minimum &rarr; emergency power-off at T<sub>critical</sub> (125 &deg;C)</li>
+        <li><strong class="b">Predictive throttling</strong> &mdash; model thermal trajectory; begin throttling before T<sub>j,max</sub> to avoid abrupt performance cliff</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">Power-Thermal Feedback Loops</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">Power-Thermal Feedback Loops</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">Positive feedback risk</strong> &mdash; higher T &rarr; higher leakage &rarr; higher P &rarr; higher T; thermal runaway in extreme cases</li>
-        <li><strong class="accent2">Control loop</strong> &mdash; PID controller: T<sub>target</sub> = 95 &deg;C; adjust power cap every 1&ndash;10 ms; proportional band: &plusmn;5 &deg;C</li>
-        <li><strong class="accent2">Multi-input control</strong> &mdash; power, temperature, current, and voltage all feed into unified throttling decision</li>
-        <li><strong class="accent2">Time constants</strong> &mdash; die: 1&ndash;10 ms; package: 100 ms&ndash;1 s; heatsink: 10&ndash;60 s; room: minutes</li>
+        <li><strong class="a">Positive feedback risk</strong> &mdash; higher T &rarr; higher leakage &rarr; higher P &rarr; higher T; thermal runaway in extreme cases</li>
+        <li><strong class="a">Control loop</strong> &mdash; PID controller: T<sub>target</sub> = 95 &deg;C; adjust power cap every 1&ndash;10 ms; proportional band: &plusmn;5 &deg;C</li>
+        <li><strong class="a">Multi-input control</strong> &mdash; power, temperature, current, and voltage all feed into unified throttling decision</li>
+        <li><strong class="a">Time constants</strong> &mdash; die: 1&ndash;10 ms; package: 100 ms&ndash;1 s; heatsink: 10&ndash;60 s; room: minutes</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Edge Device Constraints</h3>
+      <h3 style="color:var(--green);">Edge Device Constraints</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent3">Skin temperature</strong> &mdash; phones/tablets limited to 40&ndash;45 &deg;C skin; sustained SoC power: 3&ndash;8 W; burst: 15&ndash;25 W</li>
-        <li><strong class="accent3">Passive cooling only</strong> &mdash; no fans; heat spreads through chassis; thermal throttling is the norm, not the exception</li>
-        <li><strong class="accent3">Battery thermal limits</strong> &mdash; Li-ion batteries degrade above 45 &deg;C; charging + compute creates dual heat source</li>
-        <li><strong class="accent3">Sustained ML inference</strong> &mdash; edge NPUs run at 1&ndash;3 W sustained; burst to 8&ndash;10 W for &lt;30 s before throttling</li>
+        <li><strong class="g">Skin temperature</strong> &mdash; phones/tablets limited to 40&ndash;45 &deg;C skin; sustained SoC power: 3&ndash;8 W; burst: 15&ndash;25 W</li>
+        <li><strong class="g">Passive cooling only</strong> &mdash; no fans; heat spreads through chassis; thermal throttling is the norm, not the exception</li>
+        <li><strong class="g">Battery thermal limits</strong> &mdash; Li-ion batteries degrade above 45 &deg;C; charging + compute creates dual heat source</li>
+        <li><strong class="g">Sustained ML inference</strong> &mdash; edge NPUs run at 1&ndash;3 W sustained; burst to 8&ndash;10 W for &lt;30 s before throttling</li>
       </ul>
-      <h3 style="color:var(--accent4); margin-top:0.5em;">Cooling Solutions by TDP</h3>
+      <h3 style="color:var(--purple); margin-top:0.5em;">Cooling Solutions by TDP</h3>
       <table>
         <tr><th>TDP Range</th><th>Cooling</th><th>Example</th></tr>
-        <tr><td>&lt;15 W</td><td class="accent3">Passive / heat pipe</td><td>Qualcomm 8 Gen 3, Apple A17</td></tr>
-        <tr><td>15&ndash;65 W</td><td class="accent">Fan + heatsink</td><td>Apple M3 Max, AMD Phoenix</td></tr>
-        <tr><td>65&ndash;350 W</td><td class="accent2">Large heatsink + fan</td><td>NVIDIA L40, AMD MI210</td></tr>
-        <tr><td>350&ndash;700 W</td><td class="accent2">Vapor chamber + blower</td><td>NVIDIA H100 SXM, AMD MI300X</td></tr>
-        <tr><td>&gt;700 W</td><td class="accent4">Direct liquid cooling</td><td>NVIDIA GB200 NVL72, custom ASICs</td></tr>
+        <tr><td>&lt;15 W</td><td class="g">Passive / heat pipe</td><td>Qualcomm 8 Gen 3, Apple A17</td></tr>
+        <tr><td>15&ndash;65 W</td><td class="b">Fan + heatsink</td><td>Apple M3 Max, AMD Phoenix</td></tr>
+        <tr><td>65&ndash;350 W</td><td class="a">Large heatsink + fan</td><td>NVIDIA L40, AMD MI210</td></tr>
+        <tr><td>350&ndash;700 W</td><td class="a">Vapor chamber + blower</td><td>NVIDIA H100 SXM, AMD MI300X</td></tr>
+        <tr><td>&gt;700 W</td><td class="p">Direct liquid cooling</td><td>NVIDIA GB200 NVL72, custom ASICs</td></tr>
       </table>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 22: Case Studies -->
 <!-- ============================================================ -->
-<section>
-  <h2>Case Studies: Industry Power Architectures</h2>
-  <div class="box-row" style="margin-top:0.3em;">
-    <div class="box" style="max-width:none; flex:1;">
-      <h3 style="color:var(--accent);">NVIDIA H100</h3>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>Case Studies: Industry Power Architectures</h2></div>
+  <div class="cols cols-2" style="margin-top:0.3em;">
+    <div class="card" style="max-width:none; flex:1;">
+      <h3 style="color:var(--blue);">NVIDIA H100</h3>
       <ul style="font-size:0.62em; text-align:left;">
         <li>700 W TDP (SXM5); 4 nm TSMC; 80B transistors</li>
         <li>20+ independent power domains; per-SM clock gating</li>
@@ -846,8 +806,8 @@ set_retention ret_npu \
         <li>HBM3 PHY: independent power domain, DVFS for bandwidth scaling</li>
       </ul>
     </div>
-    <div class="box" style="max-width:none; flex:1;">
-      <h3 style="color:var(--accent2);">Apple M3 Ultra</h3>
+    <div class="card" style="max-width:none; flex:1;">
+      <h3 style="color:var(--amber);">Apple M3 Ultra</h3>
       <ul style="font-size:0.62em; text-align:left;">
         <li>3 nm TSMC; 92B transistors; ~150 W max package power</li>
         <li>Per-core DVFS on P-cores and E-cores; FLL-based (&lt;1 &mu;s transitions)</li>
@@ -857,9 +817,9 @@ set_retention ret_npu \
       </ul>
     </div>
   </div>
-  <div class="box-row" style="margin-top:0.3em;">
-    <div class="box" style="max-width:none; flex:1;">
-      <h3 style="color:var(--accent3);">AMD MI300X</h3>
+  <div class="cols cols-2" style="margin-top:0.3em;">
+    <div class="card" style="max-width:none; flex:1;">
+      <h3 style="color:var(--green);">AMD MI300X</h3>
       <ul style="font-size:0.62em; text-align:left;">
         <li>750 W TDP; 12 chiplets (8 XCD + 4 IOD) on CoWoS-like</li>
         <li>Per-chiplet power domains; independent DVFS per XCD</li>
@@ -868,8 +828,8 @@ set_retention ret_npu \
         <li>HSMP + ROCm SMI for rack-level power orchestration</li>
       </ul>
     </div>
-    <div class="box" style="max-width:none; flex:1;">
-      <h3 style="color:var(--accent4);">Google TPU v5p</h3>
+    <div class="card" style="max-width:none; flex:1;">
+      <h3 style="color:var(--purple);">Google TPU v5p</h3>
       <ul style="font-size:0.62em; text-align:left;">
         <li>Custom ASIC; ~250 W estimated; sparse core + dense MXU architecture</li>
         <li>Custom PMIC with ML-workload-tuned voltage profiles</li>
@@ -879,54 +839,53 @@ set_retention ret_npu \
       </ul>
     </div>
   </div>
-  <div class="highlight-bar" style="margin-top:0.4em;">
+  <div class="card amber" style="margin-top:0.4em;">
     <strong>Qualcomm Hexagon DSP</strong> power states: Active &rarr; Idle (clock-gated, 1 &mu;s wake) &rarr; Power Collapse (domain off, 100 &mu;s wake) &rarr; Deep Sleep (retention, 500 &mu;s wake). Edge NPU achieves 15 TOPS/W by aggressive state machine transitions every 10&ndash;100 ms.
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 23: References & Further Reading -->
 <!-- ============================================================ -->
-<section>
-  <h2>References &amp; Further Reading</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>References &amp; Further Reading</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Standards &amp; Specifications</h3>
+      <h3 style="color:var(--blue);">Standards &amp; Specifications</h3>
       <ul style="font-size:0.62em;">
-        <li><strong class="accent">IEEE 1801-2018</strong> &mdash; Unified Power Format (UPF); power intent specification standard</li>
-        <li><strong class="accent">Si2 CPF</strong> &mdash; Common Power Format; Cadence-backed alternative to UPF</li>
-        <li><strong class="accent">JEDEC JESD51</strong> &mdash; Thermal measurement standards for semiconductor devices</li>
-        <li><strong class="accent">Intel SVID Protocol</strong> &mdash; Serial VID Interface Design Guide</li>
-        <li><strong class="accent">PMBus (SMBus)</strong> &mdash; Power management bus protocol specification</li>
+        <li><strong class="b">IEEE 1801-2018</strong> &mdash; Unified Power Format (UPF); power intent specification standard</li>
+        <li><strong class="b">Si2 CPF</strong> &mdash; Common Power Format; Cadence-backed alternative to UPF</li>
+        <li><strong class="b">JEDEC JESD51</strong> &mdash; Thermal measurement standards for semiconductor devices</li>
+        <li><strong class="b">Intel SVID Protocol</strong> &mdash; Serial VID Interface Design Guide</li>
+        <li><strong class="b">PMBus (SMBus)</strong> &mdash; Power management bus protocol specification</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.5em;">Key Papers</h3>
+      <h3 style="color:var(--amber); margin-top:0.5em;">Key Papers</h3>
       <ul style="font-size:0.62em;">
-        <li><strong class="accent2">Esmaeilzadeh et al.</strong> &mdash; "Dark Silicon and the End of Multicore Scaling," ISCA 2011</li>
-        <li><strong class="accent2">Horowitz</strong> &mdash; "Computing's Energy Problem (and What We Can Do About It)," ISSCC 2014</li>
-        <li><strong class="accent2">Kim et al.</strong> &mdash; "FIVR &mdash; Fully Integrated Voltage Regulators on 4th Generation Intel Core SoCs," ISSCC 2014</li>
-        <li><strong class="accent2">Singh et al.</strong> &mdash; "Zen 2: The AMD 7nm Energy-Efficient High-Performance x86-64 Microprocessor Core," ISSCC 2020</li>
-        <li><strong class="accent2">Jouppi et al.</strong> &mdash; "TPU v4: An Optically Reconfigurable Supercomputer," ISCA 2023</li>
+        <li><strong class="a">Esmaeilzadeh et al.</strong> &mdash;"Dark Silicon and the End of Multicore Scaling," ISCA 2011</li>
+        <li><strong class="a">Horowitz</strong> &mdash;"Computing's Energy Problem (and What We Can Do About It)," ISSCC 2014</li>
+        <li><strong class="a">Kim et al.</strong> &mdash;"FIVR &mdash; Fully Integrated Voltage Regulators on 4th Generation Intel Core SoCs," ISSCC 2014</li>
+        <li><strong class="a">Singh et al.</strong> &mdash;"Zen 2: The AMD 7nm Energy-Efficient High-Performance x86-64 Microprocessor Core," ISSCC 2020</li>
+        <li><strong class="a">Jouppi et al.</strong> &mdash;"TPU v4: An Optically Reconfigurable Supercomputer," ISCA 2023</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Books</h3>
+      <h3 style="color:var(--green);">Books</h3>
       <ul style="font-size:0.62em;">
-        <li><strong class="accent3">Keating et al.</strong> &mdash; <em>Low Power Methodology Manual</em>, Springer, 2007</li>
-        <li><strong class="accent3">Rabaey, Chandrakasan, Nikolic</strong> &mdash; <em>Digital Integrated Circuits</em>, 2nd ed., Pearson</li>
-        <li><strong class="accent3">Weste &amp; Harris</strong> &mdash; <em>CMOS VLSI Design</em>, 4th ed., Addison-Wesley</li>
-        <li><strong class="accent3">Irwin &amp; De</strong> &mdash; <em>Low Power Design Methodologies</em>, Springer, 1996</li>
-        <li><strong class="accent3">Calhoun &amp; Chandrakasan</strong> &mdash; <em>Ultra-Low-Voltage Circuit Design</em>, Springer, 2015</li>
+        <li><strong class="g">Keating et al.</strong> &mdash; <em>Low Power Methodology Manual</em>, Springer, 2007</li>
+        <li><strong class="g">Rabaey, Chandrakasan, Nikolic</strong> &mdash; <em>Digital Integrated Circuits</em>, 2nd ed., Pearson</li>
+        <li><strong class="g">Weste &amp; Harris</strong> &mdash; <em>CMOS VLSI Design</em>, 4th ed., Addison-Wesley</li>
+        <li><strong class="g">Irwin &amp; De</strong> &mdash; <em>Low Power Design Methodologies</em>, Springer, 1996</li>
+        <li><strong class="g">Calhoun &amp; Chandrakasan</strong> &mdash; <em>Ultra-Low-Voltage Circuit Design</em>, Springer, 2015</li>
       </ul>
-      <h3 style="color:var(--accent4); margin-top:0.5em;">Industry Resources</h3>
+      <h3 style="color:var(--purple); margin-top:0.5em;">Industry Resources</h3>
       <ul style="font-size:0.62em;">
-        <li><strong class="accent4">Synopsys</strong> &mdash; Power Compiler, PrimeTime PX, IC Compiler II power optimization user guides</li>
-        <li><strong class="accent4">Cadence</strong> &mdash; Voltus IC Power Integrity, Joules RTL Power Solution</li>
-        <li><strong class="accent4">NVIDIA</strong> &mdash; GPU Power Management documentation (NVML API, DCGM)</li>
-        <li><strong class="accent4">Intel</strong> &mdash; Running Average Power Limit (RAPL) interface specification</li>
+        <li><strong class="p">Synopsys</strong> &mdash; Power Compiler, PrimeTime PX, IC Compiler II power optimization user guides</li>
+        <li><strong class="p">Cadence</strong> &mdash; Voltus IC Power Integrity, Joules RTL Power Solution</li>
+        <li><strong class="p">NVIDIA</strong> &mdash; GPU Power Management documentation (NVML API, DCGM)</li>
+        <li><strong class="p">Intel</strong> &mdash; Running Average Power Limit (RAPL) interface specification</li>
       </ul>
     </div>
   </div>
-  <p class="dim" style="margin-top:0.8em; font-size:0.55em; text-align:center;">
+  <p style="color:var(--muted)" style="margin-top:0.8em; font-size:0.55em; text-align:center;">
     Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> &middot; Playfair Display + DM Sans + JetBrains Mono &middot; Educational use
   </p>
 </section>
@@ -940,15 +899,16 @@ set_retention ret_npu \
 Reveal.initialize({
   hash: true,
   slideNumber: 'c/t',
-  showSlideNumber: 'all',
   transition: 'fade',
   transitionSpeed: 'fast',
-  backgroundTransition: 'fade',
+  controls: true,
+  progress: true,
   center: false,
-  margin: 0.02,
-  width: 1280,
+  width: 1100,
   height: 900,
-  plugins: [ RevealHighlight ]
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
 });
 </script>
 <script>

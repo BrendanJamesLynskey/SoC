@@ -1,220 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI / ML Accelerator Architectures — Modern SoC Design Series</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:      #0d0f14;
-  --surface: #13161e;
-  --panel:   #1a1f2e;
-  --border:  #2a3048;
-  --accent:  #7eb8f7;
-  --accent2: #f7a05a;
-  --accent3: #7ef7c0;
-  --accent4: #f76e7e;
-  --muted:   #8892aa;
-  --text:    #dde4f0;
-  --white:   #ffffff;
-  --mono:    'JetBrains Mono', monospace;
-  --serif:   'Playfair Display', serif;
-  --sans:    'DM Sans', sans-serif;
-}
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
 
-.reveal-viewport { background: var(--bg); }
-.reveal { font-family: var(--sans); font-size: 1.55rem; color: var(--text); }
-.reveal h1,.reveal h2,.reveal h3,.reveal h4 {
-  font-family: var(--serif); letter-spacing: 0.01em; text-transform: none;
-  margin-bottom: 0.5em; color: var(--white); text-shadow: none;
-}
-.reveal h1 { font-size: 1.8em; line-height: 1.15; }
-.reveal h2 { font-size: 1.3em; }
-.reveal h3 { font-size: 1.05em; color: var(--accent); }
-.reveal p  { line-height: 1.55; margin: 0.4em 0; font-size: 0.82em; }
-.reveal ul { list-style: none; padding: 0; margin: 0; }
-.reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; font-size: 0.78em; line-height: 1.5; }
-.reveal ul li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
-.reveal ul ul li::before { color: var(--accent2); content: "◦"; }
-.reveal section { padding: 0 !important; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
 
-/* ─── slide shell ─── */
-.slide {
-  width: 100%; height: 100vh;
-  display: flex; flex-direction: column;
-  justify-content: flex-start;
-  box-sizing: border-box;
-  padding: 2.8rem 3.4rem 1.6rem;
-  background: var(--bg);
-  position: relative; overflow: hidden;
-}
-.slide::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-}
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
 
-/* ─── hero slide ─── */
-.hero {
-  justify-content: center; align-items: flex-start;
-  background: radial-gradient(ellipse 80% 60% at 70% 50%, #111c35 0%, var(--bg) 70%);
-}
-.hero::after {
-  content: '';
-  position: absolute; right: -6rem; top: -6rem;
-  width: 42rem; height: 42rem; border-radius: 50%;
-  border: 1px solid rgba(126,184,247,0.08);
-  box-shadow: 0 0 0 4rem rgba(126,184,247,0.03), 0 0 0 8rem rgba(126,184,247,0.015);
-  pointer-events: none;
-}
-.hero-eyebrow { font-family: var(--mono); font-size: 0.62em; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1.2em; }
-.hero h1 { font-size: 2.1em; line-height: 1.1; max-width: 14em; }
-.hero-sub { font-size: 0.72em; color: var(--muted); margin-top: 1.2em; max-width: 38em; line-height: 1.7; }
-.hero-tags { display: flex; gap: 0.7em; flex-wrap: wrap; margin-top: 1.8em; }
-.tag { font-family: var(--mono); font-size: 0.55em; padding: 0.3em 0.8em; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); }
-.slide-num { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; right: 2em; }
-.series-badge { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; left: 2em; }
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
 
-/* ─── layout helpers ─── */
-.cols { display: grid; gap: 2rem; margin-top: 0.8rem; }
-.cols-2 { grid-template-columns: 1fr 1fr; }
-.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.cols-2-1 { grid-template-columns: 2fr 1fr; }
-.cols-1-2 { grid-template-columns: 1fr 2fr; }
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
 
-.panel {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; padding: 1.2rem 1.4rem;
-  position: relative;
-}
-.panel-title {
-  font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 0.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.5em;
-}
-.panel-title.amber { color: var(--accent2); }
-.panel-title.green { color: var(--accent3); }
-.panel-title.red   { color: var(--accent4); }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
 
-.kv-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
-.kv-row:last-child { border-bottom: none; }
-.kv-label { color: var(--muted); }
-.kv-value { font-family: var(--mono); color: var(--accent); }
-.kv-value.amber { color: var(--accent2); }
-.kv-value.green { color: var(--accent3); }
-.kv-value.red   { color: var(--accent4); }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
 
-.slide-title { font-size: 1.0em; margin-bottom: 0.1em; }
-.slide-subtitle { font-size: 0.62em; color: var(--muted); font-family: var(--mono); letter-spacing: 0.06em; margin-bottom: 0.6em; }
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-/* ─── timeline ─── */
-.timeline { position: relative; padding-left: 1.8rem; }
-.timeline::before { content:''; position:absolute; left:0.5rem; top:0.4em; bottom:0; width:1px; background: var(--border); }
-.tl-item { position:relative; margin-bottom:0.9em; }
-.tl-item::before { content:''; position:absolute; left:-1.38rem; top:0.4em; width:0.55rem; height:0.55rem; border-radius:50%; background: var(--accent); border:2px solid var(--bg); }
-.tl-item.amber::before { background: var(--accent2); }
-.tl-item.green::before { background: var(--accent3); }
-.tl-label { font-family: var(--mono); font-size:0.58em; color: var(--accent); }
-.tl-item.amber .tl-label { color: var(--accent2); }
-.tl-item.green .tl-label { color: var(--accent3); }
-.tl-text  { font-size: 0.72em; color: var(--text); line-height:1.45; margin-top:0.15em; }
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
 
-/* ─── figure/diagram helpers ─── */
-.fig { text-align:center; }
-.fig-caption { font-family:var(--mono); font-size:0.5em; color:var(--muted); margin-top:0.5em; }
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
 
-/* ─── SVG diagrams inline ─── */
-svg.diag { width:100%; height:auto; display:block; }
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-/* ─── accent box ─── */
-.accent-box {
-  background: linear-gradient(135deg, rgba(126,184,247,0.07), rgba(126,184,247,0.02));
-  border: 1px solid rgba(126,184,247,0.25); border-radius:3px;
-  padding: 0.9em 1.1em; font-size:0.72em; line-height:1.55;
-}
-.accent-box.amber { background: linear-gradient(135deg, rgba(247,160,90,0.07), rgba(247,160,90,0.02)); border-color: rgba(247,160,90,0.25); }
-.accent-box.green { background: linear-gradient(135deg, rgba(126,247,192,0.07), rgba(126,247,192,0.02)); border-color: rgba(126,247,192,0.25); }
-.accent-box.red   { background: linear-gradient(135deg, rgba(247,110,126,0.07), rgba(247,110,126,0.02)); border-color: rgba(247,110,126,0.25); }
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
-.label { font-family:var(--mono); font-size:0.88em; font-weight:600; }
-.lb  { color: var(--accent); }
-.lam { color: var(--accent2); }
-.lgr { color: var(--accent3); }
-.lrd { color: var(--accent4); }
-
-/* ─── table ─── */
-.dtable { width:100%; border-collapse:collapse; font-size:0.65em; }
-.dtable th { background:var(--panel); color:var(--accent); font-family:var(--mono); font-size:0.92em; letter-spacing:0.07em; padding:0.55em 0.7em; border:1px solid var(--border); text-align:left; }
-.dtable td { padding:0.45em 0.7em; border:1px solid var(--border); color:var(--text); }
-.dtable tr:nth-child(even) td { background:rgba(255,255,255,0.015); }
-.dtable td.hi { color:var(--accent); font-family:var(--mono); }
-.dtable td.am { color:var(--accent2); font-family:var(--mono); }
-.dtable td.gr { color:var(--accent3); font-family:var(--mono); }
-.dtable td.rd { color:var(--accent4); font-family:var(--mono); }
-
-/* ─── progress bar ─── */
-.prog-wrap { background:var(--panel); border:1px solid var(--border); border-radius:2px; height:0.55rem; margin:0.35em 0; }
-.prog-bar  { height:100%; border-radius:2px; }
-
-/* ─── chip art ─── */
-.chip-art { font-family:var(--mono); font-size:0.42em; line-height:1.35; color:var(--accent); white-space:pre; }
-
-/* ─── equation ─── */
-.eq { font-family:var(--mono); font-size:0.72em; color:var(--accent3); background:var(--panel); border:1px solid var(--border); padding:0.5em 1em; border-radius:3px; text-align:center; }
-
-/* reveal overrides */
-.reveal .controls { color: var(--accent); }
-.reveal .progress  { color: var(--accent); height:3px; }
-.reveal .slide-number { font-family:var(--mono); font-size:0.4em; color:var(--muted); }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
-
 <!-- ════════════════════════════════════════════════════
      SLIDE 01 — TITLE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide hero">
-  <div class="hero-eyebrow">Modern SoC Design Series · Presentation 05</div>
-  <h1>AI / ML Accelerator<br/>Architectures</h1>
-  <p class="hero-sub">
-    From roofline models and dataflow engines to systolic arrays, sparsity exploitation,
+<section data-background-color="#0a0a0f">
+
+  <div style="font-family:\'JetBrains Mono\',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">Modern SoC Design Series · Presentation 05</div>
+  <h1>AI / ML Accelerator<br>Architectures</h1>
+  <div class="subtitle">From roofline models and dataflow engines to systolic arrays, sparsity exploitation,
     and the micro-architecture of today's NPUs — a rigorous tour of how silicon is shaped
-    to maximise AI throughput per watt.
-  </p>
-  <div class="hero-tags">
-    <span class="tag">Roofline Model</span>
-    <span class="tag">Systolic Arrays</span>
-    <span class="tag">Dataflow Engines</span>
-    <span class="tag">Sparsity</span>
-    <span class="tag">Mixed Precision</span>
-    <span class="tag">NPU / DSA</span>
-    <span class="tag">Transformer Accelerators</span>
-    <span class="tag">Case Studies</span>
+    to maximise AI throughput per watt.</div>
+<div style="width:60px; height:3px; background:var(--amber); margin-bottom:1.4em;"></div>
+  <div>
+    <span class="pill amber">Roofline Model</span>
+    <span class="pill amber">Systolic Arrays</span>
+    <span class="pill amber">Dataflow Engines</span>
+    <span class="pill amber">Sparsity</span>
+    <span class="pill amber">Mixed Precision</span>
+    <span class="pill amber">NPU / DSA</span>
+    <span class="pill amber">Transformer Accelerators</span>
+    <span class="pill amber">Case Studies</span>
   </div>
-  <div class="series-badge">⬡ brendanjameslynskey.github.io/SoC</div>
-  <div class="slide-num">01 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 02 — WHY SPECIALISED HARDWARE?
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Why Specialised Hardware?</div>
-  <div class="slide-subtitle">the end of free scaling</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">02</span><h2>Why Specialised Hardware?</h2></div>
 
   <div class="cols cols-2" style="margin-top:0.6rem;gap:1.4rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Dennard Scaling — Broken ~2006</div>
+      <div class="card">
+        <h3>Dennard Scaling — Broken ~2006</h3>
         <ul>
           <li>Voltage no longer scales with feature size — power density <em>rises</em></li>
           <li>Clock frequency stalls; multi-core alleviates, not eliminates, the wall</li>
@@ -222,8 +167,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>ILP extraction in general-purpose CPUs hits diminishing returns</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:1rem;">
-        <div class="panel-title amber">Compute Demand vs Supply Gap</div>
+      <div class="card" style="margin-top:1rem;">
+        <h3>Compute Demand vs Supply Gap</h3>
         <ul>
           <li>GPT-3: ~3.14 × 10²³ FLOP training</li>
           <li>LLM inference: O(2·N·L) FLOP/token for N-param, L-layer model</li>
@@ -233,8 +178,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">ML Workload Characteristics</div>
+      <div class="card">
+        <h3>ML Workload Characteristics</h3>
         <ul>
           <li><strong>Regularity</strong> — repeated MAC operations with fixed structure</li>
           <li><strong>Data reuse</strong> — weights reused across many inputs (batching)</li>
@@ -250,25 +195,22 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">02 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 03 — ROOFLINE MODEL
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">The Roofline Model</div>
-  <div class="slide-subtitle">arithmetic intensity as the design compass</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">03</span><h2>The Roofline Model</h2></div>
 
   <div class="cols cols-2" style="gap:1.6rem;">
     <div>
       <div class="eq" style="margin-bottom:0.8rem;">
         Attainable FLOPS = min( Peak FLOPS ,  I × Peak BW )
       </div>
-      <div class="panel">
-        <div class="panel-title">Arithmetic Intensity <span style="color:var(--accent3)">I</span></div>
+      <div class="card">
+        <h3>Arithmetic Intensity <span style="color:var(--accent3)">I</span></h3>
         <div class="kv-row"><span class="kv-label">Definition</span><span class="kv-value">FLOP / byte of DRAM traffic</span></div>
         <div class="kv-row"><span class="kv-label">Dense GEMM (large)</span><span class="kv-value green">~300 FLOP/B</span></div>
         <div class="kv-row"><span class="kv-label">Conv2D (large kernel)</span><span class="kv-value green">~100 FLOP/B</span></div>
@@ -276,8 +218,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <div class="kv-row"><span class="kv-label">Batch-1 GEMV (inference)</span><span class="kv-value red">~1–4 FLOP/B</span></div>
         <div class="kv-row"><span class="kv-label">Element-wise ops (ReLU)</span><span class="kv-value red">&lt;1 FLOP/B</span></div>
       </div>
-      <div class="panel" style="margin-top:0.9rem;">
-        <div class="panel-title amber">Ridge Point — NVIDIA H100 SXM</div>
+      <div class="card" style="margin-top:0.9rem;">
+        <h3>Ridge Point — NVIDIA H100 SXM</h3>
         <div class="kv-row"><span class="kv-label">FP16 Tensor TFLOPS</span><span class="kv-value">1,979</span></div>
         <div class="kv-row"><span class="kv-label">HBM3 bandwidth</span><span class="kv-value">3.35 TB/s</span></div>
         <div class="kv-row"><span class="kv-label">Ridge point</span><span class="kv-value amber">~591 FLOP/B</span></div>
@@ -288,38 +230,38 @@ svg.diag { width:100%; height:auto; display:block; }
       <!-- SVG roofline chart -->
       <svg viewBox="0 0 320 210" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.4rem;">
         <!-- axes -->
-        <line x1="30" y1="10" x2="30" y2="180" stroke="#2a3048" stroke-width="1.5"/>
-        <line x1="30" y1="180" x2="310" y2="180" stroke="#2a3048" stroke-width="1.5"/>
+        <line x1="30" y1="10" x2="30" y2="180" stroke="#2a3048" stroke-width="1.5">
+        <line x1="30" y1="180" x2="310" y2="180" stroke="#2a3048" stroke-width="1.5">
         <!-- axis labels -->
         <text x="15" y="95" fill="#8892aa" font-size="9" font-family="'JetBrains Mono',monospace" text-anchor="middle" transform="rotate(-90,15,95)">GFLOPS/s</text>
         <text x="170" y="198" fill="#8892aa" font-size="9" font-family="'JetBrains Mono',monospace" text-anchor="middle">Arithmetic Intensity (FLOP/B)</text>
         <!-- roofline: memory bound (slope) x=30..160, y=180..30 -->
-        <line x1="30" y1="180" x2="160" y2="30" stroke="#7eb8f7" stroke-width="2"/>
+        <line x1="30" y1="180" x2="160" y2="30" stroke="#7eb8f7" stroke-width="2">
         <!-- roofline: compute bound (flat) x=160..310 y=30 -->
-        <line x1="160" y1="30" x2="310" y2="30" stroke="#7eb8f7" stroke-width="2"/>
+        <line x1="160" y1="30" x2="310" y2="30" stroke="#7eb8f7" stroke-width="2">
         <!-- ridge point -->
-        <circle cx="160" cy="30" r="4" fill="#f7a05a"/>
+        <circle cx="160" cy="30" r="4" fill="#f7a05a">
         <text x="162" y="26" fill="#f7a05a" font-size="8" font-family="'JetBrains Mono',monospace">Ridge</text>
         <!-- workload points -->
         <!-- GEMV: I~2, low perf -->
-        <circle cx="51" cy="168" r="4" fill="#f76e7e"/>
+        <circle cx="51" cy="168" r="4" fill="#f76e7e">
         <text x="55" y="165" fill="#f76e7e" font-size="7.5" font-family="'DM Sans',sans-serif">GEMV</text>
         <!-- Attention: I~15 -->
-        <circle cx="82" cy="133" r="4" fill="#f7a05a"/>
+        <circle cx="82" cy="133" r="4" fill="#f7a05a">
         <text x="86" y="130" fill="#f7a05a" font-size="7.5" font-family="'DM Sans',sans-serif">Attn</text>
         <!-- Conv: I~100 -->
-        <circle cx="143" cy="42" r="4" fill="#7ef7c0"/>
+        <circle cx="143" cy="42" r="4" fill="#7ef7c0">
         <text x="147" y="38" fill="#7ef7c0" font-size="7.5" font-family="'DM Sans',sans-serif">Conv</text>
         <!-- GEMM: I>300 capped -->
-        <circle cx="230" cy="30" r="4" fill="#7ef7c0"/>
+        <circle cx="230" cy="30" r="4" fill="#7ef7c0">
         <text x="234" y="26" fill="#7ef7c0" font-size="7.5" font-family="'DM Sans',sans-serif">GEMM</text>
         <!-- zone labels -->
         <text x="65" y="80" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" opacity="0.5">Memory-bound</text>
         <text x="190" y="50" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" opacity="0.5">Compute-bound</text>
         <!-- dashed verticals -->
-        <line x1="51" y1="168" x2="51" y2="180" stroke="#f76e7e" stroke-width="0.8" stroke-dasharray="2,2"/>
-        <line x1="82" y1="133" x2="82" y2="180" stroke="#f7a05a" stroke-width="0.8" stroke-dasharray="2,2"/>
-        <line x1="143" y1="42" x2="143" y2="180" stroke="#7ef7c0" stroke-width="0.8" stroke-dasharray="2,2"/>
+        <line x1="51" y1="168" x2="51" y2="180" stroke="#f76e7e" stroke-width="0.8" stroke-dasharray="2,2">
+        <line x1="82" y1="133" x2="82" y2="180" stroke="#f7a05a" stroke-width="0.8" stroke-dasharray="2,2">
+        <line x1="143" y1="42" x2="143" y2="180" stroke="#7ef7c0" stroke-width="0.8" stroke-dasharray="2,2">
         <!-- x-axis ticks -->
         <text x="51"  y="190" fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">2</text>
         <text x="82"  y="190" fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">15</text>
@@ -333,21 +275,18 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">03 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 04 — COMPUTE PRIMITIVES: MACSANDGEMM
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Compute Primitives: MAC → GEMM → Tensor</div>
-  <div class="slide-subtitle">the hierarchy of matrix operations</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">04</span><h2>Compute Primitives: MAC → GEMM → Tensor</h2></div>
 
   <div class="cols cols-3" style="margin-top:0.6rem;">
-    <div class="panel">
-      <div class="panel-title">Scalar MAC</div>
+    <div class="card">
+      <h3>Scalar MAC</h3>
       <div class="eq" style="font-size:0.9em;">c += a × b</div>
       <ul style="margin-top:0.7em;">
         <li>Single multiply-accumulate per cycle</li>
@@ -356,8 +295,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <li>Poor reuse — reload A,B each time</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title amber">SIMD / Vector</div>
+    <div class="card">
+      <h3>SIMD / Vector</h3>
       <div class="eq" style="font-size:0.9em;">C[i] += A[i] × B[i]</div>
       <ul style="margin-top:0.7em;">
         <li>AVX-512: 16 FP32 MACs / cycle</li>
@@ -366,8 +305,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <li>Compiler auto-vectorises easily</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title green">Tensor / Matrix Unit</div>
+    <div class="card">
+      <h3>Tensor / Matrix Unit</h3>
       <div class="eq" style="font-size:0.9em;">C += A × Bᵀ</div>
       <ul style="margin-top:0.7em;">
         <li>NVIDIA Tensor Core: 16×16×16 MMA</li>
@@ -378,8 +317,8 @@ svg.diag { width:100%; height:auto; display:block; }
     </div>
   </div>
 
-  <div class="panel" style="margin-top:1rem;">
-    <div class="panel-title">GEMM Tiling Strategy — Fitting the Memory Hierarchy</div>
+  <div class="card" style="margin-top:1rem;">
+    <h3>GEMM Tiling Strategy — Fitting the Memory Hierarchy</h3>
     <div class="cols cols-2" style="gap:1.2rem;">
       <ul>
         <li><strong>Tile into L1/register file</strong> — keep hot data in the fastest storage; amortise load cost over many MACs</li>
@@ -393,22 +332,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </ul>
     </div>
   </div>
-  <div class="slide-num">04 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 05 — SYSTOLIC ARRAYS
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Systolic Arrays</div>
-  <div class="slide-subtitle">data flowing like a heartbeat through a 2D PE mesh</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">05</span><h2>Systolic Arrays</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
-      <div class="panel" style="margin-bottom:1rem;">
-        <div class="panel-title">Operating Principle</div>
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Operating Principle</h3>
         <ul>
           <li>2D grid of Processing Elements (PEs), each performing MAC</li>
           <li>Data injected from edges; flows rhythmically (systolically) across the array</li>
@@ -418,8 +354,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>Row stationary (Google TPU v1): minimises total data movement energy</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title amber">Google TPU v1 MXU</div>
+      <div class="card">
+        <h3>Google TPU v1 MXU</h3>
         <div class="kv-row"><span class="kv-label">Array size</span><span class="kv-value">256 × 256 PEs</span></div>
         <div class="kv-row"><span class="kv-label">Precision</span><span class="kv-value">INT8 MACs</span></div>
         <div class="kv-row"><span class="kv-label">Peak throughput</span><span class="kv-value amber">92 TOPS</span></div>
@@ -433,37 +369,37 @@ svg.diag { width:100%; height:auto; display:block; }
       <svg viewBox="0 0 300 260" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
         <defs>
           <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#7eb8f7" opacity="0.7"/>
+            <path d="M0,0 L0,6 L6,3 z" fill="#7eb8f7" opacity="0.7">
           </marker>
           <marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#f7a05a" opacity="0.7"/>
+            <path d="M0,0 L0,6 L6,3 z" fill="#f7a05a" opacity="0.7">
           </marker>
           <marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#7ef7c0" opacity="0.7"/>
+            <path d="M0,0 L0,6 L6,3 z" fill="#7ef7c0" opacity="0.7">
           </marker>
         </defs>
 
         <!-- PEs: 4×4 grid, each 40×30, starting at x=70,y=50 -->
         <!-- Row 0 -->
-        <rect x="70"  y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="120" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="170" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="220" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="70"  y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="120" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="170" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="220" y="50"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
         <!-- Row 1 -->
-        <rect x="70"  y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="120" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="170" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="220" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="70"  y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="120" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="170" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="220" y="95"  width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
         <!-- Row 2 -->
-        <rect x="70"  y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="120" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="170" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="220" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="70"  y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="120" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="170" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="220" y="140" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
         <!-- Row 3 -->
-        <rect x="70"  y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="120" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="170" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
-        <rect x="220" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="70"  y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="120" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="170" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
+        <rect x="220" y="185" width="40" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
 
         <!-- PE labels -->
         <text x="90"  y="69" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC</text>
@@ -472,68 +408,65 @@ svg.diag { width:100%; height:auto; display:block; }
         <text x="240" y="69" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC</text>
 
         <!-- Horizontal arrows (activations flowing right) -->
-        <line x1="8" y1="65"  x2="65"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="110" y1="65"  x2="115"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="160" y1="65"  x2="165"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="210" y1="65"  x2="215"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="8" y1="65"  x2="65"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="110" y1="65"  x2="115"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="160" y1="65"  x2="165"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="210" y1="65"  x2="215"  y2="65"  stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
 
-        <line x1="8" y1="110" x2="65"  y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="110" y1="110" x2="115" y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="160" y1="110" x2="165" y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="8" y1="110" x2="65"  y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="110" y1="110" x2="115" y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="160" y1="110" x2="165" y2="110" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
 
-        <line x1="8" y1="155" x2="65"  y2="155" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="110" y1="155" x2="115" y2="155" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="8" y1="155" x2="65"  y2="155" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="110" y1="155" x2="115" y2="155" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
 
-        <line x1="8" y1="200" x2="65"  y2="200" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="8" y1="200" x2="65"  y2="200" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arr)">
 
         <!-- Vertical arrows (weights flowing down) -->
-        <line x1="90"  y1="8"  x2="90"  y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
-        <line x1="90"  y1="80" x2="90"  y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
-        <line x1="90"  y1="125" x2="90" y2="135" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
-        <line x1="90"  y1="170" x2="90" y2="180" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="90"  y1="8"  x2="90"  y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
+        <line x1="90"  y1="80" x2="90"  y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
+        <line x1="90"  y1="125" x2="90" y2="135" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
+        <line x1="90"  y1="170" x2="90" y2="180" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
 
-        <line x1="140" y1="8"  x2="140" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
-        <line x1="140" y1="80" x2="140" y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
-        <line x1="140" y1="125" x2="140" y2="135" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="140" y1="8"  x2="140" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
+        <line x1="140" y1="80" x2="140" y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
+        <line x1="140" y1="125" x2="140" y2="135" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
 
-        <line x1="190" y1="8"  x2="190" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
-        <line x1="190" y1="80" x2="190" y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="190" y1="8"  x2="190" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
+        <line x1="190" y1="80" x2="190" y2="90"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
 
-        <line x1="240" y1="8"  x2="240" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="240" y1="8"  x2="240" y2="45"  stroke="#f7a05a" stroke-width="1.5" marker-end="url(#arr2)">
 
         <!-- partial sums out right -->
-        <line x1="260" y1="65"  x2="290" y2="65"  stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
-        <line x1="260" y1="110" x2="290" y2="110" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
-        <line x1="260" y1="155" x2="290" y2="155" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
-        <line x1="260" y1="200" x2="290" y2="200" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <line x1="260" y1="65"  x2="290" y2="65"  stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)">
+        <line x1="260" y1="110" x2="290" y2="110" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)">
+        <line x1="260" y1="155" x2="290" y2="155" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)">
+        <line x1="260" y1="200" x2="290" y2="200" stroke="#7ef7c0" stroke-width="1.5" marker-end="url(#arr3)">
 
         <!-- legend -->
-        <line x1="8" y1="240" x2="30" y2="240" stroke="#7eb8f7" stroke-width="1.5"/>
+        <line x1="8" y1="240" x2="30" y2="240" stroke="#7eb8f7" stroke-width="1.5">
         <text x="33" y="244" fill="#7eb8f7" font-size="8" font-family="'DM Sans',sans-serif">Activations →</text>
-        <line x1="100" y1="240" x2="122" y2="240" stroke="#f7a05a" stroke-width="1.5"/>
+        <line x1="100" y1="240" x2="122" y2="240" stroke="#f7a05a" stroke-width="1.5">
         <text x="125" y="244" fill="#f7a05a" font-size="8" font-family="'DM Sans',sans-serif">Weights ↓</text>
-        <line x1="190" y1="240" x2="212" y2="240" stroke="#7ef7c0" stroke-width="1.5"/>
+        <line x1="190" y1="240" x2="212" y2="240" stroke="#7ef7c0" stroke-width="1.5">
         <text x="215" y="244" fill="#7ef7c0" font-size="8" font-family="'DM Sans',sans-serif">Partial sums →</text>
       </svg>
       <div class="fig-caption">Weight-stationary 4×4 systolic array (concept). In practice the TPU v1 MXU is 256×256.</div>
     </div>
   </div>
-  <div class="slide-num">05 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 06 — DATAFLOW ARCHITECTURES
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Dataflow Architectures</div>
-  <div class="slide-subtitle">execution driven by data availability, not program counters</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">06</span><h2>Dataflow Architectures</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Dataflow vs Control-flow</div>
+      <div class="card">
+        <h3>Dataflow vs Control-flow</h3>
         <ul>
           <li><strong>Control-flow (von Neumann)</strong>: sequential PC fetch/decode; memory bottleneck; branch misprediction overhead</li>
           <li><strong>Dataflow</strong>: instructions fire when operands are ready; implicit parallelism; no speculative execution overhead</li>
@@ -541,8 +474,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>Compiler maps layer graph onto PE array dataflow schedule at compile time — zero runtime overhead</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:1rem;">
-        <div class="panel-title amber">Dataflow Variants</div>
+      <div class="card" style="margin-top:1rem;">
+        <h3>Dataflow Variants</h3>
         <ul>
           <li><strong>Weight-stationary</strong>: weights loaded once into PE RFs; minimise weight movement energy</li>
           <li><strong>Output-stationary</strong>: partial sums accumulate locally; maximise accumulator reuse</li>
@@ -552,8 +485,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Spatial Dataflow Engines</div>
+      <div class="card">
+        <h3>Spatial Dataflow Engines</h3>
         <ul>
           <li><strong>Cerebras WSE-3</strong>: entire wafer as one chip; 900K cores; 44 GB on-wafer SRAM — eliminates DRAM for moderate models</li>
           <li><strong>Groq LPU</strong>: deterministic single-chip SIMD; compiler schedules every cycle; zero pipeline stalls; 750 TOPS INT8</li>
@@ -568,17 +501,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">06 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 07 — MIXED PRECISION
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Numerical Formats &amp; Mixed Precision</div>
-  <div class="slide-subtitle">matching bit-width to workload sensitivity</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">07</span><h2>Numerical Formats &amp; Mixed Precision</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -596,16 +526,16 @@ svg.diag { width:100%; height:auto; display:block; }
       </table>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">NVIDIA Tensor Core Evolution</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>NVIDIA Tensor Core Evolution</h3>
         <div class="kv-row"><span class="kv-label">Volta (V100)</span><span class="kv-value">FP16 in, FP32 acc</span></div>
         <div class="kv-row"><span class="kv-label">Ampere (A100)</span><span class="kv-value amber">TF32, BF16, INT8, INT4, FP64</span></div>
         <div class="kv-row"><span class="kv-label">Hopper (H100)</span><span class="kv-value green">FP8 E4M3/E5M2, FP16, BF16</span></div>
         <div class="kv-row"><span class="kv-label">Blackwell (B200)</span><span class="kv-value green">FP4 NV (2× H100 throughput)</span></div>
         <div class="kv-row"><span class="kv-label">B200 FP4 peak</span><span class="kv-value amber">~9 PFLOPS (dense)</span></div>
       </div>
-      <div class="panel">
-        <div class="panel-title amber">Mixed-Precision Training (AMP)</div>
+      <div class="card">
+        <h3>Mixed-Precision Training (AMP)</h3>
         <ul>
           <li><strong>Master weights</strong>: FP32 — guards gradient precision</li>
           <li><strong>Forward/backward</strong>: FP16 or BF16 — feeds Tensor Cores</li>
@@ -616,31 +546,28 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">07 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 08 — SPARSITY
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Sparsity Exploitation</div>
-  <div class="slide-subtitle">skipping zeros — architectural and algorithmic approaches</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">08</span><h2>Sparsity Exploitation</h2></div>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
-    <div class="panel">
-      <div class="panel-title">Sources of Sparsity</div>
+    <div class="card">
+      <h3>Sources of Sparsity</h3>
       <ul>
         <li><strong>Activation sparsity</strong>: ReLU sets negative activations to zero; 50–80% sparse in practice</li>
-        <li><strong>Weight pruning</strong>: iterative magnitude pruning removes small-weight connections</li>
+        <li><strong>Weight pruning</strong>: iterative magnitude pruning removes -weight connections</li>
         <li><strong>Structured pruning</strong>: remove entire filters/heads — hardware-friendly but accuracy cost</li>
         <li><strong>Unstructured pruning</strong>: arbitrary zero pattern — needs sparse HW to exploit</li>
         <li><strong>Dynamic sparsity</strong>: varies per input; harder to schedule statically</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title amber">NVIDIA 2:4 Structured Sparsity</div>
+    <div class="card">
+      <h3>NVIDIA 2:4 Structured Sparsity</h3>
       <ul>
         <li>Exactly 2 non-zeros in every group of 4 weights</li>
         <li>Stored in compressed format: 50% weight storage</li>
@@ -650,8 +577,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <li>Accuracy: &lt;1% loss for most vision/NLP models with retraining</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title green">Sparse Format Trade-offs</div>
+    <div class="card">
+      <h3>Sparse Format Trade-offs</h3>
       <ul>
         <li><strong>CSR/CSC</strong>: row/col pointer + value arrays; irregular memory; good for very sparse (&gt;90%)</li>
         <li><strong>COO</strong>: (row, col, val) tuples; simple but high overhead at &lt;90% sparsity</li>
@@ -662,8 +589,8 @@ svg.diag { width:100%; height:auto; display:block; }
     </div>
   </div>
 
-  <div class="panel" style="margin-top:0.9rem;">
-    <div class="panel-title red">Mixture-of-Experts (MoE) — Sparsity at the Architecture Level</div>
+  <div class="card" style="margin-top:0.9rem;">
+    <h3>Mixture-of-Experts (MoE) — Sparsity at the Architecture Level</h3>
     <div class="cols cols-2" style="gap:1rem;">
       <ul>
         <li>Replace dense FFN with N expert sub-networks (e.g. 8, 64, or 256)</li>
@@ -677,44 +604,41 @@ svg.diag { width:100%; height:auto; display:block; }
       </ul>
     </div>
   </div>
-  <div class="slide-num">08 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 09 — MEMORY HIERARCHY IN ACCELERATORS
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Memory Hierarchy in AI Accelerators</div>
-  <div class="slide-subtitle">keeping compute fed — the bandwidth pyramid</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">09</span><h2>Memory Hierarchy in AI Accelerators</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
       <!-- Memory pyramid SVG -->
       <svg viewBox="0 0 300 230" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.5rem;">
         <!-- L0: Register file -->
-        <polygon points="120,20 180,20 200,50 100,50" fill="rgba(126,247,192,0.3)" stroke="#7ef7c0" stroke-width="1"/>
+        <polygon points="120,20 180,20 200,50 100,50" fill="rgba(126,247,192,0.3)" stroke="#7ef7c0" stroke-width="1">
         <text x="150" y="39" fill="#7ef7c0" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">Register File</text>
         <text x="260" y="39" fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace">kB · &gt;10 TB/s</text>
 
         <!-- L1: SRAM local -->
-        <polygon points="100,55 200,55 220,85 80,85" fill="rgba(126,184,247,0.3)" stroke="#7eb8f7" stroke-width="1"/>
+        <polygon points="100,55 200,55 220,85 80,85" fill="rgba(126,184,247,0.3)" stroke="#7eb8f7" stroke-width="1">
         <text x="150" y="74" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">L1 SRAM / Scratchpad</text>
         <text x="260" y="74" fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace">256–512 kB · 5 TB/s</text>
 
         <!-- L2: Shared SRAM -->
-        <polygon points="80,90 220,90 240,120 60,120" fill="rgba(126,184,247,0.2)" stroke="#7eb8f7" stroke-width="1"/>
+        <polygon points="80,90 220,90 240,120 60,120" fill="rgba(126,184,247,0.2)" stroke="#7eb8f7" stroke-width="1">
         <text x="150" y="109" fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">L2 / Unified Buffer SRAM</text>
         <text x="260" y="109" fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace">50–100 MB · 1–2 TB/s</text>
 
         <!-- HBM -->
-        <polygon points="60,125 240,125 255,155 45,155" fill="rgba(247,160,90,0.25)" stroke="#f7a05a" stroke-width="1"/>
+        <polygon points="60,125 240,125 255,155 45,155" fill="rgba(247,160,90,0.25)" stroke="#f7a05a" stroke-width="1">
         <text x="150" y="144" fill="#f7a05a" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">HBM3/3E (on-package)</text>
         <text x="260" y="144" fill="#f7a05a" font-size="7" font-family="'JetBrains Mono',monospace">96–192 GB · 3–5 TB/s</text>
 
         <!-- DRAM / NVLink -->
-        <polygon points="45,160 255,160 270,190 30,190" fill="rgba(247,110,126,0.2)" stroke="#f76e7e" stroke-width="1"/>
+        <polygon points="45,160 255,160 270,190 30,190" fill="rgba(247,110,126,0.2)" stroke="#f76e7e" stroke-width="1">
         <text x="150" y="179" fill="#f76e7e" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">NVLink / PCIe / CXL pool</text>
         <text x="260" y="179" fill="#f76e7e" font-size="7" font-family="'JetBrains Mono',monospace">TB scale · 900 GB/s</text>
 
@@ -723,8 +647,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </svg>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">On-Chip SRAM Sizing Considerations</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>On-Chip SRAM Sizing Considerations</h3>
         <ul>
           <li>Must hold input/output tiles + partial sums simultaneously</li>
           <li>Larger SRAM → better roofline position; SRAM density limits die area</li>
@@ -733,8 +657,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>Cerebras WSE-3: 44 GB on-wafer (no DRAM bottleneck for &lt;700B models)</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title amber">Flash Attention — Algorithm-Hardware Co-design</div>
+      <div class="card">
+        <h3>Flash Attention — Algorithm-Hardware Co-design</h3>
         <ul>
           <li>Standard attention materialises full N×N score matrix — O(N²) HBM reads/writes</li>
           <li>Flash Attention tiles Q,K,V into SRAM; fuses softmax + matmul kernel</li>
@@ -745,22 +669,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">09 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 10 — TRANSFORMER ACCELERATOR MICRO-ARCHITECTURE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Transformer Accelerator Micro-Architecture</div>
-  <div class="slide-subtitle">mapping attention and FFN layers onto silicon</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">10</span><h2>Transformer Accelerator Micro-Architecture</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;">
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">Attention Bottlenecks at Inference</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Attention Bottlenecks at Inference</h3>
         <ul>
           <li><strong>Prefill (prompt)</strong>: large GEMM — compute-bound; exploits Tensor Cores well</li>
           <li><strong>Decode (autoregressive)</strong>: GEMV — each token generates one row; memory-bandwidth bound</li>
@@ -768,8 +689,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>At 70B model, 100K context: KV cache ~200 GB — exceeds single GPU VRAM</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title amber">KV Cache Optimisations</div>
+      <div class="card">
+        <h3>KV Cache Optimisations</h3>
         <ul>
           <li><strong>Multi-Query Attention (MQA)</strong>: share single K,V head across all Q heads — 8× KV cache reduction</li>
           <li><strong>Grouped Query Attention (GQA)</strong>: G shared K,V heads (Llama 3 uses G=8); balance between MHA and MQA</li>
@@ -779,8 +700,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title green">Dedicated Transformer Engine (NVIDIA)</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Dedicated Transformer Engine (NVIDIA)</h3>
         <ul>
           <li>Hopper H100: Transformer Engine with FP8 training support</li>
           <li>Per-tensor dynamic scaling maintains numerical stability</li>
@@ -789,8 +710,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>4× H100 Tensor Core throughput vs A100 in FP8 mode</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title">Prefill / Decode Disaggregation</div>
+      <div class="card">
+        <h3>Prefill / Decode Disaggregation</h3>
         <ul>
           <li>Prefill is compute-bound; decode is memory-bound → different optimal hardware</li>
           <li><strong>Disaggregated serving</strong>: separate GPU pools for prefill vs decode (Splitwise, DistServe)</li>
@@ -800,21 +721,18 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">10 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 11 — QUANTISATION FOR INFERENCE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Quantisation for Inference</div>
-  <div class="slide-subtitle">reducing bit-width without sacrificing accuracy</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">11</span><h2>Quantisation for Inference</h2></div>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
-    <div class="panel">
-      <div class="panel-title">Post-Training Quantisation (PTQ)</div>
+    <div class="card">
+      <h3>Post-Training Quantisation (PTQ)</h3>
       <ul>
         <li><strong>Symmetric</strong>: scale = max(|W|) / 127; zero-point = 0; preferred for weights</li>
         <li><strong>Asymmetric</strong>: separate scale + zero-point; better for asymmetric activation distributions</li>
@@ -824,8 +742,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <li>Calibration dataset: 128–512 samples sufficient</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title amber">Quantisation-Aware Training (QAT)</div>
+    <div class="card">
+      <h3>Quantisation-Aware Training (QAT)</h3>
       <ul>
         <li>Simulate quantisation during training — fake quantise nodes in forward pass</li>
         <li>Gradients flow through fake-quant via straight-through estimator (STE)</li>
@@ -835,8 +753,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <li>NF4: normally-distributed 4-bit — optimal for normally-distributed weights</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title green">Hardware Quantisation Support</div>
+    <div class="card">
+      <h3>Hardware Quantisation Support</h3>
       <div class="kv-row"><span class="kv-label">NVIDIA A100</span><span class="kv-value green">INT8, INT4</span></div>
       <div class="kv-row"><span class="kv-label">NVIDIA H100</span><span class="kv-value green">FP8, INT8, INT4</span></div>
       <div class="kv-row"><span class="kv-label">NVIDIA B200</span><span class="kv-value green">FP4, FP6, FP8</span></div>
@@ -852,22 +770,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">11 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 12 — GPU ARCHITECTURE DEEP DIVE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">GPU Architecture: NVIDIA Hopper H100</div>
-  <div class="slide-subtitle">the current standard bearer for AI compute</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">12</span><h2>GPU Architecture: NVIDIA Hopper H100</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">H100 SXM5 — Key Numbers</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>H100 SXM5 — Key Numbers</h3>
         <div class="kv-row"><span class="kv-label">Process</span><span class="kv-value">TSMC N4 (4nm)</span></div>
         <div class="kv-row"><span class="kv-label">Die area</span><span class="kv-value">814 mm²</span></div>
         <div class="kv-row"><span class="kv-label">Transistors</span><span class="kv-value amber">80 billion</span></div>
@@ -882,8 +797,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title amber">Hopper New Features</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Hopper New Features</h3>
         <ul>
           <li><strong>Transformer Engine</strong>: hardware FP8 ↔ FP16/BF16 conversion; dynamic per-tensor scaling</li>
           <li><strong>WGMMA (Warpgroup MMA)</strong>: asynchronous Tensor Core with larger 64×16×16 tiles</li>
@@ -893,8 +808,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>Confidential computing</strong>: TEE with hardware attestation for multi-tenant inference</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title green">SM Micro-architecture</div>
+      <div class="card">
+        <h3>SM Micro-architecture</h3>
         <ul>
           <li>128 CUDA cores (FP32) per SM + 64 FP64 + 64 INT32</li>
           <li>4× 4th-gen Tensor Cores per SM</li>
@@ -904,17 +819,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">12 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 13 — GOOGLE TPU ARCHITECTURE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Google TPU Architecture</div>
-  <div class="slide-subtitle">purpose-built ASIC for TensorFlow / JAX workloads</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">13</span><h2>Google TPU Architecture</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -942,8 +854,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">TPU v4 Inter-Chip Link (ICI)</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>TPU v4 Inter-Chip Link (ICI)</h3>
         <ul>
           <li>Each chip has 6× bidirectional ICI links at 100 GB/s each = 600 GB/s per chip</li>
           <li>4096-chip pod arranged as 3D torus topology</li>
@@ -951,8 +863,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>All-reduce over ICI faster than NVLink at pod scale</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title amber">TPU SparseCore (v5+)</div>
+      <div class="card">
+        <h3>TPU SparseCore (v5+)</h3>
         <ul>
           <li>Dedicated accelerator for embedding lookups (recommendation models)</li>
           <li>Embedding tables: sparse random-access pattern; hostile to systolic array</li>
@@ -966,65 +878,62 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">13 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 14 — NPU IN SOC INTEGRATION
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">NPU Integration in SoCs</div>
-  <div class="slide-subtitle">on-device AI — from smartphone to datacenter SoC</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">14</span><h2>NPU Integration in SoCs</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">Typical NPU Micro-architecture</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Typical NPU Micro-architecture</h3>
         <!-- Simple NPU block diagram -->
         <svg viewBox="0 0 280 150" style="width:100%;background:var(--bg);border-radius:3px;margin-top:0.5rem;">
-          <rect x="5"   y="10"  width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+          <rect x="5"   y="10"  width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
           <text x="35"  y="29"  fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">DMA Engine</text>
 
-          <rect x="5"   y="55"  width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+          <rect x="5"   y="55"  width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
           <text x="35"  y="74"  fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Cmd Queue</text>
 
-          <rect x="5"   y="100" width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+          <rect x="5"   y="100" width="60" height="30" rx="3" fill="#1a1f2e" stroke="#2a3048">
           <text x="35"  y="119" fill="#7eb8f7" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Post-proc</text>
 
           <!-- central PE array -->
-          <rect x="80"  y="20"  width="80" height="100" rx="4" fill="rgba(126,184,247,0.1)" stroke="#7eb8f7"/>
+          <rect x="80"  y="20"  width="80" height="100" rx="4" fill="rgba(126,184,247,0.1)" stroke="#7eb8f7">
           <text x="120" y="60"  fill="#7eb8f7" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">MAC Array</text>
           <text x="120" y="73"  fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">(systolic / SIMD)</text>
           <text x="120" y="90"  fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Accumulators</text>
 
           <!-- SRAM buffer -->
-          <rect x="175" y="20"  width="65" height="45" rx="3" fill="#1a1f2e" stroke="#f7a05a"/>
+          <rect x="175" y="20"  width="65" height="45" rx="3" fill="#1a1f2e" stroke="#f7a05a">
           <text x="207" y="43"  fill="#f7a05a" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Unified Buffer</text>
           <text x="207" y="55"  fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">SRAM</text>
 
           <!-- activation/pool/norm -->
-          <rect x="175" y="80"  width="65" height="45" rx="3" fill="#1a1f2e" stroke="#7ef7c0"/>
+          <rect x="175" y="80"  width="65" height="45" rx="3" fill="#1a1f2e" stroke="#7ef7c0">
           <text x="207" y="100" fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Act/Pool/</text>
           <text x="207" y="112" fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">Norm Unit</text>
 
           <!-- arrows -->
-          <line x1="65" y1="25"  x2="79"  y2="50"  stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
-          <line x1="65" y1="70"  x2="79"  y2="70"  stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
-          <line x1="160" y1="50"  x2="174" y2="42" stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
-          <line x1="160" y1="80"  x2="174" y2="95" stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)"/>
-          <line x1="207" y1="125" x2="35" y2="115" stroke="#7ef7c0" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="65" y1="25"  x2="79"  y2="50"  stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)">
+          <line x1="65" y1="70"  x2="79"  y2="70"  stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)">
+          <line x1="160" y1="50"  x2="174" y2="42" stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)">
+          <line x1="160" y1="80"  x2="174" y2="95" stroke="#7eb8f7" stroke-width="1" marker-end="url(#arr)">
+          <line x1="207" y1="125" x2="35" y2="115" stroke="#7ef7c0" stroke-width="1" stroke-dasharray="3,2">
 
           <!-- SoC bus -->
-          <rect x="5" y="140" width="265" height="7" rx="2" fill="rgba(42,48,72,0.8)" stroke="#2a3048"/>
+          <rect x="5" y="140" width="265" height="7" rx="2" fill="rgba(42,48,72,0.8)" stroke="#2a3048">
           <text x="140" y="147" fill="#8892aa" font-size="7" font-family="'JetBrains Mono',monospace" text-anchor="middle">SoC Fabric (AMBA AXI / CHI)</text>
         </svg>
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title amber">Flagship Mobile NPUs (2024–2025)</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Flagship Mobile NPUs (2024–2025)</h3>
         <table class="dtable" style="font-size:0.82em;">
           <tr><th>Chip</th><th>NPU</th><th>TOPS</th><th>Process</th></tr>
           <tr><td>Apple A18 Pro</td><td class="hi">ANE Gen 5</td><td class="gr">38</td><td>TSMC N3E</td></tr>
@@ -1035,8 +944,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <tr><td>Google Tensor G4</td><td class="hi">TPU (Samsung)</td><td class="gr">42</td><td>Samsung SF4</td></tr>
         </table>
       </div>
-      <div class="panel">
-        <div class="panel-title green">Datacenter SoC NPU Integration</div>
+      <div class="card">
+        <h3>Datacenter SoC NPU Integration</h3>
         <ul>
           <li><strong>Intel Gaudi 3</strong>: 8× matrix multiplication engines (MME) + 24× TPC VLIW cores; 64 GB HBM2e</li>
           <li><strong>AMD MI300X APU</strong>: CDNA3 GPU + CPU dies; 192 GB HBM3 shared; 5.3 TB/s</li>
@@ -1046,21 +955,18 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">14 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 15 — TENSOR PARALLELISM & DISTRIBUTED TRAINING
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Parallelism Strategies for Large Models</div>
-  <div class="slide-subtitle">distributing compute and memory across accelerators</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">15</span><h2>Parallelism Strategies for Large Models</h2></div>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
-    <div class="panel">
-      <div class="panel-title">Data Parallelism (DP)</div>
+    <div class="card">
+      <h3>Data Parallelism (DP)</h3>
       <ul>
         <li>Each device holds a full model copy</li>
         <li>Different micro-batches processed in parallel</li>
@@ -1070,8 +976,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <li>ZeRO (DeepSpeed): shard optimizer states, gradients, params across DP ranks</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title amber">Tensor Parallelism (TP)</div>
+    <div class="card">
+      <h3>Tensor Parallelism (TP)</h3>
       <ul>
         <li>Partition weight matrices across devices (column / row sharding)</li>
         <li>Megatron-LM: column-split Q/K/V projections; row-split output projection</li>
@@ -1081,8 +987,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <li>Sequence parallelism (Ulysses): split along sequence dimension</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title green">Pipeline Parallelism (PP)</div>
+    <div class="card">
+      <h3>Pipeline Parallelism (PP)</h3>
       <ul>
         <li>Partition transformer layers across devices: device 0 = layers 0–7, etc.</li>
         <li>Micro-batching: pipeline bubble reduced by processing B micro-batches simultaneously</li>
@@ -1092,8 +998,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </ul>
     </div>
   </div>
-  <div class="panel" style="margin-top:0.8rem;">
-    <div class="panel-title red">3D Parallelism — Combining All Three</div>
+  <div class="card" style="margin-top:0.8rem;">
+    <h3>3D Parallelism — Combining All Three</h3>
     <div class="cols cols-2" style="gap:1rem;">
       <ul>
         <li><strong>DP × TP × PP</strong>: e.g. 512 GPUs = DP=8, TP=8, PP=8 → fits 1T+ parameter models</li>
@@ -1105,26 +1011,23 @@ svg.diag { width:100%; height:auto; display:block; }
       </ul>
     </div>
   </div>
-  <div class="slide-num">15 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 16 — CNN ACCELERATOR DESIGN
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">CNN Accelerator Design</div>
-  <div class="slide-subtitle">convolutional workloads — structure, tiling, and reuse</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">16</span><h2>CNN Accelerator Design</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">Convolution Loop Nest</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Convolution Loop Nest</h3>
         <div class="eq" style="font-size:0.75em; text-align:left; padding:0.7em 0.9em;">
-for N, C_out, OH, OW, C_in, KH, KW:<br/>
-&nbsp;&nbsp;O[n,c_out,oh,ow] +=<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;W[c_out,c_in,kh,kw] ×<br/>
+for N, C_out, OH, OW, C_in, KH, KW:<br>
+&nbsp;&nbsp;O[n,c_out,oh,ow] +=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;W[c_out,c_in,kh,kw] ×<br>
 &nbsp;&nbsp;&nbsp;&nbsp;I[n, c_in, oh+kh, ow+kw]
         </div>
         <ul style="margin-top:0.6em;">
@@ -1137,18 +1040,18 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title amber">CNN Accelerator Design Choices</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>CNN Accelerator Design Choices</h3>
         <ul>
           <li><strong>Line buffer</strong>: store H×W rows of input; slide window without re-reading DRAM</li>
           <li><strong>Double buffering</strong>: DMA fills buffer B while PE array consumes buffer A</li>
-          <li><strong>Weight caching</strong>: small kernels (3×3×C_in×C_out) fit in on-chip SRAM; reuse across output tiles</li>
+          <li><strong>Weight caching</strong>:  kernels (3×3×C_in×C_out) fit in on-chip SRAM; reuse across output tiles</li>
           <li><strong>Activation reuse</strong>: output-stationary on OH×OW tile; stream weights past</li>
           <li><strong>Fusion</strong>: Conv + BN + ReLU fused into single kernel — eliminates 2× DRAM round trips</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title green">Edge CNN ASIC Examples</div>
+      <div class="card">
+        <h3>Edge CNN ASIC Examples</h3>
         <div class="kv-row"><span class="kv-label">Hailo-8</span><span class="kv-value green">26 TOPS · 2.5W · dataflow arch</span></div>
         <div class="kv-row"><span class="kv-label">Kneron KL730</span><span class="kv-value">4 TOPS · INT8 · &lt;3W</span></div>
         <div class="kv-row"><span class="kv-label">Rockchip RK3588 NPU</span><span class="kv-value amber">6 TOPS · INT8/INT4</span></div>
@@ -1158,17 +1061,14 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
   </div>
-  <div class="slide-num">16 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 17 — COMPILER & SOFTWARE STACK
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">The AI Compiler Stack</div>
-  <div class="slide-subtitle">bridging high-level ML frameworks to bare silicon</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">17</span><h2>The AI Compiler Stack</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -1197,8 +1097,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">MLIR — Multi-Level IR</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>MLIR — Multi-Level IR</h3>
         <ul>
           <li>Dialect system: Linalg, Tensor, SCF, Affine, LLVM dialects</li>
           <li>Progressive lowering: high-level ops → tiled loops → memory-specific ops → ISA</li>
@@ -1206,8 +1106,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
           <li>Enables sharing of optimisation passes across hardware backends</li>
         </ul>
       </div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title amber">NVIDIA CUDA Ecosystem</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>NVIDIA CUDA Ecosystem</h3>
         <ul>
           <li><strong>cuDNN</strong>: hand-tuned CNN kernels; Winograd, FFT, im2col automatically selected</li>
           <li><strong>cuBLAS/cuBLASLt</strong>: GEMM with Tensor Core support; epilogue fusion</li>
@@ -1216,8 +1116,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
           <li><strong>TensorRT</strong>: inference optimisation — layer fusion, precision calibration, engine caching</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title green">Inference Runtimes</div>
+      <div class="card">
+        <h3>Inference Runtimes</h3>
         <ul>
           <li>vLLM: PagedAttention + continuous batching; de-facto LLM serving standard</li>
           <li>SGLang: structured generation with radix tree prefix caching</li>
@@ -1227,17 +1127,14 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
   </div>
-  <div class="slide-num">17 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 18 — POWER & EFFICIENCY
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Power Efficiency &amp; Performance per Watt</div>
-  <div class="slide-subtitle">TOPS/W — the metric that matters for edge and datacenter alike</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">18</span><h2>Power Efficiency &amp; Performance per Watt</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -1255,8 +1152,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       <p style="font-size:0.58em;color:var(--muted);margin-top:0.5em;">* Estimates from published data-sheets and characterisation reports. TOPS definition varies (dense vs sparse).</p>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">Power Breakdown in ML ASICs</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Power Breakdown in ML ASICs</h3>
         <ul>
           <li><strong>MAC arrays</strong>: 40–60% of total power — scale with utilisation; DVFS critical</li>
           <li><strong>SRAM access</strong>: 25–35% — 6T SRAM reads dominate; scratchpad &gt; cache energy</li>
@@ -1265,8 +1162,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
           <li><strong>Control &amp; misc</strong>: 3–5% — reduced in DSA vs GPU by removing OoO logic</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title amber">Energy-Reduction Techniques</div>
+      <div class="card">
+        <h3>Energy-Reduction Techniques</h3>
         <ul>
           <li><strong>Clock gating</strong>: disable MAC array clocks when inactive; 20–40% dynamic power saved</li>
           <li><strong>Power gating</strong>: shut down entire engine island; longer wake latency</li>
@@ -1278,22 +1175,19 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
   </div>
-  <div class="slide-num">18 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 19 — CASE STUDY: NVIDIA BLACKWELL B200
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Case Study: NVIDIA Blackwell B200</div>
-  <div class="slide-subtitle">the current apex of ML accelerator design (2024)</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">19</span><h2>Case Study: NVIDIA Blackwell B200</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">Architecture Highlights</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Architecture Highlights</h3>
         <div class="kv-row"><span class="kv-label">Die configuration</span><span class="kv-value amber">2× reticle dies; NV-HBI bridge</span></div>
         <div class="kv-row"><span class="kv-label">Process</span><span class="kv-value">TSMC N4P (custom)</span></div>
         <div class="kv-row"><span class="kv-label">Total transistors</span><span class="kv-value amber">208 billion</span></div>
@@ -1308,8 +1202,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title amber">New Blackwell Features</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>New Blackwell Features</h3>
         <ul>
           <li><strong>5th-gen Tensor Core</strong>: native FP4 (MXFP4); doubles throughput vs H100 FP8</li>
           <li><strong>2nd-gen Transformer Engine</strong>: per-block micro-scaling (MX formats — MXFP8, MXFP4); higher accuracy at lower precision</li>
@@ -1326,22 +1220,19 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
   </div>
-  <div class="slide-num">19 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 20 — CASE STUDY: APPLE NEURAL ENGINE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Case Study: Apple Neural Engine (ANE)</div>
-  <div class="slide-subtitle">efficiency-first on-device inference — 38 TOPS at &lt;5W</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">20</span><h2>Case Study: Apple Neural Engine (ANE)</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">ANE Architecture (M4 / A18)</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>ANE Architecture (M4 / A18)</h3>
         <ul>
           <li>Proprietary Apple ASIC integrated in SoC alongside CPU clusters and GPU</li>
           <li>Unified Memory Architecture (UMA): CPU, GPU, ANE all share the same LPDDR5X pool — zero-copy tensor passing</li>
@@ -1351,8 +1242,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
           <li>M4 ANE: 38 TOPS at &lt;5W total — best TOPS/W in class</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title amber">Unified Memory — Bandwidth Efficiency</div>
+      <div class="card">
+        <h3>Unified Memory — Bandwidth Efficiency</h3>
         <ul>
           <li>M4 LPDDR5X: 120 GB/s shared across CPU, GPU, ANE, Media engines</li>
           <li>No PCIe hop — GPU/ANE access host tensors at full memory bandwidth</li>
@@ -1362,8 +1253,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title green">On-Device LLM Inference Stack</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>On-Device LLM Inference Stack</h3>
         <ul>
           <li><strong>Apple Intelligence (iOS 18 / macOS 15)</strong>: on-device models 3B–7B parameters</li>
           <li>Private Cloud Compute: larger models on Apple Silicon servers — cryptographic attestation before sending data</li>
@@ -1372,8 +1263,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
           <li>Speculative decoding: draft model on ANE; verify on GPU; 2–3× decode speedup</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title">Evolution of TOPS</div>
+      <div class="card">
+        <h3>Evolution of TOPS</h3>
         <div class="kv-row"><span class="kv-label">A11 (2017) — 1st ANE</span><span class="kv-value">0.6 TOPS</span></div>
         <div class="kv-row"><span class="kv-label">A14 (2020)</span><span class="kv-value amber">11 TOPS</span></div>
         <div class="kv-row"><span class="kv-label">A16 (2022)</span><span class="kv-value amber">17 TOPS</span></div>
@@ -1382,21 +1273,18 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
   </div>
-  <div class="slide-num">20 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 21 — EMERGING DIRECTIONS
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Emerging Directions</div>
-  <div class="slide-subtitle">what comes after the current generation</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">21</span><h2>Emerging Directions</h2></div>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
-    <div class="panel">
-      <div class="panel-title">Processing-in-Memory (PIM)</div>
+    <div class="card">
+      <h3>Processing-in-Memory (PIM)</h3>
       <ul>
         <li>Compute inside or adjacent to DRAM die — eliminates bus bottleneck</li>
         <li><strong>Samsung HBM-PIM</strong>: GEMV engine inside each HBM stack; 2× bandwidth for DNN inference</li>
@@ -1406,8 +1294,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
         <li>Prototype systems show 2.4× energy improvement for LLM decode</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title amber">Analog / Resistive Computing</div>
+    <div class="card">
+      <h3>Analog / Resistive Computing</h3>
       <ul>
         <li><strong>Analog in-memory compute (AIMC)</strong>: weight stored as conductance; dot product via Kirchhoff's law — O(1) energy per MAC</li>
         <li>Phase-change memory (PCM), ReRAM, MRAM: non-volatile weight storage — zero boot time</li>
@@ -1416,8 +1304,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
         <li>Likely path: hybrid digital-analog; analog for weight-stationary inference, digital for accum</li>
       </ul>
     </div>
-    <div class="panel">
-      <div class="panel-title green">Photonic &amp; Neuromorphic</div>
+    <div class="card">
+      <h3>Photonic &amp; Neuromorphic</h3>
       <ul>
         <li><strong>Photonic MAC</strong>: Mach-Zehnder interferometer arrays; perform GEMM at speed of light, zero dynamic power for multiply; Lightmatter Passage chip</li>
         <li><strong>Neuromorphic</strong>: Intel Loihi 2; event-driven spiking neural network; &lt;1 mW for sparse workloads; not competitive with transformers yet</li>
@@ -1427,22 +1315,19 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </ul>
     </div>
   </div>
-  <div class="slide-num">21 / 22</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 22 — SUMMARY
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Summary &amp; Key Takeaways</div>
-  <div class="slide-subtitle">AI / ML Accelerator Architectures — Presentation 05</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">22</span><h2>Summary &amp; Key Takeaways</h2></div>
 
   <div class="cols cols-2" style="gap:1.5rem;margin-top:0.6rem;">
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title">Architecture Principles</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Architecture Principles</h3>
         <ul>
           <li><strong>Roofline model</strong> guides design: shift ridge point left (more BW) or up (more FLOPS); target workloads in compute-bound regime</li>
           <li><strong>Systolic arrays</strong> maximise data reuse in GEMM; weight/output/row-stationary dataflows trade off different memory resources</li>
@@ -1453,16 +1338,16 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       </div>
     </div>
     <div>
-      <div class="panel" style="margin-bottom:0.9rem;">
-        <div class="panel-title amber">Numerical Formats &amp; Precision</div>
+      <div class="card" style="margin-bottom:0.9rem;">
+        <h3>Numerical Formats &amp; Precision</h3>
         <ul>
           <li>Training: BF16/FP16 + FP32 master weights (AMP); FP8 on H100+ with dynamic scaling</li>
           <li>Inference: INT8 standard; INT4/FP4 for bandwidth-limited decode; FP4 on B200</li>
           <li>QLoRA/GPTQ/AWQ: PTQ at INT4 with per-group scaling — &lt;1% quality loss</li>
         </ul>
       </div>
-      <div class="panel">
-        <div class="panel-title green">System-Level Themes</div>
+      <div class="card">
+        <h3>System-Level Themes</h3>
         <ul>
           <li><strong>Memory is the bottleneck</strong> — HBM, PagedAttention, KV cache optimisation</li>
           <li><strong>Parallelism</strong> at every level: DP/TP/PP/EP for training; disaggregated serving</li>
@@ -1474,8 +1359,8 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
     </div>
   </div>
 
-  <div class="panel" style="margin-top:0.8rem;border-color:rgba(126,184,247,0.3);">
-    <div class="panel-title">Series Navigation</div>
+  <div class="card" style="margin-top:0.8rem;border-color:rgba(126,184,247,0.3);">
+    <h3>Series Navigation</h3>
     <div style="font-size:0.62em;color:var(--muted);display:flex;gap:1.5em;flex-wrap:wrap;">
       <span>✅ 01 SoC Packaging</span>
       <span>✅ 02 On-Chip Interconnect</span>
@@ -1487,11 +1372,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
       <span>… 13 Clocks &amp; Resets</span>
     </div>
   </div>
-  <div class="series-badge">⬡ brendanjameslynskey.github.io/SoC</div>
-  <div class="slide-num">22 / 22</div>
-</div>
 </section>
-
 </div><!-- /slides -->
 </div><!-- /reveal -->
 
@@ -1500,20 +1381,17 @@ for N, C_out, OH, OW, C_in, KH, KW:<br/>
 <script>
 Reveal.initialize({
   hash: true,
-  slideNumber: false,
+  slideNumber: 'c/t',
   transition: 'fade',
   transitionSpeed: 'fast',
   controls: true,
   progress: true,
   center: false,
-  width: 1280,
+  width: 1100,
   height: 900,
-  margin: 0.02,
-  plugins: [ RevealHighlight ],
-  keyboard: {
-    39: 'next',
-    37: 'prev'
-  }
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
 });
 </script>
 <script>

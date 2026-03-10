@@ -1,217 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SoCs for ML Inference — Modern SoC Design Series</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:      #0d0f14;
-  --surface: #13161e;
-  --panel:   #1a1f2e;
-  --border:  #2a3048;
-  --accent:  #7eb8f7;
-  --accent2: #f7a05a;
-  --accent3: #7ef7c0;
-  --accent4: #f76e7e;
-  --muted:   #8892aa;
-  --text:    #dde4f0;
-  --white:   #ffffff;
-  --mono:    'JetBrains Mono', monospace;
-  --serif:   'Playfair Display', serif;
-  --sans:    'DM Sans', sans-serif;
-}
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
 
-.reveal-viewport { background: var(--bg); }
-.reveal { font-family: var(--sans); font-size: 1.55rem; color: var(--text); }
-.reveal h1,.reveal h2,.reveal h3,.reveal h4 {
-  font-family: var(--serif); letter-spacing: 0.01em; text-transform: none;
-  margin-bottom: 0.5em; color: var(--white); text-shadow: none;
-}
-.reveal h1 { font-size: 1.8em; line-height: 1.15; }
-.reveal h2 { font-size: 1.3em; }
-.reveal h3 { font-size: 1.05em; color: var(--accent); }
-.reveal p  { line-height: 1.55; margin: 0.4em 0; font-size: 0.82em; }
-.reveal ul { list-style: none; padding: 0; margin: 0; }
-.reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; font-size: 0.78em; line-height: 1.5; }
-.reveal ul li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
-.reveal ul ul li::before { color: var(--accent2); content: "◦"; }
-.reveal section { padding: 0 !important; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
 
-/* ─── slide shell ─── */
-.slide {
-  width: 100%; height: 100vh;
-  display: flex; flex-direction: column;
-  justify-content: flex-start;
-  box-sizing: border-box;
-  padding: 2.8rem 3.4rem 1.6rem;
-  background: var(--bg);
-  position: relative; overflow: hidden;
-}
-.slide::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-}
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
 
-/* ─── hero slide ─── */
-.hero {
-  justify-content: center; align-items: flex-start;
-  background: radial-gradient(ellipse 80% 60% at 70% 50%, #111c35 0%, var(--bg) 70%);
-}
-.hero::after {
-  content: '';
-  position: absolute; right: -6rem; top: -6rem;
-  width: 42rem; height: 42rem; border-radius: 50%;
-  border: 1px solid rgba(126,184,247,0.08);
-  box-shadow: 0 0 0 4rem rgba(126,184,247,0.03), 0 0 0 8rem rgba(126,184,247,0.015);
-  pointer-events: none;
-}
-.hero-eyebrow { font-family: var(--mono); font-size: 0.62em; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1.2em; }
-.hero h1 { font-size: 2.1em; line-height: 1.1; max-width: 14em; }
-.hero-sub { font-size: 0.72em; color: var(--muted); margin-top: 1.2em; max-width: 38em; line-height: 1.7; }
-.hero-tags { display: flex; gap: 0.7em; flex-wrap: wrap; margin-top: 1.8em; }
-.tag { font-family: var(--mono); font-size: 0.55em; padding: 0.3em 0.8em; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); }
-.slide-num { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; right: 2em; }
-.series-badge { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; left: 2em; }
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
 
-/* ─── layout helpers ─── */
-.cols { display: grid; gap: 2rem; margin-top: 0.8rem; }
-.cols-2 { grid-template-columns: 1fr 1fr; }
-.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.cols-2-1 { grid-template-columns: 2fr 1fr; }
-.cols-1-2 { grid-template-columns: 1fr 2fr; }
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
 
-.panel {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; padding: 1.2rem 1.4rem;
-  position: relative;
-}
-.panel-title {
-  font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 0.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.5em;
-}
-.panel-title.amber { color: var(--accent2); }
-.panel-title.green { color: var(--accent3); }
-.panel-title.red   { color: var(--accent4); }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
 
-.kv-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
-.kv-row:last-child { border-bottom: none; }
-.kv-label { color: var(--muted); }
-.kv-value { font-family: var(--mono); color: var(--accent); }
-.kv-value.amber { color: var(--accent2); }
-.kv-value.green { color: var(--accent3); }
-.kv-value.red   { color: var(--accent4); }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
 
-.slide-title { font-size: 1.0em; margin-bottom: 0.1em; }
-.slide-subtitle { font-size: 0.62em; color: var(--muted); font-family: var(--mono); letter-spacing: 0.06em; margin-bottom: 0.6em; }
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-/* ─── timeline ─── */
-.timeline { position: relative; padding-left: 1.8rem; }
-.timeline::before { content:''; position:absolute; left:0.5rem; top:0.4em; bottom:0; width:1px; background: var(--border); }
-.tl-item { position:relative; margin-bottom:0.9em; }
-.tl-item::before { content:''; position:absolute; left:-1.38rem; top:0.4em; width:0.55rem; height:0.55rem; border-radius:50%; background: var(--accent); border:2px solid var(--bg); }
-.tl-item.amber::before { background: var(--accent2); }
-.tl-item.green::before { background: var(--accent3); }
-.tl-label { font-family: var(--mono); font-size:0.58em; color: var(--accent); }
-.tl-item.amber .tl-label { color: var(--accent2); }
-.tl-item.green .tl-label { color: var(--accent3); }
-.tl-text  { font-size: 0.72em; color: var(--text); line-height:1.45; margin-top:0.15em; }
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
 
-/* ─── figure/diagram helpers ─── */
-.fig { text-align:center; }
-.fig-caption { font-family:var(--mono); font-size:0.5em; color:var(--muted); margin-top:0.5em; }
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
 
-/* ─── SVG diagrams inline ─── */
-svg.diag { width:100%; height:auto; display:block; }
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-/* ─── accent box ─── */
-.accent-box {
-  background: linear-gradient(135deg, rgba(126,184,247,0.07), rgba(126,184,247,0.02));
-  border: 1px solid rgba(126,184,247,0.25); border-radius:3px;
-  padding: 0.9em 1.1em; font-size:0.72em; line-height:1.55;
-}
-.accent-box.amber { background: linear-gradient(135deg, rgba(247,160,90,0.07), rgba(247,160,90,0.02)); border-color: rgba(247,160,90,0.25); }
-.accent-box.green { background: linear-gradient(135deg, rgba(126,247,192,0.07), rgba(126,247,192,0.02)); border-color: rgba(126,247,192,0.25); }
-.accent-box.red   { background: linear-gradient(135deg, rgba(247,110,126,0.07), rgba(247,110,126,0.02)); border-color: rgba(247,110,126,0.25); }
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
-.label { font-family:var(--mono); font-size:0.88em; font-weight:600; }
-.lb  { color: var(--accent); }
-.lam { color: var(--accent2); }
-.lgr { color: var(--accent3); }
-.lrd { color: var(--accent4); }
-
-/* ─── table ─── */
-.dtable { width:100%; border-collapse:collapse; font-size:0.65em; }
-.dtable th { background:var(--panel); color:var(--accent); font-family:var(--mono); font-size:0.92em; letter-spacing:0.07em; padding:0.55em 0.7em; border:1px solid var(--border); text-align:left; }
-.dtable td { padding:0.45em 0.7em; border:1px solid var(--border); color:var(--text); }
-.dtable tr:nth-child(even) td { background:rgba(255,255,255,0.015); }
-.dtable td.hi { color:var(--accent); font-family:var(--mono); }
-.dtable td.am { color:var(--accent2); font-family:var(--mono); }
-.dtable td.gr { color:var(--accent3); font-family:var(--mono); }
-.dtable td.rd { color:var(--accent4); font-family:var(--mono); }
-
-/* ─── progress bar ─── */
-.prog-wrap { background:var(--panel); border:1px solid var(--border); border-radius:2px; height:0.55rem; margin:0.35em 0; }
-.prog-bar  { height:100%; border-radius:2px; }
-
-/* ─── equation ─── */
-.eq { font-family:var(--mono); font-size:0.72em; color:var(--accent3); background:var(--panel); border:1px solid var(--border); padding:0.5em 1em; border-radius:3px; text-align:center; }
-
-/* reveal overrides */
-.reveal .controls { color: var(--accent); }
-.reveal .progress  { color: var(--accent); height:3px; }
-.reveal .slide-number { font-family:var(--mono); font-size:0.4em; color:var(--muted); }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
-
 <!-- ════════════════════════════════════════════════════
      SLIDE 01 — TITLE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide hero">
-  <div class="hero-eyebrow">Modern SoC Design Series · Presentation 06</div>
-  <h1>SoCs for<br/>ML Inference</h1>
-  <p class="hero-sub">
-    From INT8 pipelines and on-device LLMs to NPU scheduling, memory bandwidth management,
+<section data-background-color="#0a0a0f">
+
+  <div style="font-family:\'JetBrains Mono\',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">Modern SoC Design Series · Presentation 06</div>
+  <h1>SoCs for<br>ML Inference</h1>
+  <div class="subtitle">From INT8 pipelines and on-device LLMs to NPU scheduling, memory bandwidth management,
     and the power-performance trade-offs that determine what runs on the edge — a rigorous
-    tour of how SoCs are architected specifically for inference workloads.
-  </p>
-  <div class="hero-tags">
-    <span class="tag">Training vs Inference</span>
-    <span class="tag">Quantisation</span>
-    <span class="tag">INT8 / INT4 Pipelines</span>
-    <span class="tag">On-Device LLMs</span>
-    <span class="tag">NPU Scheduling</span>
-    <span class="tag">Edge vs Cloud</span>
-    <span class="tag">Power Management</span>
-    <span class="tag">Case Studies</span>
+    tour of how SoCs are architected specifically for inference workloads.</div>
+<div style="width:60px; height:3px; background:var(--amber); margin-bottom:1.4em;"></div>
+  <div>
+    <span class="pill amber">Training vs Inference</span>
+    <span class="pill amber">Quantisation</span>
+    <span class="pill amber">INT8 / INT4 Pipelines</span>
+    <span class="pill amber">On-Device LLMs</span>
+    <span class="pill amber">NPU Scheduling</span>
+    <span class="pill amber">Edge vs Cloud</span>
+    <span class="pill amber">Power Management</span>
+    <span class="pill amber">Case Studies</span>
   </div>
-  <div class="series-badge">⬡ brendanjameslynskey.github.io/SoC</div>
-  <div class="slide-num">01 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 02 — TRAINING VS INFERENCE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Training vs Inference — Fundamentally Different Problems</div>
-  <div class="slide-subtitle">different bottlenecks demand different silicon</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">02</span><h2>Training vs Inference — Fundamentally Different Problems</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Training Characteristics</div>
+      <div class="card">
+        <h3>Training Characteristics</h3>
         <ul>
           <li><strong>Forward + backward pass</strong> — 3× the compute of inference per sample</li>
           <li><strong>FP16 / BF16 / FP32</strong> — precision critical for gradient stability</li>
@@ -227,8 +175,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Inference Characteristics</div>
+      <div class="card">
+        <h3>Inference Characteristics</h3>
         <ul>
           <li><strong>Forward pass only</strong> — activations discarded after each layer</li>
           <li><strong>INT8 / INT4 / FP8</strong> — lower precision acceptable; massive efficiency gain</li>
@@ -244,22 +192,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">02 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 03 — INFERENCE DEPLOYMENT LANDSCAPE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">The Inference Deployment Landscape</div>
-  <div class="slide-subtitle">cloud · on-premise · edge · endpoint</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">03</span><h2>The Inference Deployment Landscape</h2></div>
 
   <div class="cols cols-3" style="gap:1.1rem;margin-top:0.6rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Cloud / Hyperscale</div>
+      <div class="card">
+        <h3>Cloud / Hyperscale</h3>
         <ul>
           <li>H100, A100, MI300X, TPU v5p</li>
           <li>Models: GPT-4, Gemini, Claude</li>
@@ -272,8 +217,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">On-Premise / Workstation</div>
+      <div class="card">
+        <h3>On-Premise / Workstation</h3>
         <ul>
           <li>RTX 4090, L40S, Gaudi 2, RX 7900</li>
           <li>Models: Llama 3, Mistral, Qwen</li>
@@ -286,8 +231,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Edge / Endpoint</div>
+      <div class="card">
+        <h3>Edge / Endpoint</h3>
         <ul>
           <li>Apple M4, Snapdragon X Elite, Tensor G4</li>
           <li>Models: Phi-3, Gemma 2B, MobileNet</li>
@@ -301,34 +246,31 @@ svg.diag { width:100%; height:auto; display:block; }
     </div>
   </div>
 
-  <div class="panel" style="margin-top:0.9rem;">
-    <div class="panel-title">MCU / Microcontroller (TinyML)</div>
+  <div class="card" style="margin-top:0.9rem;">
+    <h3>MCU / Microcontroller (TinyML)</h3>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.8em;font-size:0.65em;">
       <div><span style="color:var(--accent);">Devices:</span> STM32, Nordic nRF, RP2350</div>
-      <div><span style="color:var(--accent);">Models:</span> MobileNetV3-tiny, keyword spotting</div>
+      <div><span style="color:var(--accent);">Models:</span> MobileNetV3-, keyword spotting</div>
       <div><span style="color:var(--accent);">RAM:</span> 256 KB – 8 MB SRAM</div>
       <div><span style="color:var(--accent);">TDP:</span> &lt;100 mW — often &lt;1 mW</div>
     </div>
   </div>
-  <div class="slide-num">03 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 04 — QUANTISATION FUNDAMENTALS
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Quantisation — The Foundation of Efficient Inference</div>
-  <div class="slide-subtitle">mapping floating-point tensors to fixed-width integers</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">04</span><h2>Quantisation — The Foundation of Efficient Inference</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
       <div class="eq" style="margin-bottom:0.7rem;">
         x_int = clamp( round( x_float / scale ) + zero_point,  q_min, q_max )
       </div>
-      <div class="panel">
-        <div class="panel-title">Quantisation Taxonomy</div>
+      <div class="card">
+        <h3>Quantisation Taxonomy</h3>
         <div class="kv-row"><span class="kv-label">Symmetric (INT8)</span><span class="kv-value">zero_point = 0; scale = max(|x|)/127</span></div>
         <div class="kv-row"><span class="kv-label">Asymmetric (UINT8)</span><span class="kv-value">zero_point ≠ 0; full range used</span></div>
         <div class="kv-row"><span class="kv-label">Per-tensor</span><span class="kv-value">one scale for entire tensor</span></div>
@@ -336,8 +278,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <div class="kv-row"><span class="kv-label">Per-group (AWQ/GPTQ)</span><span class="kv-value amber">one scale per 32–128 weights</span></div>
         <div class="kv-row"><span class="kv-label">NF4 (QLoRA)</span><span class="kv-value green">non-uniform, normally-distributed</span></div>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">PTQ vs QAT</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>PTQ vs QAT</h3>
         <ul>
           <li><strong>Post-Training Quantisation (PTQ)</strong> — no retraining; calibration dataset only; GPTQ, AWQ, SmoothQuant</li>
           <li><strong>Quantisation-Aware Training (QAT)</strong> — fake-quant nodes in training graph; STE gradient; best accuracy</li>
@@ -346,8 +288,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Precision Formats &amp; Efficiency</div>
+      <div class="card">
+        <h3>Precision Formats &amp; Efficiency</h3>
         <table class="dtable">
           <tr><th>Format</th><th>Bits</th><th>Relative Size</th><th>TOPS (H100)</th></tr>
           <tr><td>FP32</td><td class="hi">32</td><td>4×</td><td class="hi">67</td></tr>
@@ -371,17 +313,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">04 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 05 — INT8 / INT4 HARDWARE PIPELINES
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">INT8 &amp; INT4 Hardware Pipelines</div>
-  <div class="slide-subtitle">from MAC arrays to dequantisation and accumulation</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">05</span><h2>INT8 &amp; INT4 Hardware Pipelines</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -389,49 +328,49 @@ svg.diag { width:100%; height:auto; display:block; }
       <svg viewBox="0 0 380 210" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
         <text x="190" y="18" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">INT8 GEMM PIPELINE</text>
         <!-- boxes -->
-        <rect x="10" y="28" width="72" height="34" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="10" y="28" width="72" height="34" rx="3" fill="#1a1f2e" stroke="#2a3048">
         <text x="46" y="46" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Weights</text>
         <text x="46" y="57" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">INT8</text>
 
-        <rect x="10" y="76" width="72" height="34" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="10" y="76" width="72" height="34" rx="3" fill="#1a1f2e" stroke="#2a3048">
         <text x="46" y="94" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Activations</text>
         <text x="46" y="105" fill="#7ef7c0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">INT8</text>
 
-        <rect x="110" y="52" width="80" height="34" rx="3" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5"/>
+        <rect x="110" y="52" width="80" height="34" rx="3" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5">
         <text x="150" y="70" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">INT8 × INT8</text>
         <text x="150" y="81" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">MAC Array</text>
 
-        <rect x="218" y="52" width="72" height="34" rx="3" fill="#1a1f2e" stroke="#f7a05a"/>
+        <rect x="218" y="52" width="72" height="34" rx="3" fill="#1a1f2e" stroke="#f7a05a">
         <text x="254" y="70" fill="#f7a05a" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">INT32</text>
         <text x="254" y="81" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Accumulate</text>
 
-        <rect x="318" y="52" width="55" height="34" rx="3" fill="#1a1f2e" stroke="#7ef7c0"/>
+        <rect x="318" y="52" width="55" height="34" rx="3" fill="#1a1f2e" stroke="#7ef7c0">
         <text x="345" y="70" fill="#7ef7c0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Dequant</text>
         <text x="345" y="81" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">→ FP16</text>
 
         <!-- arrows -->
-        <line x1="82" y1="45" x2="108" y2="65" stroke="#2a3048" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="82" y1="93" x2="108" y2="74" stroke="#2a3048" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="190" y1="69" x2="216" y2="69" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arb)"/>
-        <line x1="290" y1="69" x2="316" y2="69" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#ara)"/>
+        <line x1="82" y1="45" x2="108" y2="65" stroke="#2a3048" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="82" y1="93" x2="108" y2="74" stroke="#2a3048" stroke-width="1.5" marker-end="url(#arr)">
+        <line x1="190" y1="69" x2="216" y2="69" stroke="#7eb8f7" stroke-width="1.5" marker-end="url(#arb)">
+        <line x1="290" y1="69" x2="316" y2="69" stroke="#f7a05a" stroke-width="1.5" marker-end="url(#ara)">
 
         <!-- scale boxes -->
-        <rect x="110" y="110" width="80" height="26" rx="3" fill="#13161e" stroke="#2a3048"/>
+        <rect x="110" y="110" width="80" height="26" rx="3" fill="#13161e" stroke="#2a3048">
         <text x="150" y="124" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">scale_w × scale_a</text>
-        <line x1="150" y1="110" x2="150" y2="86" stroke="#2a3048" stroke-width="1" stroke-dasharray="3,2"/>
+        <line x1="150" y1="110" x2="150" y2="86" stroke="#2a3048" stroke-width="1" stroke-dasharray="3,2">
 
         <text x="190" y="155" fill="#8892aa" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">W8A8: 4× memory saving vs FP32, 2× vs FP16</text>
         <text x="190" y="170" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Accumulator must be INT32 to prevent overflow</text>
         <text x="190" y="185" fill="#7ef7c0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Dequant fused with bias add and activation</text>
         <defs>
-          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2a3048"/></marker>
-          <marker id="arb" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7eb8f7"/></marker>
-          <marker id="ara" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f7a05a"/></marker>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2a3048"></marker>
+          <marker id="arb" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7eb8f7"></marker>
+          <marker id="ara" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f7a05a"></marker>
         </defs>
       </svg>
 
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">INT4 Weight-Only Quantisation (W4A16)</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>INT4 Weight-Only Quantisation (W4A16)</h3>
         <ul>
           <li>Weights stored as INT4, unpacked to FP16 before MAC — no INT4 accumulator needed</li>
           <li>2× weight load bandwidth saving vs INT8 — critical for memory-bound GEMV</li>
@@ -443,8 +382,8 @@ svg.diag { width:100%; height:auto; display:block; }
     </div>
 
     <div>
-      <div class="panel">
-        <div class="panel-title">Tensor Core Evolution (NVIDIA)</div>
+      <div class="card">
+        <h3>Tensor Core Evolution (NVIDIA)</h3>
         <table class="dtable">
           <tr><th>Generation</th><th>GPU</th><th>Formats</th><th>Peak TOPS</th></tr>
           <tr><td>V1 (Volta)</td><td>V100</td><td class="hi">FP16</td><td>125</td></tr>
@@ -454,8 +393,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <tr><td>V5 (Blackwell)</td><td>B200</td><td class="gr">FP4, FP6, FP8</td><td>9,000+ (FP4)</td></tr>
         </table>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title green">Accuracy vs Efficiency Trade-off</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Accuracy vs Efficiency Trade-off</h3>
         <div class="kv-row"><span class="kv-label">FP32 baseline</span><span class="kv-value">0.0% accuracy loss</span></div>
         <div class="kv-row"><span class="kv-label">BF16 / FP16</span><span class="kv-value green">&lt;0.1% — lossless in practice</span></div>
         <div class="kv-row"><span class="kv-label">W8A8 INT8 (PTQ)</span><span class="kv-value green">&lt;0.5% on most tasks</span></div>
@@ -470,17 +409,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">05 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 06 — THE LLM INFERENCE PIPELINE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">The LLM Inference Pipeline</div>
-  <div class="slide-subtitle">prefill · decode · KV-cache — three distinct hardware problems</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">06</span><h2>The LLM Inference Pipeline</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -489,42 +425,42 @@ svg.diag { width:100%; height:auto; display:block; }
         <text x="180" y="16" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">LLM INFERENCE PHASES</text>
 
         <!-- Prefill box -->
-        <rect x="10" y="26" width="155" height="72" rx="3" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5"/>
+        <rect x="10" y="26" width="155" height="72" rx="3" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5">
         <text x="87" y="42" fill="#7eb8f7" font-size="9" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="bold">PREFILL (prompt)</text>
         <text x="87" y="57" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'DM Sans',sans-serif">All tokens processed in parallel</text>
         <text x="87" y="70" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'DM Sans',sans-serif">Compute-bound: large GEMM</text>
         <text x="87" y="83" fill="#7ef7c0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">KV-cache populated</text>
 
         <!-- Arrow -->
-        <line x1="165" y1="62" x2="195" y2="62" stroke="#f7a05a" stroke-width="2" marker-end="url(#arrc)"/>
+        <line x1="165" y1="62" x2="195" y2="62" stroke="#f7a05a" stroke-width="2" marker-end="url(#arrc)">
 
         <!-- Decode box -->
-        <rect x="195" y="26" width="155" height="72" rx="3" fill="#13161e" stroke="#f7a05a" stroke-width="1.5"/>
+        <rect x="195" y="26" width="155" height="72" rx="3" fill="#13161e" stroke="#f7a05a" stroke-width="1.5">
         <text x="272" y="42" fill="#f7a05a" font-size="9" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="bold">DECODE (generation)</text>
         <text x="272" y="57" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'DM Sans',sans-serif">One token at a time</text>
         <text x="272" y="70" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'DM Sans',sans-serif">Memory-bound: GEMV + KV load</text>
         <text x="272" y="83" fill="#f7a05a" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">~1–4 FLOP/byte</text>
 
         <!-- KV-cache -->
-        <rect x="100" y="118" width="160" height="36" rx="3" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="100" y="118" width="160" height="36" rx="3" fill="#1a1f2e" stroke="#2a3048">
         <text x="180" y="133" fill="#8892aa" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">KV-CACHE (HBM / SRAM)</text>
         <text x="180" y="147" fill="#7ef7c0" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">K,V tensors: 2 × L × H × D × seq × bytes</text>
 
-        <line x1="87" y1="98" x2="160" y2="118" stroke="#7eb8f7" stroke-width="1" stroke-dasharray="3,2"/>
-        <line x1="272" y1="98" x2="200" y2="118" stroke="#f7a05a" stroke-width="1" stroke-dasharray="3,2"/>
+        <line x1="87" y1="98" x2="160" y2="118" stroke="#7eb8f7" stroke-width="1" stroke-dasharray="3,2">
+        <line x1="272" y1="98" x2="200" y2="118" stroke="#f7a05a" stroke-width="1" stroke-dasharray="3,2">
 
         <text x="180" y="178" fill="#8892aa" font-size="7.5" text-anchor="middle" font-family="'JetBrains Mono',monospace">Llama-3-70B, seq=4096: ~67 GB KV-cache (FP16)</text>
         <text x="180" y="192" fill="#7eb8f7" font-size="7.5" text-anchor="middle" font-family="'JetBrains Mono',monospace">Llama-3-8B, seq=4096: ~8 GB KV-cache (FP16)</text>
 
         <defs>
-          <marker id="arrc" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f7a05a"/></marker>
+          <marker id="arrc" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f7a05a"></marker>
         </defs>
       </svg>
     </div>
 
     <div>
-      <div class="panel">
-        <div class="panel-title">KV-Cache Sizing</div>
+      <div class="card">
+        <h3>KV-Cache Sizing</h3>
         <div class="eq" style="margin-bottom:0.6rem;font-size:0.62em;">
           KV_bytes = 2 × n_layers × n_heads × head_dim × seq_len × bytes_per_element
         </div>
@@ -533,8 +469,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <div class="kv-row"><span class="kv-label">Llama 3.1 70B (FP16, 128K ctx)</span><span class="kv-value red">~576 GB</span></div>
         <div class="kv-row"><span class="kv-label">GQA (Llama 3, 8 kv-heads)</span><span class="kv-value green">8× reduction</span></div>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">KV-Cache Optimisations</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>KV-Cache Optimisations</h3>
         <ul>
           <li><strong>Grouped Query Attention (GQA)</strong> — share K,V heads across Q groups; 8× KV reduction in Llama 3</li>
           <li><strong>Multi-Query Attention (MQA)</strong> — extreme: one K,V head shared; used in Falcon</li>
@@ -550,22 +486,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">06 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 07 — MEMORY BANDWIDTH: THE DOMINANT BOTTLENECK
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Memory Bandwidth — The Dominant Inference Bottleneck</div>
-  <div class="slide-subtitle">why decode is nearly always memory-bound</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">07</span><h2>Memory Bandwidth — The Dominant Inference Bottleneck</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Arithmetic Intensity of Inference Operations</div>
+      <div class="card">
+        <h3>Arithmetic Intensity of Inference Operations</h3>
         <div class="kv-row"><span class="kv-label">Large GEMM (prefill, large batch)</span><span class="kv-value green">100–500+ FLOP/B</span></div>
         <div class="kv-row"><span class="kv-label">GEMV (decode, batch=1)</span><span class="kv-value red">1–4 FLOP/B</span></div>
         <div class="kv-row"><span class="kv-label">Attention (prefill, seq=2K)</span><span class="kv-value amber">~15 FLOP/B</span></div>
@@ -573,8 +506,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <div class="kv-row"><span class="kv-label">MoE routing + expert GEMM</span><span class="kv-value amber">~20 FLOP/B</span></div>
         <div class="kv-row"><span class="kv-label">LayerNorm / elementwise</span><span class="kv-value red">&lt;1 FLOP/B</span></div>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">H100 SXM5 Roofline</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>H100 SXM5 Roofline</h3>
         <div class="kv-row"><span class="kv-label">Peak FP16 TFLOPS</span><span class="kv-value">989</span></div>
         <div class="kv-row"><span class="kv-label">HBM3 bandwidth</span><span class="kv-value">3.35 TB/s</span></div>
         <div class="kv-row"><span class="kv-label">Ridge point</span><span class="kv-value amber">295 FLOP/B</span></div>
@@ -588,8 +521,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Escaping the Memory Wall</div>
+      <div class="card">
+        <h3>Escaping the Memory Wall</h3>
         <div class="timeline" style="margin-top:0.4rem;">
           <div class="tl-item">
             <div class="tl-label">Batching</div>
@@ -615,17 +548,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">07 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 08 — NPU MICRO-ARCHITECTURE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">NPU Micro-Architecture for Inference</div>
-  <div class="slide-subtitle">dataflow, scratchpad, DMA, and scheduling</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">08</span><h2>NPU Micro-Architecture for Inference</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.4rem;">
     <div>
@@ -634,47 +564,47 @@ svg.diag { width:100%; height:auto; display:block; }
         <text x="180" y="16" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">NPU BLOCK DIAGRAM</text>
 
         <!-- Host Interface -->
-        <rect x="130" y="24" width="100" height="24" rx="2" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="130" y="24" width="100" height="24" rx="2" fill="#1a1f2e" stroke="#2a3048">
         <text x="180" y="40" fill="#8892aa" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Host Interface / AXI</text>
 
         <!-- Command Processor -->
-        <rect x="100" y="60" width="160" height="22" rx="2" fill="#1a1f2e" stroke="#7eb8f7"/>
+        <rect x="100" y="60" width="160" height="22" rx="2" fill="#1a1f2e" stroke="#7eb8f7">
         <text x="180" y="75" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Command Processor / Scheduler</text>
 
         <!-- DMA -->
-        <rect x="10" y="96" width="70" height="36" rx="2" fill="#13161e" stroke="#f7a05a"/>
+        <rect x="10" y="96" width="70" height="36" rx="2" fill="#13161e" stroke="#f7a05a">
         <text x="45" y="111" fill="#f7a05a" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">DMA</text>
         <text x="45" y="124" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">Engine</text>
 
         <!-- Unified SRAM -->
-        <rect x="100" y="96" width="90" height="36" rx="2" fill="#13161e" stroke="#7ef7c0"/>
+        <rect x="100" y="96" width="90" height="36" rx="2" fill="#13161e" stroke="#7ef7c0">
         <text x="145" y="111" fill="#7ef7c0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Unified SRAM</text>
         <text x="145" y="124" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">4–32 MB scratchpad</text>
 
         <!-- MAC Array -->
-        <rect x="206" y="96" width="70" height="36" rx="2" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5"/>
+        <rect x="206" y="96" width="70" height="36" rx="2" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5">
         <text x="241" y="111" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">MAC Array</text>
         <text x="241" y="124" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">systolic / SIMD</text>
 
         <!-- Activation -->
-        <rect x="290" y="96" width="65" height="36" rx="2" fill="#1a1f2e" stroke="#f76e7e"/>
+        <rect x="290" y="96" width="65" height="36" rx="2" fill="#1a1f2e" stroke="#f76e7e">
         <text x="322" y="111" fill="#f76e7e" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Activation</text>
         <text x="322" y="124" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">ReLU/GELU/LN</text>
 
         <!-- DRAM -->
-        <rect x="10" y="155" width="335" height="24" rx="2" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="10" y="155" width="335" height="24" rx="2" fill="#1a1f2e" stroke="#2a3048">
         <text x="177" y="170" fill="#8892aa" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">LPDDR5 / HBM / Unified Memory (via DMA)</text>
 
         <!-- Connections -->
-        <line x1="180" y1="48" x2="180" y2="60" stroke="#2a3048" stroke-width="1.2"/>
-        <line x1="45" y1="82" x2="45" y2="96" stroke="#f7a05a" stroke-width="1"/>
-        <line x1="145" y1="82" x2="145" y2="96" stroke="#7ef7c0" stroke-width="1"/>
-        <line x1="241" y1="82" x2="241" y2="96" stroke="#7eb8f7" stroke-width="1"/>
-        <line x1="45" y1="132" x2="45" y2="155" stroke="#f7a05a" stroke-width="1"/>
-        <line x1="145" y1="132" x2="145" y2="155" stroke="#7ef7c0" stroke-width="1"/>
+        <line x1="180" y1="48" x2="180" y2="60" stroke="#2a3048" stroke-width="1.2">
+        <line x1="45" y1="82" x2="45" y2="96" stroke="#f7a05a" stroke-width="1">
+        <line x1="145" y1="82" x2="145" y2="96" stroke="#7ef7c0" stroke-width="1">
+        <line x1="241" y1="82" x2="241" y2="96" stroke="#7eb8f7" stroke-width="1">
+        <line x1="45" y1="132" x2="45" y2="155" stroke="#f7a05a" stroke-width="1">
+        <line x1="145" y1="132" x2="145" y2="155" stroke="#7ef7c0" stroke-width="1">
 
         <!-- Double buffer annotation -->
-        <rect x="100" y="144" width="90" height="10" rx="1" fill="#7ef7c0" opacity="0.12"/>
+        <rect x="100" y="144" width="90" height="10" rx="1" fill="#7ef7c0" opacity="0.12">
         <text x="145" y="153" fill="#7ef7c0" font-size="6.5" text-anchor="middle" font-family="'JetBrains Mono',monospace">double-buffered ping/pong</text>
 
         <text x="180" y="200" fill="#8892aa" font-size="7.5" text-anchor="middle" font-family="'JetBrains Mono',monospace">DMA prefetches next tile while MAC processes current tile</text>
@@ -683,8 +613,8 @@ svg.diag { width:100%; height:auto; display:block; }
     </div>
 
     <div>
-      <div class="panel">
-        <div class="panel-title">Key Design Decisions</div>
+      <div class="card">
+        <h3>Key Design Decisions</h3>
         <ul>
           <li><strong>Scratchpad vs cache</strong> — NPUs favour software-managed scratchpad; deterministic latency, no cache miss stalls, compiler controls data residency</li>
           <li><strong>Double-buffering</strong> — DMA loads next weight tile while MAC processes current; hides DRAM latency entirely when compute time ≥ DMA time</li>
@@ -693,8 +623,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>DMA engine</strong> — supports stride, gather, scatter; critical for non-contiguous KV-cache layouts</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">Scheduling &amp; Operator Fusion</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Scheduling &amp; Operator Fusion</h3>
         <ul>
           <li><strong>Layer fusion</strong> — MatMul → Dequant → Add bias → GELU → next MatMul as single dispatch; eliminates SRAM store/load between ops</li>
           <li><strong>Tile scheduler</strong> — partitions tensors into SRAM-sized tiles; handles bank conflict avoidance</li>
@@ -703,22 +633,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">08 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 09 — SPARSITY EXPLOITATION
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Sparsity Exploitation in Inference</div>
-  <div class="slide-subtitle">skipping zeros for free compute and bandwidth savings</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">09</span><h2>Sparsity Exploitation in Inference</h2></div>
 
   <div class="cols cols-3" style="gap:1rem;margin-top:0.6rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Activation Sparsity</div>
+      <div class="card">
+        <h3>Activation Sparsity</h3>
         <ul>
           <li><strong>ReLU networks</strong>: 50–80% of activations are zero after rectification</li>
           <li>Zero-gating: skip MAC if activation = 0 → power saving proportional to sparsity</li>
@@ -728,18 +655,18 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Weight Sparsity (Pruning)</div>
+      <div class="card">
+        <h3>Weight Sparsity (Pruning)</h3>
         <ul>
           <li><strong>Unstructured pruning</strong> — individual weights zeroed; requires sparse accumulator or VLIW schedule; poor hardware efficiency</li>
-          <li><strong>Structured pruning</strong> — channels, heads, or layers removed; standard dense matmul on smaller tensors</li>
+          <li><strong>Structured pruning</strong> — channels, heads, or layers removed; standard dense matmul on  tensors</li>
           <li><strong>2:4 structured sparsity</strong> — exactly 2 non-zeros per 4 weights; 2× throughput on NVIDIA Tensor Cores from Ampere onwards; negligible accuracy loss at 50%</li>
         </ul>
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Mixture-of-Experts (MoE)</div>
+      <div class="card">
+        <h3>Mixture-of-Experts (MoE)</h3>
         <ul>
           <li>Architecture-level sparsity — only K of N expert FFN blocks activated per token</li>
           <li>Mixtral 8×7B: 8 experts, top-2 active — 46.7B total params, ~12.9B active per token</li>
@@ -753,8 +680,8 @@ svg.diag { width:100%; height:auto; display:block; }
 
   <div class="cols cols-2" style="gap:1rem;margin-top:0.9rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">NVIDIA 2:4 Structured Sparsity — Hardware Detail</div>
+      <div class="card">
+        <h3>NVIDIA 2:4 Structured Sparsity — Hardware Detail</h3>
         <ul>
           <li>Compressed sparse weight matrix: 50% values stored + 2-bit metadata per group-of-4</li>
           <li>Sparse Tensor Core decompresses and computes in single pass</li>
@@ -772,22 +699,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
       <div class="accent-box green">
         <strong style="color:var(--accent3);">Speculative Decoding as "temporal sparsity":</strong>
-        small draft model generates candidate tokens; large model verifies N at once.
+         draft model generates candidate tokens; large model verifies N at once.
         Effective throughput gain: 2–4× on typical LLM tasks without quality loss.
       </div>
     </div>
   </div>
-  <div class="slide-num">09 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 10 — ON-DEVICE LLM SoC ARCHITECTURE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">On-Device LLM SoC Architecture</div>
-  <div class="slide-subtitle">unified memory, heterogeneous compute, and the Apple M-series blueprint</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">10</span><h2>On-Device LLM SoC Architecture</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -796,37 +720,37 @@ svg.diag { width:100%; height:auto; display:block; }
         <text x="180" y="16" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">ON-DEVICE AI SoC (APPLE M4-STYLE)</text>
 
         <!-- CPU cluster -->
-        <rect x="10" y="28" width="90" height="50" rx="3" fill="#1a1f2e" stroke="#7eb8f7"/>
+        <rect x="10" y="28" width="90" height="50" rx="3" fill="#1a1f2e" stroke="#7eb8f7">
         <text x="55" y="47" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">CPU</text>
         <text x="55" y="59" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">P-cores + E-cores</text>
         <text x="55" y="70" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">Prefetch / decode</text>
 
         <!-- GPU cluster -->
-        <rect x="115" y="28" width="90" height="50" rx="3" fill="#1a1f2e" stroke="#f7a05a"/>
+        <rect x="115" y="28" width="90" height="50" rx="3" fill="#1a1f2e" stroke="#f7a05a">
         <text x="160" y="47" fill="#f7a05a" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">GPU</text>
         <text x="160" y="59" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">Prefill GEMM</text>
         <text x="160" y="70" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">Metal / SIMD</text>
 
         <!-- NPU/ANE -->
-        <rect x="220" y="28" width="90" height="50" rx="3" fill="#13161e" stroke="#7ef7c0" stroke-width="1.5"/>
+        <rect x="220" y="28" width="90" height="50" rx="3" fill="#13161e" stroke="#7ef7c0" stroke-width="1.5">
         <text x="265" y="47" fill="#7ef7c0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">NPU / ANE</text>
         <text x="265" y="59" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">38 TOPS (M4)</text>
         <text x="265" y="70" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">INT8 / INT4</text>
 
         <!-- System cache / fabric -->
-        <rect x="10" y="92" width="300" height="22" rx="2" fill="#13161e" stroke="#2a3048"/>
+        <rect x="10" y="92" width="300" height="22" rx="2" fill="#13161e" stroke="#2a3048">
         <text x="160" y="107" fill="#8892aa" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">System-Level Cache (SLC) · Coherent Interconnect Fabric</text>
 
         <!-- ISP / Media / Secure -->
-        <rect x="10" y="128" width="88" height="22" rx="2" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="10" y="128" width="88" height="22" rx="2" fill="#1a1f2e" stroke="#2a3048">
         <text x="54" y="143" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">ISP / Camera</text>
-        <rect x="106" y="128" width="88" height="22" rx="2" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="106" y="128" width="88" height="22" rx="2" fill="#1a1f2e" stroke="#2a3048">
         <text x="150" y="143" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">Media Encode/Decode</text>
-        <rect x="202" y="128" width="108" height="22" rx="2" fill="#1a1f2e" stroke="#f76e7e"/>
+        <rect x="202" y="128" width="108" height="22" rx="2" fill="#1a1f2e" stroke="#f76e7e">
         <text x="256" y="143" fill="#f76e7e" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">Secure Enclave / Crypto</text>
 
         <!-- LPDDR6 -->
-        <rect x="10" y="165" width="300" height="28" rx="3" fill="#1a1f2e" stroke="#7eb8f7" stroke-width="1.5"/>
+        <rect x="10" y="165" width="300" height="28" rx="3" fill="#1a1f2e" stroke="#7eb8f7" stroke-width="1.5">
         <text x="160" y="178" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Unified LPDDR5X Memory (128+ GB/s)</text>
         <text x="160" y="189" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">CPU · GPU · NPU share bandwidth — no PCIe copy overhead</text>
 
@@ -835,17 +759,17 @@ svg.diag { width:100%; height:auto; display:block; }
     </div>
 
     <div>
-      <div class="panel">
-        <div class="panel-title">Unified Memory Architecture Advantages</div>
+      <div class="card">
+        <h3>Unified Memory Architecture Advantages</h3>
         <ul>
           <li><strong>Zero-copy</strong> — GPU tokenises, NPU runs LLM decode, CPU runs runtime logic — all share the same physical DRAM pages</li>
           <li><strong>Coherent</strong> — no explicit DMA transfers or pinned buffers between engines</li>
-          <li><strong>LLM-friendly</strong> — 70B INT4 model ≈ 35 GB: fits M3 Ultra (192 GB) easily; fits M4 Pro (48 GB) at smaller models</li>
+          <li><strong>LLM-friendly</strong> — 70B INT4 model ≈ 35 GB: fits M3 Ultra (192 GB) easily; fits M4 Pro (48 GB) at  models</li>
           <li><strong>Bandwidth pooled</strong> — 120–800 GB/s shared; no PCIe bottleneck (≤64 GB/s)</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">Heterogeneous Dispatch Strategy</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Heterogeneous Dispatch Strategy</h3>
         <div class="kv-row"><span class="kv-label">Tokenisation / sampling</span><span class="kv-value">CPU (low latency)</span></div>
         <div class="kv-row"><span class="kv-label">Prefill (long prompt)</span><span class="kv-value amber">GPU (parallel GEMM)</span></div>
         <div class="kv-row"><span class="kv-label">Decode (token gen)</span><span class="kv-value green">NPU (low power, INT4)</span></div>
@@ -859,17 +783,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">10 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 11 — MOBILE & EDGE NPU COMPARISON
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Mobile &amp; Edge NPU Comparison</div>
-  <div class="slide-subtitle">flagship SoC inference capabilities — 2024/2025</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">11</span><h2>Mobile &amp; Edge NPU Comparison</h2></div>
 
   <table class="dtable" style="margin-top:0.7rem;font-size:0.62em;">
     <tr>
@@ -967,22 +888,19 @@ svg.diag { width:100%; height:auto; display:block; }
       activations and OS. INT8 doubles this to ~7 GB — tight for 8 GB devices.
     </div>
   </div>
-  <div class="slide-num">11 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 12 — POWER MANAGEMENT FOR INFERENCE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Power Management for ML Inference</div>
-  <div class="slide-subtitle">DVFS, power domains, and thermal budget</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">12</span><h2>Power Management for ML Inference</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Inference Power Breakdown (Mobile NPU)</div>
+      <div class="card">
+        <h3>Inference Power Breakdown (Mobile NPU)</h3>
         <!-- Horizontal bar chart -->
         <div style="font-size:0.65em;margin-top:0.4rem;">
           <div style="display:flex;align-items:center;gap:0.6em;margin-bottom:0.4em;">
@@ -1008,8 +926,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </div>
         <div style="font-size:0.58em;color:var(--muted);margin-top:0.6em;">SRAM leakage grows with size; at 16 MB+ scratchpad, SRAM can exceed MAC array power at idle.</div>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">DVFS Strategy for NPU</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>DVFS Strategy for NPU</h3>
         <ul>
           <li><strong>Compute-bound ops</strong> (prefill, large conv): max frequency, max voltage — utilise Tensor Cores fully</li>
           <li><strong>Memory-bound ops</strong> (decode GEMV): reduce NPU frequency; performance limited by DRAM BW not clock</li>
@@ -1019,8 +937,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Thermal Management</div>
+      <div class="card">
+        <h3>Thermal Management</h3>
         <ul>
           <li><strong>TDP envelope</strong> — mobile: 3–8 W sustained; tablet: 5–15 W; thin laptop: 10–25 W</li>
           <li><strong>Thermal throttling</strong> — PMIC and thermal sensor feedback; frequency reduced when Tj &gt; 85–95°C</li>
@@ -1029,8 +947,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>Vapour chamber / heat pipe</strong> — Snapdragon X Elite laptop: required for 45W PC TDP</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title red">Energy Minimisation Techniques</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Energy Minimisation Techniques</h3>
         <ul>
           <li><strong>Zero-skipping</strong> — detect zero activations before MAC; save dynamic power proportional to sparsity</li>
           <li><strong>Data compression</strong> — compress activations in SRAM to DRAM transfers; reduce bandwidth energy (α 0.5–1 pJ/bit saved)</li>
@@ -1040,17 +958,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">12 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 13 — INFERENCE COMPILER STACK
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">The Inference Compiler &amp; Runtime Stack</div>
-  <div class="slide-subtitle">from model checkpoint to efficient silicon execution</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">13</span><h2>The Inference Compiler &amp; Runtime Stack</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1058,45 +973,45 @@ svg.diag { width:100%; height:auto; display:block; }
       <svg viewBox="0 0 340 260" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
         <text x="170" y="18" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">INFERENCE COMPILER STACK</text>
 
-        <rect x="10" y="28" width="320" height="28" rx="2" fill="#1a1f2e" stroke="#7eb8f7"/>
+        <rect x="10" y="28" width="320" height="28" rx="2" fill="#1a1f2e" stroke="#7eb8f7">
         <text x="170" y="42" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'DM Sans',sans-serif">PyTorch / JAX / TensorFlow (Model checkpoint + weights)</text>
         <text x="170" y="53" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'JetBrains Mono',monospace">.pt / .safetensors / .gguf</text>
 
-        <rect x="10" y="68" width="320" height="28" rx="2" fill="#1a1f2e" stroke="#7eb8f7"/>
+        <rect x="10" y="68" width="320" height="28" rx="2" fill="#1a1f2e" stroke="#7eb8f7">
         <text x="170" y="82" fill="#7eb8f7" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Graph IR (torch.export / ONNX / StableHLO)</text>
         <text x="170" y="93" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">Quantisation, operator fusion, graph simplification</text>
 
-        <rect x="10" y="108" width="320" height="28" rx="2" fill="#13161e" stroke="#f7a05a"/>
+        <rect x="10" y="108" width="320" height="28" rx="2" fill="#13161e" stroke="#f7a05a">
         <text x="170" y="122" fill="#f7a05a" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Optimisation Passes</text>
         <text x="170" y="133" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">Constant folding · dead code elimination · layout transform · tiling</text>
 
-        <rect x="10" y="148" width="320" height="28" rx="2" fill="#13161e" stroke="#7ef7c0"/>
+        <rect x="10" y="148" width="320" height="28" rx="2" fill="#13161e" stroke="#7ef7c0">
         <text x="170" y="162" fill="#7ef7c0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Hardware Backend Codegen</text>
         <text x="170" y="173" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">cuDNN / TensorRT / Hexagon SDK / ANE toolchain / TFLite</text>
 
-        <rect x="10" y="188" width="320" height="28" rx="2" fill="#1a1f2e" stroke="#2a3048"/>
+        <rect x="10" y="188" width="320" height="28" rx="2" fill="#1a1f2e" stroke="#2a3048">
         <text x="170" y="202" fill="#dde4f0" font-size="8" text-anchor="middle" font-family="'JetBrains Mono',monospace">Runtime / Execution Engine</text>
         <text x="170" y="213" fill="#8892aa" font-size="7" text-anchor="middle" font-family="'DM Sans',sans-serif">vLLM / SGLang / llama.cpp / ONNX Runtime / CoreML</text>
 
-        <rect x="10" y="228" width="320" height="24" rx="2" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5"/>
+        <rect x="10" y="228" width="320" height="24" rx="2" fill="#13161e" stroke="#7eb8f7" stroke-width="1.5">
         <text x="170" y="244" fill="#7eb8f7" font-size="9" text-anchor="middle" font-family="'JetBrains Mono',monospace">Silicon: GPU · NPU · CPU</text>
 
         <!-- Arrows -->
-        <line x1="170" y1="56" x2="170" y2="68" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)"/>
-        <line x1="170" y1="96" x2="170" y2="108" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)"/>
-        <line x1="170" y1="136" x2="170" y2="148" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)"/>
-        <line x1="170" y1="176" x2="170" y2="188" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)"/>
-        <line x1="170" y1="216" x2="170" y2="228" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)"/>
+        <line x1="170" y1="56" x2="170" y2="68" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)">
+        <line x1="170" y1="96" x2="170" y2="108" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)">
+        <line x1="170" y1="136" x2="170" y2="148" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)">
+        <line x1="170" y1="176" x2="170" y2="188" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)">
+        <line x1="170" y1="216" x2="170" y2="228" stroke="#2a3048" stroke-width="1.2" marker-end="url(#ard)">
 
         <defs>
-          <marker id="ard" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2a3048"/></marker>
+          <marker id="ard" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2a3048"></marker>
         </defs>
       </svg>
     </div>
 
     <div>
-      <div class="panel">
-        <div class="panel-title">Key Optimisation Passes</div>
+      <div class="card">
+        <h3>Key Optimisation Passes</h3>
         <ul>
           <li><strong>Operator fusion</strong> — MatMul + GELU + residual add as single kernel; eliminates intermediate tensor writes</li>
           <li><strong>Layout transformation</strong> — NCHW → NHWC → custom NPU-native tile layout; maximises SRAM reuse</li>
@@ -1105,8 +1020,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>Kernel selection</strong> — cuDNN / TensorRT chooses fastest kernel variant at runtime via auto-tuning</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">Inference Runtimes Compared</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Inference Runtimes Compared</h3>
         <div class="kv-row"><span class="kv-label">TensorRT (NVIDIA)</span><span class="kv-value">INT8 engine, graph fusion, FP8</span></div>
         <div class="kv-row"><span class="kv-label">vLLM</span><span class="kv-value amber">PagedAttention, continuous batching</span></div>
         <div class="kv-row"><span class="kv-label">SGLang</span><span class="kv-value green">RadixAttention, prefix caching</span></div>
@@ -1121,22 +1036,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">13 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 14 — TINYML AND MCU INFERENCE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">TinyML — Inference at the Extreme Edge</div>
-  <div class="slide-subtitle">sub-milliwatt neural networks on microcontrollers</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">14</span><h2>TinyML — Inference at the Extreme Edge</h2></div>
 
   <div class="cols cols-3" style="gap:1rem;margin-top:0.6rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Constraints</div>
+      <div class="card">
+        <h3>Constraints</h3>
         <div class="kv-row"><span class="kv-label">Flash (model)</span><span class="kv-value">256 KB – 4 MB</span></div>
         <div class="kv-row"><span class="kv-label">SRAM (inference)</span><span class="kv-value">32 KB – 512 KB</span></div>
         <div class="kv-row"><span class="kv-label">Clock</span><span class="kv-value">16 – 400 MHz</span></div>
@@ -1146,8 +1058,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Model Architectures</div>
+      <div class="card">
+        <h3>Model Architectures</h3>
         <ul>
           <li><strong>MobileNetV3-Small</strong> — 1.5 MB, INT8, ~2 ms on Cortex-M55</li>
           <li><strong>DS-CNN (keyword spotting)</strong> — 80 KB, 20 classes, 98% accuracy</li>
@@ -1158,8 +1070,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Hardware &amp; Frameworks</div>
+      <div class="card">
+        <h3>Hardware &amp; Frameworks</h3>
         <ul>
           <li><strong>Arm Cortex-M55 + Ethos-U55</strong> — SIMD Helium, 128-bit SIMD; Ethos-U55: 64–512 MAC/cycle, &lt;0.5 mW</li>
           <li><strong>STM32N6 (ST)</strong> — Neural-ART NPU, 600 GOPS, Cortex-M55+Ethos-U55</li>
@@ -1172,8 +1084,8 @@ svg.diag { width:100%; height:auto; display:block; }
   </div>
 
   <div class="cols cols-2" style="gap:1rem;margin-top:0.9rem;">
-    <div class="panel">
-      <div class="panel-title">Quantisation for TinyML</div>
+    <div class="card">
+      <h3>Quantisation for TinyML</h3>
       <ul>
         <li><strong>Full INT8 post-training</strong> — TFLite converter + representative dataset; fits 256 KB SRAM with careful planning</li>
         <li><strong>Layer-wise mixed precision</strong> — sensitive first/last layers in INT16, bulk in INT8; automated by TFLite</li>
@@ -1188,22 +1100,19 @@ svg.diag { width:100%; height:auto; display:block; }
       &lt;0.1 mW average — less than an LED.
     </div>
   </div>
-  <div class="slide-num">14 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 15 — CNN INFERENCE OPTIMISATION
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">CNN Inference Optimisation</div>
-  <div class="slide-subtitle">convolution, tiling, im2col, and depthwise separability</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">15</span><h2>CNN Inference Optimisation</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Conv2D as GEMM — im2col Transform</div>
+      <div class="card">
+        <h3>Conv2D as GEMM — im2col Transform</h3>
         <ul>
           <li>Input feature map patches unrolled into rows of an Toeplitz matrix (im2col)</li>
           <li>Kernel filters become columns of a weight matrix</li>
@@ -1212,8 +1121,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>Implicit GEMM</strong> (cuDNN): computes im2col on-the-fly; no extra buffer needed</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">Winograd Convolution (F(2,3))</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Winograd Convolution (F(2,3))</h3>
         <ul>
           <li>Reduces multiplications: 3×3 conv from 9 to 4 MACs per output element</li>
           <li>Adds additions — beneficial when multiply is more expensive than add</li>
@@ -1223,8 +1132,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Depthwise Separable Convolution</div>
+      <div class="card">
+        <h3>Depthwise Separable Convolution</h3>
         <div class="eq" style="margin-bottom:0.6rem;font-size:0.62em;">
           Standard: K×K×C_in×C_out MACs → DW-Sep: K×K×C_in + C_in×C_out MACs
         </div>
@@ -1235,8 +1144,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>Efficiency trap</strong> — depthwise layers are memory-bandwidth-bound, not compute-bound; high TOPS NPUs underutilised</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title">Loop Tiling &amp; Scheduling</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Loop Tiling &amp; Scheduling</h3>
         <ul>
           <li>7-deep loop nest (N, K, C, H, W, R, S) — tiling order determines cache reuse distance</li>
           <li><strong>Output-stationary</strong>: accumulate partial output in registers; min register spill</li>
@@ -1246,22 +1155,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">15 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 16 — SERVING SYSTEMS & BATCHING
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Inference Serving Systems &amp; Batching Strategies</div>
-  <div class="slide-subtitle">maximising GPU utilisation across concurrent requests</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">16</span><h2>Inference Serving Systems &amp; Batching Strategies</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Static vs Continuous Batching</div>
+      <div class="card">
+        <h3>Static vs Continuous Batching</h3>
         <ul>
           <li><strong>Static batching</strong> — pad all sequences to max length; wait for full batch before starting; simple but wasteful</li>
           <li><strong>Continuous (iteration-level) batching</strong> — insert new requests at token boundaries; no waiting; GPU utilisation 2–3× higher</li>
@@ -1271,25 +1177,25 @@ svg.diag { width:100%; height:auto; display:block; }
         <svg viewBox="0 0 300 80" style="margin-top:0.6rem;width:100%;">
           <!-- Static -->
           <text x="0" y="12" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace">STATIC:</text>
-          <rect x="0" y="18" width="60" height="14" rx="1" fill="#7eb8f7" opacity="0.7"/>
-          <rect x="62" y="18" width="40" height="14" rx="1" fill="#7eb8f7" opacity="0.7"/>
-          <rect x="104" y="18" width="80" height="14" rx="1" fill="#7eb8f7" opacity="0.7"/>
-          <rect x="60" y="18" width="122" height="14" rx="1" fill="#2a3048" stroke="#2a3048" opacity="0.5"/><!-- padding waste -->
+          <rect x="0" y="18" width="60" height="14" rx="1" fill="#7eb8f7" opacity="0.7">
+          <rect x="62" y="18" width="40" height="14" rx="1" fill="#7eb8f7" opacity="0.7">
+          <rect x="104" y="18" width="80" height="14" rx="1" fill="#7eb8f7" opacity="0.7">
+          <rect x="60" y="18" width="122" height="14" rx="1" fill="#2a3048" stroke="#2a3048" opacity="0.5"><!-- padding waste -->
           <text x="78" y="29" fill="#f76e7e" font-size="7" font-family="'JetBrains Mono',monospace">WASTED</text>
 
           <!-- Continuous -->
           <text x="0" y="48" fill="#8892aa" font-size="8" font-family="'JetBrains Mono',monospace">CONTINUOUS:</text>
-          <rect x="0" y="54" width="60" height="14" rx="1" fill="#7eb8f7" opacity="0.8"/>
-          <rect x="61" y="54" width="40" height="14" rx="1" fill="#f7a05a" opacity="0.8"/>
-          <rect x="102" y="54" width="80" height="14" rx="1" fill="#7ef7c0" opacity="0.8"/>
-          <rect x="183" y="54" width="30" height="14" rx="1" fill="#f76e7e" opacity="0.8"/>
+          <rect x="0" y="54" width="60" height="14" rx="1" fill="#7eb8f7" opacity="0.8">
+          <rect x="61" y="54" width="40" height="14" rx="1" fill="#f7a05a" opacity="0.8">
+          <rect x="102" y="54" width="80" height="14" rx="1" fill="#7ef7c0" opacity="0.8">
+          <rect x="183" y="54" width="30" height="14" rx="1" fill="#f76e7e" opacity="0.8">
           <text x="0" y="76" fill="#7ef7c0" font-size="7" font-family="'JetBrains Mono',monospace">No padding — requests join/leave at each decode step</text>
         </svg>
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">PagedAttention (vLLM)</div>
+      <div class="card">
+        <h3>PagedAttention (vLLM)</h3>
         <ul>
           <li>KV-cache fragmentation wastes 20–40% of GPU memory in naive implementations</li>
           <li>PagedAttention: KV stored in fixed-size pages (e.g. 16 tokens); pages non-contiguous in physical memory like OS virtual memory</li>
@@ -1297,8 +1203,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>Enables 3× more concurrent requests at same GPU memory budget</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title green">Prefix Caching &amp; Radix Attention</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Prefix Caching &amp; Radix Attention</h3>
         <ul>
           <li><strong>Prefix caching</strong> — reuse KV-cache of repeated system prompts (chatbot context, RAG documents) across requests</li>
           <li><strong>SGLang RadixAttention</strong> — LRU cache of KV blocks indexed by token sequence hash; hit rate &gt;80% in multi-turn workloads</li>
@@ -1313,30 +1219,27 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">16 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 17 — DISTRIBUTED INFERENCE
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Distributed Inference — Tensor &amp; Pipeline Parallelism</div>
-  <div class="slide-subtitle">splitting models across multiple accelerators</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">17</span><h2>Distributed Inference — Tensor &amp; Pipeline Parallelism</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Why Distribute?</div>
+      <div class="card">
+        <h3>Why Distribute?</h3>
         <ul>
           <li><strong>Model doesn't fit one device</strong> — Llama 3.1 405B FP16: 810 GB; requires 10+ A100 80GB</li>
-          <li><strong>Latency requirements</strong> — distribute GEMM across devices → smaller per-device matrix → lower latency per layer</li>
+          <li><strong>Latency requirements</strong> — distribute GEMM across devices →  per-device matrix → lower latency per layer</li>
           <li><strong>Throughput scaling</strong> — additional devices handle more concurrent requests</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">Tensor Parallelism (Megatron-LM)</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Tensor Parallelism (Megatron-LM)</h3>
         <ul>
           <li><strong>Column-parallel</strong>: split weight matrix along output dimension; each GPU computes partial output columns</li>
           <li><strong>Row-parallel</strong>: split along input dimension; each GPU holds partial input rows; all-reduce to combine</li>
@@ -1347,8 +1250,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Pipeline Parallelism</div>
+      <div class="card">
+        <h3>Pipeline Parallelism</h3>
         <ul>
           <li>Transformer layers partitioned into stages; each GPU holds a stage</li>
           <li><strong>GPipe micro-batching</strong>: split batch into micro-batches; pipeline flush eliminates bubble</li>
@@ -1357,8 +1260,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>Inference-only</strong>: no backward pass — pipeline bubble eliminated; pure latency / throughput balance</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title">Expert Parallelism (MoE)</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Expert Parallelism (MoE)</h3>
         <ul>
           <li>MoE experts distributed across GPUs — each GPU owns subset of experts</li>
           <li><strong>All-to-all dispatch</strong>: route tokens to correct GPU for expert execution — dominant communication cost</li>
@@ -1373,22 +1276,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">17 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 18 — CASE STUDY: NVIDIA H100 / H200
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Case Study: NVIDIA H100 / H200 for Inference</div>
-  <div class="slide-subtitle">the dominant cloud inference platform — 2024</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">18</span><h2>Case Study: NVIDIA H100 / H200 for Inference</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">H100 SXM5 Specifications</div>
+      <div class="card">
+        <h3>H100 SXM5 Specifications</h3>
         <div class="kv-row"><span class="kv-label">Process</span><span class="kv-value">TSMC N4 (4nm)</span></div>
         <div class="kv-row"><span class="kv-label">Transistors</span><span class="kv-value">80 billion</span></div>
         <div class="kv-row"><span class="kv-label">SMs</span><span class="kv-value">132 (MIG: up to 7 instances)</span></div>
@@ -1399,8 +1299,8 @@ svg.diag { width:100%; height:auto; display:block; }
         <div class="kv-row"><span class="kv-label">NVLink 4 bandwidth</span><span class="kv-value">900 GB/s</span></div>
         <div class="kv-row"><span class="kv-label">TDP</span><span class="kv-value red">700 W</span></div>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title amber">H200 — Memory Upgrade</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>H200 — Memory Upgrade</h3>
         <div class="kv-row"><span class="kv-label">HBM3E capacity</span><span class="kv-value green">141 GB</span></div>
         <div class="kv-row"><span class="kv-label">HBM3E bandwidth</span><span class="kv-value green">4.8 TB/s</span></div>
         <div class="kv-row"><span class="kv-label">LLM decode speedup vs H100</span><span class="kv-value green">~1.9× (BW-bound)</span></div>
@@ -1408,18 +1308,18 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Hopper Inference Features</div>
+      <div class="card">
+        <h3>Hopper Inference Features</h3>
         <ul>
           <li><strong>Transformer Engine</strong> — FP8 Tensor Cores; dynamic per-layer precision selection; loss-free FP8 inference for most LLMs</li>
           <li><strong>WGMMA (Warpgroup MMA)</strong> — asynchronous matrix multiply across warp groups; decouples data movement from compute</li>
           <li><strong>TMA (Tensor Memory Accelerator)</strong> — hardware-managed multi-dimensional tile DMA; no software prefetch code needed</li>
-          <li><strong>MIG (Multi-Instance GPU)</strong> — partition H100 into up to 7 isolated inference instances; efficient for small-model serving</li>
+          <li><strong>MIG (Multi-Instance GPU)</strong> — partition H100 into up to 7 isolated inference instances; efficient for -model serving</li>
           <li><strong>Confidential Computing</strong> — TEE for sensitive inference workloads (medical, financial)</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title">Inference Performance (Llama 3.1 70B, INT8)</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Inference Performance (Llama 3.1 70B, INT8)</h3>
         <div class="kv-row"><span class="kv-label">1× H100 SXM5 (batch=1)</span><span class="kv-value amber">~30–50 tok/s decode</span></div>
         <div class="kv-row"><span class="kv-label">1× H200 (batch=1)</span><span class="kv-value green">~55–80 tok/s decode</span></div>
         <div class="kv-row"><span class="kv-label">8× H100 NVL (TP=8, batch=32)</span><span class="kv-value green">~1,800 tok/s</span></div>
@@ -1428,22 +1328,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">18 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 19 — CASE STUDY: QUALCOMM CLOUD AI 100
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Case Study: Qualcomm Cloud AI 100 Ultra</div>
-  <div class="slide-subtitle">purpose-built inference ASIC — not a repurposed training GPU</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">19</span><h2>Case Study: Qualcomm Cloud AI 100 Ultra</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">AI 100 Ultra Specifications</div>
+      <div class="card">
+        <h3>AI 100 Ultra Specifications</h3>
         <div class="kv-row"><span class="kv-label">Process</span><span class="kv-value">TSMC 5nm</span></div>
         <div class="kv-row"><span class="kv-label">INT8 TOPS</span><span class="kv-value green">870</span></div>
         <div class="kv-row"><span class="kv-label">On-chip SRAM</span><span class="kv-value green">128 MB</span></div>
@@ -1461,18 +1358,18 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Inference-First Architecture Choices</div>
+      <div class="card">
+        <h3>Inference-First Architecture Choices</h3>
         <ul>
           <li><strong>No FP64 / FP32 training paths</strong> — die area focused entirely on INT8/INT4 MAC arrays and SRAM</li>
           <li><strong>128 MB on-chip SRAM</strong> — KV-cache tiers: hot tokens in SRAM, cold in LPDDR; reduces off-chip reads for short-context decode</li>
-          <li><strong>Multi-chip module</strong> — two dies per Ultra card; 2× die yield benefit from smaller die; NVLink-equivalent internal interconnect</li>
+          <li><strong>Multi-chip module</strong> — two dies per Ultra card; 2× die yield benefit from  die; NVLink-equivalent internal interconnect</li>
           <li><strong>Compiler-driven scheduling</strong> — Qualcomm's AIC compiler statically schedules all DMA and compute; no dynamic dispatch overhead</li>
           <li><strong>Network-attached inference</strong> — designed for rack-scale pod with PCIe fabric; flexible scaling from 1 to 64 cards</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title green">Competitive Positioning</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Competitive Positioning</h3>
         <table class="dtable" style="font-size:0.9em;">
           <tr><th>Metric</th><th>H100 SXM5</th><th>AI 100 Ultra</th></tr>
           <tr><td>INT8 TOPS</td><td class="hi">3,958</td><td class="gr">870</td></tr>
@@ -1484,22 +1381,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">19 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 20 — CASE STUDY: GROQ LPU
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Case Study: Groq LPU — Compiler-as-Hardware</div>
-  <div class="slide-subtitle">deterministic dataflow execution for ultra-low inference latency</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">20</span><h2>Case Study: Groq LPU — Compiler-as-Hardware</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Groq TS-P1 Specifications</div>
+      <div class="card">
+        <h3>Groq TS-P1 Specifications</h3>
         <div class="kv-row"><span class="kv-label">Architecture</span><span class="kv-value">Tensor Streaming Processor</span></div>
         <div class="kv-row"><span class="kv-label">Process</span><span class="kv-value">TSMC 14nm (TS-P1)</span></div>
         <div class="kv-row"><span class="kv-label">On-chip SRAM</span><span class="kv-value green">230 MB — vast scratchpad</span></div>
@@ -1516,8 +1410,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Tensor Streaming Processor Principles</div>
+      <div class="card">
+        <h3>Tensor Streaming Processor Principles</h3>
         <ul>
           <li><strong>No caches, no branch prediction, no out-of-order execution</strong> — compiler determines all data movement statically at compile time</li>
           <li><strong>Deterministic execution</strong> — every instruction scheduled at compile time; zero runtime overhead</li>
@@ -1526,8 +1420,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>Compiler = hardware</strong> — Groq Compiler expresses the full execution plan; chip is a programmable dataflow engine</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title green">Trade-offs &amp; Limitations</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Trade-offs &amp; Limitations</h3>
         <ul>
           <li><strong>Model size ceiling</strong> — 70B INT4: ~35 GB; requires 200+ chips in a GroqRack for on-chip storage</li>
           <li><strong>No dynamic shapes</strong> — variable-length sequences require recompilation or padding</li>
@@ -1537,22 +1431,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">20 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 21 — SECURITY IN INFERENCE SoCs
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Security Considerations in Inference SoCs</div>
-  <div class="slide-subtitle">model protection, TEE, and inference-time attacks</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">21</span><h2>Security Considerations in Inference SoCs</h2></div>
 
   <div class="cols cols-3" style="gap:1rem;margin-top:0.6rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Model Intellectual Property</div>
+      <div class="card">
+        <h3>Model Intellectual Property</h3>
         <ul>
           <li><strong>Weight encryption</strong> — AES-256 encrypted weights in Flash/DRAM; decrypt only within NPU boundary</li>
           <li><strong>Secure boot</strong> — NPU firmware authenticated with hardware root of trust before any model load</li>
@@ -1562,8 +1453,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Trusted Execution for Cloud Inference</div>
+      <div class="card">
+        <h3>Trusted Execution for Cloud Inference</h3>
         <ul>
           <li><strong>NVIDIA Confidential Computing (H100)</strong> — GPU Trusted Execution Environment; attestation of GPU firmware integrity</li>
           <li><strong>AMD SEV-SNP + Instinct</strong> — encrypted VM memory; inference data encrypted end-to-end</li>
@@ -1573,8 +1464,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title red">Inference-Time Attacks</div>
+      <div class="card">
+        <h3>Inference-Time Attacks</h3>
         <ul>
           <li><strong>Prompt injection</strong> — adversarial input manipulates model output; not hardware-level but system design concern</li>
           <li><strong>Model extraction</strong> — repeated queries to reconstruct weights; mitigated by rate-limiting and output perturbation</li>
@@ -1598,26 +1489,23 @@ svg.diag { width:100%; height:auto; display:block; }
       scenarios where model outputs might leak training data membership.
     </div>
   </div>
-  <div class="slide-num">21 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 22 — EMERGING INFERENCE TECHNIQUES
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Emerging Inference Techniques</div>
-  <div class="slide-subtitle">speculative decoding · medusa · SSMs · analog compute</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">22</span><h2>Emerging Inference Techniques</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Speculative Decoding — Deep Dive</div>
+      <div class="card">
+        <h3>Speculative Decoding — Deep Dive</h3>
         <ul>
           <li><strong>Algorithm</strong>: draft model generates K tokens autoregressively; target model verifies all K+1 in single forward pass (parallel GEMM)</li>
           <li>Acceptance probability: p_accepted = min(1, p_target / p_draft) per token via rejection sampling</li>
-          <li><strong>Speedup</strong>: K_accepted × (T_target / T_draft) — effective when draft model is 10–50× smaller</li>
+          <li><strong>Speedup</strong>: K_accepted × (T_target / T_draft) — effective when draft model is 10–50× </li>
           <li><strong>Self-speculative</strong> (Medusa, Eagle): draft heads attached to target model; share hidden states</li>
           <li>Medusa-2: 2–3× speedup on Vicuna-13B; multiple parallel draft heads predict positions 1 to N simultaneously</li>
           <li><strong>Hardware implication</strong>: turns memory-bound GEMV decode into compute-bound GEMM verification — transforms the roofline operating point</li>
@@ -1625,18 +1513,18 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">State Space Models (Mamba / S4)</div>
+      <div class="card">
+        <h3>State Space Models (Mamba / S4)</h3>
         <ul>
           <li>Alternative to Transformer attention; recurrent state representation with linear-time decode</li>
           <li><strong>Inference advantage</strong>: O(1) memory per token (fixed state vector vs O(N) KV-cache growth)</li>
-          <li><strong>Hardware implication</strong>: no KV-cache → no KV bandwidth bottleneck; fits tiny SRAM even at long context</li>
+          <li><strong>Hardware implication</strong>: no KV-cache → no KV bandwidth bottleneck; fits  SRAM even at long context</li>
           <li>Mamba-2: structured state space; selective SSM — matches Transformer quality at 1B+ parameters</li>
           <li>Hybrid architectures (Jamba, Zamba): interleaved attention + SSM layers — best of both</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;">
-        <div class="panel-title green">Analog &amp; Photonic Compute</div>
+      <div class="card" style="margin-top:0.8rem;">
+        <h3>Analog &amp; Photonic Compute</h3>
         <ul>
           <li><strong>Analog in-memory compute</strong> (IBM PCM/ReRAM): GEMV at 85 TOPS/W; no weight movement → zero DRAM bandwidth energy</li>
           <li><strong>Photonic MAC</strong> (Lightmatter Passage): optical matrix multiplication at speed-of-light; 0 dynamic power for MAC</li>
@@ -1645,17 +1533,14 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">22 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 23 — POWER-PERFORMANCE TRADE-OFF SUMMARY
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Power-Performance Trade-off Summary</div>
-  <div class="slide-subtitle">TOPS/W across the deployment spectrum</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">23</span><h2>Power-Performance Trade-off Summary</h2></div>
 
   <table class="dtable" style="margin-top:0.6rem;font-size:0.62em;">
     <tr>
@@ -1692,22 +1577,19 @@ svg.diag { width:100%; height:auto; display:block; }
       including power, rack space, and DRAM cost).
     </div>
   </div>
-  <div class="slide-num">23 / 24</div>
-</div>
 </section>
 
 <!-- ════════════════════════════════════════════════════
      SLIDE 24 — SUMMARY & SERIES NAVIGATION
 ════════════════════════════════════════════════════ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Summary &amp; Key Takeaways</div>
-  <div class="slide-subtitle">SoCs for ML Inference</div>
+<section data-background-color="#0a0a0f">
+
+  <div class="slide-hdr"><span class="tag">24</span><h2>Summary &amp; Key Takeaways</h2></div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Core Principles</div>
+      <div class="card">
+        <h3>Core Principles</h3>
         <div class="timeline" style="margin-top:0.3rem;">
           <div class="tl-item">
             <div class="tl-label">Memory Bandwidth Dominates</div>
@@ -1733,8 +1615,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Emerging Directions</div>
+      <div class="card">
+        <h3>Emerging Directions</h3>
         <ul>
           <li><strong>FP4 / FP6</strong> — Blackwell native FP4; model quality at sub-INT4 bitwidths approaching INT8 with careful calibration</li>
           <li><strong>State Space Models</strong> — Mamba / Jamba eliminate KV-cache; O(1) decode memory enables extreme context lengths</li>
@@ -1744,8 +1626,8 @@ svg.diag { width:100%; height:auto; display:block; }
           <li><strong>On-device foundation models</strong> — 7B–13B running locally at &lt;10 W is now engineered reality</li>
         </ul>
       </div>
-      <div class="panel" style="margin-top:0.8rem;border-color:rgba(126,184,247,0.3);">
-        <div class="panel-title">Series Navigation</div>
+      <div class="card" style="margin-top:0.8rem;border-color:rgba(126,184,247,0.3);">
+        <h3>Series Navigation</h3>
         <div style="font-size:0.62em;color:var(--muted);display:flex;gap:1.2em;flex-wrap:wrap;">
           <span>✅ 01 SoC Packaging</span>
           <span>✅ 02 On-Chip Interconnect</span>
@@ -1760,12 +1642,7 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-
-  <div class="series-badge">⬡ brendanjameslynskey.github.io/SoC</div>
-  <div class="slide-num">24 / 24</div>
-</div>
 </section>
-
 </div><!-- /slides -->
 </div><!-- /reveal -->
 
@@ -1774,20 +1651,17 @@ svg.diag { width:100%; height:auto; display:block; }
 <script>
 Reveal.initialize({
   hash: true,
-  slideNumber: false,
+  slideNumber: 'c/t',
   transition: 'fade',
   transitionSpeed: 'fast',
   controls: true,
   progress: true,
   center: false,
-  width: 1280,
+  width: 1100,
   height: 900,
-  margin: 0.02,
-  plugins: [ RevealHighlight ],
-  keyboard: {
-    39: 'next',
-    37: 'prev'
-  }
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
 });
 </script>
 <script>

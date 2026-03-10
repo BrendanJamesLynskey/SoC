@@ -1,282 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CXL in ML Accelerator SoCs — From Memory Expansion to Fabric</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
-
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --r-background-color: #0a0a0f;
-    --r-main-font: 'DM Sans', sans-serif;
-    --r-heading-font: 'Playfair Display', serif;
-    --r-code-font: 'JetBrains Mono', monospace;
-    --r-main-font-size: 28px;
-    --r-heading-color: #e8e4df;
-    --r-main-color: #c8c4bf;
-    --r-link-color: #7eb8da;
-    --r-link-color-hover: #a8d4ef;
-    --r-selection-background-color: #2a5a7a;
-    --accent: #7eb8da;
-    --accent2: #e8a87c;
-    --accent3: #8fd4a4;
-    --accent4: #c49dd8;
-    --dim: #6a6660;
-    --surface: #16161e;
-    --surface2: #1e1e28;
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
   }
 
-  /* ── Base Reveal overrides ── */
-  .reveal { font-family: var(--r-main-font); color: var(--r-main-color); }
-  .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
-    font-family: var(--r-heading-font);
-    color: var(--r-heading-color);
-    text-transform: none;
-    letter-spacing: 0.01em;
-    line-height: 1.15;
-    text-shadow: none;
-  }
-  .reveal h1 { font-size: 1.8em; }
-  .reveal h2 { font-size: 1.35em; margin-bottom: 0.5em; }
-  .reveal h3 { font-size: 1.0em; color: var(--accent); }
-  .reveal p { font-size: 0.78em; line-height: 1.65; margin: 0.3em 0; }
-  .reveal ul, .reveal ol { font-size: 0.78em; line-height: 1.6; margin: 0.2em 0; }
-  .reveal li { margin-bottom: 0.15em; }
-  .reveal blockquote {
-    background: var(--surface);
-    border-left: 3px solid var(--accent);
-    padding: 0.6em 1em;
-    font-size: 0.75em;
-    font-style: italic;
-    color: var(--r-main-color);
-    width: 90%;
-    margin: 0.5em auto;
-  }
-  .reveal code { font-family: var(--r-code-font); font-size: 0.92em; }
-  .reveal pre { font-size: 0.52em; margin: 0.4em 0; }
-  .reveal pre code {
-    padding: 0.8em 1em;
-    border-radius: 4px;
-    background: var(--surface);
-    border: 1px solid #2a2a35;
-    max-height: 420px;
-  }
-  .reveal section { text-align: left; padding: 1.2em 1.6em !important; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
 
-  /* ── Colour / utility classes ── */
-  .accent  { color: var(--accent); }
-  .accent2 { color: var(--accent2); }
-  .accent3 { color: var(--accent3); }
-  .accent4 { color: var(--accent4); }
-  .dim     { color: var(--dim); }
-  .mono    { font-family: var(--r-code-font); }
-  .small   { font-size: 0.72em; }
-  .smaller { font-size: 0.62em; }
-  .tiny    { font-size: 0.52em; }
-  .left    { text-align: left; }
-  .center  { text-align: center; }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
 
-  /* ── Tags ── */
-  .tag {
-    display: inline-block;
-    font-family: var(--r-code-font);
-    font-size: 0.48em;
-    padding: 0.2em 0.55em;
-    border-radius: 3px;
-    margin: 0.1em 0.15em;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
   }
-  .tag-blue   { background: rgba(126,184,218,0.12); color: var(--accent);  border-color: rgba(126,184,218,0.25); }
-  .tag-orange { background: rgba(232,168,124,0.12); color: var(--accent2); border-color: rgba(232,168,124,0.25); }
-  .tag-green  { background: rgba(143,212,164,0.12); color: var(--accent3); border-color: rgba(143,212,164,0.25); }
-  .tag-purple { background: rgba(196,157,216,0.12); color: var(--accent4); border-color: rgba(196,157,216,0.25); }
-  .tag-dim    { background: rgba(106,102,96,0.12);  color: var(--dim);     border-color: rgba(106,102,96,0.25); }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
 
-  /* ── Tables ── */
-  .reveal table { font-size: 0.55em; width: 100%; border-collapse: collapse; margin: 0.3em 0; }
-  .reveal table th {
-    background: var(--surface2);
-    color: var(--accent);
-    font-family: var(--r-code-font);
-    font-weight: 700;
-    font-size: 0.9em;
-    padding: 0.5em 0.7em;
-    border-bottom: 2px solid var(--accent);
-    text-align: left;
-  }
-  .reveal table td {
-    padding: 0.4em 0.7em;
-    border-bottom: 1px solid #1e1e28;
-    vertical-align: top;
-  }
-  .reveal table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
 
-  /* ── Box-row / box ── */
-  .box-row {
-    display: flex; gap: 0.6em; margin: 0.5em 0; flex-wrap: wrap;
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
   }
-  .box {
-    flex: 1; min-width: 140px;
-    background: var(--surface);
-    border: 1px solid #2a2a35;
-    border-radius: 5px;
-    padding: 0.6em 0.8em;
-  }
-  .box h3 { font-size: 0.7em; margin: 0 0 0.3em 0; }
-  .box p, .box ul { font-size: 0.62em; }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
 
-  /* ── Two-column ── */
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.2em;
-    margin-top: 0.4em;
-  }
-  .two-col.wide-left  { grid-template-columns: 1.5fr 1fr; }
-  .two-col.wide-right { grid-template-columns: 1fr 1.5fr; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
 
-  /* ── Steps ── */
-  .steps {
-    counter-reset: step;
-    list-style: none;
-    padding-left: 0;
-  }
-  .steps li {
-    counter-increment: step;
-    padding-left: 1.8em;
-    position: relative;
-    margin-bottom: 0.4em;
-  }
-  .steps li::before {
-    content: counter(step);
-    position: absolute;
-    left: 0;
-    font-family: var(--r-code-font);
-    font-size: 0.75em;
-    font-weight: 700;
-    color: var(--accent);
-    background: rgba(126,184,218,0.12);
-    width: 1.4em; height: 1.4em;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-  /* ── Title slide ── */
-  .title-slide {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100%;
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
   }
-  .title-slide h1 { font-size: 2.2em; font-weight: 900; margin-bottom: 0.2em; }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
   .title-slide .subtitle {
-    font-size: 0.72em;
-    color: var(--dim);
-    max-width: 30em;
-    line-height: 1.5;
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
   }
-  .title-slide .meta {
-    font-size: 0.45em;
-    color: var(--dim);
-    font-family: var(--r-code-font);
-  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-  /* ── Section slide ── */
-  .section-slide {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100%;
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
   }
-  .section-slide .section-num {
-    font-family: var(--r-code-font);
-    font-size: 5em;
-    font-weight: 700;
-    color: rgba(126,184,218,0.10);
-    line-height: 1;
-    margin-bottom: -0.15em;
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
   }
-  .section-slide h2 { font-size: 1.8em; margin-bottom: 0.15em; }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
-  /* ── Architecture stack ── */
-  .arch-stack {
-    display: flex; flex-direction: column; gap: 0; margin: 0.5em 0;
-  }
-  .arch-layer {
-    padding: 0.35em 0.8em;
-    font-family: var(--r-code-font);
-    font-size: 0.55em;
-    border: 1px solid #2a2a35;
-    text-align: center;
-  }
-
-  /* ── KV (key-value) ── */
-  .kv {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 0.15em 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    font-size: 0.68em;
-  }
-  .kv:last-child { border-bottom: none; }
-
-  /* ── Flow arrow ── */
-  .flow-arrow {
-    text-align: center;
-    font-size: 1.2em;
-    color: var(--dim);
-    margin: 0.1em 0;
-    letter-spacing: 0.1em;
-  }
-
-  /* ── Highlight bar ── */
-  .highlight-bar {
-    background: linear-gradient(90deg, rgba(126,184,218,0.10), transparent);
-    border-left: 3px solid var(--accent);
-    padding: 0.4em 0.8em;
-    margin: 0.4em 0;
-    font-size: 0.72em;
-  }
-
-  /* ── Slide footer ── */
-  .slide-footer {
-    position: absolute;
-    bottom: 0.5em;
-    left: 1.6em;
-    right: 1.6em;
-    font-size: 0.36em;
-    color: var(--dim);
-    font-family: var(--r-code-font);
-    border-top: 1px solid #1e1e28;
-    padding-top: 0.4em;
-    display: flex;
-    justify-content: space-between;
-  }
-
-  /* ── Overflow fix ── */
-  .reveal .slides > section { overflow-y: auto !important; }
-  .reveal .slides > section > section { overflow-y: auto !important; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
 
+
 <!-- ============================================================ -->
 <!-- SLIDE 1: Title -->
 <!-- ============================================================ -->
-<section class="title-slide" data-background-gradient="radial-gradient(ellipse at 30% 50%, #111828 0%, #0a0a0f 70%)">
-  <p class="mono small accent" style="letter-spacing:0.15em;">MODERN SOC DESIGN · PRESENTATION 08</p>
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:\'JetBrains Mono\',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">MODERN SOC DESIGN · PRESENTATION 08</div>
   <h1>CXL in ML Accelerator SoCs</h1>
-  <p class="subtitle">From Memory Expansion to Fabric-Attached Acceleration</p>
+  <div class="subtitle">From Memory Expansion to Fabric-Attached Acceleration</div>
+<div style="width:60px; height:3px; background:var(--amber); margin-bottom:1.4em;"></div>
   <p class="meta" style="margin-top:1.5em;">
     CXL.io · CXL.cache · CXL.mem · Memory pooling · Fabric switches · Type 1/2/3 devices · SoC integration
   </p>
@@ -286,58 +145,52 @@
 <!-- ============================================================ -->
 <!-- SLIDE 2: Why CXL for ML -->
 <!-- ============================================================ -->
-<section>
-  <h2>Why CXL for ML Accelerators?</h2>
-  <p class="dim small" style="margin-bottom:0.4em;">The memory wall is the dominant bottleneck in modern ML workloads</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>Why CXL for ML Accelerators?</h2></div>
+  <p style="color:var(--muted)" style="margin-bottom:0.4em;">The memory wall is the dominant bottleneck in modern ML workloads</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">The Memory Wall</h3>
+      <h3 class="a">The Memory Wall</h3>
       <ul>
-        <li><strong class="accent2">Capacity:</strong> GPT-4-class models require &gt;1 TB for KV-cache at scale; HBM3E tops out at 144 GB per stack</li>
-        <li><strong class="accent2">Bandwidth:</strong> LLM decode is memory-bandwidth-bound — each token reads the entire KV-cache</li>
-        <li><strong class="accent2">Cost:</strong> HBM at ~$10-15/GB vs DDR5 at ~$2-3/GB vs CXL-attached DDR5 at ~$3-4/GB</li>
-        <li><strong class="accent2">Stranded memory:</strong> Fixed per-device DRAM leads to 30-40% memory waste in heterogeneous clusters</li>
+        <li><strong class="g">Capacity:</strong> GPT-4-class models require &gt;1 TB for KV-cache at scale; HBM3E tops out at 144 GB per stack</li>
+        <li><strong class="g">Bandwidth:</strong> LLM decode is memory-bandwidth-bound — each token reads the entire KV-cache</li>
+        <li><strong class="g">Cost:</strong> HBM at ~$10-15/GB vs DDR5 at ~$2-3/GB vs CXL-attached DDR5 at ~$3-4/GB</li>
+        <li><strong class="g">Stranded memory:</strong> Fixed per-device DRAM leads to 30-40% memory waste in heterogeneous clusters</li>
       </ul>
     </div>
     <div>
-      <h3 class="accent3">CXL's Value Proposition</h3>
+      <h3 class="g">CXL's Value Proposition</h3>
       <ul>
-        <li><span class="accent">Coherent</span> access to terabytes of shared DDR5 memory</li>
-        <li><span class="accent">Cache-line granularity</span> — no DMA descriptor overhead</li>
-        <li><span class="accent">PCIe PHY reuse</span> — leverages existing SerDes IP</li>
-        <li><span class="accent">Memory pooling</span> — dynamic allocation eliminates stranding</li>
-        <li><span class="accent">Fabric scalability</span> — CXL 3.x enables rack-scale shared memory</li>
+        <li><span class="a">Coherent</span> access to terabytes of shared DDR5 memory</li>
+        <li><span class="a">Cache-line granularity</span> — no DMA descriptor overhead</li>
+        <li><span class="a">PCIe PHY reuse</span> — leverages existing SerDes IP</li>
+        <li><span class="a">Memory pooling</span> — dynamic allocation eliminates stranding</li>
+        <li><span class="a">Fabric scalability</span> — CXL 3.x enables rack-scale shared memory</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.6em;">
-        <strong class="accent">Key insight:</strong> CXL bridges the gap between fast-but-small HBM and large-but-remote networked memory.
+      <div class="card amber" style="margin-top:0.6em;">
+        <strong class="a">Key insight:</strong> CXL bridges the gap between fast-but- HBM and large-but-remote networked memory.
       </div>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>02 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 3: Section — CXL Protocol Foundation -->
 <!-- ============================================================ -->
-<section class="section-slide" data-background-gradient="radial-gradient(ellipse at 50% 50%, #111828 0%, #0a0a0f 70%)">
-  <div class="section-num">I</div>
-  <h2>CXL Protocol Foundation</h2>
-  <p class="dim">Sub-protocols, flex bus negotiation, and the CXL version timeline</p>
+<section data-background-color="#0a0a0f" >
+<div class="slide-hdr"><span class="tag">--</span><h2>CXL Protocol Foundation</h2></div>
+  <p style="color:var(--muted)">Sub-protocols, flex bus negotiation, and the CXL version timeline</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 4: CXL Protocol Stack -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL Protocol Stack</h2>
-  <p class="dim small">Three sub-protocols multiplexed over a single PCIe PHY via flex bus arbitration</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>CXL Protocol Stack</h2></div>
+  <p style="color:var(--muted)">Three sub-protocols multiplexed over a single PCIe PHY via flex bus arbitration</p>
 
-  <div class="two-col" style="margin-top:0.5em;">
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent); border-color:var(--accent);">
@@ -349,47 +202,42 @@
         <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3); border-color:var(--accent3);">
           CXL.mem &nbsp;(Host → Device memory)
         </div>
-        <div class="flow-arrow">▼</div>
+        <div class="ss-arrow">▼</div>
         <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4); border-color:var(--accent4);">
           CXL ARB/MUX &nbsp;(Flex Bus Arbitration)
         </div>
-        <div class="flow-arrow">▼</div>
+        <div class="ss-arrow">▼</div>
         <div class="arch-layer" style="background:var(--surface2); color:var(--dim);">
           PCIe 5.0 / 6.0 PHY &nbsp;(32/64 GT/s per lane)
         </div>
       </div>
 
-      <div class="highlight-bar" style="margin-top:0.6em;">
+      <div class="card amber" style="margin-top:0.6em;">
         <strong>Flex Bus</strong> dynamically allocates PHY bandwidth across sub-protocols each 2 μs arbitration window.
       </div>
     </div>
     <div>
-      <h3 class="accent">CXL.io</h3>
-      <p class="small">Equivalent to PCIe TLP. Used for device discovery, configuration, interrupts, DMA. Required by all device types.</p>
+      <h3 class="a">CXL.io</h3>
+      <p>Equivalent to PCIe TLP. Used for device discovery, configuration, interrupts, DMA. Required by all device types.</p>
 
-      <h3 class="accent2" style="margin-top:0.5em;">CXL.cache</h3>
-      <p class="small">Device caches host memory with hardware coherency. 3 channels: D2H Request, D2H Data, H2D Response. Uses MESI protocol variant. Enables accelerators to cache host data without software intervention.</p>
+      <h3 class="g" style="margin-top:0.5em;">CXL.cache</h3>
+      <p>Device caches host memory with hardware coherency. 3 channels: D2H Request, D2H Data, H2D Response. Uses MESI protocol variant. Enables accelerators to cache host data without software intervention.</p>
 
-      <h3 class="accent3" style="margin-top:0.5em;">CXL.mem</h3>
-      <p class="small">Host processor accesses device-attached memory (DDR, HBM) with load/store semantics. 2 channels: M2S (master-to-subordinate), S2M (subordinate-to-master). 64-byte cache-line granularity.</p>
+      <h3 class="g" style="margin-top:0.5em;">CXL.mem</h3>
+      <p>Host processor accesses device-attached memory (DDR, HBM) with load/store semantics. 2 channels: M2S (master-to-subordinate), S2M (subordinate-to-master). 64-byte cache-line granularity.</p>
 
-      <h3 class="accent4" style="margin-top:0.5em;">ARB/MUX</h3>
-      <p class="small">Multiplexes CXL.io, CXL.cache, and CXL.mem flits onto shared PCIe lanes. Supports 68B (CXL 2.0) and 256B (CXL 3.0) flit modes.</p>
+      <h3 class="p" style="margin-top:0.5em;">ARB/MUX</h3>
+      <p>Multiplexes CXL.io, CXL.cache, and CXL.mem flits onto shared PCIe lanes. Supports 68B (CXL 2.0) and 256B (CXL 3.0) flit modes.</p>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>04 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 5: CXL Version Evolution -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL Version Evolution</h2>
-  <p class="dim small">From PCIe 5.0 coherency to rack-scale fabric attach</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>CXL Version Evolution</h2></div>
+  <p style="color:var(--muted)">From PCIe 5.0 coherency to rack-scale fabric attach</p>
 
   <table style="margin-top:0.5em;">
     <thead>
@@ -406,71 +254,66 @@
         <td class="accent mono">CXL 1.0</td>
         <td>2019</td>
         <td>PCIe 5.0</td>
-        <td class="accent">64 GB/s</td>
+        <td class="a">64 GB/s</td>
         <td>CXL.io + CXL.cache + CXL.mem, 68B flits</td>
       </tr>
       <tr>
         <td class="accent mono">CXL 1.1</td>
         <td>2020</td>
         <td>PCIe 5.0</td>
-        <td class="accent">64 GB/s</td>
+        <td class="a">64 GB/s</td>
         <td>Compliance framework, DOE extensions, security hardening</td>
       </tr>
       <tr>
         <td class="accent2 mono">CXL 2.0</td>
         <td>2022</td>
         <td>PCIe 5.0</td>
-        <td class="accent">64 GB/s</td>
+        <td class="a">64 GB/s</td>
         <td>Single-level switching, memory pooling, FM-API, QoS telemetry, hot-plug</td>
       </tr>
       <tr>
         <td class="accent3 mono">CXL 3.0</td>
         <td>2022</td>
         <td>PCIe 6.0</td>
-        <td class="accent3">128 GB/s</td>
+        <td class="g">128 GB/s</td>
         <td>256B flits, multi-level switching, back-invalidation, global fabric attach (GFA), peer-to-peer, port-based routing (PBR)</td>
       </tr>
       <tr>
         <td class="accent4 mono">CXL 3.1</td>
         <td>2023</td>
         <td>PCIe 6.0</td>
-        <td class="accent3">128 GB/s</td>
+        <td class="g">128 GB/s</td>
         <td>Enhanced coherency, UIO extensions, TSP security, extended PBR, refined memory sharing semantics</td>
       </tr>
     </tbody>
   </table>
 
-  <div class="box-row" style="margin-top:0.5em;">
-    <div class="box">
-      <h3 class="accent">Flit Size Impact</h3>
+  <div class="cols cols-3" style="margin-top:0.5em;">
+    <div class="card">
+      <h3 class="a">Flit Size Impact</h3>
       <p>CXL 3.0's 256B flits reduce per-flit header overhead from ~6% to ~1.5%, enabling higher effective bandwidth for bulk transfers.</p>
     </div>
-    <div class="box">
-      <h3 class="accent2">PHY Bandwidth Doubling</h3>
+    <div class="card">
+      <h3 class="g">PHY Bandwidth Doubling</h3>
       <p>PCIe 6.0 (64 GT/s PAM4) doubles raw bandwidth. CXL 3.0 x16 delivers 128 GB/s per direction — matching one HBM3 stack.</p>
     </div>
-    <div class="box">
-      <h3 class="accent3">Backward Compatibility</h3>
+    <div class="card">
+      <h3 class="g">Backward Compatibility</h3>
       <p>CXL 3.x devices negotiate down to CXL 2.0/1.1 hosts. The flex bus handshake occurs during PCIe LTSSM training.</p>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>05 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 6: CXL.io Deep Dive -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL.io — Discovery, Configuration &amp; DMA</h2>
-  <p class="dim small">PCIe-compatible transaction layer present in every CXL device</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>CXL.io — Discovery, Configuration &amp; DMA</h2></div>
+  <p style="color:var(--muted)">PCIe-compatible transaction layer present in every CXL device</p>
 
-  <div class="two-col wide-left">
+  <div class="cols cols-6040">
     <div>
-      <h3 class="accent">Functions</h3>
+      <h3 class="a">Functions</h3>
       <ul>
         <li><strong>Device discovery:</strong> Standard PCIe enumeration — BIOS/OS sees CXL devices as PCIe endpoints with DVSEC capabilities</li>
         <li><strong>MMIO &amp; config space:</strong> BAR-mapped registers, CXL DVSEC (Designated Vendor-Specific Extended Capability) for CXL-specific negotiation</li>
@@ -479,12 +322,12 @@
         <li><strong>DMA:</strong> Bulk data movement for non-coherent transfers (firmware loading, telemetry extraction)</li>
       </ul>
 
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">DVSEC IDs:</strong> 0x1E98 (CXL), identifying CXL capability, device type, and supported sub-protocols.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="a">DVSEC IDs:</strong> 0x1E98 (CXL), identifying CXL capability, device type, and supported sub-protocols.
       </div>
     </div>
     <div>
-      <h3 class="accent2">CXL.io Transaction Types</h3>
+      <h3 class="g">CXL.io Transaction Types</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.10); color:var(--accent);">Memory Read / Write (MRd, MWr)</div>
         <div class="arch-layer" style="background:rgba(232,168,124,0.08); color:var(--accent2);">Config Read / Write (CfgRd0/1, CfgWr0/1)</div>
@@ -492,8 +335,8 @@
         <div class="arch-layer" style="background:rgba(196,157,216,0.08); color:var(--accent4);">Message (Msg, MsgD) — vendor-defined, error</div>
       </div>
 
-      <h3 class="accent3" style="margin-top:0.6em;">Boot Flow</h3>
-      <ol class="steps" style="font-size:0.68em;">
+      <h3 class="g" style="margin-top:0.6em;">Boot Flow</h3>
+      <ol  style="font-size:0.68em;">
         <li>PCIe PHY link training (LTSSM) — flex bus negotiation</li>
         <li>CXL DVSEC discovery — determine device type (1/2/3)</li>
         <li>CXL.cache/mem link initialization if applicable</li>
@@ -502,23 +345,18 @@
       </ol>
     </div>
   </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>06 / 22</span>
-  </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 7: CXL.cache Protocol -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL.cache — Device-to-Host Coherency</h2>
-  <p class="dim small">Enables accelerators to cache host memory lines with hardware-managed coherency</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>CXL.cache — Device-to-Host Coherency</h2></div>
+  <p style="color:var(--muted)">Enables accelerators to cache host memory lines with hardware-managed coherency</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">Channel Architecture</h3>
+      <h3 class="a">Channel Architecture</h3>
       <table>
         <thead>
           <tr><th>Channel</th><th>Direction</th><th>Purpose</th></tr>
@@ -533,52 +371,47 @@
         </tbody>
       </table>
 
-      <div class="highlight-bar" style="margin-top:0.4em;">
-        Coherency maintained via <strong class="accent">MESI variant</strong> — host home agent tracks all cached lines.
+      <div class="card amber" style="margin-top:0.4em;">
+        Coherency maintained via <strong class="a">MESI variant</strong> — host home agent tracks all cached lines.
       </div>
     </div>
     <div>
-      <h3 class="accent2">Snoop Flow Example</h3>
-      <p class="small">Device reads host memory line (cold miss):</p>
+      <h3 class="g">Snoop Flow Example</h3>
+      <p>Device reads host memory line (cold miss):</p>
       <div class="arch-stack" style="margin-top:0.3em;">
         <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
           1. Device sends D2H Req: RdShared(addr)
         </div>
-        <div class="flow-arrow">↓</div>
+        <div class="ss-arrow">↓</div>
         <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--accent2);">
           2. Host home agent checks snoop filter
         </div>
-        <div class="flow-arrow">↓</div>
+        <div class="ss-arrow">↓</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--accent3);">
           3. Host sends H2D Resp: GO-S + H2D Data (64B)
         </div>
-        <div class="flow-arrow">↓</div>
+        <div class="ss-arrow">↓</div>
         <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">
           4. Device installs line in Shared state
         </div>
       </div>
 
-      <h3 class="accent3" style="margin-top:0.5em;">ML Relevance</h3>
-      <p class="small">Type 2 accelerators (GPUs, NPUs) use CXL.cache to coherently access host-resident weight tensors, page tables, and scheduling queues — avoiding explicit DMA copy overhead.</p>
+      <h3 class="g" style="margin-top:0.5em;">ML Relevance</h3>
+      <p>Type 2 accelerators (GPUs, NPUs) use CXL.cache to coherently access host-resident weight tensors, page tables, and scheduling queues — avoiding explicit DMA copy overhead.</p>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>07 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 8: CXL.mem Protocol -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL.mem — Host Access to Device Memory</h2>
-  <p class="dim small">Load/store access to device-attached DDR/HBM at cache-line granularity</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>CXL.mem — Host Access to Device Memory</h2></div>
+  <p style="color:var(--muted)">Load/store access to device-attached DDR/HBM at cache-line granularity</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">M2S / S2M Channels</h3>
+      <h3 class="a">M2S / S2M Channels</h3>
       <table>
         <thead>
           <tr><th>Channel</th><th>Direction</th><th>Messages</th></tr>
@@ -591,49 +424,43 @@
         </tbody>
       </table>
 
-      <h3 class="accent2" style="margin-top:0.5em;">Bias Modes</h3>
-      <div class="kv"><span class="dim">Host Bias</span><span class="mono accent">Host caches device memory — device snoops host on access</span></div>
-      <div class="kv"><span class="dim">Device Bias</span><span class="mono accent2">Device controls caching — host snoops device on access</span></div>
-      <div class="kv"><span class="dim">Shared Bias</span><span class="mono accent3">Both can cache — full coherency protocol engaged</span></div>
+      <h3 class="g" style="margin-top:0.5em;">Bias Modes</h3>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Host Bias</span><span class="mono accent">Host caches device memory — device snoops host on access</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Device Bias</span><span class="mono accent2">Device controls caching — host snoops device on access</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Shared Bias</span><span class="mono accent3">Both can cache — full coherency protocol engaged</span></div>
     </div>
     <div>
-      <h3 class="accent3">Latency Budget</h3>
-      <div class="kv"><span class="dim">PCIe PHY traversal</span><span class="mono accent">~30-40 ns</span></div>
-      <div class="kv"><span class="dim">CXL protocol overhead</span><span class="mono accent">~20-30 ns</span></div>
-      <div class="kv"><span class="dim">Device-side DRAM access</span><span class="mono accent2">~40-60 ns (DDR5)</span></div>
-      <div class="kv"><span class="dim">Total CXL.mem read</span><span class="mono accent3">~150-250 ns</span></div>
-      <div class="kv"><span class="dim">Local DDR5 comparison</span><span class="mono dim">~80-100 ns</span></div>
+      <h3 class="g">Latency Budget</h3>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">PCIe PHY traversal</span><span class="mono accent">~30-40 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL protocol overhead</span><span class="mono accent">~20-30 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Device-side DRAM access</span><span class="mono accent2">~40-60 ns (DDR5)</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Total CXL.mem read</span><span class="mono accent3">~150-250 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Local DDR5 comparison</span><span class="mono dim">~80-100 ns</span></div>
 
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">1.5-2.5x local DRAM latency</strong> — but CXL.mem enables terabytes of capacity unreachable by local DIMMs alone. For batch-tolerant ML inference, throughput matters more than per-access latency.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="a">1.5-2.5x local DRAM latency</strong> — but CXL.mem enables terabytes of capacity unreachable by local DIMMs alone. For batch-tolerant ML inference, throughput matters more than per-access latency.
       </div>
 
-      <h3 class="accent4" style="margin-top:0.5em;">HDM Decoders</h3>
-      <p class="small">Host-managed Device Memory (HDM) decoders map CXL memory into the host physical address space. BIOS/firmware configures base/limit/interleave across up to 16 targets.</p>
+      <h3 class="p" style="margin-top:0.5em;">HDM Decoders</h3>
+      <p>Host-managed Device Memory (HDM) decoders map CXL memory into the host physical address space. BIOS/firmware configures base/limit/interleave across up to 16 targets.</p>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>08 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 9: Section — CXL Device Types -->
 <!-- ============================================================ -->
-<section class="section-slide" data-background-gradient="radial-gradient(ellipse at 50% 50%, #111828 0%, #0a0a0f 70%)">
-  <div class="section-num">II</div>
-  <h2>CXL Device Types</h2>
-  <p class="dim">Type 1, 2, and 3 — from smart NICs to memory expanders</p>
+<section data-background-color="#0a0a0f" >
+<div class="slide-hdr"><span class="tag">--</span><h2>CXL Device Types</h2></div>
+  <p style="color:var(--muted)">Type 1, 2, and 3 — from smart NICs to memory expanders</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 10: Device Type Taxonomy -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL Device Type Taxonomy</h2>
-  <p class="dim small">Three device types defined by which sub-protocols they implement</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>CXL Device Type Taxonomy</h2></div>
+  <p style="color:var(--muted)">Three device types defined by which sub-protocols they implement</p>
 
   <table style="margin-top:0.5em;">
     <thead>
@@ -649,197 +476,181 @@
     <tbody>
       <tr>
         <td class="accent mono" style="font-weight:700;">Type 1</td>
-        <td class="accent3">✓</td>
-        <td class="accent3">✓</td>
-        <td class="dim">—</td>
+        <td class="g">✓</td>
+        <td class="g">✓</td>
+        <td style="color:var(--muted)">—</td>
         <td>No device-attached memory</td>
         <td>SmartNICs, coherent accelerators without local DRAM</td>
       </tr>
       <tr>
         <td class="accent2 mono" style="font-weight:700;">Type 2</td>
-        <td class="accent3">✓</td>
-        <td class="accent3">✓</td>
-        <td class="accent3">✓</td>
+        <td class="g">✓</td>
+        <td class="g">✓</td>
+        <td class="g">✓</td>
         <td>Device-attached (HBM, GDDR, DDR)</td>
         <td>GPUs, FPGAs, ML accelerators with local memory</td>
       </tr>
       <tr>
         <td class="accent3 mono" style="font-weight:700;">Type 3</td>
-        <td class="accent3">✓</td>
-        <td class="dim">—</td>
-        <td class="accent3">✓</td>
+        <td class="g">✓</td>
+        <td style="color:var(--muted)">—</td>
+        <td class="g">✓</td>
         <td>Device-attached (DDR5, persistent memory)</td>
         <td>Memory expanders, CXL DRAM modules, CXL PMem</td>
       </tr>
     </tbody>
   </table>
 
-  <div class="box-row" style="margin-top:0.5em;">
-    <div class="box" style="border-left:3px solid var(--accent);">
-      <h3 class="accent">Type 1 — Coherent I/O</h3>
+  <div class="cols cols-3" style="margin-top:0.5em;">
+    <div class="card blue" style="border-left:3px solid var(--accent);">
+      <h3 class="a">Type 1 — Coherent I/O</h3>
       <p>Device caches host memory for low-latency access. No device memory exposed to host. Ideal for SmartNICs that snoop packet buffers in host LLC.</p>
     </div>
-    <div class="box" style="border-left:3px solid var(--accent2);">
-      <h3 class="accent2">Type 2 — Accelerator</h3>
+    <div class="card amber" style="border-left:3px solid var(--accent2);">
+      <h3 class="g">Type 2 — Accelerator</h3>
       <p>Full bidirectional coherency. Device has its own memory <em>and</em> caches host memory. The critical type for ML accelerator SoCs — enables unified virtual addressing.</p>
     </div>
-    <div class="box" style="border-left:3px solid var(--accent3);">
-      <h3 class="accent3">Type 3 — Memory Expander</h3>
+    <div class="card green" style="border-left:3px solid var(--accent3);">
+      <h3 class="g">Type 3 — Memory Expander</h3>
       <p>No device-side caching of host memory. Host accesses device memory via CXL.mem. Simplest controller — highest density, lowest cost per GB.</p>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>10 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 11: Type 3 Memory Expanders -->
 <!-- ============================================================ -->
-<section>
-  <h2>Type 3 — CXL Memory Expanders</h2>
-  <p class="dim small">Expanding host-addressable memory beyond DIMM slot limitations</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>Type 3 — CXL Memory Expanders</h2></div>
+  <p style="color:var(--muted)">Expanding host-addressable memory beyond DIMM slot limitations</p>
 
-  <div class="two-col wide-left">
+  <div class="cols cols-6040">
     <div>
-      <h3 class="accent">Architecture</h3>
+      <h3 class="a">Architecture</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent);">Host CPU (CXL Root Port)</div>
-        <div class="flow-arrow">↕ CXL.io + CXL.mem</div>
+        <div class="ss-arrow">↕ CXL.io + CXL.mem</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">CXL Type 3 Controller</div>
-        <div class="flow-arrow">↕ DDR5 PHY</div>
+        <div class="ss-arrow">↕ DDR5 PHY</div>
         <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--accent2);">DDR5 DRAM (up to 2 TB per device)</div>
       </div>
 
-      <h3 class="accent2" style="margin-top:0.5em;">Bandwidth Characteristics</h3>
-      <div class="kv"><span class="dim">CXL x16 (PCIe 5.0)</span><span class="mono accent">~63 GB/s per direction</span></div>
-      <div class="kv"><span class="dim">CXL x16 (PCIe 6.0)</span><span class="mono accent3">~126 GB/s per direction</span></div>
-      <div class="kv"><span class="dim">DDR5-5600 (2ch)</span><span class="mono accent2">~89.6 GB/s</span></div>
-      <div class="kv"><span class="dim">Read latency</span><span class="mono accent4">170-250 ns typical</span></div>
+      <h3 class="g" style="margin-top:0.5em;">Bandwidth Characteristics</h3>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL x16 (PCIe 5.0)</span><span class="mono accent">~63 GB/s per direction</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL x16 (PCIe 6.0)</span><span class="mono accent3">~126 GB/s per direction</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">DDR5-5600 (2ch)</span><span class="mono accent2">~89.6 GB/s</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Read latency</span><span class="mono accent4">170-250 ns typical</span></div>
     </div>
     <div>
-      <h3 class="accent3">Products &amp; Deployments</h3>
+      <h3 class="g">Products &amp; Deployments</h3>
       <ul>
-        <li><strong class="accent">Samsung CMM-D:</strong> CXL 2.0 DDR5 memory module, 128 GB, E1.S form factor, deployed in hyperscale memory tiering</li>
-        <li><strong class="accent2">SK hynix CMS:</strong> CXL Memory Semiconductor — 96 GB CXL 2.0 DRAM, PCIe 5.0 x8, &lt;200 ns latency</li>
-        <li><strong class="accent3">Micron CZ120:</strong> CXL 2.0 memory expander, 256 GB, E3.S, targets 4 TB per socket via pooling</li>
-        <li><strong class="accent4">Samsung CMM-H:</strong> CXL-attached HBM, combining high bandwidth with CXL flexibility</li>
+        <li><strong class="a">Samsung CMM-D:</strong> CXL 2.0 DDR5 memory module, 128 GB, E1.S form factor, deployed in hyperscale memory tiering</li>
+        <li><strong class="g">SK hynix CMS:</strong> CXL Memory Semiconductor — 96 GB CXL 2.0 DRAM, PCIe 5.0 x8, &lt;200 ns latency</li>
+        <li><strong class="g">Micron CZ120:</strong> CXL 2.0 memory expander, 256 GB, E3.S, targets 4 TB per socket via pooling</li>
+        <li><strong class="p">Samsung CMM-H:</strong> CXL-attached HBM, combining high bandwidth with CXL flexibility</li>
       </ul>
 
-      <blockquote style="margin-top:0.5em;">
+      <div class="card blue" style="margin-top:0.5em;">
         "Type 3 memory expanders turn PCIe slots into DRAM slots — unlocking 2-4x the memory capacity of DIMM-only configurations at ~50% lower cost per GB."
-      </blockquote>
+      </div>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>11 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 12: Type 2 Accelerators -->
 <!-- ============================================================ -->
-<section>
-  <h2>Type 2 — CXL Accelerators for ML</h2>
-  <p class="dim small">Full coherency with device-attached memory — the key CXL device type for ML workloads</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Type 2 — CXL Accelerators for ML</h2></div>
+  <p style="color:var(--muted)">Full coherency with device-attached memory — the key CXL device type for ML workloads</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">Why Type 2 for ML?</h3>
+      <h3 class="a">Why Type 2 for ML?</h3>
       <ul>
-        <li><strong class="accent2">Unified Virtual Memory:</strong> GPU/NPU and CPU share a single virtual address space — no explicit copies</li>
-        <li><strong class="accent2">Coherent Host Access:</strong> Accelerator caches host-resident data (page tables, scheduling metadata) via CXL.cache</li>
-        <li><strong class="accent2">Host-Visible Device Memory:</strong> CPU can directly read/write accelerator HBM/GDDR via CXL.mem</li>
-        <li><strong class="accent2">Demand Paging:</strong> CXL.cache supports ATS (Address Translation Services) — enables GPU page faults resolved by host OS</li>
+        <li><strong class="g">Unified Virtual Memory:</strong> GPU/NPU and CPU share a single virtual address space — no explicit copies</li>
+        <li><strong class="g">Coherent Host Access:</strong> Accelerator caches host-resident data (page tables, scheduling metadata) via CXL.cache</li>
+        <li><strong class="g">Host-Visible Device Memory:</strong> CPU can directly read/write accelerator HBM/GDDR via CXL.mem</li>
+        <li><strong class="g">Demand Paging:</strong> CXL.cache supports ATS (Address Translation Services) — enables GPU page faults resolved by host OS</li>
       </ul>
 
-      <h3 class="accent3" style="margin-top:0.4em;">Bias Mode for ML</h3>
-      <p class="small"><strong class="accent">Device Bias</strong> during compute-intensive phases (GEMM, attention) — device owns its memory, minimal snooping. <strong class="accent2">Host Bias</strong> during data staging — CPU writes model weights directly into device memory.</p>
+      <h3 class="g" style="margin-top:0.4em;">Bias Mode for ML</h3>
+      <p><strong class="a">Device Bias</strong> during compute-intensive phases (GEMM, attention) — device owns its memory, minimal snooping. <strong class="g">Host Bias</strong> during data staging — CPU writes model weights directly into device memory.</p>
     </div>
     <div>
-      <h3 class="accent2">Type 2 Architecture</h3>
+      <h3 class="g">Type 2 Architecture</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">Host CPU + System Memory</div>
-        <div class="flow-arrow">↕ CXL.io + CXL.cache + CXL.mem</div>
+        <div class="ss-arrow">↕ CXL.io + CXL.cache + CXL.mem</div>
         <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">Type 2 CXL Controller + Coherency Agent</div>
-        <div class="flow-arrow">↕</div>
+        <div class="ss-arrow">↕</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--accent3);">ML Compute Engine (Systolic / Tensor Core)</div>
-        <div class="flow-arrow">↕</div>
+        <div class="ss-arrow">↕</div>
         <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">Device-Attached HBM3 / GDDR7</div>
       </div>
 
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">SVM (Shared Virtual Memory):</strong> Type 2 enables the host and device to share page tables via ATS/PRI, eliminating pinned memory requirements and enabling oversubscription of device memory.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="a">SVM (Shared Virtual Memory):</strong> Type 2 enables the host and device to share page tables via ATS/PRI, eliminating pinned memory requirements and enabling oversubscription of device memory.
       </div>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>12 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 13: Section — CXL Fabric & Pooling -->
 <!-- ============================================================ -->
-<section class="section-slide" data-background-gradient="radial-gradient(ellipse at 50% 50%, #111828 0%, #0a0a0f 70%)">
-  <div class="section-num">III</div>
-  <h2>CXL Fabric &amp; Pooling</h2>
-  <p class="dim">Switches, memory pools, and rack-scale shared memory</p>
+<section data-background-color="#0a0a0f" >
+<div class="slide-hdr"><span class="tag">--</span><h2>CXL Fabric &amp; Pooling</h2></div>
+  <p style="color:var(--muted)">Switches, memory pools, and rack-scale shared memory</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 14: CXL Switches & Fabric -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL Switches &amp; Fabric Topology</h2>
-  <p class="dim small">From point-to-point links to multi-level fabric with dynamic resource assignment</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>CXL Switches &amp; Fabric Topology</h2></div>
+  <p style="color:var(--muted)">From point-to-point links to multi-level fabric with dynamic resource assignment</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">Single-Level Switch (CXL 2.0)</h3>
+      <h3 class="a">Single-Level Switch (CXL 2.0)</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
           Host 0 &nbsp; | &nbsp; Host 1 &nbsp; | &nbsp; Host 2 &nbsp; | &nbsp; Host 3
         </div>
-        <div class="flow-arrow">↕ Upstream Ports</div>
+        <div class="ss-arrow">↕ Upstream Ports</div>
         <div class="arch-layer" style="background:rgba(232,168,124,0.15); color:var(--accent2);">
           CXL 2.0 Switch + Fabric Manager
         </div>
-        <div class="flow-arrow">↕ Downstream Ports (Virtual CXL Switches)</div>
+        <div class="ss-arrow">↕ Downstream Ports (Virtual CXL Switches)</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">
           Type 3 Mem | Type 3 Mem | Type 2 Accel | Type 3 Mem
         </div>
       </div>
 
-      <p class="small" style="margin-top:0.3em;">Each host sees a <strong class="accent">Virtual CXL Switch (VCS)</strong> with dedicated downstream ports. Fabric Manager dynamically binds devices to hosts via MLD (Multi-Logical Device) or SLD (Single-Logical Device) model.</p>
+      <p style="margin-top:0.3em;">Each host sees a <strong class="a">Virtual CXL Switch (VCS)</strong> with dedicated downstream ports. Fabric Manager dynamically binds devices to hosts via MLD (Multi-Logical Device) or SLD (Single-Logical Device) model.</p>
     </div>
     <div>
-      <h3 class="accent2">Multi-Level Switching (CXL 3.0+)</h3>
+      <h3 class="g">Multi-Level Switching (CXL 3.0+)</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
           Host Rack 0 &nbsp; | &nbsp; Host Rack 1
         </div>
-        <div class="flow-arrow">↕</div>
+        <div class="ss-arrow">↕</div>
         <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--accent4);">
           Level-2 CXL Switch (Spine)
         </div>
-        <div class="flow-arrow">↕</div>
+        <div class="ss-arrow">↕</div>
         <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">
           Level-1 Switch &nbsp; | &nbsp; Level-1 Switch
         </div>
-        <div class="flow-arrow">↕</div>
+        <div class="ss-arrow">↕</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">
           Memory Pool &nbsp; | &nbsp; Accelerators &nbsp; | &nbsp; Memory Pool
         </div>
       </div>
 
-      <h3 class="accent3" style="margin-top:0.4em;">Fabric Manager (FM)</h3>
+      <h3 class="g" style="margin-top:0.4em;">Fabric Manager (FM)</h3>
       <ul>
         <li>Software entity that discovers, configures, and manages CXL fabric</li>
         <li>Binds/unbinds device LDs to host VCS via FM-API</li>
@@ -848,35 +659,30 @@
       </ul>
     </div>
   </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>14 / 22</span>
-  </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 15: Memory Pooling -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL Memory Pooling</h2>
-  <p class="dim small">Dynamic shared memory resources across multiple hosts — eliminating stranded capacity</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>CXL Memory Pooling</h2></div>
+  <p style="color:var(--muted)">Dynamic shared memory resources across multiple hosts — eliminating stranded capacity</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">Pooling Architecture</h3>
+      <h3 class="a">Pooling Architecture</h3>
       <ul>
-        <li><strong class="accent2">Multi-Logical Device (MLD):</strong> A single physical Type 3 device partitioned into up to 16 Logical Devices (LDs), each assigned to a different host</li>
-        <li><strong class="accent2">Dynamic Capacity Device (DCD):</strong> CXL 3.0 feature — host requests memory extents on demand. FM allocates from a shared pool in configurable chunk sizes (256 MB to 1 TB)</li>
-        <li><strong class="accent2">Shared memory regions:</strong> CXL 3.0 allows multiple hosts to map the same physical memory — enables inter-host communication without network traversal</li>
+        <li><strong class="g">Multi-Logical Device (MLD):</strong> A single physical Type 3 device partitioned into up to 16 Logical Devices (LDs), each assigned to a different host</li>
+        <li><strong class="g">Dynamic Capacity Device (DCD):</strong> CXL 3.0 feature — host requests memory extents on demand. FM allocates from a shared pool in configurable chunk sizes (256 MB to 1 TB)</li>
+        <li><strong class="g">Shared memory regions:</strong> CXL 3.0 allows multiple hosts to map the same physical memory — enables inter-host communication without network traversal</li>
       </ul>
 
-      <div class="highlight-bar" style="margin-top:0.4em;">
-        <strong class="accent">Memory utilisation improvement:</strong> Hyperscale studies (Meta, Microsoft) show CXL pooling reduces stranded memory by 18-30%, saving ~$2-4M per 10k-server cluster.
+      <div class="card amber" style="margin-top:0.4em;">
+        <strong class="a">Memory utilisation improvement:</strong> Hyperscale studies (Meta, Microsoft) show CXL pooling reduces stranded memory by 18-30%, saving ~$2-4M per 10k-server cluster.
       </div>
     </div>
     <div>
-      <h3 class="accent3">Pooling for ML Inference Clusters</h3>
+      <h3 class="g">Pooling for ML Inference Clusters</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
           Inference Host A (serving GPT-4o)
@@ -887,92 +693,81 @@
         <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">
           Inference Host C (idle — scaling down)
         </div>
-        <div class="flow-arrow">↕ CXL Switch</div>
+        <div class="ss-arrow">↕ CXL Switch</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.15); color:var(--accent3);">
           Shared CXL Memory Pool (4 TB DDR5)
         </div>
       </div>
 
-      <p class="small" style="margin-top:0.3em;">Host A dynamically allocates 1.5 TB for KV-cache. Host B uses 800 GB. When Host C goes idle, its 700 GB returns to the pool. FM reallocates to Host A within microseconds — no data migration needed via DCD.</p>
+      <p style="margin-top:0.3em;">Host A dynamically allocates 1.5 TB for KV-cache. Host B uses 800 GB. When Host C goes idle, its 700 GB returns to the pool. FM reallocates to Host A within microseconds — no data migration needed via DCD.</p>
 
-      <div class="kv" style="margin-top:0.3em;"><span class="dim">Allocation granularity</span><span class="mono accent">256 MB — 1 TB extents</span></div>
-      <div class="kv"><span class="dim">Reallocation time</span><span class="mono accent2">~10-100 μs (FM-API)</span></div>
-      <div class="kv"><span class="dim">Max hosts per pool</span><span class="mono accent3">16 (MLD), 4096+ (DCD/GFA)</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="margin-top:0.3em;"><span style="color:var(--muted)">Allocation granularity</span><span class="mono accent">256 MB — 1 TB extents</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Reallocation time</span><span class="mono accent2">~10-100 μs (FM-API)</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Max hosts per pool</span><span class="mono accent3">16 (MLD), 4096+ (DCD/GFA)</span></div>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>15 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 16: CXL 3.0/3.1 Features -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL 3.0/3.1 — Advanced Fabric Features</h2>
-  <p class="dim small">Back-invalidation, global fabric attach, and enhanced coherency for rack-scale ML</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">18</span><h2>CXL 3.0/3.1 — Advanced Fabric Features</h2></div>
+  <p style="color:var(--muted)">Back-invalidation, global fabric attach, and enhanced coherency for rack-scale ML</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">Back-Invalidation (BI)</h3>
-      <p class="small">Type 3 devices gain limited coherency: device can issue <strong class="accent2">BISnp</strong> (Back-Invalidate Snoop) to host caches when another host writes to shared memory. Eliminates stale-data hazards in multi-host pooling without full CXL.cache complexity.</p>
+      <h3 class="a">Back-Invalidation (BI)</h3>
+      <p>Type 3 devices gain limited coherency: device can issue <strong class="g">BISnp</strong> (Back-Invalidate Snoop) to host caches when another host writes to shared memory. Eliminates stale-data hazards in multi-host pooling without full CXL.cache complexity.</p>
 
-      <h3 class="accent2" style="margin-top:0.4em;">Global Fabric Attach (GFA)</h3>
-      <p class="small">Extends CXL beyond single-switch topologies. Enables multi-level, multi-switch fabrics where any host can reach any device across the fabric. Uses <strong class="accent">Port-Based Routing (PBR)</strong> — switches route by physical port rather than device ID, enabling O(1) lookup latency in switch forwarding tables.</p>
+      <h3 class="g" style="margin-top:0.4em;">Global Fabric Attach (GFA)</h3>
+      <p>Extends CXL beyond single-switch topologies. Enables multi-level, multi-switch fabrics where any host can reach any device across the fabric. Uses <strong class="a">Port-Based Routing (PBR)</strong> — switches route by physical port rather than device ID, enabling O(1) lookup latency in switch forwarding tables.</p>
 
-      <h3 class="accent3" style="margin-top:0.4em;">256-Byte Flits</h3>
-      <p class="small">Doubles flit size from CXL 2.0's 68B. Reduces header-to-payload ratio, enables carrying 4x 64B cache lines per flit. Combined with PCIe 6.0, delivers 128 GB/s per direction on x16 link.</p>
+      <h3 class="g" style="margin-top:0.4em;">256-Byte Flits</h3>
+      <p>Doubles flit size from CXL 2.0's 68B. Reduces header-to-payload ratio, enables carrying 4x 64B cache lines per flit. Combined with PCIe 6.0, delivers 128 GB/s per direction on x16 link.</p>
     </div>
     <div>
-      <h3 class="accent4">CXL 3.1 Enhancements</h3>
+      <h3 class="p">CXL 3.1 Enhancements</h3>
       <ul>
-        <li><strong class="accent">TSP (TEE Security Protocol):</strong> Hardware-enforced encryption for CXL.mem traffic — essential for multi-tenant ML inference clusters</li>
-        <li><strong class="accent2">Unified I/O (UIO):</strong> Extends CXL coherency to non-PCIe fabrics (e.g., AMBA CHI bridges)</li>
-        <li><strong class="accent3">Extended PBR:</strong> Supports up to 4096 ports per fabric, enabling warehouse-scale CXL deployments</li>
-        <li><strong class="accent4">Per-device QoS:</strong> Fine-grained bandwidth/latency SLAs enforced at the switch level</li>
+        <li><strong class="a">TSP (TEE Security Protocol):</strong> Hardware-enforced encryption for CXL.mem traffic — essential for multi-tenant ML inference clusters</li>
+        <li><strong class="g">Unified I/O (UIO):</strong> Extends CXL coherency to non-PCIe fabrics (e.g., AMBA CHI bridges)</li>
+        <li><strong class="g">Extended PBR:</strong> Supports up to 4096 ports per fabric, enabling warehouse-scale CXL deployments</li>
+        <li><strong class="p">Per-device QoS:</strong> Fine-grained bandwidth/latency SLAs enforced at the switch level</li>
       </ul>
 
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">ML impact:</strong> CXL 3.1 GFA + DCD enables a rack of 32 inference servers to share a 64 TB memory pool, dynamically allocating KV-cache capacity per workload — approaching the memory elasticity of disaggregated storage with DRAM latency.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="a">ML impact:</strong> CXL 3.1 GFA + DCD enables a rack of 32 inference servers to share a 64 TB memory pool, dynamically allocating KV-cache capacity per workload — approaching the memory elasticity of disaggregated storage with DRAM latency.
       </div>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>16 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 17: Section — CXL for ML Workloads -->
 <!-- ============================================================ -->
-<section class="section-slide" data-background-gradient="radial-gradient(ellipse at 50% 50%, #111828 0%, #0a0a0f 70%)">
-  <div class="section-num">IV</div>
-  <h2>CXL for ML Workloads</h2>
-  <p class="dim">KV-cache expansion, memory-bound inference, and SoC integration challenges</p>
+<section data-background-color="#0a0a0f" >
+<div class="slide-hdr"><span class="tag">--</span><h2>CXL for ML Workloads</h2></div>
+  <p style="color:var(--muted)">KV-cache expansion, memory-bound inference, and SoC integration challenges</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 18: KV-Cache Expansion -->
 <!-- ============================================================ -->
-<section>
-  <h2>KV-Cache Expansion via CXL Memory</h2>
-  <p class="dim small">Offloading KV-cache to CXL-attached DRAM for long-context LLM inference</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">20</span><h2>KV-Cache Expansion via CXL Memory</h2></div>
+  <p style="color:var(--muted)">Offloading KV-cache to CXL-attached DRAM for long-context LLM inference</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">The KV-Cache Problem</h3>
+      <h3 class="a">The KV-Cache Problem</h3>
       <ul>
         <li>LLM inference stores key/value tensors for every token in every layer</li>
-        <li><strong class="accent2">GPT-4 (128k context):</strong> ~50-80 GB KV-cache per request at FP16</li>
-        <li><strong class="accent2">Llama-3-405B:</strong> ~160 GB KV-cache at 128k tokens, FP16</li>
+        <li><strong class="g">GPT-4 (128k context):</strong> ~50-80 GB KV-cache per request at FP16</li>
+        <li><strong class="g">Llama-3-405B:</strong> ~160 GB KV-cache at 128k tokens, FP16</li>
         <li>Batching 64 concurrent requests: 3-10 TB KV-cache — far exceeds HBM capacity</li>
       </ul>
 
-      <h3 class="accent2" style="margin-top:0.4em;">CXL Tiered Memory Approach</h3>
+      <h3 class="g" style="margin-top:0.4em;">CXL Tiered Memory Approach</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent);">
           Tier 0: HBM3E (hot KV layers) — 80 GB, ~3.2 TB/s
@@ -986,46 +781,41 @@
       </div>
     </div>
     <div>
-      <h3 class="accent3">Latency Analysis</h3>
+      <h3 class="g">Latency Analysis</h3>
       <table>
         <thead>
           <tr><th>Access Tier</th><th>Latency</th><th>BW per Device</th></tr>
         </thead>
         <tbody>
-          <tr><td class="accent mono">HBM3E</td><td>~15-20 ns</td><td class="accent">~1 TB/s</td></tr>
-          <tr><td class="accent2 mono">Local DDR5</td><td>~80-100 ns</td><td class="accent2">~90 GB/s</td></tr>
-          <tr><td class="accent3 mono">CXL DDR5</td><td>~170-250 ns</td><td class="accent3">~64 GB/s (x16)</td></tr>
-          <tr><td class="accent4 mono">CXL PMem</td><td>~300-500 ns</td><td class="accent4">~20 GB/s</td></tr>
+          <tr><td class="accent mono">HBM3E</td><td>~15-20 ns</td><td class="a">~1 TB/s</td></tr>
+          <tr><td class="accent2 mono">Local DDR5</td><td>~80-100 ns</td><td class="g">~90 GB/s</td></tr>
+          <tr><td class="accent3 mono">CXL DDR5</td><td>~170-250 ns</td><td class="g">~64 GB/s (x16)</td></tr>
+          <tr><td class="accent4 mono">CXL PMem</td><td>~300-500 ns</td><td class="p">~20 GB/s</td></tr>
         </tbody>
       </table>
 
-      <div class="highlight-bar" style="margin-top:0.4em;">
-        <strong class="accent">Key insight:</strong> Attention is sequential per-layer during decode. Only the <em>current</em> layer's KV entries must be in HBM. Prefetching the next layer from CXL overlaps with compute, hiding 80-90% of CXL latency.
+      <div class="card amber" style="margin-top:0.4em;">
+        <strong class="a">Key insight:</strong> Attention is sequential per-layer during decode. Only the <em>current</em> layer's KV entries must be in HBM. Prefetching the next layer from CXL overlaps with compute, hiding 80-90% of CXL latency.
       </div>
 
-      <p class="small" style="margin-top:0.3em;"><strong class="accent2">Research results (Meta, 2024):</strong> CXL-tiered KV-cache achieves &lt;5% throughput degradation vs all-HBM at 4x the context length capacity.</p>
+      <p style="margin-top:0.3em;"><strong class="g">Research results (Meta, 2024):</strong> CXL-tiered KV-cache achieves &lt;5% throughput degradation vs all-HBM at 4x the context length capacity.</p>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>18 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 19: Memory-Bandwidth-Bound Inference -->
 <!-- ============================================================ -->
-<section>
-  <h2>Memory-Bandwidth-Bound Inference</h2>
-  <p class="dim small">CXL pooled memory for distributed model sharding and capacity-constrained workloads</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">21</span><h2>Memory-Bandwidth-Bound Inference</h2></div>
+  <p style="color:var(--muted)">CXL pooled memory for distributed model sharding and capacity-constrained workloads</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">The Bandwidth Challenge</h3>
-      <p class="small">LLM decode is fundamentally memory-bandwidth-bound: each generated token reads all model weights once. For Llama-3-70B at FP16 (140 GB weights), generating at 30 tokens/s requires 4.2 TB/s — only achievable with 4+ HBM3E stacks.</p>
+      <h3 class="a">The Bandwidth Challenge</h3>
+      <p>LLM decode is fundamentally memory-bandwidth-bound: each generated token reads all model weights once. For Llama-3-70B at FP16 (140 GB weights), generating at 30 tokens/s requires 4.2 TB/s — only achievable with 4+ HBM3E stacks.</p>
 
-      <h3 class="accent2" style="margin-top:0.4em;">CXL for Capacity, Not Bandwidth</h3>
+      <h3 class="g" style="margin-top:0.4em;">CXL for Capacity, Not Bandwidth</h3>
       <ul>
         <li>CXL x16 PCIe 5.0: ~64 GB/s — insufficient alone for weight streaming</li>
         <li>But ideal for <strong>capacity-bound</strong> workloads: embeddings, KV-cache, activation checkpoints</li>
@@ -1033,12 +823,12 @@
         <li>CXL 3.0 x16 (PCIe 6.0): ~128 GB/s — approaching DDR5 channel bandwidth</li>
       </ul>
 
-      <div class="highlight-bar" style="margin-top:0.4em;">
-        <strong class="accent">Design rule:</strong> Place compute-hot tensors (weights, attention) in HBM. Place capacity-hot but bandwidth-cold data (KV-cache, embeddings, intermediate activations) in CXL DRAM.
+      <div class="card amber" style="margin-top:0.4em;">
+        <strong class="a">Design rule:</strong> Place compute-hot tensors (weights, attention) in HBM. Place capacity-hot but bandwidth-cold data (KV-cache, embeddings, intermediate activations) in CXL DRAM.
       </div>
     </div>
     <div>
-      <h3 class="accent3">Pooled Model Sharding</h3>
+      <h3 class="g">Pooled Model Sharding</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
           Inference Server 0 (Layers 0-19 in HBM)
@@ -1046,85 +836,75 @@
         <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--accent2);">
           Inference Server 1 (Layers 20-39 in HBM)
         </div>
-        <div class="flow-arrow">↕ CXL Switch</div>
+        <div class="ss-arrow">↕ CXL Switch</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.15); color:var(--accent3);">
           Shared CXL Pool: Full model weights (140 GB) + KV-cache (2 TB)
         </div>
       </div>
 
-      <p class="small" style="margin-top:0.3em;">Each server keeps its pipeline-parallel shard in HBM for fast GEMM execution. The shared CXL pool holds the complete model copy for failover, plus the distributed KV-cache that both servers read during cross-shard attention.</p>
+      <p style="margin-top:0.3em;">Each server keeps its pipeline-parallel shard in HBM for fast GEMM execution. The shared CXL pool holds the complete model copy for failover, plus the distributed KV-cache that both servers read during cross-shard attention.</p>
 
-      <h3 class="accent4" style="margin-top:0.4em;">CXL vs RDMA for ML</h3>
-      <div class="kv"><span class="dim">CXL latency</span><span class="mono accent">150-250 ns (load/store)</span></div>
-      <div class="kv"><span class="dim">RDMA latency</span><span class="mono accent2">1-2 μs (verb post + completion)</span></div>
-      <div class="kv"><span class="dim">CXL granularity</span><span class="mono accent3">64 B (cache line)</span></div>
-      <div class="kv"><span class="dim">RDMA granularity</span><span class="mono accent4">4 KB+ (page-level practical minimum)</span></div>
+      <h3 class="p" style="margin-top:0.4em;">CXL vs RDMA for ML</h3>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL latency</span><span class="mono accent">150-250 ns (load/store)</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">RDMA latency</span><span class="mono accent2">1-2 μs (verb post + completion)</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL granularity</span><span class="mono accent3">64 B (cache line)</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">RDMA granularity</span><span class="mono accent4">4 KB+ (page-level practical minimum)</span></div>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>19 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 20: CXL SoC Integration -->
 <!-- ============================================================ -->
-<section>
-  <h2>CXL SoC Integration</h2>
-  <p class="dim small">PHY design, controller IP, coherency bridges, and latency budgets for ML accelerator SoCs</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">22</span><h2>CXL SoC Integration</h2></div>
+  <p style="color:var(--muted)">PHY design, controller IP, coherency bridges, and latency budgets for ML accelerator SoCs</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">SoC Integration Architecture</h3>
+      <h3 class="a">SoC Integration Architecture</h3>
       <div class="arch-stack">
         <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
           ML Compute Clusters (Tensor Cores / Systolic Arrays)
         </div>
-        <div class="flow-arrow">↕ On-chip NoC (AXI/CHI)</div>
+        <div class="ss-arrow">↕ On-chip NoC (AXI/CHI)</div>
         <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">
           CXL Controller IP (Type 2: cache agent + mem decoder)
         </div>
-        <div class="flow-arrow">↕ AMBA CHI-to-CXL Bridge</div>
+        <div class="ss-arrow">↕ AMBA CHI-to-CXL Bridge</div>
         <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">
           CXL/PCIe Dual-Mode PHY (32/64 GT/s SerDes)
         </div>
-        <div class="flow-arrow">↕ Package bumps / retimers</div>
+        <div class="ss-arrow">↕ Package bumps / retimers</div>
         <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">
           CXL Root Port / Switch (off-chip)
         </div>
       </div>
     </div>
     <div>
-      <h3 class="accent2">Key Design Considerations</h3>
+      <h3 class="g">Key Design Considerations</h3>
       <ul>
-        <li><strong class="accent">PHY IP:</strong> CXL reuses PCIe PHY — Synopsys, Cadence, Alphawave offer CXL-ready PHY IP at 32 GT/s (Gen5) and 64 GT/s (Gen6). Area: ~5-8 mm² per x16 PHY at 5nm.</li>
-        <li><strong class="accent2">Controller IP:</strong> CXL controller manages flit packing, credit flow, and coherency state machines. ~1-2 mm² area. Vendors: Synopsys, Cadence, Rambus, Montage.</li>
-        <li><strong class="accent3">CHI-CXL Bridge:</strong> Translates on-chip AMBA CHI coherency transactions to CXL.cache/mem messages. Critical for ARM-based ML SoCs (e.g., Grace, Neoverse-based designs).</li>
-        <li><strong class="accent4">Latency budget:</strong></li>
+        <li><strong class="a">PHY IP:</strong> CXL reuses PCIe PHY — Synopsys, Cadence, Alphawave offer CXL-ready PHY IP at 32 GT/s (Gen5) and 64 GT/s (Gen6). Area: ~5-8 mm² per x16 PHY at 5nm.</li>
+        <li><strong class="g">Controller IP:</strong> CXL controller manages flit packing, credit flow, and coherency state machines. ~1-2 mm² area. Vendors: Synopsys, Cadence, Rambus, Montage.</li>
+        <li><strong class="g">CHI-CXL Bridge:</strong> Translates on-chip AMBA CHI coherency transactions to CXL.cache/mem messages. Critical for ARM-based ML SoCs (e.g., Grace, Neoverse-based designs).</li>
+        <li><strong class="p">Latency budget:</strong></li>
       </ul>
 
-      <div class="kv"><span class="dim">On-chip NoC</span><span class="mono accent">10-15 ns</span></div>
-      <div class="kv"><span class="dim">CXL controller</span><span class="mono accent2">5-10 ns</span></div>
-      <div class="kv"><span class="dim">PHY + link</span><span class="mono accent3">30-40 ns</span></div>
-      <div class="kv"><span class="dim">Remote DRAM</span><span class="mono accent4">40-60 ns</span></div>
-      <div class="kv" style="border-top:1px solid var(--accent);"><span class="accent" style="font-weight:700;">Total round-trip</span><span class="mono accent" style="font-weight:700;">~170-250 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">On-chip NoC</span><span class="mono accent">10-15 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL controller</span><span class="mono accent2">5-10 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">PHY + link</span><span class="mono accent3">30-40 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Remote DRAM</span><span class="mono accent4">40-60 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="border-top:1px solid var(--accent);"><span class="a" style="font-weight:700;">Total round-trip</span><span class="mono accent" style="font-weight:700;">~170-250 ns</span></div>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>20 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 21: Case Studies -->
 <!-- ============================================================ -->
-<section>
-  <h2>Industry Case Studies</h2>
-  <p class="dim small">Real-world CXL deployments in ML-adjacent server platforms and memory products</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">23</span><h2>Industry Case Studies</h2></div>
+  <p style="color:var(--muted)">Real-world CXL deployments in ML-adjacent server platforms and memory products</p>
 
   <table>
     <thead>
@@ -1182,74 +962,65 @@
     </tbody>
   </table>
 
-  <div class="box-row" style="margin-top:0.4em;">
-    <div class="box" style="border-left:3px solid var(--accent);">
-      <h3 class="accent">Intel SPR + Samsung CMM-D</h3>
+  <div class="cols cols-3" style="margin-top:0.4em;">
+    <div class="card blue" style="border-left:3px solid var(--accent);">
+      <h3 class="a">Intel SPR + Samsung CMM-D</h3>
       <p>First production CXL memory tiering deployment. Linux kernel 6.3+ with NUMA-aware CXL memory tiering via <span class="mono">cxl_mem</span> driver. ~180 ns measured read latency.</p>
     </div>
-    <div class="box" style="border-left:3px solid var(--accent3);">
-      <h3 class="accent3">Astera Labs Leo + SK hynix CMS</h3>
+    <div class="card green" style="border-left:3px solid var(--accent3);">
+      <h3 class="g">Astera Labs Leo + SK hynix CMS</h3>
       <p>Demonstrated 4-host memory pooling with dynamic allocation. Each host gained access to 384 GB shared CXL memory. Hot-plug device migration in &lt;50 μs.</p>
     </div>
-  </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>21 / 22</span>
   </div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 22: References & Further Reading -->
 <!-- ============================================================ -->
-<section>
-  <h2>References &amp; Further Reading</h2>
-  <p class="dim small">Specifications, papers, and industry resources</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">24</span><h2>References &amp; Further Reading</h2></div>
+  <p style="color:var(--muted)">Specifications, papers, and industry resources</p>
 
-  <div class="two-col">
+  <div class="cols cols-2">
     <div>
-      <h3 class="accent">Specifications</h3>
+      <h3 class="a">Specifications</h3>
       <ul>
-        <li><strong>CXL 3.1 Specification</strong> — CXL Consortium (2023). Full protocol definition, 900+ pages. <span class="mono tiny">computeexpresslink.org</span></li>
+        <li><strong>CXL 3.1 Specification</strong> — CXL Consortium (2023). Full protocol definition, 900+ pages. <span class="mono ">computeexpresslink.org</span></li>
         <li><strong>CXL 3.0 Specification</strong> — CXL Consortium (2022). 256B flits, GFA, multi-level switching.</li>
         <li><strong>CXL 2.0 Specification</strong> — CXL Consortium (2022). Single-level switching, memory pooling, FM-API.</li>
         <li><strong>PCIe 6.0 Specification</strong> — PCI-SIG (2022). 64 GT/s PAM4 PHY underpinning CXL 3.x.</li>
       </ul>
 
-      <h3 class="accent2" style="margin-top:0.5em;">Research Papers</h3>
+      <h3 class="g" style="margin-top:0.5em;">Research Papers</h3>
       <ul>
-        <li>Pond: CXL-based memory pooling systems for cloud — <span class="dim">ASPLOS 2023</span></li>
-        <li>TPP: Transparent page placement for CXL heterogeneous memory — <span class="dim">ASPLOS 2023</span></li>
-        <li>CXL-ANNS: Software-hardware collaborative memory disaggregation — <span class="dim">USENIX ATC 2023</span></li>
-        <li>Demystifying CXL memory with genuine devices and software — <span class="dim">MICRO 2023</span></li>
+        <li>Pond: CXL-based memory pooling systems for cloud — <span style="color:var(--muted)">ASPLOS 2023</span></li>
+        <li>TPP: Transparent page placement for CXL heterogeneous memory — <span style="color:var(--muted)">ASPLOS 2023</span></li>
+        <li>CXL-ANNS: Software-hardware collaborative memory disaggregation — <span style="color:var(--muted)">USENIX ATC 2023</span></li>
+        <li>Demystifying CXL memory with genuine devices and software — <span style="color:var(--muted)">MICRO 2023</span></li>
       </ul>
     </div>
     <div>
-      <h3 class="accent3">Industry Resources</h3>
+      <h3 class="g">Industry Resources</h3>
       <ul>
-        <li><strong>CXL Consortium</strong> — <span class="mono tiny">computeexpresslink.org</span> — specifications, white papers, member list</li>
-        <li><strong>Linux CXL Subsystem</strong> — kernel docs: <span class="mono tiny">Documentation/driver-api/cxl/</span> — cxl_pci, cxl_mem, cxl_port drivers</li>
+        <li><strong>CXL Consortium</strong> — <span class="mono ">computeexpresslink.org</span> — specifications, white papers, member list</li>
+        <li><strong>Linux CXL Subsystem</strong> — kernel docs: <span class="mono ">Documentation/driver-api/cxl/</span> — cxl_pci, cxl_mem, cxl_port drivers</li>
         <li><strong>QEMU CXL Emulation</strong> — Type 3 device emulation for kernel/driver development</li>
         <li><strong>Astera Labs</strong> — Leo CXL smart memory controller, Aries CXL retimer</li>
         <li><strong>Montage Technology</strong> — CXL controller IP and memory buffer chips</li>
       </ul>
 
-      <h3 class="accent4" style="margin-top:0.5em;">Key Takeaways</h3>
-      <div class="highlight-bar">
+      <h3 class="p" style="margin-top:0.5em;">Key Takeaways</h3>
+      <div class="card amber">
         CXL transforms ML accelerator SoC design by breaking the memory capacity wall with coherent, low-latency, pooled memory — enabling longer contexts, larger batches, and more efficient cluster utilisation.
       </div>
 
-      <p class="small dim" style="margin-top:0.8em;">
+      <p class=" dim" style="margin-top:0.8em;">
         Modern SoC Design Series · Presentation 08 · CXL in ML Accelerator SoCs
       </p>
     </div>
   </div>
-
-  <div class="slide-footer">
-    <span>CXL in ML Accelerator SoCs</span>
-    <span>22 / 22</span>
-  </div>
 </section>
+
 
 </div><!-- /slides -->
 </div><!-- /reveal -->
@@ -1260,15 +1031,16 @@
 Reveal.initialize({
   hash: true,
   slideNumber: 'c/t',
-  showSlideNumber: 'all',
   transition: 'fade',
   transitionSpeed: 'fast',
-  backgroundTransition: 'fade',
+  controls: true,
+  progress: true,
   center: false,
-  margin: 0.02,
-  width: 1280,
+  width: 1100,
   height: 900,
-  plugins: [ RevealHighlight ]
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
 });
 </script>
 <script>

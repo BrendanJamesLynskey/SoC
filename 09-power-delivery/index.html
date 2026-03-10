@@ -1,288 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modern ML Accelerator SoC Power Delivery — From VRM to Transistor</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-    --r-background-color: #0a0a0f;
-    --r-main-font: 'DM Sans', sans-serif;
-    --r-heading-font: 'Playfair Display', serif;
-    --r-code-font: 'JetBrains Mono', monospace;
-    --r-main-font-size: 28px;
-    --r-heading-color: #e8e4df;
-    --r-main-color: #c8c4bf;
-    --r-link-color: #7eb8da;
-    --r-link-color-hover: #a8d4ef;
-    --r-selection-background-color: #2a5a7a;
-    --accent: #7eb8da;
-    --accent2: #e8a87c;
-    --accent3: #8fd4a4;
-    --accent4: #c49dd8;
-    --dim: #6a6660;
-    --surface: #16161e;
-    --surface2: #1e1e28;
-    --bg: #0a0a0f;
-    --panel: #16161e;
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
     --border: #2a2a3a;
-    --muted: #6a6660;
-    --text: #c8c4bf;
-    --white: #e8e4df;
-    --mono: 'JetBrains Mono', monospace;
-    --serif: 'Playfair Display', serif;
-    --sans: 'DM Sans', sans-serif;
-}
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
 
-/* ─── reveal base ─── */
-.reveal-viewport { background: var(--bg); }
-.reveal { font-family: var(--sans); font-size: 1.55rem; color: var(--text); }
-.reveal h1,.reveal h2,.reveal h3,.reveal h4 {
-  font-family: var(--serif); letter-spacing: 0.01em; text-transform: none;
-  margin-bottom: 0.5em; color: var(--white); text-shadow: none;
-}
-.reveal h1 { font-size: 1.8em; line-height: 1.15; }
-.reveal h2 { font-size: 1.3em; }
-.reveal h3 { font-size: 1.05em; color: var(--accent); }
-.reveal p  { line-height: 1.55; margin: 0.4em 0; font-size: 0.82em; }
-.reveal ul { list-style: none; padding: 0; margin: 0; }
-.reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; font-size: 0.78em; line-height: 1.5; }
-.reveal ul li::before { content: "\25B8"; position: absolute; left: 0; color: var(--accent); }
-.reveal ul ul li::before { color: var(--accent2); content: "\25E6"; }
-.reveal section { padding: 0 !important; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
 
-/* ─── accent/utility classes ─── */
-.accent  { color: var(--accent); }
-.accent2 { color: var(--accent2); }
-.accent3 { color: var(--accent3); }
-.accent4 { color: var(--accent4); }
-.dim     { color: var(--muted); }
-.mono    { font-family: var(--mono); font-size: 0.85em; }
-.small   { font-size: 0.82em; }
-.smaller { font-size: 0.72em; }
-.tiny    { font-size: 0.6em; }
-.left    { text-align: left; }
-.center  { text-align: center; }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
 
-/* ─── slide shell ─── */
-.slide {
-  width: 100%; height: 100vh;
-  display: flex; flex-direction: column;
-  justify-content: flex-start;
-  box-sizing: border-box;
-  padding: 2.8rem 3.4rem 1.6rem;
-  background: var(--bg);
-  position: relative; overflow: hidden;
-}
-.slide::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-}
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
 
-/* ─── hero / title slide ─── */
-.hero, .title-slide {
-  justify-content: center; align-items: flex-start;
-  background: radial-gradient(ellipse 80% 60% at 70% 50%, #111828 0%, var(--bg) 70%);
-}
-.hero::after, .title-slide::after {
-  content: '';
-  position: absolute; right: -6rem; top: -6rem;
-  width: 42rem; height: 42rem; border-radius: 50%;
-  border: 1px solid rgba(126,184,218,0.08);
-  box-shadow: 0 0 0 4rem rgba(126,184,218,0.03), 0 0 0 8rem rgba(126,184,218,0.015);
-  pointer-events: none;
-}
-.hero-eyebrow { font-family: var(--mono); font-size: 0.62em; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1.2em; }
-.hero h1, .title-slide h1 { font-size: 2.1em; line-height: 1.1; max-width: 14em; }
-.hero-sub { font-size: 0.72em; color: var(--muted); margin-top: 1.2em; max-width: 38em; line-height: 1.7; }
-.hero-tags { display: flex; gap: 0.7em; flex-wrap: wrap; margin-top: 1.8em; }
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
 
-/* ─── section slide ─── */
-.section-slide {
-  justify-content: center; align-items: flex-start;
-  background: radial-gradient(ellipse 60% 50% at 50% 50%, #111828 0%, var(--bg) 70%);
-}
-.section-num {
-  font-family: var(--mono); font-size: 3.5em; font-weight: 700;
-  color: rgba(126,184,218,0.12); line-height: 1; margin-bottom: 0.1em;
-}
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
 
-/* ─── tags ─── */
-.tag { font-family: var(--mono); font-size: 0.55em; padding: 0.3em 0.8em; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); }
-.tag-blue  { background: rgba(126,184,218,0.12); color: var(--accent);  border-color: rgba(126,184,218,0.3); }
-.tag-amber { background: rgba(232,168,124,0.12); color: var(--accent2); border-color: rgba(232,168,124,0.3); }
-.tag-green { background: rgba(143,212,164,0.12); color: var(--accent3); border-color: rgba(143,212,164,0.3); }
-.tag-purple{ background: rgba(196,157,216,0.12); color: var(--accent4); border-color: rgba(196,157,216,0.3); }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
 
-/* ─── positioning helpers ─── */
-.slide-num { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; right: 2em; }
-.series-badge { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; left: 2em; }
-.slide-title { font-size: 1.0em; margin-bottom: 0.1em; }
-.slide-subtitle { font-size: 0.62em; color: var(--muted); font-family: var(--mono); letter-spacing: 0.06em; margin-bottom: 0.6em; }
-.slide-footer { font-family: var(--mono); font-size: 0.45em; color: var(--muted); position: absolute; bottom: 1.4em; left: 2em; }
-hr.div { border: none; border-top: 1px solid var(--border); margin: 0.8em 0; }
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-/* ─── layout helpers ─── */
-.cols { display: grid; gap: 2rem; margin-top: 0.8rem; }
-.cols-2 { grid-template-columns: 1fr 1fr; }
-.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.cols-2-1 { grid-template-columns: 2fr 1fr; }
-.cols-1-2 { grid-template-columns: 1fr 2fr; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 0.8rem; }
-.two-col-60-40 { display: grid; grid-template-columns: 60fr 40fr; gap: 2rem; margin-top: 0.8rem; }
-.two-col-40-60 { display: grid; grid-template-columns: 40fr 60fr; gap: 2rem; margin-top: 0.8rem; }
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
 
-/* ─── panel ─── */
-.panel {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; padding: 1.2rem 1.4rem;
-  position: relative;
-}
-.panel-title {
-  font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 0.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.5em;
-}
-.panel-title.amber { color: var(--accent2); }
-.panel-title.green { color: var(--accent3); }
-.panel-title.purple { color: var(--accent4); }
-.panel h3 { margin-top: 0; }
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
 
-/* ─── box / box-row ─── */
-.box {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; padding: 0.6em 0.9em;
-  font-family: var(--mono); font-size: 0.62em;
-  text-align: center; color: var(--text);
-}
-.box.blue   { border-color: var(--accent);  color: var(--accent);  }
-.box.amber  { border-color: var(--accent2); color: var(--accent2); }
-.box.green  { border-color: var(--accent3); color: var(--accent3); }
-.box.purple { border-color: var(--accent4); color: var(--accent4); }
-.box-row { display: flex; gap: 0.8em; margin: 0.6em 0; flex-wrap: wrap; }
-.box-row .box { flex: 1; }
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-/* ─── key-value rows ─── */
-.kv-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
-.kv-row:last-child { border-bottom: none; }
-.kv-label { color: var(--muted); }
-.kv-value { font-family: var(--mono); color: var(--accent); }
-.kv-value.amber { color: var(--accent2); }
-.kv-value.green { color: var(--accent3); }
-.kv-value.purple { color: var(--accent4); }
-.kv { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
-/* ─── steps ─── */
-.steps { counter-reset: step; padding-left: 0; }
-.steps li { counter-increment: step; list-style: none; padding-left: 2em; position: relative; margin-bottom: 0.5em; }
-.steps li::before { content: counter(step); position: absolute; left: 0; font-family: var(--mono); font-weight: 700; color: var(--accent); font-size: 0.9em; }
-
-/* ─── arch-stack ─── */
-.arch-stack { display: flex; flex-direction: column; gap: 0; }
-.arch-layer {
-  padding: 0.5em 1em; text-align: center;
-  font-family: var(--mono); font-size: 0.62em;
-  border: 1px solid var(--border); background: var(--panel);
-}
-.arch-layer.blue   { border-color: var(--accent);  color: var(--accent);  background: rgba(126,184,218,0.07); }
-.arch-layer.amber  { border-color: var(--accent2); color: var(--accent2); background: rgba(232,168,124,0.07); }
-.arch-layer.green  { border-color: var(--accent3); color: var(--accent3); background: rgba(143,212,164,0.07); }
-.arch-layer.purple { border-color: var(--accent4); color: var(--accent4); background: rgba(196,157,216,0.07); }
-
-/* ─── flow arrow ─── */
-.flow-arrow { text-align: center; font-size: 1.2em; color: var(--muted); line-height: 1; padding: 0.1em 0; }
-
-/* ─── highlight bar ─── */
-.highlight-bar {
-  background: linear-gradient(135deg, rgba(126,184,218,0.07), rgba(126,184,218,0.02));
-  border: 1px solid rgba(126,184,218,0.25); border-radius: 3px;
-  padding: 0.9em 1.1em; font-size: 0.72em; line-height: 1.55;
-}
-.highlight-bar.amber { background: linear-gradient(135deg, rgba(232,168,124,0.07), rgba(232,168,124,0.02)); border-color: rgba(232,168,124,0.25); }
-.highlight-bar.green { background: linear-gradient(135deg, rgba(143,212,164,0.07), rgba(143,212,164,0.02)); border-color: rgba(143,212,164,0.25); }
-.highlight-bar.purple { background: linear-gradient(135deg, rgba(196,157,216,0.07), rgba(196,157,216,0.02)); border-color: rgba(196,157,216,0.25); }
-
-/* ─── accent box ─── */
-.accent-box {
-  background: linear-gradient(135deg, rgba(126,184,218,0.07), rgba(126,184,218,0.02));
-  border: 1px solid rgba(126,184,218,0.25); border-radius: 3px;
-  padding: 0.9em 1.1em; font-size: 0.72em; line-height: 1.55;
-}
-.accent-box.amber { background: linear-gradient(135deg, rgba(232,168,124,0.07), rgba(232,168,124,0.02)); border-color: rgba(232,168,124,0.25); }
-.accent-box.green { background: linear-gradient(135deg, rgba(143,212,164,0.07), rgba(143,212,164,0.02)); border-color: rgba(143,212,164,0.25); }
-.accent-box.purple { background: linear-gradient(135deg, rgba(196,157,216,0.07), rgba(196,157,216,0.02)); border-color: rgba(196,157,216,0.25); }
-
-/* ─── stat row ─── */
-.stat-row { display: flex; gap: 1em; margin: 0.6em 0; }
-.stat {
-  flex: 1; background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; padding: 0.7em 0.9em; text-align: center;
-}
-.stat .val {
-  font-family: var(--serif); font-size: 1.5em; color: var(--accent); display: block; line-height: 1;
-}
-.stat .lbl { font-size: 0.55em; color: var(--muted); display: block; margin-top: 0.3em; }
-
-/* ─── table ─── */
-.dtable { width: 100%; border-collapse: collapse; font-size: 0.65em; }
-.dtable th { background: var(--panel); color: var(--accent); font-family: var(--mono); font-size: 0.92em; letter-spacing: 0.07em; padding: 0.55em 0.7em; border: 1px solid var(--border); text-align: left; }
-.dtable td { padding: 0.45em 0.7em; border: 1px solid var(--border); color: var(--text); }
-.dtable tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
-.dtable td.hi { color: var(--accent); font-family: var(--mono); }
-.dtable td.am { color: var(--accent2); font-family: var(--mono); }
-.dtable td.gr { color: var(--accent3); font-family: var(--mono); }
-.dtable td.pr { color: var(--accent4); font-family: var(--mono); }
-
-/* ─── equation ─── */
-.eq { font-family: var(--mono); font-size: 0.72em; color: var(--accent3); background: var(--panel); border: 1px solid var(--border); padding: 0.5em 1em; border-radius: 3px; text-align: center; }
-
-/* ─── timeline ─── */
-.timeline { position: relative; padding-left: 1.8rem; }
-.timeline::before { content:''; position:absolute; left:0.5rem; top:0.4em; bottom:0; width:1px; background: var(--border); }
-.tl-item { position:relative; margin-bottom:0.9em; }
-.tl-item::before { content:''; position:absolute; left:-1.38rem; top:0.4em; width:0.55rem; height:0.55rem; border-radius:50%; background: var(--accent); border:2px solid var(--bg); }
-.tl-item.amber::before { background: var(--accent2); }
-.tl-item.green::before { background: var(--accent3); }
-.tl-label { font-family: var(--mono); font-size:0.58em; color: var(--accent); }
-.tl-item.amber .tl-label { color: var(--accent2); }
-.tl-item.green .tl-label { color: var(--accent3); }
-.tl-text  { font-size: 0.72em; color: var(--text); line-height:1.45; margin-top:0.15em; }
-
-/* ─── code blocks ─── */
-.reveal pre {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; font-size: 0.6em; margin: 0;
-  box-shadow: none;
-}
-.reveal pre code { padding: 0.8em 1em; }
-
-/* ─── blockquote ─── */
-.reveal blockquote {
-  background: var(--panel); border-left: 3px solid var(--accent);
-  padding: 0.8em 1.2em; margin: 0.6em 0; font-size: 0.75em;
-  color: var(--text); font-style: italic; width: auto;
-  box-shadow: none;
-}
-
-/* ─── SVG diagrams ─── */
-svg.diag { width:100%; height:auto; display:block; }
-
-/* ─── progress bar ─── */
-.prog-wrap { background:var(--panel); border:1px solid var(--border); border-radius:2px; height:0.55rem; margin:0.35em 0; }
-.prog-bar  { height:100%; border-radius:2px; }
-
-/* ─── reveal overrides ─── */
-.reveal .controls { color: var(--accent); }
-.reveal .progress  { color: var(--accent); height: 3px; }
-.reveal .slide-number { font-family: var(--mono); font-size: 0.4em; color: var(--muted); }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
@@ -292,48 +130,34 @@ svg.diag { width:100%; height:auto; display:block; }
 <!-- ============================================================ -->
 <!-- SLIDE 1: Title                                               -->
 <!-- ============================================================ -->
-<section>
-<div class="slide hero" style="background: radial-gradient(ellipse at 30% 50%, #111828 0%, var(--bg) 70%);">
-  <div class="hero-eyebrow">Modern SoC Design Series &middot; Presentation 09</div>
-  <h1>ML Accelerator SoC<br/>Power Delivery</h1>
-  <p class="hero-sub">
-    From VRM to Transistor &mdash; Delivering 1000&thinsp;W+ to AI Silicon.
+<section class="title-slide" data-background-color="#0a0a0f">
+  <p class="meta">Modern SoC Design Series &middot; Presentation 09</p>
+  <h1>ML Accelerator SoC<br>Power Delivery</h1>
+  <div style="width:60px;height:3px;background:var(--amber);margin:.3em 0"></div>
+  <p class="subtitle">From VRM to Transistor &mdash; Delivering 1000&thinsp;W+ to AI Silicon.
     A rigorous tour of PDN impedance, backside power, integrated voltage regulation,
-    and the techniques that keep next-generation ML accelerators within their voltage noise budget.
-  </p>
-  <div class="hero-tags">
-    <span class="tag">BSPDN</span>
-    <span class="tag">PIVR</span>
-    <span class="tag">On-die Voltage Regulation</span>
-    <span class="tag">PDN Impedance</span>
-    <span class="tag">eDTC</span>
-    <span class="tag">Power Integrity</span>
-    <span class="tag">IR Drop</span>
-  </div>
-  <div class="series-badge">Modern SoC Design Series</div>
-  <div class="slide-num">01 / 22</div>
-</div>
+    and the techniques that keep next-generation ML accelerators within their voltage noise budget.</p>
+  <div style="display:flex;gap:.3em;flex-wrap:wrap;margin-top:.4em;"><span class="pill amber">BSPDN</span> <span class="pill amber">PIVR</span> <span class="pill amber">On-die Voltage Regulation</span> <span class="pill amber">PDN Impedance</span> <span class="pill amber">eDTC</span> <span class="pill amber">Power Integrity</span> <span class="pill amber">IR Drop</span></div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 2: Why Power Delivery Matters                          -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Why Power Delivery Matters for ML SoCs</div>
-  <div class="slide-subtitle">the hardest problem nobody outside silicon talks about</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Why Power Delivery Matters for ML SoCs</h2></div>
+  <p style="color:var(--muted);font-size:.48em">the hardest problem nobody outside silicon talks about</p>
 
-  <div class="stat-row" style="margin-top:0.5rem;">
-    <div class="stat"><span class="val">700&ndash;1200 W</span><span class="lbl">TDP of modern AI accelerators (B200, MI300X)</span></div>
-    <div class="stat"><span class="val" style="color:var(--accent2);">600+ A</span><span class="lbl">Peak current at 0.75&thinsp;V core supply</span></div>
-    <div class="stat"><span class="val" style="color:var(--accent3);">&lt;3%</span><span class="lbl">Voltage noise budget (&plusmn;22&thinsp;mV at 0.75&thinsp;V)</span></div>
-    <div class="stat"><span class="val" style="color:var(--accent4);">100+ A/ns</span><span class="lbl">di/dt transient during workload switching</span></div>
+  <div class="cols cols-2" style="gap:.5em" style="margin-top:0.5rem;">
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1">700&ndash;1200 W</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">TDP of modern AI accelerators (B200, MI300X)</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--amber);">600+ A</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Peak current at 0.75&thinsp;V core supply</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--green);">&lt;3%</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Voltage noise budget (&plusmn;22&thinsp;mV at 0.75&thinsp;V)</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--purple);">100+ A/ns</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">di/dt transient during workload switching</span></div>
   </div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.7rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Why It Is Getting Harder</div>
+      <div class="card">
+        <h3 style="color:var(--amber)">Why It Is Getting Harder</h3>
         <ul>
           <li><strong>Lower Vdd</strong> &mdash; sub-0.8&thinsp;V rails shrink absolute noise margin</li>
           <li><strong>Higher current density</strong> &mdash; &gt;2&thinsp;A/mm&sup2; in modern logic tiles</li>
@@ -344,8 +168,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Consequences of Poor Power Delivery</div>
+      <div class="card">
+        <h3 style="color:var(--green)">Consequences of Poor Power Delivery</h3>
         <ul>
           <li><strong>Timing failures</strong> &mdash; voltage droop slows gates, violates setup constraints</li>
           <li><strong>Frequency guardband</strong> &mdash; 10&ndash;15% clock reduction to tolerate worst-case droop</li>
@@ -357,91 +181,79 @@ svg.diag { width:100%; height:auto; display:block; }
     </div>
   </div>
 
-  <div class="highlight-bar amber" style="margin-top:0.7rem;">
+  <div class="card amber" style="margin-top:0.7rem;">
     Every 1% reduction in voltage guardband for a 1000&thinsp;W accelerator recovers ~10&thinsp;W &mdash; equivalent to a meaningful gain in TOPS/W for inference workloads.
   </div>
-  <div class="slide-num">02 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 3: Section — PDN Fundamentals                          -->
 <!-- ============================================================ -->
-<section>
-<div class="slide section-slide">
-  <div class="section-num">I</div>
-  <h2>PDN Fundamentals</h2>
-  <p class="hero-sub" style="margin-top:0.4em;">
-    Impedance targets, decoupling hierarchies, and IR drop &mdash; the physics that constrain
-    every watt reaching the transistor.
-  </p>
-  <div class="slide-num">03 / 22</div>
-</div>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">I</span><h2>PDN Fundamentals</h2></div>
+  <p>Impedance targets, decoupling hierarchies, and IR drop &mdash; the physics that constrain
+    every watt reaching the transistor.</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 4: PDN Overview                                        -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Power Delivery Network Overview</div>
-  <div class="slide-subtitle">VRM &rarr; PCB &rarr; Package &rarr; Die &mdash; every stage matters</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery Network Overview</h2></div>
+  <p style="color:var(--muted);font-size:.48em">VRM &rarr; PCB &rarr; Package &rarr; Die &mdash; every stage matters</p>
 
-  <div class="arch-stack" style="margin-top:0.6rem;">
-    <div class="arch-layer blue">VRM (Voltage Regulator Module) &mdash; 48&thinsp;V &rarr; 0.75&thinsp;V, multi-phase buck, &lt;1&thinsp;m&Omega; output impedance</div>
-    <div class="flow-arrow">&darr;</div>
-    <div class="arch-layer amber">PCB Planes &amp; Traces &mdash; 12&ndash;20 layer stackup, 50&ndash;200&thinsp;&micro;&Omega; sheet resistance, bulk &amp; MLCC decaps</div>
-    <div class="flow-arrow">&darr;</div>
-    <div class="arch-layer green">Package Substrate &mdash; 8&ndash;16 RDL layers, &micro;-bumps / C4 bumps, package decoupling caps (100s of nF)</div>
-    <div class="flow-arrow">&darr;</div>
-    <div class="arch-layer purple">On-Die PDN &mdash; M1&ndash;M15 metal stack, on-die MOS caps / eDTC, &lt;10&thinsp;m&Omega; target at &gt;100&thinsp;MHz</div>
+  <div style="display:flex;flex-direction:column;gap:0" style="margin-top:0.6rem;">
+    <div class="card blue" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">VRM (Voltage Regulator Module) &mdash; 48&thinsp;V &rarr; 0.75&thinsp;V, multi-phase buck, &lt;1&thinsp;m&Omega; output impedance</div>
+    <div class="ss-arrow">&darr;</div>
+    <div class="card amber" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">PCB Planes &amp; Traces &mdash; 12&ndash;20 layer stackup, 50&ndash;200&thinsp;&micro;&Omega; sheet resistance, bulk &amp; MLCC decaps</div>
+    <div class="ss-arrow">&darr;</div>
+    <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">Package Substrate &mdash; 8&ndash;16 RDL layers, &micro;-bumps / C4 bumps, package decoupling caps (100s of nF)</div>
+    <div class="ss-arrow">&darr;</div>
+    <div class="card purple" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">On-Die PDN &mdash; M1&ndash;M15 metal stack, on-die MOS caps / eDTC, &lt;10&thinsp;m&Omega; target at &gt;100&thinsp;MHz</div>
   </div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.8rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Impedance Budget by Stage</div>
-        <table class="dtable">
+      <div class="card">
+        <h3>Impedance Budget by Stage</h3>
+        <table>
           <tr><th>Stage</th><th>Z_typ</th><th>Frequency Range</th><th>Key Elements</th></tr>
-          <tr><td>VRM</td><td class="hi">&lt;1 m&Omega;</td><td>DC &ndash; 100 kHz</td><td>Output filter LC</td></tr>
-          <tr><td>PCB</td><td class="am">0.5&ndash;2 m&Omega;</td><td>100 kHz &ndash; 10 MHz</td><td>Bulk + MLCC caps</td></tr>
-          <tr><td>Package</td><td class="gr">1&ndash;5 m&Omega;</td><td>10&ndash;200 MHz</td><td>Pkg caps, TSVs</td></tr>
-          <tr><td>On-die</td><td class="pr">&lt;1 m&Omega;</td><td>&gt;200 MHz</td><td>MOS caps, eDTC</td></tr>
+          <tr><td>VRM</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">&lt;1 m&Omega;</td><td>DC &ndash; 100 kHz</td><td>Output filter LC</td></tr>
+          <tr><td>PCB</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">0.5&ndash;2 m&Omega;</td><td>100 kHz &ndash; 10 MHz</td><td>Bulk + MLCC caps</td></tr>
+          <tr><td>Package</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">1&ndash;5 m&Omega;</td><td>10&ndash;200 MHz</td><td>Pkg caps, TSVs</td></tr>
+          <tr><td>On-die</td><td style="color:var(--purple);font-family:'JetBrains Mono',monospace">&lt;1 m&Omega;</td><td>&gt;200 MHz</td><td>MOS caps, eDTC</td></tr>
         </table>
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Typical Numbers &mdash; 700W AI GPU</div>
-        <div class="kv-row"><span class="kv-label">Core voltage (Vdd)</span><span class="kv-value">0.75 V nominal</span></div>
-        <div class="kv-row"><span class="kv-label">Peak current</span><span class="kv-value amber">~930 A</span></div>
-        <div class="kv-row"><span class="kv-label">Bump / pillar count</span><span class="kv-value">50,000+ power bumps</span></div>
-        <div class="kv-row"><span class="kv-label">PCB decoupling</span><span class="kv-value green">~10 mF (MLCC array)</span></div>
-        <div class="kv-row"><span class="kv-label">Package decoupling</span><span class="kv-value green">200&ndash;800 nF</span></div>
-        <div class="kv-row"><span class="kv-label">On-die MOS cap</span><span class="kv-value green">100&ndash;300 nF</span></div>
+      <div class="card">
+        <h3 style="color:var(--amber)">Typical Numbers &mdash; 700W AI GPU</h3>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Core voltage (Vdd)</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">0.75 V nominal</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Peak current</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">~930 A</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Bump / pillar count</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">50,000+ power bumps</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">PCB decoupling</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">~10 mF (MLCC array)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Package decoupling</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">200&ndash;800 nF</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">On-die MOS cap</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">100&ndash;300 nF</span></div>
       </div>
     </div>
   </div>
-  <div class="slide-num">04 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 5: PDN Impedance & Target Impedance                    -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">PDN Impedance &amp; Target Impedance</div>
-  <div class="slide-subtitle">frequency-domain view of power delivery quality</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>PDN Impedance &amp; Target Impedance</h2></div>
+  <p style="color:var(--muted);font-size:.48em">frequency-domain view of power delivery quality</p>
 
-  <div class="eq" style="margin-top:0.5rem;margin-bottom:0.7rem;">
+  <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace" style="margin-top:0.5rem;margin-bottom:0.7rem;">
     Z_target = V_ripple / I_transient &nbsp;&nbsp;&mdash;&nbsp;&nbsp; e.g. Z_target = 22.5 mV / 600 A = 37.5 &micro;&Omega;
   </div>
 
   <div class="cols cols-2" style="gap:1.4rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Target Impedance Method</div>
+      <div class="card">
+        <h3>Target Impedance Method</h3>
         <ul>
           <li><strong>Flat impedance</strong> &mdash; maintain Z &lt; Z_target from DC to ~1&thinsp;GHz</li>
           <li><strong>Anti-resonance peaks</strong> &mdash; occur at transitions between cap stages; must be damped below target</li>
@@ -450,24 +262,24 @@ svg.diag { width:100%; height:auto; display:block; }
           <li>Analysis via S-parameter measurements or 3D EM extraction tools (Ansys SIwave, Cadence Sigrity)</li>
         </ul>
       </div>
-      <div class="accent-box" style="margin-top:0.7rem;">
-        For a 1000&thinsp;W SoC at 0.75&thinsp;V with 3% noise margin: Z_target = 0.0225 / 1333 = <strong style="color:var(--accent);">16.9&thinsp;&micro;&Omega;</strong> &mdash; an extraordinarily low impedance to maintain across decades of frequency.
+      <div class="card blue" style="margin-top:0.7rem;">
+        For a 1000&thinsp;W SoC at 0.75&thinsp;V with 3% noise margin: Z_target = 0.0225 / 1333 = <strong style="color:var(--blue);">16.9&thinsp;&micro;&Omega;</strong> &mdash; an extraordinarily low impedance to maintain across decades of frequency.
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Frequency Regimes</div>
-        <table class="dtable">
+      <div class="card">
+        <h3 style="color:var(--green)">Frequency Regimes</h3>
+        <table>
           <tr><th>Regime</th><th>Freq</th><th>Dominant Elements</th></tr>
-          <tr><td>VRM loop</td><td class="hi">DC &ndash; 50 kHz</td><td>VRM feedback + output caps</td></tr>
-          <tr><td>PCB resonance</td><td class="am">50 kHz &ndash; 5 MHz</td><td>Bulk + MLCC bank</td></tr>
-          <tr><td>Package cavity</td><td class="gr">5&ndash;200 MHz</td><td>Pkg caps + substrate planes</td></tr>
-          <tr><td>On-die network</td><td class="pr">200 MHz &ndash; 2 GHz</td><td>On-die decap + grid R/L</td></tr>
+          <tr><td>VRM loop</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">DC &ndash; 50 kHz</td><td>VRM feedback + output caps</td></tr>
+          <tr><td>PCB resonance</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">50 kHz &ndash; 5 MHz</td><td>Bulk + MLCC bank</td></tr>
+          <tr><td>Package cavity</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">5&ndash;200 MHz</td><td>Pkg caps + substrate planes</td></tr>
+          <tr><td>On-die network</td><td style="color:var(--purple);font-family:'JetBrains Mono',monospace">200 MHz &ndash; 2 GHz</td><td>On-die decap + grid R/L</td></tr>
           <tr><td>On-die local</td><td>&gt;2 GHz</td><td>Local wiring + gate cap</td></tr>
         </table>
       </div>
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Anti-Resonance Mitigation</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Anti-Resonance Mitigation</h3>
         <ul>
           <li>Overlap ESR-damped capacitor values to smooth transitions</li>
           <li>Use controlled-ESR capacitors to flatten peaks</li>
@@ -477,72 +289,66 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">05 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 6: Decoupling Capacitor Hierarchy                      -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Decoupling Capacitor Hierarchy</div>
-  <div class="slide-subtitle">ESL and ESR dominate performance at each stage</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Decoupling Capacitor Hierarchy</h2></div>
+  <p style="color:var(--muted);font-size:.48em">ESL and ESR dominate performance at each stage</p>
 
-  <table class="dtable" style="margin-top:0.5rem;">
+  <table style="margin-top:0.5rem;">
     <tr>
       <th>Cap Type</th><th>Capacitance</th><th>ESR</th><th>ESL</th><th>f_res</th><th>Location</th><th>Role</th>
     </tr>
     <tr>
-      <td><strong>Bulk electrolytic</strong></td><td class="hi">100&ndash;1000 &micro;F</td><td class="am">5&ndash;50 m&Omega;</td>
-      <td>5&ndash;20 nH</td><td class="gr">50&ndash;200 kHz</td><td>PCB near VRM</td><td>Energy reservoir, VRM decoupling</td>
+      <td><strong>Bulk electrolytic</strong></td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">100&ndash;1000 &micro;F</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">5&ndash;50 m&Omega;</td>
+      <td>5&ndash;20 nH</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">50&ndash;200 kHz</td><td>PCB near VRM</td><td>Energy reservoir, VRM decoupling</td>
     </tr>
     <tr>
-      <td><strong>MLCC (0402/0201)</strong></td><td class="hi">100 nF &ndash; 22 &micro;F</td><td class="am">2&ndash;10 m&Omega;</td>
-      <td>200&ndash;800 pH</td><td class="gr">2&ndash;30 MHz</td><td>PCB under socket</td><td>Mid-frequency decoupling</td>
+      <td><strong>MLCC (0402/0201)</strong></td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">100 nF &ndash; 22 &micro;F</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">2&ndash;10 m&Omega;</td>
+      <td>200&ndash;800 pH</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">2&ndash;30 MHz</td><td>PCB under socket</td><td>Mid-frequency decoupling</td>
     </tr>
     <tr>
-      <td><strong>Package MIM caps</strong></td><td class="hi">10&ndash;200 nF</td><td class="am">10&ndash;50 m&Omega;</td>
-      <td>30&ndash;100 pH</td><td class="gr">50&ndash;500 MHz</td><td>Package substrate</td><td>Package resonance suppression</td>
+      <td><strong>Package MIM caps</strong></td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">10&ndash;200 nF</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">10&ndash;50 m&Omega;</td>
+      <td>30&ndash;100 pH</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">50&ndash;500 MHz</td><td>Package substrate</td><td>Package resonance suppression</td>
     </tr>
     <tr>
-      <td><strong>On-die MOS cap</strong></td><td class="hi">50&ndash;200 nF</td><td class="am">1&ndash;5 m&Omega;</td>
-      <td>&lt;10 pH</td><td class="gr">&gt;1 GHz</td><td>Die (filler cells)</td><td>High-freq local decoupling</td>
+      <td><strong>On-die MOS cap</strong></td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">50&ndash;200 nF</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">1&ndash;5 m&Omega;</td>
+      <td>&lt;10 pH</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">&gt;1 GHz</td><td>Die (filler cells)</td><td>High-freq local decoupling</td>
     </tr>
     <tr>
-      <td><strong>eDTC (deep trench)</strong></td><td class="hi">100&ndash;500 nF</td><td class="am">&lt;2 m&Omega;</td>
-      <td>&lt;5 pH</td><td class="gr">&gt;2 GHz</td><td>Die (BEOL/substrate)</td><td>Ultra-high-freq, replaces area</td>
+      <td><strong>eDTC (deep trench)</strong></td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">100&ndash;500 nF</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">&lt;2 m&Omega;</td>
+      <td>&lt;5 pH</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">&gt;2 GHz</td><td>Die (BEOL/substrate)</td><td>Ultra-high-freq, replaces area</td>
     </tr>
   </table>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.7rem;">
     <div>
-      <div class="highlight-bar" style="margin-bottom:0;">
-        <strong style="color:var(--accent);">ESL is the enemy.</strong> At high frequencies, Z = 2&pi;f &middot; ESL dominates. A 10&thinsp;&micro;F cap with 1&thinsp;nH ESL has Z = 6.3&thinsp;&Omega; at 1&thinsp;GHz &mdash; useless for on-die decoupling. Only on-die caps with sub-10&thinsp;pH ESL matter above 200&thinsp;MHz.
+      <div class="card amber" style="margin-bottom:0;">
+        <strong style="color:var(--blue);">ESL is the enemy.</strong> At high frequencies, Z = 2&pi;f &middot; ESL dominates. A 10&thinsp;&micro;F cap with 1&thinsp;nH ESL has Z = 6.3&thinsp;&Omega; at 1&thinsp;GHz &mdash; useless for on-die decoupling. Only on-die caps with sub-10&thinsp;pH ESL matter above 200&thinsp;MHz.
       </div>
     </div>
     <div>
-      <div class="highlight-bar amber" style="margin-bottom:0;">
-        <strong style="color:var(--accent2);">Modern PDN: 1000+ MLCC</strong> on the PCB, 100+ package caps in the substrate, and &gt;15% of die area dedicated to on-die decoupling (MOS cap filler + eDTC). Total system decoupling: ~10&ndash;15 mF.
+      <div class="card amber" style="margin-bottom:0;">
+        <strong style="color:var(--amber);">Modern PDN: 1000+ MLCC</strong> on the PCB, 100+ package caps in the substrate, and &gt;15% of die area dedicated to on-die decoupling (MOS cap filler + eDTC). Total system decoupling: ~10&ndash;15 mF.
       </div>
     </div>
   </div>
-  <div class="slide-num">06 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 7: IR Drop Analysis                                    -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">IR Drop Analysis</div>
-  <div class="slide-subtitle">static vs dynamic drop, current density, and electromigration</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>IR Drop Analysis</h2></div>
+  <p style="color:var(--muted);font-size:.48em">static vs dynamic drop, current density, and electromigration</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Static IR Drop</div>
+      <div class="card">
+        <h3>Static IR Drop</h3>
         <ul>
           <li><strong>V_drop = I &times; R_path</strong> from pad to transistor</li>
           <li>Dominated by metal stack sheet resistance (Cu at 5nm: R_sheet ~50&ndash;100 m&Omega;/sq for M1)</li>
@@ -552,8 +358,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Dynamic IR Drop</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Dynamic IR Drop</h3>
         <ul>
           <li><strong>V_drop = L &times; di/dt + I &times; R</strong> &mdash; inductive component dominates during transients</li>
           <li>Triggered by simultaneous switching of large logic blocks</li>
@@ -564,9 +370,9 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Electromigration &amp; Black's Equation</div>
-        <div class="eq" style="margin-bottom:0.6rem;">
+      <div class="card">
+        <h3 style="color:var(--green)">Electromigration &amp; Black's Equation</h3>
+        <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace" style="margin-bottom:0.6rem;">
           MTTF = A &times; J<sup>&minus;n</sup> &times; exp(E_a / k_B T)
         </div>
         <ul>
@@ -578,8 +384,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">Current Density Maps</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">Current Density Maps</h3>
         <ul>
           <li>Generated via vectorless or VCD-based dynamic analysis</li>
           <li>Hot spots correlate with high-activity macro blocks (tensor cores, SRAM banks)</li>
@@ -589,37 +395,28 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">07 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 8: Section — Voltage Regulation                        -->
 <!-- ============================================================ -->
-<section>
-<div class="slide section-slide">
-  <div class="section-num">II</div>
-  <h2>Voltage Regulation</h2>
-  <p class="hero-sub" style="margin-top:0.4em;">
-    From board-level VRMs to package-integrated and on-die regulators &mdash;
-    moving regulation closer to the load.
-  </p>
-  <div class="slide-num">08 / 22</div>
-</div>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">II</span><h2>Voltage Regulation</h2></div>
+  <p>From board-level VRMs to package-integrated and on-die regulators &mdash;
+    moving regulation closer to the load.</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 9: VRM Topologies                                      -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">VRM Topologies for AI Accelerators</div>
-  <div class="slide-subtitle">multi-phase buck converters, DrMOS, and transient response</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>VRM Topologies for AI Accelerators</h2></div>
+  <p style="color:var(--muted);font-size:.48em">multi-phase buck converters, DrMOS, and transient response</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Multi-Phase Buck Converter</div>
+      <div class="card">
+        <h3>Multi-Phase Buck Converter</h3>
         <ul>
           <li><strong>Topology</strong> &mdash; N interleaved buck phases (typically 12&ndash;20 phases for &gt;600A)</li>
           <li><strong>Switching freq</strong> &mdash; 400&ndash;800 kHz per phase; effective ripple at N&times;f_sw</li>
@@ -630,8 +427,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">48V Direct Conversion</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">48V Direct Conversion</h3>
         <ul>
           <li>OCP Open Rack V3: 48V bus eliminates 12V intermediate stage</li>
           <li><strong>4:1 ratio</strong> &mdash; 48V &rarr; ~12V via switched-cap, then multi-phase buck to Vcore</li>
@@ -642,44 +439,41 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">DrMOS &amp; Smart Power Stages</div>
+      <div class="card">
+        <h3 style="color:var(--green)">DrMOS &amp; Smart Power Stages</h3>
         <ul>
           <li><strong>DrMOS</strong>: Driver + high-side + low-side FETs in single package (8&times;8 mm)</li>
           <li>Infineon TDA21490: 90A continuous, R_DS(on) &lt; 0.5 m&Omega;</li>
           <li>Renesas ISL99390: 90A, integrated temperature sensing</li>
-          <li><strong>GaN power stages</strong> &mdash; higher f_sw (2&ndash;4 MHz), smaller inductors, faster transient</li>
+          <li><strong>GaN power stages</strong> &mdash; higher f_sw (2&ndash;4 MHz),  inductors, faster transient</li>
           <li>EPC2302: GaN FET, 1.3 m&Omega;, enables &gt;2 MHz switching</li>
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">VRM Spec Example &mdash; AI GPU Card</div>
-        <div class="kv-row"><span class="kv-label">Input voltage</span><span class="kv-value">48V (rack) or 12V (legacy)</span></div>
-        <div class="kv-row"><span class="kv-label">Output voltage</span><span class="kv-value amber">0.65&ndash;0.85V (DVFS range)</span></div>
-        <div class="kv-row"><span class="kv-label">Max current</span><span class="kv-value amber">900&ndash;1600 A</span></div>
-        <div class="kv-row"><span class="kv-label">Phase count</span><span class="kv-value green">16&ndash;24 phases</span></div>
-        <div class="kv-row"><span class="kv-label">Efficiency</span><span class="kv-value green">&gt;90% at 80% load</span></div>
-        <div class="kv-row"><span class="kv-label">Load-step response</span><span class="kv-value">&lt;25 mV droop for 500A step</span></div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">VRM Spec Example &mdash; AI GPU Card</h3>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Input voltage</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">48V (rack) or 12V (legacy)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Output voltage</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">0.65&ndash;0.85V (DVFS range)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Max current</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">900&ndash;1600 A</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Phase count</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">16&ndash;24 phases</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Efficiency</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">&gt;90% at 80% load</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Load-step response</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">&lt;25 mV droop for 500A step</span></div>
       </div>
     </div>
   </div>
-  <div class="slide-num">09 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 10: PIVR — Package-Integrated Voltage Regulation       -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">On-Package Voltage Regulation (PIVR)</div>
-  <div class="slide-subtitle">Intel FIVR and the push to integrate regulation into the package</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>On-Package Voltage Regulation (PIVR)</h2></div>
+  <p style="color:var(--muted);font-size:.48em">Intel FIVR and the push to integrate regulation into the package</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Intel Fully Integrated Voltage Regulator (FIVR)</div>
+      <div class="card">
+        <h3>Intel Fully Integrated Voltage Regulator (FIVR)</h3>
         <ul>
           <li>First deployed in <strong>Haswell (2013)</strong>; refined through Alder Lake, Meteor Lake</li>
           <li><strong>Topology</strong> &mdash; on-die multi-phase buck with thin-film inductors on package</li>
@@ -690,26 +484,26 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="accent-box" style="margin-top:0.7rem;">
+      <div class="card blue" style="margin-top:0.7rem;">
         FIVR eliminates the PCB-to-die impedance for the regulated domain. The VRM output is
         <em>inside</em> the package &mdash; reducing PDN inductance by 10&ndash;50&times; versus board regulation.
         This translates directly to reduced voltage guardband.
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">Advantages Over Board VRM</div>
+      <div class="card">
+        <h3 style="color:var(--amber)">Advantages Over Board VRM</h3>
         <ul>
           <li><strong>Faster transient response</strong> &mdash; 100 ns vs 10&ndash;50 &micro;s for board VRM</li>
           <li><strong>Per-domain regulation</strong> &mdash; separate rails for each core, GPU, IO, etc.</li>
           <li><strong>Reduced guardband</strong> &mdash; 30&ndash;50 mV savings enables higher frequency or lower power</li>
-          <li><strong>Fewer board components</strong> &mdash; simpler motherboard, smaller form factor</li>
+          <li><strong>Fewer board components</strong> &mdash; simpler motherboard,  form factor</li>
           <li><strong>Dynamic power savings</strong> &mdash; rapid DVFS during idle/burst cycles</li>
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title green">PIVR in AI Accelerators</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--green)">PIVR in AI Accelerators</h3>
         <ul>
           <li><strong>Intel Ponte Vecchio</strong> &mdash; FIVR with per-tile regulation across 47 chiplets</li>
           <li><strong>Intel Gaudi 3</strong> &mdash; FIVR for independent HBM and compute voltage domains</li>
@@ -719,22 +513,19 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">10 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 11: On-Die LDO & IVR                                   -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">On-Die LDO &amp; Integrated Voltage Regulators</div>
-  <div class="slide-subtitle">granular per-block DVFS with fully on-die regulation</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>On-Die LDO &amp; Integrated Voltage Regulators</h2></div>
+  <p style="color:var(--muted);font-size:.48em">granular per-block DVFS with fully on-die regulation</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">On-Die LDO (Low Dropout Regulator)</div>
+      <div class="card">
+        <h3>On-Die LDO (Low Dropout Regulator)</h3>
         <ul>
           <li><strong>Topology</strong> &mdash; PMOS pass transistor + error amplifier, fully in standard CMOS</li>
           <li><strong>Dropout</strong> &mdash; 50&ndash;100 mV minimum (V_in &minus; V_out)</li>
@@ -745,8 +536,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Digital LDO</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Digital LDO</h3>
         <ul>
           <li>Array of parallel PMOS switches with binary-weighted widths</li>
           <li>Digital comparator + shift register replaces analog error amp</li>
@@ -757,8 +548,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">On-Die Switched-Cap IVR</div>
+      <div class="card">
+        <h3 style="color:var(--green)">On-Die Switched-Cap IVR</h3>
         <ul>
           <li>Charge-pump topology: 2:1 or 3:2 ratio conversion using on-die MOS caps</li>
           <li><strong>Efficiency</strong> &mdash; &gt;90% at fixed rational conversion ratios</li>
@@ -769,50 +560,41 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">Trade-offs: Board vs Package vs Die Regulation</div>
-        <table class="dtable">
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">Trade-offs: Board vs Package vs Die Regulation</h3>
+        <table>
           <tr><th>Metric</th><th>Board VRM</th><th>PIVR (FIVR)</th><th>On-Die LDO</th></tr>
-          <tr><td>Efficiency</td><td class="gr">90&ndash;95%</td><td class="am">85&ndash;90%</td><td class="am">85&ndash;93%</td></tr>
-          <tr><td>Transient (ns)</td><td>10,000&ndash;50,000</td><td class="hi">100&ndash;1,000</td><td class="hi">1&ndash;50</td></tr>
-          <tr><td>Guardband saved</td><td>baseline</td><td class="gr">30&ndash;50 mV</td><td class="gr">50&ndash;80 mV</td></tr>
-          <tr><td>Die area cost</td><td class="gr">0%</td><td class="am">2&ndash;4%</td><td class="am">3&ndash;8%</td></tr>
-          <tr><td>Granularity</td><td>1&ndash;2 rails</td><td>4&ndash;16 domains</td><td class="hi">100s of islands</td></tr>
+          <tr><td>Efficiency</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">90&ndash;95%</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">85&ndash;90%</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">85&ndash;93%</td></tr>
+          <tr><td>Transient (ns)</td><td>10,000&ndash;50,000</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">100&ndash;1,000</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">1&ndash;50</td></tr>
+          <tr><td>Guardband saved</td><td>baseline</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">30&ndash;50 mV</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">50&ndash;80 mV</td></tr>
+          <tr><td>Die area cost</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">0%</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">2&ndash;4%</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">3&ndash;8%</td></tr>
+          <tr><td>Granularity</td><td>1&ndash;2 rails</td><td>4&ndash;16 domains</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">100s of islands</td></tr>
         </table>
       </div>
     </div>
   </div>
-  <div class="slide-num">11 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 12: Section — Advanced PDN Technologies                -->
 <!-- ============================================================ -->
-<section>
-<div class="slide section-slide">
-  <div class="section-num">III</div>
-  <h2>Advanced PDN Technologies</h2>
-  <p class="hero-sub" style="margin-top:0.4em;">
-    Backside power delivery, deep trench capacitors, and TSV-based power &mdash;
-    the innovations redefining what is physically possible.
-  </p>
-  <div class="slide-num">12 / 22</div>
-</div>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">III</span><h2>Advanced PDN Technologies</h2></div>
+  <p>Backside power delivery, deep trench capacitors, and TSV-based power &mdash;
+    the innovations redefining what is physically possible.</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 13: BSPDN                                              -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">BSPDN &mdash; Backside Power Delivery Network</div>
-  <div class="slide-subtitle">Intel PowerVia, TSMC N2P &mdash; decoupling power from signal routing</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>BSPDN &mdash; Backside Power Delivery Network</h2></div>
+  <p style="color:var(--muted);font-size:.48em">Intel PowerVia, TSMC N2P &mdash; decoupling power from signal routing</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">How BSPDN Works</div>
+      <div class="card">
+        <h3>How BSPDN Works</h3>
         <ul>
           <li><strong>Conventional (frontside)</strong> &mdash; power &amp; signal share the same BEOL metal stack</li>
           <li><strong>BSPDN</strong> &mdash; power rails delivered through the <em>backside</em> of the wafer via nano-TSVs</li>
@@ -822,8 +604,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Intel PowerVia (Intel 20A / 18A)</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Intel PowerVia (Intel 20A / 18A)</h3>
         <ul>
           <li>First production BSPDN: <strong>Intel 20A (2024)</strong></li>
           <li>Backside power with RibbonFET (gate-all-around) transistors</li>
@@ -834,8 +616,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Benefits of BSPDN</div>
+      <div class="card">
+        <h3 style="color:var(--green)">Benefits of BSPDN</h3>
         <ul>
           <li><strong>IR drop</strong> &mdash; 30&ndash;50% reduction; shorter, wider power paths to transistors</li>
           <li><strong>Signal routing</strong> &mdash; 15&ndash;25% more tracks available (no VDD/VSS on M1/M2)</li>
@@ -845,33 +627,30 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">TSMC Backside Power (N2P, A16)</div>
-        <div class="kv-row"><span class="kv-label">Node</span><span class="kv-value">N2P (2026), A16 (2026+)</span></div>
-        <div class="kv-row"><span class="kv-label">TSV diameter</span><span class="kv-value amber">~50&ndash;100 nm nano-TSV</span></div>
-        <div class="kv-row"><span class="kv-label">Backside metals</span><span class="kv-value green">2&ndash;4 layers</span></div>
-        <div class="kv-row"><span class="kv-label">IR drop improvement</span><span class="kv-value green">25&ndash;40% vs N2</span></div>
-        <div class="kv-row"><span class="kv-label">Density benefit</span><span class="kv-value">~10% logic density gain</span></div>
-        <div class="kv-row"><span class="kv-label">Target customers</span><span class="kv-value purple">HPC, AI accelerators, mobile AP</span></div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">TSMC Backside Power (N2P, A16)</h3>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Node</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">N2P (2026), A16 (2026+)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">TSV diameter</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">~50&ndash;100 nm nano-TSV</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Backside metals</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">2&ndash;4 layers</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">IR drop improvement</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">25&ndash;40% vs N2</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Density benefit</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">~10% logic density gain</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Target customers</span><span style="color:var(--purple);font-family:'JetBrains Mono',monospace">HPC, AI accelerators, mobile AP</span></div>
       </div>
     </div>
   </div>
-  <div class="slide-num">13 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 14: eDTC                                               -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">eDTC &mdash; Embedded Deep Trench Capacitors</div>
-  <div class="slide-subtitle">TSMC's on-die capacitance revolution for PDN impedance</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>eDTC &mdash; Embedded Deep Trench Capacitors</h2></div>
+  <p style="color:var(--muted);font-size:.48em">TSMC's on-die capacitance revolution for PDN impedance</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">What is eDTC?</div>
+      <div class="card">
+        <h3>What is eDTC?</h3>
         <ul>
           <li>Deep trenches etched into the silicon substrate, lined with high-k dielectric and filled with conductor</li>
           <li>Capacitance density: <strong>250&ndash;400 nF/mm&sup2;</strong> (vs ~20 nF/mm&sup2; for MOS-cap filler)</li>
@@ -881,8 +660,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Impact on PDN Impedance</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Impact on PDN Impedance</h3>
         <ul>
           <li><strong>2&ndash;5&times; reduction</strong> in on-die PDN impedance at 200 MHz&ndash;2 GHz</li>
           <li>Pushes anti-resonance peaks below target impedance</li>
@@ -893,45 +672,42 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">TSMC eDTC Technology Roadmap</div>
-        <table class="dtable">
+      <div class="card">
+        <h3 style="color:var(--green)">TSMC eDTC Technology Roadmap</h3>
+        <table>
           <tr><th>Generation</th><th>Node</th><th>Density</th><th>ESL</th><th>Status</th></tr>
-          <tr><td>Gen 1</td><td class="hi">N5/N4</td><td class="am">~250 nF/mm&sup2;</td><td>&lt;5 pH</td><td class="gr">Production</td></tr>
-          <tr><td>Gen 2</td><td class="hi">N3E</td><td class="am">~350 nF/mm&sup2;</td><td>&lt;3 pH</td><td class="gr">Production</td></tr>
-          <tr><td>Gen 3</td><td class="hi">N2</td><td class="am">~500 nF/mm&sup2;</td><td>&lt;2 pH</td><td>Development</td></tr>
+          <tr><td>Gen 1</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">N5/N4</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">~250 nF/mm&sup2;</td><td>&lt;5 pH</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">Production</td></tr>
+          <tr><td>Gen 2</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">N3E</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">~350 nF/mm&sup2;</td><td>&lt;3 pH</td><td style="color:var(--green);font-family:'JetBrains Mono',monospace">Production</td></tr>
+          <tr><td>Gen 3</td><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">N2</td><td style="color:var(--amber);font-family:'JetBrains Mono',monospace">~500 nF/mm&sup2;</td><td>&lt;2 pH</td><td>Development</td></tr>
         </table>
       </div>
 
-      <div class="highlight-bar green" style="margin-top:0.7rem;">
+      <div class="card green" style="margin-top:0.7rem;">
         For a 600 mm&sup2; die with 10% area allocated to eDTC at 400 nF/mm&sup2;:
         <strong>24 &micro;F of on-die capacitance</strong> with sub-5 pH ESL &mdash; this fundamentally
         changes the PDN impedance profile, suppressing resonance peaks that were previously
         the dominant source of voltage noise above 100 MHz.
       </div>
 
-      <div class="accent-box amber" style="margin-top:0.7rem;">
+      <div class="card amber" style="margin-top:0.7rem;">
         NVIDIA and AMD have both adopted TSMC eDTC for their latest data center GPUs,
         citing 2&ndash;3% frequency improvement from reduced voltage guardband alone.
       </div>
     </div>
   </div>
-  <div class="slide-num">14 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 15: TSV Power Delivery                                 -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Through-Silicon Via Power Delivery</div>
-  <div class="slide-subtitle">TSV arrays for 2.5D/3D stacking &mdash; current capacity, thermal co-design</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Through-Silicon Via Power Delivery</h2></div>
+  <p style="color:var(--muted);font-size:.48em">TSV arrays for 2.5D/3D stacking &mdash; current capacity, thermal co-design</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">TSV Power Delivery Basics</div>
+      <div class="card">
+        <h3>TSV Power Delivery Basics</h3>
         <ul>
           <li><strong>TSV diameter</strong> &mdash; 5&ndash;10 &micro;m (standard), 1&ndash;3 &micro;m (fine-pitch for 3D)</li>
           <li><strong>Resistance per TSV</strong> &mdash; ~10&ndash;50 m&Omega; (depending on diameter/depth)</li>
@@ -941,8 +717,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">2.5D Interposer PDN (CoWoS)</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">2.5D Interposer PDN (CoWoS)</h3>
         <ul>
           <li>TSMC CoWoS-S: silicon interposer with TSVs connecting package to chiplets</li>
           <li>Interposer TSVs: 10 &micro;m diameter, 100 &micro;m depth, ~25 m&Omega; each</li>
@@ -953,8 +729,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">3D Stacking Power Challenges</div>
+      <div class="card">
+        <h3 style="color:var(--green)">3D Stacking Power Challenges</h3>
         <ul>
           <li><strong>Thermal stacking</strong> &mdash; top die heated by bottom die; T_junction rises &rarr; higher R &rarr; worse IR drop</li>
           <li><strong>TSV area overhead</strong> &mdash; 5&ndash;15% of die area consumed by TSV keep-out zones</li>
@@ -964,54 +740,45 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">Thermal-Power Co-Design</div>
-        <div class="kv-row"><span class="kv-label">Cu resistivity temp coeff</span><span class="kv-value">+0.39%/&deg;C</span></div>
-        <div class="kv-row"><span class="kv-label">100&deg;C vs 25&deg;C R increase</span><span class="kv-value amber">~30% higher resistance</span></div>
-        <div class="kv-row"><span class="kv-label">Impact on IR drop</span><span class="kv-value amber">20&ndash;30% worse at hot spots</span></div>
-        <div class="kv-row"><span class="kv-label">Mitigation</span><span class="kv-value green">Thermal-aware placement, microfluidic cooling</span></div>
-        <div class="kv-row"><span class="kv-label">3D power budget</span><span class="kv-value">Often limited to 50&ndash;100 W/die for 3D stack</span></div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">Thermal-Power Co-Design</h3>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Cu resistivity temp coeff</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">+0.39%/&deg;C</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">100&deg;C vs 25&deg;C R increase</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">~30% higher resistance</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Impact on IR drop</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">20&ndash;30% worse at hot spots</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Mitigation</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">Thermal-aware placement, microfluidic cooling</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">3D power budget</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">Often limited to 50&ndash;100 W/die for 3D stack</span></div>
       </div>
     </div>
   </div>
-  <div class="slide-num">15 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 16: Section — ML Accelerator Challenges                -->
 <!-- ============================================================ -->
-<section>
-<div class="slide section-slide">
-  <div class="section-num">IV</div>
-  <h2>ML Accelerator Challenges</h2>
-  <p class="hero-sub" style="margin-top:0.4em;">
-    Real-world power delivery for 700W+ AI GPUs, di/dt management during training workloads,
-    power integrity simulation, and chiplet architectures.
-  </p>
-  <div class="slide-num">16 / 22</div>
-</div>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">IV</span><h2>ML Accelerator Challenges</h2></div>
+  <p>Real-world power delivery for 700W+ AI GPUs, di/dt management during training workloads,
+    power integrity simulation, and chiplet architectures.</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 17: 700W+ AI GPU Power                                 -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Power Delivery for 700W+ AI GPUs</div>
-  <div class="slide-subtitle">NVIDIA Blackwell architecture, 48V racks, connector challenges</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery for 700W+ AI GPUs</h2></div>
+  <p style="color:var(--muted);font-size:.48em">NVIDIA Blackwell architecture, 48V racks, connector challenges</p>
 
-  <div class="stat-row" style="margin-top:0.5rem;">
-    <div class="stat"><span class="val">1200 W</span><span class="lbl">NVIDIA B200 TDP (max)</span></div>
-    <div class="stat"><span class="val" style="color:var(--accent2);">1600 A</span><span class="lbl">Peak current at 0.75V Vcore</span></div>
-    <div class="stat"><span class="val" style="color:var(--accent3);">48V</span><span class="lbl">Rack-level bus voltage (OCP)</span></div>
-    <div class="stat"><span class="val" style="color:var(--accent4);">2&times; dies</span><span class="lbl">Multi-die module (NVLink-C2C)</span></div>
+  <div class="cols cols-2" style="gap:.5em" style="margin-top:0.5rem;">
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1">1200 W</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">NVIDIA B200 TDP (max)</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--amber);">1600 A</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Peak current at 0.75V Vcore</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--green);">48V</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Rack-level bus voltage (OCP)</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--purple);">2&times; dies</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Multi-die module (NVLink-C2C)</span></div>
   </div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.6rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">NVIDIA Blackwell Power Architecture</div>
+      <div class="card">
+        <h3>NVIDIA Blackwell Power Architecture</h3>
         <ul>
           <li><strong>B200 module</strong> &mdash; 2 GPU dies on CoWoS-L substrate + 8 HBM3E stacks</li>
           <li><strong>48V input</strong> &mdash; 48V&rarr;~6V (switched-cap IBC) &rarr; 0.75V (multi-phase buck)</li>
@@ -1023,41 +790,38 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title amber">48V to Point-of-Load Path</div>
-        <div class="arch-stack">
-          <div class="arch-layer blue">48V Rack Bus (OCP Open Rack V3)</div>
-          <div class="flow-arrow">&darr;</div>
-          <div class="arch-layer amber">48V&rarr;6V IBC (Intermediate Bus Converter, switched-cap, 98% eff.)</div>
-          <div class="flow-arrow">&darr;</div>
-          <div class="arch-layer green">6V&rarr;0.75V Multi-Phase Buck (20-phase, 91% eff.)</div>
-          <div class="flow-arrow">&darr;</div>
-          <div class="arch-layer purple">PCB &rarr; Package &rarr; Die PDN (&lt;50m&Omega; total path)</div>
+      <div class="card">
+        <h3 style="color:var(--amber)">48V to Point-of-Load Path</h3>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div class="card blue" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">48V Rack Bus (OCP Open Rack V3)</div>
+          <div class="ss-arrow">&darr;</div>
+          <div class="card amber" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">48V&rarr;6V IBC (Intermediate Bus Converter, switched-cap, 98% eff.)</div>
+          <div class="ss-arrow">&darr;</div>
+          <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">6V&rarr;0.75V Multi-Phase Buck (20-phase, 91% eff.)</div>
+          <div class="ss-arrow">&darr;</div>
+          <div class="card purple" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">PCB &rarr; Package &rarr; Die PDN (&lt;50m&Omega; total path)</div>
         </div>
       </div>
 
-      <div class="highlight-bar" style="margin-top:0.7rem;">
+      <div class="card amber" style="margin-top:0.7rem;">
         Cable &amp; connector challenges at 1200W: 16-pin 12VHPWR handles 600W at 12V (50A/pin).
         At 48V, the same 600W needs only 12.5A &mdash; enabling thinner cables and reducing I&sup2;R loss by 16&times;.
       </div>
     </div>
   </div>
-  <div class="slide-num">17 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 18: di/dt Management                                   -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">di/dt Management in ML Training Workloads</div>
-  <div class="slide-subtitle">GEMM&rarr;communication switching, droop events, firmware mitigation</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>di/dt Management in ML Training Workloads</h2></div>
+  <p style="color:var(--muted);font-size:.48em">GEMM&rarr;communication switching, droop events, firmware mitigation</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">The di/dt Problem in ML Training</div>
+      <div class="card">
+        <h3>The di/dt Problem in ML Training</h3>
         <ul>
           <li><strong>GEMM phase</strong> &mdash; all tensor cores active, ~100% utilization, peak current draw</li>
           <li><strong>Communication phase</strong> &mdash; NVLink/ICI all-reduce; tensor cores idle, current drops 40&ndash;60%</li>
@@ -1068,14 +832,14 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="accent-box amber" style="margin-top:0.7rem;">
+      <div class="card amber" style="margin-top:0.7rem;">
         A 1000A swing in 500 ns with 50 pH effective PDN inductance produces V_droop = L &times; di/dt =
-        50 pH &times; 2&times;10&sup9; A/s = <strong style="color:var(--accent2);">100 mV droop</strong> &mdash; exceeding the entire noise budget.
+        50 pH &times; 2&times;10&sup9; A/s = <strong style="color:var(--amber);">100 mV droop</strong> &mdash; exceeding the entire noise budget.
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Hardware Mitigation</div>
+      <div class="card">
+        <h3 style="color:var(--green)">Hardware Mitigation</h3>
         <ul>
           <li><strong>On-die decoupling</strong> &mdash; eDTC + MOS caps provide charge reservoir for &lt;50 ns events</li>
           <li><strong>Staggered clock gating</strong> &mdash; spread wake-up across 10&ndash;50 ns window</li>
@@ -1085,8 +849,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">Firmware &amp; Software Mitigation</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">Firmware &amp; Software Mitigation</h3>
         <ul>
           <li><strong>Workload scheduling</strong> &mdash; overlap compute and communication to smooth transitions</li>
           <li><strong>DVFS pre-positioning</strong> &mdash; lower voltage before known idle &rarr; reduce droop magnitude</li>
@@ -1097,35 +861,32 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
   </div>
-  <div class="slide-num">18 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 19: Power Integrity Simulation                         -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Power Integrity Simulation &amp; Signoff</div>
-  <div class="slide-subtitle">static/dynamic IR drop tools, EM analysis, PDN extraction, workload co-simulation</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Integrity Simulation &amp; Signoff</h2></div>
+  <p style="color:var(--muted);font-size:.48em">static/dynamic IR drop tools, EM analysis, PDN extraction, workload co-simulation</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Signoff Tool Landscape</div>
-        <table class="dtable">
+      <div class="card">
+        <h3>Signoff Tool Landscape</h3>
+        <table>
           <tr><th>Tool</th><th>Vendor</th><th>Capability</th></tr>
-          <tr><td class="hi">Voltus</td><td>Cadence</td><td>Static &amp; dynamic IR drop, EM, multi-rail</td></tr>
-          <tr><td class="hi">RedHawk</td><td>Synopsys (Ansys)</td><td>Dynamic droop, thermal-aware IR, chip-pkg co-sim</td></tr>
-          <tr><td class="hi">Totem</td><td>Ansys</td><td>Full-chip EM/IR, power grid optimization</td></tr>
-          <tr><td class="hi">SIwave</td><td>Ansys</td><td>Package/PCB PDN extraction, S-parameter</td></tr>
-          <tr><td class="hi">Sigrity</td><td>Cadence</td><td>Package/board PI, PDN impedance analysis</td></tr>
+          <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">Voltus</td><td>Cadence</td><td>Static &amp; dynamic IR drop, EM, multi-rail</td></tr>
+          <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">RedHawk</td><td>Synopsys (Ansys)</td><td>Dynamic droop, thermal-aware IR, chip-pkg co-sim</td></tr>
+          <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">Totem</td><td>Ansys</td><td>Full-chip EM/IR, power grid optimization</td></tr>
+          <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">SIwave</td><td>Ansys</td><td>Package/PCB PDN extraction, S-parameter</td></tr>
+          <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">Sigrity</td><td>Cadence</td><td>Package/board PI, PDN impedance analysis</td></tr>
         </table>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Analysis Flow</div>
-        <ol class="steps">
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Analysis Flow</h3>
+        <ol>
           <li>Extract die power grid (RLC network, 10M+ nodes)</li>
           <li>Map switching activity from VCD or vectorless estimation</li>
           <li>Combine with package/PCB model (S-parameter or lumped RLC)</li>
@@ -1135,8 +896,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Workload-Driven Power Integrity</div>
+      <div class="card">
+        <h3 style="color:var(--green)">Workload-Driven Power Integrity</h3>
         <ul>
           <li><strong>VCD-based</strong> &mdash; captures exact switching; 10&ndash;100 TB of data for full-chip AI accelerator</li>
           <li><strong>Vectorless</strong> &mdash; statistical estimation; faster but less accurate</li>
@@ -1146,33 +907,30 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">Modern Signoff Criteria</div>
-        <div class="kv-row"><span class="kv-label">Max static IR drop</span><span class="kv-value">&lt;3&ndash;5% Vdd</span></div>
-        <div class="kv-row"><span class="kv-label">Max dynamic droop</span><span class="kv-value amber">&lt;8&ndash;10% Vdd</span></div>
-        <div class="kv-row"><span class="kv-label">EM lifetime target</span><span class="kv-value green">&gt;10 years at T_j = 105&deg;C</span></div>
-        <div class="kv-row"><span class="kv-label">Bump current limit</span><span class="kv-value">&lt;150 mA/bump (C4), &lt;30 mA (&micro;bump)</span></div>
-        <div class="kv-row"><span class="kv-label">Via current limit</span><span class="kv-value">Per-layer EM spec from foundry PDK</span></div>
-        <div class="kv-row"><span class="kv-label">Simulation nodes</span><span class="kv-value purple">10M&ndash;100M for large AI dies</span></div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">Modern Signoff Criteria</h3>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Max static IR drop</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">&lt;3&ndash;5% Vdd</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Max dynamic droop</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">&lt;8&ndash;10% Vdd</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">EM lifetime target</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">&gt;10 years at T_j = 105&deg;C</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Bump current limit</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">&lt;150 mA/bump (C4), &lt;30 mA (&micro;bump)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Via current limit</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">Per-layer EM spec from foundry PDK</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Simulation nodes</span><span style="color:var(--purple);font-family:'JetBrains Mono',monospace">10M&ndash;100M for large AI dies</span></div>
       </div>
     </div>
   </div>
-  <div class="slide-num">19 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 20: Chiplet Power Delivery                             -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Power Delivery in Chiplet Architectures</div>
-  <div class="slide-subtitle">per-chiplet regulation, interposer PDN, power gating coordination</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery in Chiplet Architectures</h2></div>
+  <p style="color:var(--muted);font-size:.48em">per-chiplet regulation, interposer PDN, power gating coordination</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Chiplet PDN Challenges</div>
+      <div class="card">
+        <h3>Chiplet PDN Challenges</h3>
         <ul>
           <li><strong>Multiple voltage domains</strong> &mdash; compute, IO, HBM PHY each need distinct Vdd</li>
           <li><strong>Cross-chiplet transients</strong> &mdash; one chiplet's di/dt couples through shared interposer PDN</li>
@@ -1182,8 +940,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Per-Chiplet Voltage Regulation</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Per-Chiplet Voltage Regulation</h3>
         <ul>
           <li><strong>Option A</strong> &mdash; board VRM per chiplet (separate power domain from PCB)</li>
           <li><strong>Option B</strong> &mdash; PIVR per chiplet (Intel Ponte Vecchio approach)</li>
@@ -1194,8 +952,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Power Gating Coordination</div>
+      <div class="card">
+        <h3 style="color:var(--green)">Power Gating Coordination</h3>
         <ul>
           <li><strong>Inrush current</strong> &mdash; enabling a power-gated chiplet draws 50&ndash;200A in 100 ns</li>
           <li><strong>Sequencing</strong> &mdash; stagger chiplet wake-up to limit aggregate di/dt</li>
@@ -1205,30 +963,27 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">Interposer PDN Design</div>
-        <div class="kv-row"><span class="kv-label">Interposer technology</span><span class="kv-value">TSMC CoWoS-S (Si), CoWoS-L (organic + Si bridge)</span></div>
-        <div class="kv-row"><span class="kv-label">Power TSVs per chiplet</span><span class="kv-value amber">5,000&ndash;15,000</span></div>
-        <div class="kv-row"><span class="kv-label">Interposer metal layers</span><span class="kv-value green">3&ndash;4 (2 for power planes)</span></div>
-        <div class="kv-row"><span class="kv-label">MIM cap on interposer</span><span class="kv-value green">10&ndash;50 nF/mm&sup2;</span></div>
-        <div class="kv-row"><span class="kv-label">IR drop (interposer only)</span><span class="kv-value">&lt;10 mV at full load</span></div>
-        <div class="kv-row"><span class="kv-label">Cross-coupling isolation</span><span class="kv-value purple">Separate power TSV arrays per domain</span></div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">Interposer PDN Design</h3>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Interposer technology</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">TSMC CoWoS-S (Si), CoWoS-L (organic + Si bridge)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Power TSVs per chiplet</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">5,000&ndash;15,000</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Interposer metal layers</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">3&ndash;4 (2 for power planes)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">MIM cap on interposer</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">10&ndash;50 nF/mm&sup2;</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">IR drop (interposer only)</span><span style="color:var(--blue);font-family:'JetBrains Mono',monospace">&lt;10 mV at full load</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.52em;padding:.1em 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Cross-coupling isolation</span><span style="color:var(--purple);font-family:'JetBrains Mono',monospace">Separate power TSV arrays per domain</span></div>
       </div>
     </div>
   </div>
-  <div class="slide-num">20 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 21: Case Studies                                       -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">Case Studies &mdash; Power Delivery in Production AI Silicon</div>
-  <div class="slide-subtitle">NVIDIA B200, AMD MI300X, Intel Ponte Vecchio, Apple M2 Ultra</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>Case Studies &mdash; Power Delivery in Production AI Silicon</h2></div>
+  <p style="color:var(--muted);font-size:.48em">NVIDIA B200, AMD MI300X, Intel Ponte Vecchio, Apple M2 Ultra</p>
 
-  <table class="dtable" style="margin-top:0.5rem;">
+  <table style="margin-top:0.5rem;">
     <tr>
       <th>Attribute</th>
       <th>NVIDIA B200</th>
@@ -1238,10 +993,10 @@ svg.diag { width:100%; height:auto; display:block; }
     </tr>
     <tr>
       <td><strong>TDP</strong></td>
-      <td class="hi">1000&ndash;1200 W</td>
-      <td class="am">750 W</td>
-      <td class="gr">600 W</td>
-      <td class="pr">~60 W (peak)</td>
+      <td style="color:var(--blue);font-family:'JetBrains Mono',monospace">1000&ndash;1200 W</td>
+      <td style="color:var(--amber);font-family:'JetBrains Mono',monospace">750 W</td>
+      <td style="color:var(--green);font-family:'JetBrains Mono',monospace">600 W</td>
+      <td style="color:var(--purple);font-family:'JetBrains Mono',monospace">~60 W (peak)</td>
     </tr>
     <tr>
       <td><strong>Die count</strong></td>
@@ -1252,10 +1007,10 @@ svg.diag { width:100%; height:auto; display:block; }
     </tr>
     <tr>
       <td><strong>Process</strong></td>
-      <td class="hi">TSMC N4P</td>
-      <td class="am">TSMC N5/N6</td>
-      <td class="gr">Intel 4 + TSMC N5</td>
-      <td class="pr">TSMC N5P</td>
+      <td style="color:var(--blue);font-family:'JetBrains Mono',monospace">TSMC N4P</td>
+      <td style="color:var(--amber);font-family:'JetBrains Mono',monospace">TSMC N5/N6</td>
+      <td style="color:var(--green);font-family:'JetBrains Mono',monospace">Intel 4 + TSMC N5</td>
+      <td style="color:var(--purple);font-family:'JetBrains Mono',monospace">TSMC N5P</td>
     </tr>
     <tr>
       <td><strong>Packaging</strong></td>
@@ -1268,22 +1023,22 @@ svg.diag { width:100%; height:auto; display:block; }
       <td><strong>Voltage regulation</strong></td>
       <td>Board VRM (48V&rarr;Vcore)</td>
       <td>Board VRM + on-die LDO</td>
-      <td class="gr">FIVR (per-tile)</td>
+      <td style="color:var(--green);font-family:'JetBrains Mono',monospace">FIVR (per-tile)</td>
       <td>On-package PMIC + on-die LDO</td>
     </tr>
     <tr>
       <td><strong>On-die decap tech</strong></td>
-      <td class="hi">eDTC + MOS cap</td>
-      <td class="am">eDTC + MOS cap</td>
+      <td style="color:var(--blue);font-family:'JetBrains Mono',monospace">eDTC + MOS cap</td>
+      <td style="color:var(--amber);font-family:'JetBrains Mono',monospace">eDTC + MOS cap</td>
       <td>MOS cap (no eDTC)</td>
       <td>MOS cap</td>
     </tr>
     <tr>
       <td><strong>Peak current</strong></td>
-      <td class="hi">~1600 A</td>
-      <td class="am">~1000 A</td>
-      <td class="gr">~800 A</td>
-      <td class="pr">~80 A</td>
+      <td style="color:var(--blue);font-family:'JetBrains Mono',monospace">~1600 A</td>
+      <td style="color:var(--amber);font-family:'JetBrains Mono',monospace">~1000 A</td>
+      <td style="color:var(--green);font-family:'JetBrains Mono',monospace">~800 A</td>
+      <td style="color:var(--purple);font-family:'JetBrains Mono',monospace">~80 A</td>
     </tr>
     <tr>
       <td><strong>PDN innovation</strong></td>
@@ -1303,36 +1058,33 @@ svg.diag { width:100%; height:auto; display:block; }
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.7rem;">
     <div>
-      <div class="accent-box" style="margin-bottom:0;">
-        <strong style="color:var(--accent);">NVIDIA B200</strong> represents the state of the art in brute-force PDN engineering:
+      <div class="card blue" style="margin-bottom:0;">
+        <strong style="color:var(--blue);">NVIDIA B200</strong> represents the state of the art in brute-force PDN engineering:
         48V input, 20+ phase VRM, CoWoS-L with 100k+ power bumps, eDTC Gen 2, and firmware-level
         current management. Total system PDN capacitance exceeds 15 mF.
       </div>
     </div>
     <div>
-      <div class="accent-box green" style="margin-bottom:0;">
-        <strong style="color:var(--accent3);">Intel Ponte Vecchio</strong> is the most aggressive in voltage regulation integration:
+      <div class="card green" style="margin-bottom:0;">
+        <strong style="color:var(--green);">Intel Ponte Vecchio</strong> is the most aggressive in voltage regulation integration:
         FIVR provides per-tile DVFS across 47 heterogeneous tiles, reducing guardband by ~40 mV
         and enabling 5&ndash;8% higher frequency than equivalent board-regulated design.
       </div>
     </div>
   </div>
-  <div class="slide-num">21 / 22</div>
-</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 22: References & Further Reading                       -->
 <!-- ============================================================ -->
-<section>
-<div class="slide">
-  <div class="slide-title">References &amp; Further Reading</div>
-  <div class="slide-subtitle">papers, standards, and resources for deeper study</div>
+<section data-background-color="#0a0a0f">
+<div class="slide-hdr"><span class="tag">TOPIC</span><h2>References &amp; Further Reading</h2></div>
+  <p style="color:var(--muted);font-size:.48em">papers, standards, and resources for deeper study</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
-      <div class="panel">
-        <div class="panel-title">Key Papers &amp; Publications</div>
+      <div class="card">
+        <h3>Key Papers &amp; Publications</h3>
         <ul>
           <li>M. Swaminathan &amp; A.E. Engin, <em>&ldquo;Power Integrity Modeling and Design for Semiconductors and Systems&rdquo;</em>, Prentice Hall, 2007</li>
           <li>L. Smith, R. Anderson, T. Roy, <em>&ldquo;Power Distribution System Design Methodology and Capacitor Selection for Modern CMOS Technology&rdquo;</em>, IEEE Trans. AP, 1999</li>
@@ -1342,8 +1094,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title amber">Industry Standards</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--amber)">Industry Standards</h3>
         <ul>
           <li><strong>OCP Open Rack V3</strong> &mdash; 48V rack power distribution specification</li>
           <li><strong>PCI-SIG CEM 5.0</strong> &mdash; 12VHPWR connector (600W) specification</li>
@@ -1354,8 +1106,8 @@ svg.diag { width:100%; height:auto; display:block; }
       </div>
     </div>
     <div>
-      <div class="panel">
-        <div class="panel-title green">Conference Venues</div>
+      <div class="card">
+        <h3 style="color:var(--green)">Conference Venues</h3>
         <ul>
           <li><strong>IEEE ECTC</strong> &mdash; Electronic Components and Technology Conference (packaging &amp; PDN)</li>
           <li><strong>IEEE IEDM</strong> &mdash; International Electron Devices Meeting (eDTC, BSPDN process)</li>
@@ -1366,8 +1118,8 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="panel" style="margin-top:0.7rem;">
-        <div class="panel-title purple">EDA &amp; Simulation Resources</div>
+      <div class="card" style="margin-top:0.7rem;">
+        <h3 style="color:var(--purple)">EDA &amp; Simulation Resources</h3>
         <ul>
           <li><strong>Cadence Voltus / Sigrity</strong> &mdash; die + package power integrity co-simulation</li>
           <li><strong>Synopsys RedHawk / PrimeRail</strong> &mdash; EM/IR signoff, adaptive voltage analysis</li>
@@ -1377,14 +1129,12 @@ svg.diag { width:100%; height:auto; display:block; }
         </ul>
       </div>
 
-      <div class="highlight-bar purple" style="margin-top:0.7rem;">
+      <div class="card purple" style="margin-top:0.7rem;">
         Next in the series: <strong>Presentation 10</strong> &mdash; exploring thermal management and cooling
         architectures for high-power AI silicon.
       </div>
     </div>
   </div>
-  <div class="slide-num">22 / 22</div>
-</div>
 </section>
 
 </div><!-- /slides -->
@@ -1395,20 +1145,17 @@ svg.diag { width:100%; height:auto; display:block; }
 <script>
 Reveal.initialize({
   hash: true,
-  slideNumber: false,
+  slideNumber: 'c/t',
   transition: 'fade',
   transitionSpeed: 'fast',
   controls: true,
   progress: true,
   center: false,
-  width: 1280,
+  width: 1100,
   height: 900,
-  margin: 0.02,
-  plugins: [ RevealHighlight ],
-  keyboard: {
-    39: 'next',
-    37: 'prev'
-  }
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
 });
 </script>
 <script>

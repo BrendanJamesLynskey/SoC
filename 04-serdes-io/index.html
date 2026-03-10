@@ -1,147 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>High-Speed SerDes &amp; I/O — Modern SoC Design 04</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
 <style>
   :root {
-    --bg-dark:   #0d1117;
-    --bg-card:   #161b22;
-    --bg-panel:  #1c2330;
-    --accent1:   #58a6ff;   /* blue  – signal / digital    */
-    --accent2:   #3fb950;   /* green – link / PHY OK       */
-    --accent3:   #d2a679;   /* amber – equalisation / CDR  */
-    --accent4:   #bc8cff;   /* violet – PCIe / protocol    */
-    --accent5:   #f78166;   /* coral – impairment / loss   */
-    --text-hi:   #e6edf3;
-    --text-lo:   #8b949e;
-    --border:    #30363d;
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
   }
 
-  .reveal-viewport { background: var(--bg-dark); }
-  .reveal { font-family: 'DM Sans', sans-serif; font-size: 22px; color: var(--text-hi); }
-  .reveal h1, .reveal h2, .reveal h3 {
-    font-family: 'Playfair Display', serif;
-    text-transform: none; letter-spacing: 0;
-    color: var(--text-hi); text-shadow: none;
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
   }
-  .reveal h1 { font-size: 2.2em; }
-  .reveal h2 { font-size: 1.6em; margin-bottom: 0.5em; }
-  .reveal h3 { font-size: 1.15em; color: var(--accent1); }
-  .reveal p  { line-height: 1.6; margin: 0.4em 0; }
-  .reveal section { padding: 0 2%; box-sizing: border-box; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
-  .reveal ul { list-style: none; padding-left: 0; margin: 0; }
-  .reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; line-height: 1.5; }
-  .reveal ul li::before { content: "▸"; color: var(--accent1); position: absolute; left: 0; }
-  .reveal ul ul li::before { content: "◦"; color: var(--text-lo); }
-  .reveal code { font-family: 'JetBrains Mono', monospace; background: #1e2736; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.85em; }
-  .reveal pre  { background: #1e2736; border-radius: 8px; padding: 1em; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-  .reveal a    { color: var(--accent1); }
-  .reveal .controls { color: var(--accent1); }
-  .reveal .progress { color: var(--accent1); }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
 
-  /* ---- Layout ---- */
-  .cols { display: flex; gap: 1.2em; align-items: flex-start; }
-  .col  { flex: 1; }
-  .col2 { flex: 2; }
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
 
-  /* ---- Cards ---- */
-  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 0.75em 1em; margin: 0.4em 0; }
-  .card-h { border-top: 3px solid var(--accent1); }
-  .card-g { border-top: 3px solid var(--accent2); }
-  .card-a { border-top: 3px solid var(--accent3); }
-  .card-v { border-top: 3px solid var(--accent4); }
-  .card-r { border-top: 3px solid var(--accent5); }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
 
-  /* ---- Title / section slides ---- */
-  .title-slide { text-align: center; padding-top: 1.5em; }
-  .title-slide h1 { font-size: 2.0em; margin: 0; }
-  .series  { font-family: 'DM Sans', sans-serif; font-size: 0.8em; color: var(--accent1); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4em; }
-  .subtitle { font-size: 0.75em; color: var(--text-lo); margin-top: 0.6em; }
-  .hex-badge { display: inline-block; font-size: 3.5em; color: var(--accent1); margin-bottom: 0.2em; }
-  .section-slide { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
-  .section-slide h2 { font-size: 1.9em; color: var(--accent1); }
-  .section-slide p  { color: var(--text-lo); font-size: 0.85em; }
-  .section-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--text-lo); letter-spacing: 0.15em; margin-bottom: 0.3em; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
 
-  /* ---- Tags ---- */
-  .tag    { display: inline-block; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 0.2em 0.7em; font-size: 0.7em; color: var(--text-lo); margin: 0.15em; }
-  .tag-b  { border-color: var(--accent1); color: var(--accent1); }
-  .tag-g  { border-color: var(--accent2); color: var(--accent2); }
-  .tag-a  { border-color: var(--accent3); color: var(--accent3); }
-  .tag-v  { border-color: var(--accent4); color: var(--accent4); }
-  .tag-r  { border-color: var(--accent5); color: var(--accent5); }
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-  /* ---- Stat callout ---- */
-  .stat   { text-align: center; padding: 0.5em; }
-  .stat .num { font-family: 'Playfair Display', serif; font-size: 2.0em; font-weight: 900; color: var(--accent1); }
-  .stat .lbl { font-size: 0.65em; color: var(--text-lo); }
-  .stat-g .num { color: var(--accent2); }
-  .stat-a .num { color: var(--accent3); }
-  .stat-v .num { color: var(--accent4); }
-  .stat-r .num { color: var(--accent5); }
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
 
-  /* ---- Tables ---- */
-  .reveal table { border-collapse: collapse; font-size: 0.72em; width: 100%; }
-  .reveal table th { background: var(--bg-panel); color: var(--accent1); padding: 0.4em 0.6em; border: 1px solid var(--border); text-align: left; }
-  .reveal table td { padding: 0.35em 0.6em; border: 1px solid var(--border); color: var(--text-hi); background: var(--bg-card); vertical-align: top; }
-  .reveal table tr:nth-child(even) td { background: #1a2130; }
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
 
-  /* ---- Eye-diagram canvas wrapper ---- */
-  .eye-wrap { background: #060c14; border: 1px solid var(--border); border-radius: 8px; padding: 0.4em; text-align: center; }
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-  /* ---- Signal trace rows ---- */
-  .sig-row { display: flex; align-items: center; margin: 0.25em 0; gap: 0.5em; }
-  .sig-label { width: 5.5em; font-size: 0.68em; text-align: right; color: var(--text-lo); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
-  /* ---- Footer ---- */
-  .slide-footer { position: absolute; bottom: 0.3em; right: 0.8em; font-size: 0.5em; color: var(--text-lo); font-family: 'JetBrains Mono', monospace; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
 
-<!-- =====================================================================
-     SLIDE 01  –  TITLE
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <div class="title-slide">
-    <div class="hex-badge">⬡</div>
-    <div class="series">Modern SoC Design · Presentation 04</div>
+<section class="title-slide" data-background-color="#0a0a0f">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">Modern SoC Design · Presentation 04</div>
     <h1>High-Speed SerDes &amp; I/O</h1>
-    <p class="subtitle">
+    <div class="subtitle">
       SerDes fundamentals · NRZ &amp; PAM4 · Equalization · Clock &amp; Data Recovery<br/>
       PCIe 5/6 · UCIe die-to-die · Co-packaged optics · Signal integrity
-    </p>
-    <div style="margin-top:1.4em">
-      <span class="tag tag-b">SerDes</span><span class="tag tag-g">PCIe 6</span>
-      <span class="tag tag-a">PAM4</span><span class="tag tag-v">UCIe</span>
-      <span class="tag tag-r">CDR</span><span class="tag">CTLE</span>
-      <span class="tag">DFE</span><span class="tag">Co-packaged Optics</span>
     </div>
-    <p style="margin-top:1.6em; font-size:0.6em; color:var(--text-lo)">
-      Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf
-    </p>
-  </div>
-</section>
+    <div style="width:60px; height:3px; background:var(--amber); margin-bottom:1.4em;"></div>
+    <div style="margin-top:1.4em">
+      <span class="pill amber">SerDes</span><span class="pill green">PCIe 6</span>
+      <span class="pill green">PAM4</span><span class="pill purple">UCIe</span>
+      <span class="pill purple">CDR</span><span class="pill amber">CTLE</span>
+      <span class="pill amber">DFE</span><span class="pill amber">Co-packaged Optics</span>
+    </div>
+    <div class="meta">Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf</div>
+  </section>
 
-<!-- =====================================================================
-     SLIDE 02  –  WHY HIGH-SPEED I/O MATTERS
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>Why I/O Bandwidth Is a First-Class Design Constraint</h2>
-  <div class="cols">
-    <div class="col2">
-      <div class="card card-r" style="margin-bottom:0.7em">
-        <strong style="color:var(--accent5)">The I/O Bandwidth Problem</strong><br/>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">02</span>
+
+    <h2>Why I/O Bandwidth Is a First-Class Design Constraint</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card red" style="margin-bottom:0.7em">
+        <strong style="color:var(--red)">The I/O Bandwidth Problem</strong><br/>
         <span style="font-size:0.82em">An H100 GPU delivers 3.35 TB/s of HBM bandwidth internally, yet must communicate with the rest of the system over PCIe 5.0 ×16 at just ~128 GB/s — a 26× mismatch.
         As ML clusters scale to thousands of accelerators, the interconnect fabric between chips, boards, and racks becomes the dominant performance and power constraint.</span>
       </div>
@@ -153,12 +167,12 @@
         <li>Every generation: 2–4× bandwidth, same pin count, lower power per bit</li>
       </ul>
     </div>
-    <div class="col">
+    <div>
       <div class="card" style="text-align:center; padding:0.8em 0.4em">
         <svg width="200" height="195" viewBox="0 0 200 195">
           <!-- Y axis -->
-          <line x1="38" y1="10" x2="38" y2="170" stroke="#30363d" stroke-width="1.5"/>
-          <line x1="38" y1="170" x2="195" y2="170" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="38" y1="10" x2="38" y2="170" stroke="var(--border)" stroke-width="1.5"/>
+          <line x1="38" y1="170" x2="195" y2="170" stroke="var(--border)" stroke-width="1.5"/>
           <!-- PCIe BW trend -->
           <polyline points="38,155 75,135 112,108 149,75 186,38"
             fill="none" stroke="#bc8cff" stroke-width="2.5"/>
@@ -177,35 +191,35 @@
           <text x="147" y="183" font-size="7" fill="#8b949e">6</text>
           <text x="184" y="183" font-size="7" fill="#8b949e">7</text>
         </svg>
-        <div style="font-size:0.6em; color:var(--text-lo)">PCIe bandwidth doubles each generation; pin count stays fixed</div>
+        <div style="font-size:0.6em; color:var(--muted)">PCIe bandwidth doubles each generation; pin count stays fixed</div>
       </div>
-      <div class="stat stat-r" style="margin-top:0.4em">
-        <div class="num">26×</div>
-        <div class="lbl">HBM vs PCIe BW gap<br/>in H100 GPU</div>
+      <div class="card red" style="text-align:center; margin-top:0.4em">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--red)">26×</div>
+        <div style="font-size:.52em; color:var(--muted)">HBM vs PCIe BW gap<br/>in H100 GPU</div>
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 03  –  SECTION: SERDES FUNDAMENTALS
-====================================================================== -->
-<section data-background-color="#0a0f1a">
-  <div class="section-slide">
-    <div class="section-num">SECTION 01</div>
+<section data-background-color="#0a0a0f">
+  
+  <div class="slide-hdr">
+    <span class="tag">03</span>
     <h2>SerDes Fundamentals</h2>
-    <p>Serialiser · Deserialiser · PLL · Transmitter &amp; receiver architecture</p>
   </div>
+    <p>Serialiser · Deserialiser · PLL · Transmitter &amp; receiver architecture</p>
 </section>
 
-<!-- =====================================================================
-     SLIDE 04  –  SERDES ARCHITECTURE
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>SerDes Architecture</h2>
-  <div class="cols">
-    <div class="col2">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">04</span>
+
+    <h2>SerDes Architecture</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
       <p style="font-size:0.82em; margin-bottom:0.5em">A <strong>Serialiser/Deserialiser (SerDes)</strong> converts a wide parallel bus to a narrow high-speed serial stream and back, allowing a small number of pins to carry enormous aggregate bandwidth.</p>
 
       <!-- Block diagram via SVG -->
@@ -229,7 +243,7 @@
           <text x="198" y="76" text-anchor="middle" font-size="7.5" fill="#8b949e">impedance Zout</text>
 
           <!-- Channel -->
-          <rect x="239" y="42" width="42" height="31" rx="3" fill="#13191e" stroke="#30363d" stroke-width="1"/>
+          <rect x="239" y="42" width="42" height="31" rx="3" fill="#13191e" stroke="var(--border)" stroke-width="1"/>
           <text x="260" y="57" text-anchor="middle" font-size="7.5" fill="#8b949e">Channel</text>
           <text x="260" y="68" text-anchor="middle" font-size="7" fill="#f78166">loss / ISI</text>
 
@@ -259,7 +273,7 @@
           <line x1="437" y1="57" x2="445" y2="57" stroke="#bc8cff" stroke-width="1.5" marker-end="url(#arr)"/>
 
           <!-- TX parallel data in -->
-          <line x1="83" y1="57" x2="67" y2="57" stroke="#30363d" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="83" y1="57" x2="67" y2="57" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,2"/>
           <text x="0" y="54" font-size="7" fill="#8b949e">Parallel</text>
           <text x="0" y="63" font-size="7" fill="#8b949e">data in</text>
           <!-- RX parallel data out -->
@@ -275,10 +289,10 @@
         </svg>
       </div>
 
-      <div class="cols">
-        <div class="col">
-          <div class="card card-h" style="font-size:0.77em">
-            <strong style="color:var(--accent1)">TX Path</strong>
+      <div class="cols cols-2">
+        <div>
+          <div class="card amber" style="font-size:0.77em">
+            <strong style="color:var(--amber)">TX Path</strong>
             <ul>
               <li>PLL generates low-jitter serial clock</li>
               <li>N:1 MUX serialises parallel data</li>
@@ -287,9 +301,9 @@
             </ul>
           </div>
         </div>
-        <div class="col">
-          <div class="card card-g" style="font-size:0.77em">
-            <strong style="color:var(--accent2)">RX Path</strong>
+        <div>
+          <div class="card green" style="font-size:0.77em">
+            <strong style="color:var(--green)">RX Path</strong>
             <ul>
               <li>CTLE: continuous-time linear equaliser (boost high freqs)</li>
               <li>DFE: decision-feedback equaliser (remove post-cursor ISI)</li>
@@ -300,32 +314,34 @@
         </div>
       </div>
     </div>
-    <div class="col">
-      <div class="stat stat-a">
-        <div class="num">112G</div>
-        <div class="lbl">state-of-art SerDes<br/>lane rate (PAM4)</div>
+    <div>
+      <div class="card green" style="text-align:center">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--green)">112G</div>
+        <div style="font-size:.52em; color:var(--muted)">state-of-art SerDes<br/>lane rate (PAM4)</div>
       </div>
-      <div class="stat stat-v" style="margin-top:0.4em">
-        <div class="num">&lt;1 pJ</div>
-        <div class="lbl">target per bit<br/>next-gen SerDes</div>
+      <div class="card purple" style="text-align:center; margin-top:0.4em">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--purple)">&lt;1 pJ</div>
+        <div style="font-size:.52em; color:var(--muted)">target per bit<br/>next-gen SerDes</div>
       </div>
-      <div class="card card-r" style="margin-top:0.5em; font-size:0.77em">
-        <strong style="color:var(--accent5)">Key challenge:</strong> At 112 Gbps, one unit interval (UI) = 9 ps. Jitter budget for the entire link — TX, channel, and RX — must fit inside roughly 30% of that: ~2.7 ps rms.
+      <div class="card red" style="margin-top:0.5em; font-size:0.77em">
+        <strong style="color:var(--red)">Key challenge:</strong> At 112 Gbps, one unit interval (UI) = 9 ps. Jitter budget for the entire link — TX, channel, and RX — must fit inside roughly 30% of that: ~2.7 ps rms.
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 05  –  NRZ vs PAM4
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>NRZ vs PAM4 — The Modulation Shift</h2>
-  <div class="cols">
-    <div class="col2">
-      <div class="card card-h" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent1)">NRZ — Non-Return-to-Zero (2-level)</strong>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">05</span>
+
+    <h2>NRZ vs PAM4 — The Modulation Shift</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:0.5em">
+        <strong style="color:var(--amber)">NRZ — Non-Return-to-Zero (2-level)</strong>
         <ul style="font-size:0.79em; margin-top:0.3em">
           <li>1 bit per symbol; symbol rate = bit rate</li>
           <li>Simple slicer with single threshold at 0</li>
@@ -334,8 +350,8 @@
           <li>Used in: PCIe 4, 25G Ethernet, SATA, USB 3</li>
         </ul>
       </div>
-      <div class="card card-a" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent3)">PAM4 — Pulse Amplitude Modulation 4-level</strong>
+      <div class="card green" style="margin-bottom:0.5em">
+        <strong style="color:var(--green)">PAM4 — Pulse Amplitude Modulation 4-level</strong>
         <ul style="font-size:0.79em; margin-top:0.3em">
           <li>2 bits per symbol; symbol rate = <em>half</em> the bit rate</li>
           <li>4 amplitude levels: {−3, −1, +1, +3} (normalised)</li>
@@ -345,8 +361,8 @@
           <li>Used in: PCIe 5/6, 400G/800G Ethernet, HBM4, GDDR7</li>
         </ul>
       </div>
-      <div class="card card-r">
-        <strong style="color:var(--accent5)">PAM4 Error Propagation</strong>
+      <div class="card red">
+        <strong style="color:var(--red)">PAM4 Error Propagation</strong>
         <ul style="font-size:0.79em; margin-top:0.3em">
           <li>Each symbol carries 2 bits; a single symbol error can flip 1 or 2 bits</li>
           <li>Gray coding assigns adjacent symbols to 1-bit-different codewords — limits burst errors</li>
@@ -354,9 +370,9 @@
         </ul>
       </div>
     </div>
-    <div class="col">
+    <div>
       <!-- Eye diagram comparison (SVG art) -->
-      <div class="eye-wrap" style="margin-bottom:0.5em">
+      <div class="card" style="margin-bottom:0.5em">
         <svg width="175" height="100" viewBox="0 0 175 100">
           <text x="87" y="10" text-anchor="middle" font-size="8" fill="#58a6ff">NRZ Eye</text>
           <!-- Eye outline -->
@@ -387,35 +403,35 @@
           <text x="87" y="116" text-anchor="middle" font-size="7" fill="#f78166">⅓ eye height vs NRZ</text>
         </svg>
       </div>
-      <div class="stat stat-a">
-        <div class="num">2 bit/sym</div>
-        <div class="lbl">PAM4: same baud rate,<br/>double the bit rate</div>
+      <div class="card green" style="text-align:center">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--green)">2 bit/sym</div>
+        <div style="font-size:.52em; color:var(--muted)">PAM4: same baud rate,<br/>double the bit rate</div>
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 06  –  SECTION: EQUALISATION
-====================================================================== -->
-<section data-background-color="#0a0f1a">
-  <div class="section-slide">
-    <div class="section-num">SECTION 02</div>
+<section data-background-color="#0a0a0f">
+  
+  <div class="slide-hdr">
+    <span class="tag">06</span>
     <h2>Equalisation</h2>
-    <p>CTLE · DFE · TX FIR · DSP-based RX · Adaptation algorithms</p>
   </div>
+    <p>CTLE · DFE · TX FIR · DSP-based RX · Adaptation algorithms</p>
 </section>
 
-<!-- =====================================================================
-     SLIDE 07  –  CHANNEL IMPAIRMENTS & EQUALISATION
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>Channel Impairments &amp; Equalisation Techniques</h2>
-  <div class="cols">
-    <div class="col">
-      <div class="card card-r">
-        <strong style="color:var(--accent5)">Channel Impairments</strong>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">07</span>
+
+    <h2>Channel Impairments &amp; Equalisation Techniques</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card red">
+        <strong style="color:var(--red)">Channel Impairments</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li><strong>Insertion loss:</strong> skin effect + dielectric loss; ~0.5–1.5 dB/GHz on FR4 PCB</li>
           <li><strong>ISI (Inter-Symbol Interference):</strong> frequency-dependent loss smears symbols in time</li>
@@ -425,8 +441,8 @@
         </ul>
       </div>
 
-      <div class="card card-h" style="margin-top:0.5em">
-        <strong style="color:var(--accent1)">TX FIR Pre-emphasis</strong>
+      <div class="card amber" style="margin-top:0.5em">
+        <strong style="color:var(--amber)">TX FIR Pre-emphasis</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Finite Impulse Response filter applied at transmitter</li>
           <li>Boosts high-frequency content before signal enters lossy channel</li>
@@ -436,9 +452,9 @@
         </ul>
       </div>
     </div>
-    <div class="col">
-      <div class="card card-a">
-        <strong style="color:var(--accent3)">CTLE — Continuous-Time Linear Equaliser</strong>
+    <div>
+      <div class="card green">
+        <strong style="color:var(--green)">CTLE — Continuous-Time Linear Equaliser</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Analogue high-pass filter at RX input</li>
           <li>Boosts high frequencies to invert channel roll-off</li>
@@ -447,8 +463,8 @@
           <li>Programmable via capacitor bank / resistor ladder</li>
         </ul>
       </div>
-      <div class="card card-v" style="margin-top:0.5em">
-        <strong style="color:var(--accent4)">DFE — Decision-Feedback Equaliser</strong>
+      <div class="card purple" style="margin-top:0.5em">
+        <strong style="color:var(--purple)">DFE — Decision-Feedback Equaliser</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Uses <em>decided</em> past symbols to cancel post-cursor ISI</li>
           <li>No noise amplification (unlike linear equalisers)</li>
@@ -457,30 +473,32 @@
           <li>4–8 taps typical for 56 G NRZ; 8–16 taps for 112 G PAM4</li>
         </ul>
       </div>
-      <div class="card card-g" style="margin-top:0.5em; font-size:0.78em">
-        <strong style="color:var(--accent2)">Adaptation</strong><br/>
+      <div class="card green" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--green)">Adaptation</strong><br/>
         Coefficients adapt continuously using LMS (Least Mean Squares) or
         MMSE minimising RX eye closure. Convergence: ~10⁵–10⁶ symbols.
         PCIe link training runs adaptation sequences at startup.
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 08  –  CDR
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>Clock &amp; Data Recovery (CDR)</h2>
-  <div class="cols">
-    <div class="col2">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">08</span>
+
+    <h2>Clock &amp; Data Recovery (CDR)</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
       <p style="font-size:0.82em; margin-bottom:0.5em">The receiver has no reference clock aligned to the incoming data — it must extract timing directly from data transitions. CDR is the circuit that does this.</p>
 
-      <div class="cols">
-        <div class="col">
-          <div class="card card-h">
-            <strong style="color:var(--accent1)">Phase-Locked Loop (PLL) CDR</strong>
+      <div class="cols cols-2">
+        <div>
+          <div class="card amber">
+            <strong style="color:var(--amber)">Phase-Locked Loop (PLL) CDR</strong>
             <ul style="font-size:0.77em; margin-top:0.3em">
               <li>Phase detector compares data edges vs VCO phase</li>
               <li>Loop filter averages error signal</li>
@@ -490,9 +508,9 @@
             </ul>
           </div>
         </div>
-        <div class="col">
-          <div class="card card-v">
-            <strong style="color:var(--accent4)">Phase Interpolator (PI) CDR</strong>
+        <div>
+          <div class="card purple">
+            <strong style="color:var(--purple)">Phase Interpolator (PI) CDR</strong>
             <ul style="font-size:0.77em; margin-top:0.3em">
               <li>Fixed RX PLL generates reference phases (e.g. 8)</li>
               <li>Digital loop selects/blends phase for sampling</li>
@@ -504,8 +522,8 @@
         </div>
       </div>
 
-      <div class="card card-a" style="margin-top:0.5em">
-        <strong style="color:var(--accent3)">Bang-Bang (BB) Phase Detector</strong>
+      <div class="card green" style="margin-top:0.5em">
+        <strong style="color:var(--green)">Bang-Bang (BB) Phase Detector</strong>
         <ul style="font-size:0.79em; margin-top:0.3em">
           <li>Samples data at two phases: "early" and "late" relative to eye centre</li>
           <li>1-bit decision: phase error is always ±1 LSB (non-linear)</li>
@@ -514,12 +532,12 @@
         </ul>
       </div>
 
-      <div class="card card-g" style="margin-top:0.5em; font-size:0.78em">
-        <strong style="color:var(--accent2)">Digital CDR (ADC-based, PAM4)</strong><br/>
+      <div class="card green" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--green)">Digital CDR (ADC-based, PAM4)</strong><br/>
         PAM4 at 56G+ often uses a flash ADC (4–6 bits) followed by a fully digital CDR and DFE running at fractional rate. Enables aggressive EQ and adaptation but consumes significant area and power.
       </div>
     </div>
-    <div class="col">
+    <div>
       <!-- CDR loop diagram -->
       <div class="card" style="text-align:center; padding:0.6em 0.4em">
         <svg width="185" height="230" viewBox="0 0 185 230">
@@ -550,33 +568,33 @@
           </defs>
         </svg>
       </div>
-      <div class="stat stat-v" style="margin-top:0.3em">
-        <div class="num">9 ps</div>
-        <div class="lbl">1 UI at 112 Gbps —<br/>total jitter budget</div>
+      <div class="card purple" style="text-align:center; margin-top:0.3em">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--purple)">9 ps</div>
+        <div style="font-size:.52em; color:var(--muted)">1 UI at 112 Gbps —<br/>total jitter budget</div>
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 09  –  SECTION: PCIe
-====================================================================== -->
-<section data-background-color="#0a0f1a">
-  <div class="section-slide">
-    <div class="section-num">SECTION 03</div>
+<section data-background-color="#0a0a0f">
+  
+  <div class="slide-hdr">
+    <span class="tag">09</span>
     <h2>PCIe 5 &amp; 6</h2>
-    <p>Protocol stack · Link training · FLIT mode · Bandwidth scaling</p>
   </div>
+    <p>Protocol stack · Link training · FLIT mode · Bandwidth scaling</p>
 </section>
 
-<!-- =====================================================================
-     SLIDE 10  –  PCIe PROTOCOL STACK
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>PCIe Protocol Stack</h2>
-  <div class="cols">
-    <div class="col">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">10</span>
+
+    <h2>PCIe Protocol Stack</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
       <!-- Layered stack diagram -->
       <div class="card" style="padding:0.5em 0.7em; margin-bottom:0.5em">
         <svg width="210" height="220" viewBox="0 0 210 220">
@@ -600,14 +618,14 @@
           <text x="105" y="160" text-anchor="middle" font-size="9" fill="#f78166" font-weight="bold">PHY — Electrical</text>
           <text x="105" y="172" text-anchor="middle" font-size="7.5" fill="#8b949e">SerDes · EQ · CDR · Rx detect</text>
           <!-- Physical medium -->
-          <rect x="10" y="180" width="190" height="28" rx="4" fill="#13191e" stroke="#30363d" stroke-width="1"/>
+          <rect x="10" y="180" width="190" height="28" rx="4" fill="#13191e" stroke="var(--border)" stroke-width="1"/>
           <text x="105" y="198" text-anchor="middle" font-size="9" fill="#8b949e">Differential Pair / Channel</text>
         </svg>
       </div>
     </div>
-    <div class="col2">
-      <div class="card card-v" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent4)">TLP — Transaction Layer Packet</strong>
+    <div>
+      <div class="card purple" style="margin-bottom:0.5em">
+        <strong style="color:var(--purple)">TLP — Transaction Layer Packet</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Header (3–4 DW): type, address, length, requester/completer ID, tag</li>
           <li>Data payload: 1–1024 DW (4–4096 bytes)</li>
@@ -615,8 +633,8 @@
           <li>Transaction types: Memory, I/O, Config, Message, AtomicOp (FetchAdd, CAS, Swap)</li>
         </ul>
       </div>
-      <div class="card card-g" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent2)">Flow Control</strong>
+      <div class="card green" style="margin-bottom:0.5em">
+        <strong style="color:var(--green)">Flow Control</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Credit-based: receiver advertises header + data credits per VC</li>
           <li>Transmitter counts credits before sending; no retransmit needed</li>
@@ -624,8 +642,8 @@
           <li>DLLP Ack/Nak: link-level retry on LCRC failure</li>
         </ul>
       </div>
-      <div class="card card-r">
-        <strong style="color:var(--accent5)">PCIe 6.0 — FLIT Mode</strong>
+      <div class="card red">
+        <strong style="color:var(--red)">PCIe 6.0 — FLIT Mode</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Fixed-size 256-byte FLIT (Flow Control Unit) replaces variable TLP framing</li>
           <li>Enables FEC (Reed-Solomon + CRC-6) → BER &lt;10⁻¹⁸ from raw 10⁻⁴ PAM4</li>
@@ -641,25 +659,27 @@
         <tr><td>PCIe 6</td><td>FLIT/256B</td><td>64</td><td>128 GB/s</td><td>PAM4</td></tr>
         <tr><td>PCIe 7*</td><td>FLIT/256B</td><td>128</td><td>256 GB/s</td><td>PAM4</td></tr>
       </table>
-      <div style="font-size:0.6em; color:var(--text-lo); margin-top:0.2em">* PCIe 7 in specification development (PCI-SIG)</div>
+      <div style="font-size:0.6em; color:var(--muted); margin-top:0.2em">* PCIe 7 in specification development (PCI-SIG)</div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 11  –  PCIe LINK TRAINING
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>PCIe Link Training &amp; State Machine (LTSSM)</h2>
-  <div class="cols">
-    <div class="col2">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">11</span>
+
+    <h2>PCIe Link Training &amp; State Machine (LTSSM)</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
       <p style="font-size:0.81em; margin-bottom:0.5em">Before data flows, each PCIe link must negotiate parameters and equalise the channel. The <strong>Link Training and Status State Machine (LTSSM)</strong> manages this sequence.</p>
 
-      <div class="card card-h" style="margin-bottom:0.4em">
-        <strong style="color:var(--accent1)">LTSSM Key States</strong>
+      <div class="card amber" style="margin-bottom:0.4em">
+        <strong style="color:var(--amber)">LTSSM Key States</strong>
         <div class="cols" style="margin-top:0.3em">
-          <div class="col">
+          <div>
             <ul style="font-size:0.77em">
               <li><strong>Detect:</strong> RX detects electrical termination; confirms far-end present</li>
               <li><strong>Polling:</strong> TX sends TS1/TS2 ordered sets; bit lock</li>
@@ -667,7 +687,7 @@
               <li><strong>Recovery:</strong> re-equalises on link errors or speed change</li>
             </ul>
           </div>
-          <div class="col">
+          <div>
             <ul style="font-size:0.77em">
               <li><strong>L0:</strong> normal active operation</li>
               <li><strong>L0s:</strong> electrical idle; fast exit (~1 µs)</li>
@@ -678,8 +698,8 @@
         </div>
       </div>
 
-      <div class="card card-a" style="margin-bottom:0.4em">
-        <strong style="color:var(--accent3)">Equalization Phases (PCIe 3+)</strong>
+      <div class="card green" style="margin-bottom:0.4em">
+        <strong style="color:var(--green)">Equalization Phases (PCIe 3+)</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li><strong>Phase 1:</strong> TX uses default preset (P0–P10 for PCIe 4/5)</li>
           <li><strong>Phase 2:</strong> receiver requests TX preset changes via TS2; optimises TX FIR</li>
@@ -689,12 +709,12 @@
         </ul>
       </div>
 
-      <div class="card card-g" style="font-size:0.78em">
-        <strong style="color:var(--accent2)">ASPM — Active-State Power Management</strong><br/>
+      <div class="card green" style="font-size:0.78em">
+        <strong style="color:var(--green)">ASPM — Active-State Power Management</strong><br/>
         Hardware autonomously transitions idle links to L0s/L1 to save power. L1 substates (L1.1, L1.2) use CLKREQ# handshake to gate reference clocks. Critical for edge AI SoCs: a PCIe 5 ×16 link idles at &gt;2 W.
       </div>
     </div>
-    <div class="col">
+    <div>
       <!-- LTSSM simplified state flow -->
       <div class="card" style="text-align:center; padding:0.5em 0.3em">
         <svg width="170" height="290" viewBox="0 0 170 290">
@@ -720,7 +740,7 @@
           <rect x="35" y="227" width="100" height="24" rx="12" fill="#1e2736" stroke="#bc8cff" stroke-width="1.5"/>
           <text x="85" y="243" text-anchor="middle" font-size="8.5" fill="#bc8cff">Recovery</text>
 
-          <rect x="35" y="262" width="100" height="24" rx="12" fill="#13191e" stroke="#30363d" stroke-width="1"/>
+          <rect x="35" y="262" width="100" height="24" rx="12" fill="#13191e" stroke="var(--border)" stroke-width="1"/>
           <text x="85" y="278" text-anchor="middle" font-size="8.5" fill="#8b949e">L2 / L3 (Off)</text>
 
           <!-- Arrows down -->
@@ -731,7 +751,7 @@
           <line x1="85" y1="140" x2="85" y2="153" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
           <line x1="85" y1="177" x2="85" y2="190" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
           <line x1="85" y1="214" x2="85" y2="227" stroke="#bc8cff" stroke-width="1" stroke-dasharray="4,3"/>
-          <line x1="85" y1="251" x2="85" y2="262" stroke="#30363d" stroke-width="1"/>
+          <line x1="85" y1="251" x2="85" y2="262" stroke="var(--border)" stroke-width="1"/>
           <!-- Recovery back to L0 -->
           <path d="M 135,239 L 160,239 L 160,128 L 135,128" fill="none" stroke="#bc8cff" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr3)"/>
 
@@ -744,36 +764,36 @@
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 12  –  SECTION: UCIe DIE-TO-DIE
-====================================================================== -->
-<section data-background-color="#0a0f1a">
-  <div class="section-slide">
-    <div class="section-num">SECTION 04</div>
+<section data-background-color="#0a0a0f">
+  
+  <div class="slide-hdr">
+    <span class="tag">12</span>
     <h2>UCIe — Universal Chiplet Interconnect Express</h2>
-    <p>Die-to-die PHY · Bump pitch · Protocol stack · Bandwidth density</p>
   </div>
+    <p>Die-to-die PHY · Bump pitch · Protocol stack · Bandwidth density</p>
 </section>
 
-<!-- =====================================================================
-     SLIDE 13  –  UCIe ARCHITECTURE
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>UCIe — Die-to-Die Interconnect Standard</h2>
-  <div class="cols">
-    <div class="col2">
-      <div class="card card-v" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent4)">Why a Die-to-Die Standard?</strong><br/>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">13</span>
+
+    <h2>UCIe — Die-to-Die Interconnect Standard</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card purple" style="margin-bottom:0.5em">
+        <strong style="color:var(--purple)">Why a Die-to-Die Standard?</strong><br/>
         <span style="font-size:0.8em">Chiplet architectures (AMD, Intel, Apple, NVIDIA) use proprietary die-to-die interconnects. UCIe (announced 2022, now v2.0) provides an open standard so chiplets from different vendors can interoperate — the "PCIe of the package."</span>
       </div>
 
-      <div class="cols">
-        <div class="col">
-          <div class="card card-h">
-            <strong style="color:var(--accent1); font-size:0.85em">UCIe Physical Layer</strong>
+      <div class="cols cols-2">
+        <div>
+          <div class="card amber">
+            <strong style="color:var(--amber); font-size:0.85em">UCIe Physical Layer</strong>
             <ul style="font-size:0.77em; margin-top:0.3em">
               <li><strong>Standard package:</strong> 55 µm bump pitch; up to 16 GT/s NRZ</li>
               <li><strong>Advanced package:</strong> 25 µm bump pitch (CoWoS/SoIC); up to 32 GT/s</li>
@@ -783,9 +803,9 @@
             </ul>
           </div>
         </div>
-        <div class="col">
-          <div class="card card-a">
-            <strong style="color:var(--accent3); font-size:0.85em">Bandwidth Density</strong>
+        <div>
+          <div class="card green">
+            <strong style="color:var(--green); font-size:0.85em">Bandwidth Density</strong>
             <ul style="font-size:0.77em; margin-top:0.3em">
               <li>Standard: ~1 Tb/s/mm edge bandwidth</li>
               <li>Advanced: ~10 Tb/s/mm (2 TB/s per mm)</li>
@@ -796,8 +816,8 @@
         </div>
       </div>
 
-      <div class="card card-g" style="margin-top:0.5em">
-        <strong style="color:var(--accent2)">UCIe Protocol Stack</strong>
+      <div class="card green" style="margin-top:0.5em">
+        <strong style="color:var(--green)">UCIe Protocol Stack</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li><strong>Protocol layer:</strong> PCIe TLP or CXL.io/cache/mem — runs unchanged over UCIe</li>
           <li><strong>Die-to-Die Adapter (D2D):</strong> flow control, credit management, protocol arbitration</li>
@@ -806,26 +826,26 @@
         </ul>
       </div>
     </div>
-    <div class="col">
+    <div>
       <!-- UCIe vs PCIe bandwidth density comparison -->
       <div class="card" style="text-align:center; padding:0.6em 0.4em; margin-bottom:0.5em">
         <svg width="185" height="175" viewBox="0 0 185 175">
           <text x="92" y="12" text-anchor="middle" font-size="8" fill="#8b949e">Bandwidth density comparison</text>
           <!-- Bars -->
           <!-- PCIe 5 off-pkg -->
-          <rect x="15" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="15" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="var(--border)"/>
           <rect x="15" y="121" width="20" height="24" rx="2" fill="#58a6ff"/>
           <text x="25" y="158" text-anchor="middle" font-size="7" fill="#58a6ff">PCIe 5</text>
           <!-- UCIe std -->
-          <rect x="55" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="55" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="var(--border)"/>
           <rect x="55" y="89" width="20" height="56" rx="2" fill="#3fb950"/>
           <text x="65" y="158" text-anchor="middle" font-size="7" fill="#3fb950">UCIe Std</text>
           <!-- UCIe adv -->
-          <rect x="95" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="95" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="var(--border)"/>
           <rect x="95" y="25" width="20" height="120" rx="2" fill="#d2a679"/>
           <text x="105" y="158" text-anchor="middle" font-size="7" fill="#d2a679">UCIe Adv</text>
           <!-- HBM interface -->
-          <rect x="135" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="#30363d"/>
+          <rect x="135" y="25" width="20" height="120" rx="2" fill="#1e2736" stroke="var(--border)"/>
           <rect x="135" y="50" width="20" height="95" rx="2" fill="#bc8cff"/>
           <text x="145" y="158" text-anchor="middle" font-size="7" fill="#bc8cff">HBM PHY</text>
           <!-- Y axis label -->
@@ -838,38 +858,38 @@
           <text x="168" y="145" font-size="6.5" fill="#8b949e">GB/s/mm²</text>
         </svg>
       </div>
-      <div class="stat stat-v">
-        <div class="num">20×</div>
-        <div class="lbl">UCIe advanced vs PCIe 5<br/>bandwidth density</div>
+      <div class="card purple" style="text-align:center">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--purple)">20×</div>
+        <div style="font-size:.52em; color:var(--muted)">UCIe advanced vs PCIe 5<br/>bandwidth density</div>
       </div>
-      <div class="card card-r" style="margin-top:0.4em; font-size:0.76em">
-        <strong style="color:var(--accent5)">Key benefit:</strong> UCIe collapses the on-package BW gap — a 1 mm edge of UCIe advanced delivers more bandwidth than an entire PCIe 5 ×16 link.
+      <div class="card red" style="margin-top:0.4em; font-size:0.76em">
+        <strong style="color:var(--red)">Key benefit:</strong> UCIe collapses the on-package BW gap — a 1 mm edge of UCIe advanced delivers more bandwidth than an entire PCIe 5 ×16 link.
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 14  –  SECTION: HIGH-SPEED ETHERNET
-====================================================================== -->
-<section data-background-color="#0a0f1a">
-  <div class="section-slide">
-    <div class="section-num">SECTION 05</div>
+<section data-background-color="#0a0a0f">
+  
+  <div class="slide-hdr">
+    <span class="tag">14</span>
     <h2>High-Speed Ethernet &amp; Network I/O</h2>
-    <p>400G · 800G · 1.6T · RDMA · SmartNIC integration in ML SoCs</p>
   </div>
+    <p>400G · 800G · 1.6T · RDMA · SmartNIC integration in ML SoCs</p>
 </section>
 
-<!-- =====================================================================
-     SLIDE 15  –  400G / 800G ETHERNET
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>400G / 800G / 1.6T Ethernet for AI Clusters</h2>
-  <div class="cols">
-    <div class="col">
-      <div class="card card-h">
-        <strong style="color:var(--accent1)">Ethernet Rate Ladder</strong>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">15</span>
+
+    <h2>400G / 800G / 1.6T Ethernet for AI Clusters</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <strong style="color:var(--amber)">Ethernet Rate Ladder</strong>
         <table style="font-size:0.73em; margin-top:0.4em">
           <tr><th>Standard</th><th>Lanes</th><th>Rate/lane</th><th>Modulation</th></tr>
           <tr><td>100GbE</td><td>4</td><td>25G NRZ</td><td>NRZ</td></tr>
@@ -878,8 +898,8 @@
           <tr><td>1.6TbE</td><td>8</td><td>200G PAM4</td><td>PAM4</td></tr>
         </table>
       </div>
-      <div class="card card-a" style="margin-top:0.5em">
-        <strong style="color:var(--accent3)">FEC — Forward Error Correction</strong>
+      <div class="card green" style="margin-top:0.5em">
+        <strong style="color:var(--green)">FEC — Forward Error Correction</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Raw PAM4 BER ~10⁻⁴ → must correct to &lt;10⁻¹⁵ for Ethernet</li>
           <li><strong>RS(544,514) KP4:</strong> standard for 100G+ PAM4; adds 6% overhead</li>
@@ -889,9 +909,9 @@
         </ul>
       </div>
     </div>
-    <div class="col">
-      <div class="card card-g">
-        <strong style="color:var(--accent2)">RDMA &amp; SmartNIC Integration</strong>
+    <div>
+      <div class="card green">
+        <strong style="color:var(--green)">RDMA &amp; SmartNIC Integration</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li><strong>RDMA over Converged Ethernet (RoCEv2):</strong> GPU-to-GPU memory transfers without CPU involvement</li>
           <li>NVIDIA NCCL uses RoCEv2 (or NVLink) for all-reduce collective operations</li>
@@ -899,8 +919,8 @@
           <li>Integrated in SoC: Qualcomm Cloud AI 100, Amazon Trainium2 — custom Ethernet MAC embedded with the ML accelerator</li>
         </ul>
       </div>
-      <div class="card card-v" style="margin-top:0.5em">
-        <strong style="color:var(--accent4)">AI Cluster Networking</strong>
+      <div class="card purple" style="margin-top:0.5em">
+        <strong style="color:var(--purple)">AI Cluster Networking</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Scale-up (intra-server): NVLink 4 @ 900 GB/s, UCIe</li>
           <li>Scale-out (inter-server): 400G/800G InfiniBand or RoCEv2 Ethernet</li>
@@ -908,35 +928,35 @@
           <li>Google Jupiter: petabit-scale fabric, 100G per host link</li>
         </ul>
       </div>
-      <div class="stat stat-g" style="margin-top:0.4em">
-        <div class="num">1.6 Tb/s</div>
-        <div class="lbl">per-port Ethernet<br/>target for AI fabric (2025+)</div>
+      <div class="card green" style="text-align:center; margin-top:0.4em">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--green)">1.6 Tb/s</div>
+        <div style="font-size:.52em; color:var(--muted)">per-port Ethernet<br/>target for AI fabric (2025+)</div>
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 16  –  SECTION: SIGNAL INTEGRITY
-====================================================================== -->
-<section data-background-color="#0a0f1a">
-  <div class="section-slide">
-    <div class="section-num">SECTION 06</div>
+<section data-background-color="#0a0a0f">
+  
+  <div class="slide-hdr">
+    <span class="tag">16</span>
     <h2>Signal Integrity</h2>
-    <p>Channel modelling · S-parameters · Eye mask · Jitter decomposition · SI closure</p>
   </div>
+    <p>Channel modelling · S-parameters · Eye mask · Jitter decomposition · SI closure</p>
 </section>
 
-<!-- =====================================================================
-     SLIDE 17  –  SIGNAL INTEGRITY FUNDAMENTALS
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>Signal Integrity — Channel Modelling &amp; Closure</h2>
-  <div class="cols">
-    <div class="col">
-      <div class="card card-r">
-        <strong style="color:var(--accent5)">Loss Budget</strong>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">17</span>
+
+    <h2>Signal Integrity — Channel Modelling &amp; Closure</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card red">
+        <strong style="color:var(--red)">Loss Budget</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li><strong>PCB trace:</strong> 0.5–1.5 dB/GHz (FR4); lower loss with low-Dk/Df laminates (Megtron 7, Tachyon 100G)</li>
           <li><strong>Via transition:</strong> 0.5–2 dB stub resonance; back-drilling mandatory at 56G+</li>
@@ -946,8 +966,8 @@
           <li>PCIe 6 PAM4: ≤32 dB at half-Nyquist (16 GHz)</li>
         </ul>
       </div>
-      <div class="card card-h" style="margin-top:0.5em">
-        <strong style="color:var(--accent1)">S-Parameters &amp; Channel Characterisation</strong>
+      <div class="card amber" style="margin-top:0.5em">
+        <strong style="color:var(--amber)">S-Parameters &amp; Channel Characterisation</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>S21: insertion loss (signal path); S11: return loss (reflection)</li>
           <li>NEXT/FEXT: near/far-end crosstalk between differential pairs</li>
@@ -956,9 +976,9 @@
         </ul>
       </div>
     </div>
-    <div class="col">
-      <div class="card card-a">
-        <strong style="color:var(--accent3)">Jitter Decomposition</strong>
+    <div>
+      <div class="card green">
+        <strong style="color:var(--green)">Jitter Decomposition</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li><strong>TJ (Total Jitter):</strong> measured at BER 10⁻¹²; TJ = DJ + Q×RJ</li>
           <li><strong>DJ (Deterministic Jitter):</strong> bounded; ISI, crosstalk, PJ, DCD</li>
@@ -967,8 +987,8 @@
           <li>PRBS31: pseudo-random pattern stresses ISI; PRBS7 for conformance</li>
         </ul>
       </div>
-      <div class="card card-g" style="margin-top:0.5em">
-        <strong style="color:var(--accent2)">SI Closure Flow</strong>
+      <div class="card green" style="margin-top:0.5em">
+        <strong style="color:var(--green)">SI Closure Flow</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>Schematic: impedance stack-up, via models, connector IBIS-AMI</li>
           <li>Pre-layout: topology analysis, loss budget spreadsheet</li>
@@ -977,42 +997,42 @@
           <li>Post-silicon: VNA S-param measurement + BERT margin sweep</li>
         </ul>
       </div>
-      <div class="stat stat-r" style="margin-top:0.3em">
-        <div class="num">36 dB</div>
-        <div class="lbl">max channel insertion loss<br/>PCIe 5.0 at 16 GHz Nyquist</div>
+      <div class="card red" style="text-align:center; margin-top:0.3em">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--red)">36 dB</div>
+        <div style="font-size:.52em; color:var(--muted)">max channel insertion loss<br/>PCIe 5.0 at 16 GHz Nyquist</div>
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 18  –  SECTION: CO-PACKAGED OPTICS
-====================================================================== -->
-<section data-background-color="#0a0f1a">
-  <div class="section-slide">
-    <div class="section-num">SECTION 07</div>
+<section data-background-color="#0a0a0f">
+  
+  <div class="slide-hdr">
+    <span class="tag">18</span>
     <h2>Co-Packaged Optics</h2>
-    <p>CPO · Silicon photonics · EIC+PIC integration · Pluggable vs CPO</p>
   </div>
+    <p>CPO · Silicon photonics · EIC+PIC integration · Pluggable vs CPO</p>
 </section>
 
-<!-- =====================================================================
-     SLIDE 19  –  CO-PACKAGED OPTICS
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>Co-Packaged Optics (CPO)</h2>
-  <div class="cols">
-    <div class="col2">
-      <div class="card card-r" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent5)">The Pluggable Optical Module Problem</strong><br/>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">19</span>
+
+    <h2>Co-Packaged Optics (CPO)</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card red" style="margin-bottom:0.5em">
+        <strong style="color:var(--red)">The Pluggable Optical Module Problem</strong><br/>
         <span style="font-size:0.8em">At 400G+, pluggable QSFP modules sit at the front panel — 1–2 metres of electrical trace between switch ASIC and optics. At 112 Gbps PAM4 per lane this trace dissipates ~5–10 W per module just in SerDes and retimer power. CPO moves the photonic engine inside the package, replacing long electrical traces with micron-scale optical waveguides.</span>
       </div>
 
-      <div class="cols">
-        <div class="col">
-          <div class="card card-h">
-            <strong style="color:var(--accent1); font-size:0.85em">Silicon Photonics PIC</strong>
+      <div class="cols cols-2">
+        <div>
+          <div class="card amber">
+            <strong style="color:var(--amber); font-size:0.85em">Silicon Photonics PIC</strong>
             <ul style="font-size:0.77em; margin-top:0.3em">
               <li>Mach-Zehnder modulators (MZM) or micro-ring modulators (MRM)</li>
               <li>Germanium photodetectors (25+ GHz BW)</li>
@@ -1021,9 +1041,9 @@
             </ul>
           </div>
         </div>
-        <div class="col">
-          <div class="card card-a">
-            <strong style="color:var(--accent3); font-size:0.85em">EIC + PIC Integration</strong>
+        <div>
+          <div class="card green">
+            <strong style="color:var(--green); font-size:0.85em">EIC + PIC Integration</strong>
             <ul style="font-size:0.77em; margin-top:0.3em">
               <li>Electronic IC (laser driver, TIA) flip-chipped onto PIC</li>
               <li>Bump pitch 50–100 µm; µm-scale electrical trace to modulator</li>
@@ -1034,8 +1054,8 @@
         </div>
       </div>
 
-      <div class="card card-g" style="margin-top:0.5em">
-        <strong style="color:var(--accent2)">CPO vs Pluggable: Power Comparison</strong>
+      <div class="card green" style="margin-top:0.5em">
+        <strong style="color:var(--green)">CPO vs Pluggable: Power Comparison</strong>
         <table style="font-size:0.73em; margin-top:0.3em">
           <tr><th></th><th>Pluggable 400G</th><th>CPO 400G</th><th>CPO 1.6T</th></tr>
           <tr><td>Optical module power</td><td>~12 W</td><td>~3 W</td><td>~6 W</td></tr>
@@ -1045,7 +1065,7 @@
         </table>
       </div>
     </div>
-    <div class="col">
+    <div>
       <!-- CPO architecture diagram -->
       <div class="card" style="text-align:center; padding:0.6em 0.3em; margin-bottom:0.5em">
         <svg width="180" height="240" viewBox="0 0 180 240">
@@ -1079,28 +1099,30 @@
           <line x1="145" y1="155" x2="145" y2="183" stroke="#f78166" stroke-width="1" stroke-dasharray="3,2"/>
 
           <!-- Package boundary -->
-          <rect x="5" y="3" width="170" height="220" rx="8" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="6,4"/>
+          <rect x="5" y="3" width="170" height="220" rx="8" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="6,4"/>
           <text x="90" y="235" text-anchor="middle" font-size="7" fill="#30363d">Package boundary</text>
         </svg>
       </div>
-      <div class="stat stat-g">
-        <div class="num">4×</div>
-        <div class="lbl">lower power vs<br/>pluggable at 400G</div>
+      <div class="card green" style="text-align:center">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--green)">4×</div>
+        <div style="font-size:.52em; color:var(--muted)">lower power vs<br/>pluggable at 400G</div>
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 20  –  OTHER HIGH-SPEED I/O: NVLink, CXL, USB4
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>Other Critical High-Speed I/O Standards</h2>
-  <div class="cols">
-    <div class="col">
-      <div class="card card-v">
-        <strong style="color:var(--accent4)">NVLink 4 &amp; NVLink-C2C</strong>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">20</span>
+
+    <h2>Other Critical High-Speed I/O Standards</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card purple">
+        <strong style="color:var(--purple)">NVLink 4 &amp; NVLink-C2C</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li><strong>NVLink 4:</strong> 900 GB/s bidirectional between H100 GPUs (18 links × 50 GB/s)</li>
           <li>Proprietary NVIDIA protocol; cache-coherent GPU-to-GPU</li>
@@ -1109,8 +1131,8 @@
           <li>C2C uses UCIe-like short-reach die-to-die at 25 µm bump pitch</li>
         </ul>
       </div>
-      <div class="card card-a" style="margin-top:0.5em">
-        <strong style="color:var(--accent3)">USB4 v2.0 / Thunderbolt 5</strong>
+      <div class="card green" style="margin-top:0.5em">
+        <strong style="color:var(--green)">USB4 v2.0 / Thunderbolt 5</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>80 Gbps asymmetric; PAM4 on existing USB-C cable</li>
           <li>Tunnels: DisplayPort 2.1, PCIe 4, USB 3.2</li>
@@ -1119,9 +1141,9 @@
         </ul>
       </div>
     </div>
-    <div class="col">
-      <div class="card card-g">
-        <strong style="color:var(--accent2)">CXL PHY (CXL 2.0 / 3.1)</strong>
+    <div>
+      <div class="card green">
+        <strong style="color:var(--green)">CXL PHY (CXL 2.0 / 3.1)</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>CXL runs over PCIe PHY — same SerDes, same lane speeds</li>
           <li>CXL 2.0: PCIe 5.0 PHY (32 GT/s NRZ)</li>
@@ -1130,8 +1152,8 @@
           <li>No dedicated PHY needed — leverage existing PCIe IP</li>
         </ul>
       </div>
-      <div class="card card-h" style="margin-top:0.5em">
-        <strong style="color:var(--accent1)">Infinity Fabric / xGMI (AMD)</strong>
+      <div class="card amber" style="margin-top:0.5em">
+        <strong style="color:var(--amber)">Infinity Fabric / xGMI (AMD)</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>AMD scale-out link connecting GPUs and APUs</li>
           <li>MI300X: xGMI3 @ 128 GB/s per link</li>
@@ -1148,18 +1170,20 @@
       </table>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 21  –  SERDES POWER & NEXT-GEN TRENDS
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>SerDes Power Trends &amp; Next-Generation Directions</h2>
-  <div class="cols">
-    <div class="col2">
-      <div class="card card-r" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent5)">SerDes Power — The Key Bottleneck</strong>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">21</span>
+
+    <h2>SerDes Power Trends &amp; Next-Generation Directions</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card red" style="margin-bottom:0.5em">
+        <strong style="color:var(--red)">SerDes Power — The Key Bottleneck</strong>
         <ul style="font-size:0.8em; margin-top:0.3em">
           <li>56G NRZ SerDes: ~5–8 pJ/bit (TX+RX); 10 Tbps aggregate = 50–80 W</li>
           <li>112G PAM4 SerDes: ~3–5 pJ/bit; DSP ADC dominates power</li>
@@ -1169,10 +1193,10 @@
         </ul>
       </div>
 
-      <div class="cols">
-        <div class="col">
-          <div class="card card-h">
-            <strong style="color:var(--accent1); font-size:0.85em">Process Node Scaling</strong>
+      <div class="cols cols-2">
+        <div>
+          <div class="card amber">
+            <strong style="color:var(--amber); font-size:0.85em">Process Node Scaling</strong>
             <ul style="font-size:0.76em; margin-top:0.3em">
               <li>SerDes benefits from digital node shrink (DSP, CDR)</li>
               <li>Analogue (VCO, driver) needs specialised device options</li>
@@ -1181,9 +1205,9 @@
             </ul>
           </div>
         </div>
-        <div class="col">
-          <div class="card card-a">
-            <strong style="color:var(--accent3); font-size:0.85em">224G PAM4 / Beyond</strong>
+        <div>
+          <div class="card green">
+            <strong style="color:var(--green); font-size:0.85em">224G PAM4 / Beyond</strong>
             <ul style="font-size:0.76em; margin-top:0.3em">
               <li>224G PAM4 in R&D: ~112 GBaud symbol rate</li>
               <li>Requires DSP with &gt;8-bit ADC; full digital EQ</li>
@@ -1194,9 +1218,9 @@
         </div>
       </div>
     </div>
-    <div class="col">
-      <div class="card card-g" style="margin-bottom:0.5em">
-        <strong style="color:var(--accent2)">Photonic Roadmap</strong>
+    <div>
+      <div class="card green" style="margin-bottom:0.5em">
+        <strong style="color:var(--green)">Photonic Roadmap</strong>
         <ul style="font-size:0.78em; margin-top:0.3em">
           <li>2024: 400G CPO sampling (Broadcom Humboldt, Marvell Spica)</li>
           <li>2025–26: 800G CPO in hyperscale switch ASIC ramp</li>
@@ -1204,61 +1228,63 @@
           <li>ML SoC: co-packaged photonic die for scale-out interconnect</li>
         </ul>
       </div>
-      <div class="stat stat-a">
-        <div class="num">224G</div>
-        <div class="lbl">next-gen lane rate<br/>PAM4 in R&amp;D (2025+)</div>
+      <div class="card green" style="text-align:center">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--green)">224G</div>
+        <div style="font-size:.52em; color:var(--muted)">next-gen lane rate<br/>PAM4 in R&amp;D (2025+)</div>
       </div>
-      <div class="stat stat-v" style="margin-top:0.4em">
-        <div class="num">&lt;2 pJ</div>
-        <div class="lbl">target energy/bit for<br/>1.6T-era SerDes</div>
+      <div class="card purple" style="text-align:center; margin-top:0.4em">
+        <div style="font-family:'Playfair Display',serif; font-size:1.8em; font-weight:900; color:var(--purple)">&lt;2 pJ</div>
+        <div style="font-size:.52em; color:var(--muted)">target energy/bit for<br/>1.6T-era SerDes</div>
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 22  –  SUMMARY
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <h2>Summary</h2>
-  <div class="cols">
-    <div class="col2">
-      <div class="cols">
-        <div class="col">
-          <div class="card card-h" style="font-size:0.78em">
-            <strong style="color:var(--accent1)">SerDes Architecture</strong><br/>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+
+    <span class="tag">22</span>
+
+    <h2>Summary</h2>
+
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="cols cols-2">
+        <div>
+          <div class="card amber" style="font-size:0.78em">
+            <strong style="color:var(--amber)">SerDes Architecture</strong><br/>
             TX PLL + FIR serialiser; RX CTLE + DFE + CDR deserialiser. 112G PAM4 state-of-art with ADC-based digital DSP. Jitter budget &lt;3 ps rms at 1 UI = 9 ps.
           </div>
         </div>
-        <div class="col">
-          <div class="card card-a" style="font-size:0.78em">
-            <strong style="color:var(--accent3)">NRZ vs PAM4</strong><br/>
+        <div>
+          <div class="card green" style="font-size:0.78em">
+            <strong style="color:var(--green)">NRZ vs PAM4</strong><br/>
             PAM4 halves baud rate for same bit rate; reduces channel bandwidth requirement. 9.5 dB SNR penalty demands aggressive EQ and mandatory FEC (RS KP4).
           </div>
         </div>
       </div>
       <div class="cols" style="margin-top:0.5em">
-        <div class="col">
-          <div class="card card-v" style="font-size:0.78em">
-            <strong style="color:var(--accent4)">PCIe 5 &amp; 6</strong><br/>
+        <div>
+          <div class="card purple" style="font-size:0.78em">
+            <strong style="color:var(--purple)">PCIe 5 &amp; 6</strong><br/>
             PCIe 5: 32 GT/s NRZ, 64 GB/s ×16. PCIe 6: 64 GT/s PAM4 FLIT mode, 128 GB/s ×16, inline FEC. PCIe 7 targets 256 GB/s.
           </div>
         </div>
-        <div class="col">
-          <div class="card card-g" style="font-size:0.78em">
-            <strong style="color:var(--accent2)">UCIe</strong><br/>
+        <div>
+          <div class="card green" style="font-size:0.78em">
+            <strong style="color:var(--green)">UCIe</strong><br/>
             Open die-to-die standard. Advanced package: 25 µm pitch, 10+ TB/s/mm bandwidth density — 20× denser than PCIe off-package. PCIe/CXL protocol tunnelled unchanged.
           </div>
         </div>
       </div>
-      <div class="card card-r" style="margin-top:0.5em; font-size:0.78em">
-        <strong style="color:var(--accent5)">The Trajectory:</strong>
+      <div class="card red" style="margin-top:0.5em; font-size:0.78em">
+        <strong style="color:var(--red)">The Trajectory:</strong>
         Electrical SerDes pushes toward 224G PAM4; beyond that, insertion loss mandates optical solutions.
         Co-packaged optics will dominate rack-scale AI interconnect by 2027, reducing the optical module power by 4–8× vs pluggables and enabling per-chip I/O bandwidths exceeding 10 Tbps.
       </div>
     </div>
-    <div class="col">
+    <div>
       <div class="card" style="font-size:0.78em; margin-bottom:0.5em">
         <strong>Up Next in the Series</strong>
         <ul style="margin-top:0.3em">
@@ -1284,56 +1310,45 @@
       </div>
     </div>
   </div>
-  <div class="slide-footer">04 · High-Speed SerDes &amp; I/O</div>
 </section>
 
-<!-- =====================================================================
-     SLIDE 23  –  CLOSING
-====================================================================== -->
-<section data-background-color="#0d1117">
-  <div class="title-slide" style="padding-top:2em">
-    <div class="hex-badge">⬡</div>
-    <div class="series">Modern SoC Design · Presentation 04</div>
+<section class="title-slide" data-background-color="#0a0a0f">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">Modern SoC Design · Presentation 04</div>
     <h1 style="font-size:1.7em">High-Speed SerDes &amp; I/O</h1>
-    <p style="margin-top:1em; font-size:0.75em; color:var(--text-lo)">
+    <p style="margin-top:1em; font-size:0.75em; color:var(--muted)">
       Part of an open series exploring modern SoC design end-to-end.<br/>
       All presentations available at
       <a href="https://brendanjameslynskey.github.io/SoC/">brendanjameslynskey.github.io/SoC</a>
     </p>
     <div style="margin-top:1.2em">
-      <span class="tag tag-b">SerDes</span><span class="tag tag-g">PCIe 6</span>
-      <span class="tag tag-a">PAM4</span><span class="tag tag-v">UCIe</span>
-      <span class="tag tag-r">CDR</span><span class="tag">CTLE / DFE</span>
-      <span class="tag">Co-packaged Optics</span><span class="tag">800G Ethernet</span>
+      <span class="pill amber">SerDes</span><span class="pill green">PCIe 6</span>
+      <span class="pill green">PAM4</span><span class="pill purple">UCIe</span>
+      <span class="pill purple">CDR</span><span class="pill amber">CTLE / DFE</span>
+      <span class="pill amber">Co-packaged Optics</span><span class="pill amber">800G Ethernet</span>
     </div>
-    <p style="margin-top:1.5em; font-size:0.6em; color:var(--text-lo)">
-      Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf to URL
-    </p>
-  </div>
-</section>
+    <div class="meta">Navigate: ← → or swipe &nbsp;|&nbsp; Overview: Esc &nbsp;|&nbsp; PDF: append ?print-pdf to URL</div>
+  </section>
 
-</div><!-- /slides -->
-</div><!-- /reveal -->
+</div><!-- /.slides -->
+</div><!-- /.reveal -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
 <script>
-  Reveal.initialize({
-    hash: true,
-    slideNumber: 'c/t',
-    transition: 'fade',
-    transitionSpeed: 'fast',
-    backgroundTransition: 'fade',
-    controls: true,
-    progress: true,
-    center: false,
-    width: 1280,
-    height: 900,
-    margin: 0.02,
-    plugins: [ RevealHighlight, RevealNotes ],
-    highlight: { highlightOnLoad: true }
-  });
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1100,
+  height: 900,
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
+});
 </script>
 <script>
 (function(){

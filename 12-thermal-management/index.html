@@ -1,138 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thermal Management in ML Accelerator SoCs — Modern SoC Series</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
-
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --r-background-color: #0a0a0f;
-    --r-main-font: 'DM Sans', sans-serif;
-    --r-heading-font: 'Playfair Display', serif;
-    --r-code-font: 'JetBrains Mono', monospace;
-    --r-main-font-size: 28px;
-    --r-heading-color: #e8e4df;
-    --r-main-color: #c8c4bf;
-    --r-link-color: #7eb8da;
-    --r-link-color-hover: #a8d4ef;
-    --r-selection-background-color: #2a5a7a;
-    --accent: #7eb8da;
-    --accent2: #e8a87c;
-    --accent3: #8fd4a4;
-    --accent4: #c49dd8;
-    --dim: #6a6660;
-    --surface: #16161e;
-    --surface2: #1e1e28;
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
   }
 
-  .reveal { font-weight: 400; }
-  .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-shadow: none; }
-  .reveal h1 { font-size: 2.0em; font-weight: 900; }
-  .reveal h2 { font-size: 1.35em; }
-  .reveal h3 { font-size: 1.0em; color: var(--accent); font-family: var(--r-main-font); font-weight: 700; }
-  .reveal p, .reveal li { line-height: 1.6; }
-  .reveal ul { list-style: none; padding-left: 0; }
-  .reveal ul li { position: relative; padding-left: 1.4em; margin-bottom: 0.4em; }
-  .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
-  .reveal code { font-family: var(--r-code-font); font-size: 0.85em; }
-  .reveal pre { width: 100%; box-shadow: none; }
-  .reveal pre code { padding: 1em 1.2em; border-radius: 8px; background: var(--surface); border: 1px solid #2a2a35; max-height: 520px; font-size: 0.55em; line-height: 1.55; }
-  .reveal .slide-number { font-family: var(--r-code-font); font-size: 0.6em; color: var(--dim); background: transparent; }
-  .reveal blockquote { background: var(--surface); border-left: 4px solid var(--accent); padding: 0.8em 1.2em; font-style: normal; border-radius: 0 8px 8px 0; width: 90%; margin: 0.8em auto; font-size: 0.85em; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
 
-  /* Utility */
-  .accent  { color: var(--accent) !important; }
-  .accent2 { color: var(--accent2) !important; }
-  .accent3 { color: var(--accent3) !important; }
-  .accent4 { color: var(--accent4) !important; }
-  .dim     { color: var(--dim) !important; }
-  .mono    { font-family: var(--r-code-font) !important; }
-  .small   { font-size: 0.7em !important; }
-  .smaller { font-size: 0.6em !important; }
-  .tiny    { font-size: 0.5em !important; }
-  .left    { text-align: left !important; }
-  .center  { text-align: center !important; }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
 
-  /* Tag / badge */
-  .tag { display: inline-block; padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.55em; font-family: var(--r-code-font); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; margin: 0 0.15em; }
-  .tag-blue   { background: rgba(126,184,218,0.18); color: var(--accent); }
-  .tag-orange { background: rgba(232,168,124,0.18); color: var(--accent2); }
-  .tag-green  { background: rgba(143,212,164,0.18); color: var(--accent3); }
-  .tag-purple { background: rgba(196,157,216,0.18); color: var(--accent4); }
-  .tag-dim    { background: rgba(106,102,96,0.18);  color: var(--dim); }
-
-  /* Tables */
-  .reveal table { border-collapse: collapse; margin: 0.6em auto; font-size: 0.65em; width: 95%; }
-  .reveal table th { background: var(--surface2); color: var(--accent); font-weight: 700; padding: 0.5em 0.7em; border-bottom: 2px solid var(--accent); text-align: left; }
-  .reveal table td { padding: 0.45em 0.7em; border-bottom: 1px solid #2a2a35; }
-  .reveal table tr:last-child td { border-bottom: none; }
-
-  /* Diagrams / boxes */
-  .box-row { display: flex; gap: 0.8em; justify-content: center; flex-wrap: wrap; margin: 0.6em 0; }
-  .box { background: var(--surface); border: 1px solid #2a2a35; border-radius: 8px; padding: 0.7em 1em; flex: 1; min-width: 180px; max-width: 320px; text-align: center; }
-  .box h3 { margin: 0 0 0.3em; font-size: 0.85em; }
-  .box p, .box ul { font-size: 0.65em; margin: 0; }
-
-  /* Two-col */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; align-items: start; }
-  .two-col.wide-left { grid-template-columns: 1.3fr 0.7fr; }
-  .two-col.wide-right { grid-template-columns: 0.7fr 1.3fr; }
-
-  /* Numbered steps */
-  .steps { counter-reset: step; padding-left: 0; }
-  .steps li { counter-increment: step; padding-left: 2.2em; }
-  .steps li::before { content: counter(step); position: absolute; left: 0; width: 1.5em; height: 1.5em; background: var(--accent); color: var(--r-background-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 700; }
-
-  /* Slide-specific */
-  .title-slide h1 { font-size: 2.2em; margin-bottom: 0.15em; }
-  .title-slide .subtitle { font-size: 0.85em; color: var(--accent); margin-bottom: 0.5em; font-family: var(--r-main-font); }
-  .title-slide .meta { font-size: 0.55em; color: var(--dim); }
-
-  .section-slide { background: linear-gradient(135deg, #0d1420 0%, #0a0a0f 100%); }
-  .section-slide h2 { font-size: 1.8em; }
-  .section-slide .section-num { font-family: var(--r-code-font); font-size: 0.6em; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.3em; }
-
-  /* Architecture diagram via CSS */
-  .arch-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0.5em auto; max-width: 700px; }
-  .arch-layer { width: 100%; padding: 0.4em 0.8em; border-radius: 6px; text-align: center; font-size: 0.6em; font-weight: 700; font-family: var(--r-code-font); }
-
-  /* Animated underline on headings */
-  .reveal section h2::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 3px;
-    background: var(--accent);
-    margin: 0.25em auto 0;
-    border-radius: 2px;
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
   }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
 
-  .section-slide h2::after,
-  .title-slide h1::after { display: none; }
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
 
-  /* Key-value layout */
-  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2em 1em; font-size: 0.7em; text-align: left; margin: 0.5em auto; max-width: 90%; }
-  .kv dt { color: var(--accent); font-weight: 700; white-space: nowrap; font-family: var(--r-code-font); font-size: 0.9em; }
-  .kv dd { margin: 0; }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
 
-  /* Flow arrow */
-  .flow-arrow { color: var(--dim); font-size: 1.4em; margin: 0.15em 0; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
 
-  /* Highlight bar */
-  .highlight-bar { background: linear-gradient(90deg, rgba(126,184,218,0.12) 0%, transparent 100%); border-left: 3px solid var(--accent); padding: 0.5em 1em; margin: 0.5em 0; border-radius: 0 6px 6px 0; font-size: 0.75em; }
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-  /* Footer attribution */
-  .slide-footer { position: absolute; bottom: 1em; left: 50%; transform: translateX(-50%); font-size: 0.35em; color: var(--dim); font-family: var(--r-code-font); }
-  .reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
+
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
 <body>
@@ -142,37 +130,34 @@
 <!-- ============================================================ -->
 <!-- SLIDE 1: Title -->
 <!-- ============================================================ -->
-<section class="title-slide" data-background-gradient="radial-gradient(ellipse at 30% 50%, #111828 0%, #0a0a0f 70%)">
-  <p class="mono small accent" style="letter-spacing:0.15em;">MODERN SOC DESIGN &middot; PRESENTATION 12</p>
-  <h1>Thermal Management in<br/>ML Accelerator SoCs</h1>
+<section class="title-slide" data-background-color="#0a0a0f">
+  <p class="meta">MODERN SOC DESIGN &middot; PRESENTATION 12</p>
+  <h1>Thermal Management in<br>ML Accelerator SoCs</h1>
+  <div style="width:60px;height:3px;background:var(--amber);margin:.3em 0"></div>
   <p class="subtitle">Dissipating 1000W+ from AI Silicon</p>
-  <p class="meta" style="margin-top:1.5em;">
-    Thermal design power &middot; Direct liquid cooling &middot; Vapour chambers &middot; TIM materials &middot; Throttling &middot; Hotspot mitigation
-  </p>
-  <p class="meta" style="margin-top:1em;">Navigate: <span class="mono">&rarr; &larr;</span> &nbsp;|&nbsp; Overview: <span class="mono">Esc</span> &nbsp;|&nbsp; Fullscreen: <span class="mono">F</span></p>
+  <div style="display:flex;gap:.3em;flex-wrap:wrap;margin-top:.4em;"><span class="pill amber">Thermal design power</span> <span class="pill amber">Direct liquid cooling</span> <span class="pill amber">Vapour chambers</span> <span class="pill amber">TIM materials</span> <span class="pill amber">Throttling</span> <span class="pill amber">Hotspot mitigation</span></div>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 2: The Thermal Challenge -->
 <!-- ============================================================ -->
-<section>
-  <h2>The Thermal Challenge</h2>
-  <div class="two-col" style="margin-top:0.6em;">
-    <div class="left">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">01</span><h2>The Thermal Challenge</h2></div>
+  <div class="cols cols-2" style="margin-top:0.6em;">
+    <div>
       <ul style="font-size:0.75em;">
-        <li><strong class="accent">Power density</strong> &mdash; modern AI accelerators exceed <strong>1 W/mm&sup2;</strong> locally; NVIDIA B200 dissipates <strong>1000 W</strong> from ~814 mm&sup2; of active die area</li>
-        <li><strong class="accent2">Junction temperature</strong> &mdash; T<sub>j,max</sub> typically 100&ndash;105 &deg;C for datacenter GPUs; every 10 &deg;C rise doubles failure rate (Arrhenius: AF = e<sup>&Delta;E<sub>a</sub>/k(1/T<sub>1</sub>&minus;1/T<sub>2</sub>)</sup>)</li>
-        <li><strong class="accent3">Thermal runaway</strong> &mdash; leakage current rises exponentially with temperature &rarr; positive feedback loop; at 7 nm, leakage is ~30% of total power at T<sub>j</sub> = 100 &deg;C</li>
-        <li><strong class="accent4">Reliability</strong> &mdash; electromigration, NBTI, HCI all accelerate with temperature; solder joint fatigue from thermal cycling limits package lifetime to ~60k power cycles</li>
+        <li><strong class="b">Power density</strong> &mdash; modern AI accelerators exceed <strong>1 W/mm&sup2;</strong> locally; NVIDIA B200 dissipates <strong>1000 W</strong> from ~814 mm&sup2; of active die area</li>
+        <li><strong class="a">Junction temperature</strong> &mdash; T<sub>j,max</sub> typically 100&ndash;105 &deg;C for datacenter GPUs; every 10 &deg;C rise doubles failure rate (Arrhenius: AF = e<sup>&Delta;E<sub>a</sub>/k(1/T<sub>1</sub>&minus;1/T<sub>2</sub>)</sup>)</li>
+        <li><strong class="g">Thermal runaway</strong> &mdash; leakage current rises exponentially with temperature &rarr; positive feedback loop; at 7 nm, leakage is ~30% of total power at T<sub>j</sub> = 100 &deg;C</li>
+        <li><strong class="p">Reliability</strong> &mdash; electromigration, NBTI, HCI all accelerate with temperature; solder joint fatigue from thermal cycling limits package lifetime to ~60k power cycles</li>
       </ul>
     </div>
     <div>
-      <blockquote style="font-size:0.75em;">
-        "Thermal management, not transistor density, is the primary limiter of AI accelerator performance scaling."
-        <br><span class="dim small">&mdash; TSMC OIP 2024 keynote</span>
-      </blockquote>
-      <div class="highlight-bar" style="margin-top:0.8em;">
-        Power trend: A100 <strong class="accent">400 W</strong> &rarr; H100 <strong class="accent2">700 W</strong> &rarr; B200 <strong class="accent4">1000 W</strong> &rarr; Rubin (2026) <strong class="accent3">~1400 W</strong> projected
+      <div class="card blue" style="font-size:0.75em;">"Thermal management, not transistor density, is the primary limiter of AI accelerator performance scaling."
+        <br><span  style="color:var(--muted)">&mdash; TSMC OIP 2024 keynote</span>
+      </div>
+      <div class="card amber" style="margin-top:0.8em;">
+        Power trend: A100 <strong class="b">400 W</strong> &rarr; H100 <strong class="a">700 W</strong> &rarr; B200 <strong class="p">1000 W</strong> &rarr; Rubin (2026) <strong class="g">~1400 W</strong> projected
       </div>
       <table style="margin-top:0.6em;">
         <tr><th>Failure Mechanism</th><th>E<sub>a</sub> (eV)</th><th>AF @ +15 &deg;C</th></tr>
@@ -182,65 +167,62 @@
         <tr><td>Solder fatigue</td><td>&mdash;</td><td>Coffin-Manson</td></tr>
       </table>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 3: Section — Thermal Fundamentals -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section I</p>
-  <h2>Thermal Fundamentals</h2>
-  <p class="dim" style="font-size:0.75em;">Conduction &middot; Convection &middot; Radiation &middot; Thermal resistance networks &middot; RC models</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section I</span><h2>Thermal Fundamentals</h2></div>
+  <p>Conduction &middot; Convection &middot; Radiation &middot; Thermal resistance networks &middot; RC models</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 4: Heat Transfer Mechanisms -->
 <!-- ============================================================ -->
-<section>
-  <h2>Heat Transfer Mechanisms</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>Heat Transfer Mechanisms</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Three Modes of Heat Transfer</h3>
+      <h3 style="color:var(--blue);">Three Modes of Heat Transfer</h3>
       <ul style="font-size:0.7em;">
-        <li><strong class="accent">Conduction</strong> &mdash; Q = kA&Delta;T/L; dominant within die, TIM, heatsink. Silicon k = 130 W/m&middot;K, copper k = 400 W/m&middot;K</li>
-        <li><strong class="accent2">Convection</strong> &mdash; Q = hA&Delta;T; forced air h = 25&ndash;250 W/m&sup2;&middot;K, liquid h = 500&ndash;10,000 W/m&sup2;&middot;K</li>
-        <li><strong class="accent3">Radiation</strong> &mdash; Q = &epsilon;&sigma;A(T<sup>4</sup><sub>s</sub>&minus;T<sup>4</sup><sub>surr</sub>); negligible inside server (&lt;2% of total), relevant only for exposed outdoor enclosures</li>
+        <li><strong class="b">Conduction</strong> &mdash; Q = kA&Delta;T/L; dominant within die, TIM, heatsink. Silicon k = 130 W/m&middot;K, copper k = 400 W/m&middot;K</li>
+        <li><strong class="a">Convection</strong> &mdash; Q = hA&Delta;T; forced air h = 25&ndash;250 W/m&sup2;&middot;K, liquid h = 500&ndash;10,000 W/m&sup2;&middot;K</li>
+        <li><strong class="g">Radiation</strong> &mdash; Q = &epsilon;&sigma;A(T<sup>4</sup><sub>s</sub>&minus;T<sup>4</sup><sub>surr</sub>); negligible inside server (&lt;2% of total), relevant only for exposed outdoor enclosures</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.7em;">Thermal RC Model</h3>
+      <h3 style="color:var(--amber); margin-top:0.7em;">Thermal RC Model</h3>
       <ul style="font-size:0.7em;">
-        <li><strong class="accent2">R<sub>th</sub></strong> = temperature rise per watt (K/W or &deg;C/W)</li>
-        <li><strong class="accent2">C<sub>th</sub></strong> = thermal mass (J/K); determines transient response</li>
+        <li><strong class="a">R<sub>th</sub></strong> = temperature rise per watt (K/W or &deg;C/W)</li>
+        <li><strong class="a">C<sub>th</sub></strong> = thermal mass (J/K); determines transient response</li>
         <li>Time constant &tau; = R<sub>th</sub> &times; C<sub>th</sub>; silicon die &tau; &approx; 1&ndash;10 ms, heatsink &tau; &approx; 10&ndash;100 s</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Thermal Resistance Network</h3>
-      <div class="arch-stack" style="max-width:340px;">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.2); color:var(--accent);">Junction (T<sub>j</sub>)</div>
-        <div class="flow-arrow">&darr; R<sub>jc</sub> = 0.02&ndash;0.10 &deg;C/W</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.2); color:var(--accent2);">Case / IHS</div>
-        <div class="flow-arrow">&darr; R<sub>cs</sub> = 0.05&ndash;0.20 &deg;C/W (TIM2)</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.2); color:var(--accent3);">Heatsink / Cold Plate</div>
-        <div class="flow-arrow">&darr; R<sub>sa</sub> = 0.05&ndash;0.30 &deg;C/W</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.2); color:var(--accent4);">Ambient (T<sub>a</sub>)</div>
+      <h3 style="color:var(--green);">Thermal Resistance Network</h3>
+      <div style="display:flex;flex-direction:column;gap:0" style="max-width:340px;">
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.2); color:var(--blue);">Junction (T<sub>j</sub>)</div>
+        <div class="ss-arrow">&darr; R<sub>jc</sub> = 0.02&ndash;0.10 &deg;C/W</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.2); color:var(--amber);">Case / IHS</div>
+        <div class="ss-arrow">&darr; R<sub>cs</sub> = 0.05&ndash;0.20 &deg;C/W (TIM2)</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(143,212,164,0.2); color:var(--green);">Heatsink / Cold Plate</div>
+        <div class="ss-arrow">&darr; R<sub>sa</sub> = 0.05&ndash;0.30 &deg;C/W</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(196,157,216,0.2); color:var(--purple);">Ambient (T<sub>a</sub>)</div>
       </div>
-      <div class="highlight-bar" style="margin-top:0.5em;">
+      <div class="card amber" style="margin-top:0.5em;">
         T<sub>j</sub> = T<sub>a</sub> + P &times; (R<sub>jc</sub> + R<sub>cs</sub> + R<sub>sa</sub>)<br>
-        For 700 W, R<sub>total</sub> must be &lt; <strong class="accent">0.10 &deg;C/W</strong> to keep &Delta;T &lt; 70 &deg;C
+        For 700 W, R<sub>total</sub> must be &lt; <strong class="b">0.10 &deg;C/W</strong> to keep &Delta;T &lt; 70 &deg;C
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 5: Thermal Design Power (TDP) -->
 <!-- ============================================================ -->
-<section>
-  <h2>Thermal Design Power (TDP)</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>Thermal Design Power (TDP)</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <dl class="kv">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em">
         <dt>TDP</dt>
         <dd>Maximum sustained power the cooling solution must dissipate; defined by worst-case realistic workload</dd>
         <dt>TDP vs Peak</dt>
@@ -263,22 +245,21 @@
         <tr><td>Intel Gaudi 3</td><td>600</td><td>~500 mm&sup2;</td><td>~1.20</td></tr>
         <tr><td>Google TPU v5e</td><td>~250</td><td>~400 mm&sup2;</td><td>~0.63</td></tr>
       </table>
-      <div class="highlight-bar" style="margin-top:0.6em;">
-        <strong class="accent2">Key insight:</strong> TDP is a <em>thermal contract</em> between the chip designer and the cooling solution designer &mdash; exceeding it causes thermal throttling or shutdown.
+      <div class="card amber" style="margin-top:0.6em;">
+        <strong class="a">Key insight:</strong> TDP is a <em>thermal contract</em> between the chip designer and the cooling solution designer &mdash; exceeding it causes thermal throttling or shutdown.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 6: Thermal Interface Materials -->
 <!-- ============================================================ -->
-<section>
-  <h2>Thermal Interface Materials (TIM)</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>Thermal Interface Materials (TIM)</h2></div>
   <p style="font-size:0.7em;">TIM fills microscopic air gaps between mating surfaces. Without TIM, contact resistance dominates: bare metal-to-metal leaves ~99% of area as air gaps (k<sub>air</sub> = 0.025 W/m&middot;K).</p>
-  <div class="two-col" style="margin-top:0.4em;">
+  <div class="cols cols-2" style="margin-top:0.4em;">
     <div>
-      <h3 style="color:var(--accent2);">TIM1: Die &rarr; IHS</h3>
+      <h3 style="color:var(--amber);">TIM1: Die &rarr; IHS</h3>
       <table>
         <tr><th>Material</th><th>k (W/m&middot;K)</th><th>BLT (&mu;m)</th><th>R<sub>th</sub> (&deg;C&middot;mm&sup2;/W)</th></tr>
         <tr><td>Thermal paste</td><td>3&ndash;8</td><td>25&ndash;75</td><td>3&ndash;25</td></tr>
@@ -287,47 +268,45 @@
         <tr><td>Graphite sheet</td><td>10&ndash;15 (through)</td><td>100&ndash;200</td><td>7&ndash;20</td></tr>
         <tr><td>STIM (solder TIM)</td><td>50&ndash;86</td><td>15&ndash;25</td><td>0.17&ndash;0.50</td></tr>
       </table>
-      <p style="font-size:0.6em;" class="dim">Intel uses STIM (indium) on server CPUs; NVIDIA uses high-performance paste or STIM depending on SKU.</p>
+      <p style="font-size:0.6em;" style="color:var(--muted)">Intel uses STIM (indium) on server CPUs; NVIDIA uses high-performance paste or STIM depending on SKU.</p>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">TIM2: IHS &rarr; Heatsink</h3>
+      <h3 style="color:var(--green);">TIM2: IHS &rarr; Heatsink</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Thermal paste</strong> &mdash; most common; 3&ndash;12 W/m&middot;K; prone to pump-out (squeeze-out under thermal cycling) and dry-out (volatile loss over months)</li>
-        <li><strong class="accent2">Phase-change pads</strong> &mdash; solid at room temp, melt at 45&ndash;55 &deg;C; self-healing on each power cycle; 3&ndash;6 W/m&middot;K</li>
-        <li><strong class="accent3">Graphite pads</strong> &mdash; compressible, reusable; in-plane k &gt; 1000 W/m&middot;K but through-plane only 10&ndash;15 W/m&middot;K</li>
-        <li><strong class="accent4">Liquid metal</strong> &mdash; gallium-based; 40+ W/m&middot;K; corrosive to aluminium; requires nickel plating on heatsink</li>
+        <li><strong class="b">Thermal paste</strong> &mdash; most common; 3&ndash;12 W/m&middot;K; prone to pump-out (squeeze-out under thermal cycling) and dry-out (volatile loss over months)</li>
+        <li><strong class="a">Phase-change pads</strong> &mdash; solid at room temp, melt at 45&ndash;55 &deg;C; self-healing on each power cycle; 3&ndash;6 W/m&middot;K</li>
+        <li><strong class="g">Graphite pads</strong> &mdash; compressible, reusable; in-plane k &gt; 1000 W/m&middot;K but through-plane only 10&ndash;15 W/m&middot;K</li>
+        <li><strong class="p">Liquid metal</strong> &mdash; gallium-based; 40+ W/m&middot;K; corrosive to aluminium; requires nickel plating on heatsink</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent4">Degradation:</strong> TIM pump-out increases R<sub>th</sub> by 20&ndash;50% over 3&ndash;5 years in datacenter. STIM eliminates this failure mode entirely.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="p">Degradation:</strong> TIM pump-out increases R<sub>th</sub> by 20&ndash;50% over 3&ndash;5 years in datacenter. STIM eliminates this failure mode entirely.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 7: Section — Air Cooling -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section II</p>
-  <h2>Air Cooling</h2>
-  <p class="dim" style="font-size:0.75em;">Heatsinks &middot; Vapour chambers &middot; Fan design &middot; Server airflow management</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section II</span><h2>Air Cooling</h2></div>
+  <p>Heatsinks &middot; Vapour chambers &middot; Fan design &middot; Server airflow management</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 8: Heatsink Design -->
 <!-- ============================================================ -->
-<section>
-  <h2>Heatsink Design</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>Heatsink Design</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Fin Geometry &amp; Materials</h3>
+      <h3 style="color:var(--blue);">Fin Geometry &amp; Materials</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Copper baseplate</strong> &mdash; k = 400 W/m&middot;K; superior spreading but 3.3&times; heavier and 5&times; costlier than aluminium</li>
-        <li><strong class="accent2">Aluminium fins</strong> &mdash; k = 205 W/m&middot;K; extruded or bonded-fin construction; 60&ndash;80% of datacenter heatsinks</li>
-        <li><strong class="accent3">Fin density</strong> &mdash; higher FPI (fins per inch) increases surface area but raises pressure drop; optimal: 14&ndash;22 FPI for 1U/2U servers</li>
-        <li><strong class="accent4">Fin height</strong> &mdash; diminishing returns above ~50 mm due to thermal boundary layer growth; effectiveness &eta; drops below 60%</li>
+        <li><strong class="b">Copper baseplate</strong> &mdash; k = 400 W/m&middot;K; superior spreading but 3.3&times; heavier and 5&times; costlier than aluminium</li>
+        <li><strong class="a">Aluminium fins</strong> &mdash; k = 205 W/m&middot;K; extruded or bonded-fin construction; 60&ndash;80% of datacenter heatsinks</li>
+        <li><strong class="g">Fin density</strong> &mdash; higher FPI (fins per inch) increases surface area but raises pressure drop; optimal: 14&ndash;22 FPI for 1U/2U servers</li>
+        <li><strong class="p">Fin height</strong> &mdash; diminishing returns above ~50 mm due to thermal boundary layer growth; effectiveness &eta; drops below 60%</li>
       </ul>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>R<sub>spreading</sub></dt>
         <dd>For 60&times;60 mm die on 120&times;120 mm base: ~0.02&ndash;0.05 &deg;C/W in copper, ~0.05&ndash;0.12 &deg;C/W in aluminium</dd>
         <dt>R<sub>conv</sub></dt>
@@ -335,43 +314,42 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Heat Pipe Integration</h3>
+      <h3 style="color:var(--amber);">Heat Pipe Integration</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Sintered heat pipes</strong> &mdash; Q<sub>max</sub> = 30&ndash;80 W per 6 mm pipe; effective k &gt; 10,000 W/m&middot;K along length</li>
-        <li><strong class="accent2">U-shape / L-shape</strong> &mdash; transport heat from baseplate to remote fin stacks; enables offset designs for RAM clearance</li>
+        <li><strong class="b">Sintered heat pipes</strong> &mdash; Q<sub>max</sub> = 30&ndash;80 W per 6 mm pipe; effective k &gt; 10,000 W/m&middot;K along length</li>
+        <li><strong class="a">U-shape / L-shape</strong> &mdash; transport heat from baseplate to remote fin stacks; enables offset designs for RAM clearance</li>
         <li>Gravity-dependent: performance degrades 10&ndash;30% in adverse orientation (evaporator above condenser)</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent3">Air cooling limit:</strong> practical maximum ~350&ndash;400 W for a 2U server heatsink at 35 &deg;C inlet, 80 dBA acoustic budget. Beyond this, liquid cooling becomes necessary.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="g">Air cooling limit:</strong> practical maximum ~350&ndash;400 W for a 2U server heatsink at 35 &deg;C inlet, 80 dBA acoustic budget. Beyond this, liquid cooling becomes necessary.
       </div>
-      <div class="box-row" style="margin-top:0.5em;">
-        <div class="box"><h3 style="color:var(--accent);">1U Server</h3><p>&le;200 W</p><p class="dim">Active heatsink</p></div>
-        <div class="box"><h3 style="color:var(--accent2);">2U Server</h3><p>&le;400 W</p><p class="dim">Heatpipe tower</p></div>
-        <div class="box"><h3 style="color:var(--accent3);">4U / OAM</h3><p>&le;700 W</p><p class="dim">Vapour chamber</p></div>
+      <div class="cols cols-2" style="margin-top:0.5em;">
+        <div class="card"><h3 style="color:var(--blue);">1U Server</h3><p>&le;200 W</p><p style="color:var(--muted)">Active heatsink</p></div>
+        <div class="card"><h3 style="color:var(--amber);">2U Server</h3><p>&le;400 W</p><p style="color:var(--muted)">Heatpipe tower</p></div>
+        <div class="card"><h3 style="color:var(--green);">4U / OAM</h3><p>&le;700 W</p><p style="color:var(--muted)">Vapour chamber</p></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 9: Vapour Chambers -->
 <!-- ============================================================ -->
-<section>
-  <h2>Vapour Chambers</h2>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>Vapour Chambers</h2></div>
   <p style="font-size:0.7em;">A vapour chamber is a planar heat pipe: a sealed copper enclosure with an internal wick structure and working fluid (water). It provides near-isothermal heat spreading across the entire baseplate area.</p>
-  <div class="two-col" style="margin-top:0.4em;">
+  <div class="cols cols-2" style="margin-top:0.4em;">
     <div>
-      <h3 style="color:var(--accent);">Operating Principle</h3>
-      <div class="arch-stack" style="max-width:320px;">
-        <div class="arch-layer" style="background:rgba(232,168,124,0.25); color:var(--accent2);">1. Evaporation at hotspot</div>
-        <div class="flow-arrow">&darr;</div>
-        <div class="arch-layer" style="background:rgba(126,184,218,0.25); color:var(--accent);">2. Vapour transport (near-sonic)</div>
-        <div class="flow-arrow">&darr;</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.25); color:var(--accent3);">3. Condensation at cooler walls</div>
-        <div class="flow-arrow">&darr;</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.25); color:var(--accent4);">4. Wick return (capillary action)</div>
+      <h3 style="color:var(--blue);">Operating Principle</h3>
+      <div style="display:flex;flex-direction:column;gap:0" style="max-width:320px;">
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.25); color:var(--amber);">1. Evaporation at hotspot</div>
+        <div class="ss-arrow">&darr;</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.25); color:var(--blue);">2. Vapour transport (near-sonic)</div>
+        <div class="ss-arrow">&darr;</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(143,212,164,0.25); color:var(--green);">3. Condensation at cooler walls</div>
+        <div class="ss-arrow">&darr;</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(196,157,216,0.25); color:var(--purple);">4. Wick return (capillary action)</div>
       </div>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>Effective k</dt>
         <dd>20,000&ndash;50,000 W/m&middot;K (vs 400 for solid copper)</dd>
         <dt>Thickness</dt>
@@ -381,12 +359,12 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">GPU / Accelerator Applications</h3>
+      <h3 style="color:var(--amber);">GPU / Accelerator Applications</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">AMD MI300X</strong> &mdash; custom vapour chamber spans entire 5,332 mm&sup2; OAM module; R<sub>spreading</sub> &lt; 0.01 &deg;C/W</li>
-        <li><strong class="accent2">NVIDIA H100 SXM</strong> &mdash; vapour chamber baseplate with extruded fin stack; handles 700 W TDP</li>
-        <li><strong class="accent3">Wick types</strong> &mdash; sintered copper powder (most common), mesh, grooved, or hybrid multi-layer for higher capillary pressure</li>
-        <li><strong class="accent4">Manufacturing</strong> &mdash; diffusion bonding or brazing; vacuum backfill with degassed DI water; leak rate &lt; 10<sup>&minus;8</sup> atm&middot;cc/s</li>
+        <li><strong class="b">AMD MI300X</strong> &mdash; custom vapour chamber spans entire 5,332 mm&sup2; OAM module; R<sub>spreading</sub> &lt; 0.01 &deg;C/W</li>
+        <li><strong class="a">NVIDIA H100 SXM</strong> &mdash; vapour chamber baseplate with extruded fin stack; handles 700 W TDP</li>
+        <li><strong class="g">Wick types</strong> &mdash; sintered copper powder (most common), mesh, grooved, or hybrid multi-layer for higher capillary pressure</li>
+        <li><strong class="p">Manufacturing</strong> &mdash; diffusion bonding or brazing; vacuum backfill with degassed DI water; leak rate &lt; 10<sup>&minus;8</sup> atm&middot;cc/s</li>
       </ul>
       <table style="margin-top:0.5em;">
         <tr><th>Spreading Solution</th><th>R<sub>spread</sub> (&deg;C/W)</th><th>Weight (g)</th></tr>
@@ -395,24 +373,23 @@
         <tr><td>Vapour chamber (3 mm)</td><td>0.015</td><td>180</td></tr>
       </table>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 10: Fan & Airflow Design -->
 <!-- ============================================================ -->
-<section>
-  <h2>Fan &amp; Airflow Design</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>Fan &amp; Airflow Design</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">CFD-Optimised Airflow</h3>
+      <h3 style="color:var(--blue);">CFD-Optimised Airflow</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Airflow requirement</strong> &mdash; ~100&ndash;200 CFM per GPU at 700 W; total server (8-GPU): 800&ndash;1600 CFM</li>
-        <li><strong class="accent2">Pressure drop</strong> &mdash; dense fin arrays create 0.5&ndash;2.0 inches H<sub>2</sub>O static pressure; requires high-static-pressure fans (counter-rotating or multi-stage)</li>
-        <li><strong class="accent3">Push-pull</strong> &mdash; dual fan walls increase effective static pressure by ~60%; standard in DGX-style 8-GPU servers</li>
-        <li><strong class="accent4">CFD validation</strong> &mdash; ANSYS Icepak / 6SigmaET simulations validated with IR thermography and thermocouple data; typical accuracy &plusmn;3 &deg;C</li>
+        <li><strong class="b">Airflow requirement</strong> &mdash; ~100&ndash;200 CFM per GPU at 700 W; total server (8-GPU): 800&ndash;1600 CFM</li>
+        <li><strong class="a">Pressure drop</strong> &mdash; dense fin arrays create 0.5&ndash;2.0 inches H<sub>2</sub>O static pressure; requires high-static-pressure fans (counter-rotating or multi-stage)</li>
+        <li><strong class="g">Push-pull</strong> &mdash; dual fan walls increase effective static pressure by ~60%; standard in DGX-style 8-GPU servers</li>
+        <li><strong class="p">CFD validation</strong> &mdash; ANSYS Icepak / 6SigmaET simulations validated with IR thermography and thermocouple data; typical accuracy &plusmn;3 &deg;C</li>
       </ul>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>Fan power</dt>
         <dd>200&ndash;600 W per server (5&ndash;10% of total system power); proportional to RPM<sup>3</sup></dd>
         <dt>Acoustic</dt>
@@ -420,43 +397,41 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Server Rack Airflow Management</h3>
+      <h3 style="color:var(--amber);">Server Rack Airflow Management</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Front-to-back</strong> &mdash; standard airflow direction; cold air from cold aisle, exhaust to hot aisle</li>
-        <li><strong class="accent2">Air recirculation</strong> &mdash; primary failure mode; hot exhaust re-entering intake raises T<sub>inlet</sub> by 5&ndash;15 &deg;C; containment curtains or doors eliminate this</li>
-        <li><strong class="accent3">Blanking panels</strong> &mdash; seal unused U-spaces; missing panels can raise intake temp by 8 &deg;C</li>
-        <li><strong class="accent4">Dust filtration</strong> &mdash; MERV-8 minimum for datacenter; high-altitude sites (Mexico City, Denver) need MERV-11+ due to particulate density</li>
+        <li><strong class="b">Front-to-back</strong> &mdash; standard airflow direction; cold air from cold aisle, exhaust to hot aisle</li>
+        <li><strong class="a">Air recirculation</strong> &mdash; primary failure mode; hot exhaust re-entering intake raises T<sub>inlet</sub> by 5&ndash;15 &deg;C; containment curtains or doors eliminate this</li>
+        <li><strong class="g">Blanking panels</strong> &mdash; seal unused U-spaces; missing panels can raise intake temp by 8 &deg;C</li>
+        <li><strong class="p">Dust filtration</strong> &mdash; MERV-8 minimum for datacenter; high-altitude sites (Mexico City, Denver) need MERV-11+ due to particulate density</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">Air cooling economics:</strong> fan power at full speed (85 dBA) for an 8&times;H100 DGX system consumes ~500 W &mdash; 7% overhead. Liquid cooling reduces this to ~50 W (pumps), saving 450 W per node &times; 1000s of nodes.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="b">Air cooling economics:</strong> fan power at full speed (85 dBA) for an 8&times;H100 DGX system consumes ~500 W &mdash; 7% overhead. Liquid cooling reduces this to ~50 W (pumps), saving 450 W per node &times; 1000s of nodes.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 11: Section — Liquid Cooling -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section III</p>
-  <h2>Liquid Cooling</h2>
-  <p class="dim" style="font-size:0.75em;">Cold plates &middot; Direct liquid cooling &middot; Immersion &middot; Coolant distribution</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section III</span><h2>Liquid Cooling</h2></div>
+  <p>Cold plates &middot; Direct liquid cooling &middot; Immersion &middot; Coolant distribution</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 12: Cold Plate Liquid Cooling -->
 <!-- ============================================================ -->
-<section>
-  <h2>Cold Plate Liquid Cooling</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>Cold Plate Liquid Cooling</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Direct-to-Chip Cold Plates</h3>
+      <h3 style="color:var(--blue);">Direct-to-Chip Cold Plates</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Copper cold plate</strong> &mdash; brazed or skived-fin internal channels; turbulent flow at Re &gt; 4000 provides h = 5,000&ndash;15,000 W/m&sup2;&middot;K</li>
-        <li><strong class="accent2">Microchannel designs</strong> &mdash; channel width 50&ndash;500 &mu;m; R<sub>th</sub> &lt; 0.02 &deg;C/W for 700 W class; limited by pressure drop (0.5&ndash;3 bar)</li>
-        <li><strong class="accent3">Jet impingement</strong> &mdash; coolant jets directly on cold plate surface; h up to 25,000 W/m&sup2;&middot;K; used in custom HPC systems</li>
+        <li><strong class="b">Copper cold plate</strong> &mdash; brazed or skived-fin internal channels; turbulent flow at Re &gt; 4000 provides h = 5,000&ndash;15,000 W/m&sup2;&middot;K</li>
+        <li><strong class="a">Microchannel designs</strong> &mdash; channel width 50&ndash;500 &mu;m; R<sub>th</sub> &lt; 0.02 &deg;C/W for 700 W class; limited by pressure drop (0.5&ndash;3 bar)</li>
+        <li><strong class="g">Jet impingement</strong> &mdash; coolant jets directly on cold plate surface; h up to 25,000 W/m&sup2;&middot;K; used in custom HPC systems</li>
       </ul>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>Flow rate</dt>
         <dd>0.5&ndash;2.0 L/min per GPU; &Delta;T<sub>water</sub> = P/(&#7745;&middot;c<sub>p</sub>) &asymp; 700/(0.017&times;4186) &asymp; 10 &deg;C at 1 L/min</dd>
         <dt>Pressure drop</dt>
@@ -466,7 +441,7 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Coolant Selection</h3>
+      <h3 style="color:var(--amber);">Coolant Selection</h3>
       <table>
         <tr><th>Coolant</th><th>k (W/m&middot;K)</th><th>c<sub>p</sub> (J/kg&middot;K)</th><th>Notes</th></tr>
         <tr><td>Water</td><td>0.60</td><td>4186</td><td>Best thermal; corrosion risk</td></tr>
@@ -474,30 +449,29 @@
         <tr><td>PAO (dielectric)</td><td>0.14</td><td>2100</td><td>Safe for electronics; 3&times; worse</td></tr>
         <tr><td>Novec 7100</td><td>0.07</td><td>1180</td><td>Two-phase capable; expensive</td></tr>
       </table>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent3">Leak mitigation:</strong> non-drip quick-disconnect fittings (Staubli, CPC); leak detection sensors with auto-shutoff; redundant drain pans beneath every server.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="g">Leak mitigation:</strong> non-drip quick-disconnect fittings (Staubli, CPC); leak detection sensors with auto-shutoff; redundant drain pans beneath every server.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 13: Direct Liquid Cooling (DLC) -->
 <!-- ============================================================ -->
-<section>
-  <h2>Direct Liquid Cooling (DLC)</h2>
-  <p style="font-size:0.7em;">DLC delivers coolant directly to the chip package, bypassing heatsinks and airflow entirely. TSMC's direct-to-silicon approach achieves <strong class="accent">0.055 &deg;C/W at 2.6 kW</strong> &mdash; 3&times; better than the best air-cooled solutions.</p>
-  <div class="two-col" style="margin-top:0.4em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>Direct Liquid Cooling (DLC)</h2></div>
+  <p style="font-size:0.7em;">DLC delivers coolant directly to the chip package, bypassing heatsinks and airflow entirely. TSMC's direct-to-silicon approach achieves <strong class="b">0.055 &deg;C/W at 2.6 kW</strong> &mdash; 3&times; better than the best air-cooled solutions.</p>
+  <div class="cols cols-2" style="margin-top:0.4em;">
     <div>
-      <h3 style="color:var(--accent);">CDU Architecture</h3>
-      <div class="arch-stack" style="max-width:340px;">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.2); color:var(--accent);">Chip Cold Plate (40&ndash;50 &deg;C)</div>
-        <div class="flow-arrow">&darr; Secondary Loop (treated water)</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.2); color:var(--accent2);">In-Row CDU (heat exchanger)</div>
-        <div class="flow-arrow">&darr; Primary Loop (facility water)</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.2); color:var(--accent3);">Cooling Tower / Dry Cooler</div>
+      <h3 style="color:var(--blue);">CDU Architecture</h3>
+      <div style="display:flex;flex-direction:column;gap:0" style="max-width:340px;">
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.2); color:var(--blue);">Chip Cold Plate (40&ndash;50 &deg;C)</div>
+        <div class="ss-arrow">&darr; Secondary Loop (treated water)</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.2); color:var(--amber);">In-Row CDU (heat exchanger)</div>
+        <div class="ss-arrow">&darr; Primary Loop (facility water)</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(143,212,164,0.2); color:var(--green);">Cooling Tower / Dry Cooler</div>
       </div>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>Secondary loop</dt>
         <dd>Treated water, 35&ndash;45 &deg;C supply, 2&ndash;4 bar, flow ~50&ndash;200 L/min per rack</dd>
         <dt>CDU capacity</dt>
@@ -505,42 +479,41 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Rear-Door Heat Exchangers (RDHx)</h3>
+      <h3 style="color:var(--amber);">Rear-Door Heat Exchangers (RDHx)</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Passive RDHx</strong> &mdash; water coil on rack rear door; cools exhaust air by 15&ndash;25 &deg;C; handles 30&ndash;50 kW/rack without facility CRAC changes</li>
-        <li><strong class="accent2">Active RDHx</strong> &mdash; integrated fans + coil; up to 60 kW/rack; Schneider NetShelter, Vertiv Liebert</li>
-        <li><strong class="accent3">Neutral air</strong> &mdash; exhaust exits at room temperature; eliminates hot aisle containment requirement</li>
+        <li><strong class="b">Passive RDHx</strong> &mdash; water coil on rack rear door; cools exhaust air by 15&ndash;25 &deg;C; handles 30&ndash;50 kW/rack without facility CRAC changes</li>
+        <li><strong class="a">Active RDHx</strong> &mdash; integrated fans + coil; up to 60 kW/rack; Schneider NetShelter, Vertiv Liebert</li>
+        <li><strong class="g">Neutral air</strong> &mdash; exhaust exits at room temperature; eliminates hot aisle containment requirement</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent4">TSMC breakthrough (2024):</strong> direct-to-silicon liquid cooling with microchannels etched into the silicon backside; demonstrated 2.6 kW dissipation with R<sub>th</sub> = 0.055 &deg;C/W &mdash; enables next-gen 1500 W+ accelerators.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="p">TSMC breakthrough (2024):</strong> direct-to-silicon liquid cooling with microchannels etched into the silicon backside; demonstrated 2.6 kW dissipation with R<sub>th</sub> = 0.055 &deg;C/W &mdash; enables next-gen 1500 W+ accelerators.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 14: Immersion Cooling -->
 <!-- ============================================================ -->
-<section>
-  <h2>Immersion Cooling</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>Immersion Cooling</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Single-Phase Immersion</h3>
+      <h3 style="color:var(--blue);">Single-Phase Immersion</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Principle</strong> &mdash; servers submerged in dielectric fluid (mineral oil, synthetic ester, or engineered fluids); natural or forced convection removes heat</li>
-        <li><strong class="accent2">h coefficient</strong> &mdash; 200&ndash;1500 W/m&sup2;&middot;K (natural convection in dielectric); modest but uniform</li>
-        <li><strong class="accent3">Vendors</strong> &mdash; GRC (ElectroSafe), LiquidCool Solutions, Submer, Asperitas</li>
-        <li><strong class="accent4">Capacity</strong> &mdash; 100&ndash;200 kW per tank; suitable for racks up to 100 kW</li>
+        <li><strong class="b">Principle</strong> &mdash; servers submerged in dielectric fluid (mineral oil, synthetic ester, or engineered fluids); natural or forced convection removes heat</li>
+        <li><strong class="a">h coefficient</strong> &mdash; 200&ndash;1500 W/m&sup2;&middot;K (natural convection in dielectric); modest but uniform</li>
+        <li><strong class="g">Vendors</strong> &mdash; GRC (ElectroSafe), LiquidCool Solutions, Submer, Asperitas</li>
+        <li><strong class="p">Capacity</strong> &mdash; 100&ndash;200 kW per tank; suitable for racks up to 100 kW</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.6em;">Two-Phase Immersion</h3>
+      <h3 style="color:var(--amber); margin-top:0.6em;">Two-Phase Immersion</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Boiling heat transfer</strong> &mdash; fluid boils on chip surface; h = 5,000&ndash;20,000 W/m&sup2;&middot;K; latent heat absorption is extremely efficient</li>
-        <li><strong class="accent2">Fluid</strong> &mdash; 3M Novec 7100/649 (T<sub>boil</sub> = 49&ndash;61 &deg;C), Engineered Fluids ElectroCool; GWP concerns driving new chemistries</li>
-        <li><strong class="accent3">Condenser</strong> &mdash; vapour rises, condenses on water-cooled coils above tank; drips back (passive, no pumps for dielectric)</li>
+        <li><strong class="b">Boiling heat transfer</strong> &mdash; fluid boils on chip surface; h = 5,000&ndash;20,000 W/m&sup2;&middot;K; latent heat absorption is extremely efficient</li>
+        <li><strong class="a">Fluid</strong> &mdash; 3M Novec 7100/649 (T<sub>boil</sub> = 49&ndash;61 &deg;C), Engineered Fluids ElectroCool; GWP concerns driving new chemistries</li>
+        <li><strong class="g">Condenser</strong> &mdash; vapour rises, condenses on water-cooled coils above tank; drips back (passive, no pumps for dielectric)</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Deployment &amp; PUE Impact</h3>
+      <h3 style="color:var(--green);">Deployment &amp; PUE Impact</h3>
       <table>
         <tr><th>Cooling Method</th><th>PUE</th><th>kW/rack</th><th>Water Use</th></tr>
         <tr><td>Traditional air (CRAC)</td><td>1.5&ndash;2.0</td><td>10&ndash;25</td><td>High (evap towers)</td></tr>
@@ -549,40 +522,37 @@
         <tr><td>Single-phase immersion</td><td>1.02&ndash;1.10</td><td>100&ndash;200</td><td>Very low</td></tr>
         <tr><td>Two-phase immersion</td><td>1.01&ndash;1.06</td><td>200+</td><td>Near zero</td></tr>
       </table>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">PUE savings at scale:</strong> a 100 MW AI data center at PUE 1.05 (immersion) vs 1.4 (air) saves <strong class="accent3">35 MW</strong> of cooling power &mdash; $25M+/year in electricity at $0.08/kWh.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="b">PUE savings at scale:</strong> a 100 MW AI data center at PUE 1.05 (immersion) vs 1.4 (air) saves <strong class="g">35 MW</strong> of cooling power &mdash; $25M+/year in electricity at $0.08/kWh.
       </div>
-      <blockquote style="font-size:0.7em; margin-top:0.5em;">
-        "Two-phase immersion is the endgame for AI cooling, but fluid cost ($50&ndash;200/L) and serviceability remain barriers."
-        <br><span class="dim small">&mdash; Uptime Institute, 2025</span>
-      </blockquote>
+      <div class="card blue" style="font-size:0.7em; margin-top:0.5em;">"Two-phase immersion is the endgame for AI cooling, but fluid cost ($50&ndash;200/L) and serviceability remain barriers."
+        <br><span  style="color:var(--muted)">&mdash; Uptime Institute, 2025</span>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 15: Section — On-Die Thermal Management -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section IV</p>
-  <h2>On-Die Thermal Management</h2>
-  <p class="dim" style="font-size:0.75em;">Hotspot detection &middot; Workload migration &middot; Thermal throttling &middot; 3D stacking challenges</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section IV</span><h2>On-Die Thermal Management</h2></div>
+  <p>Hotspot detection &middot; Workload migration &middot; Thermal throttling &middot; 3D stacking challenges</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 16: Hotspot Mitigation -->
 <!-- ============================================================ -->
-<section>
-  <h2>Hotspot Mitigation</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>Hotspot Mitigation</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Non-Uniform Power Maps</h3>
+      <h3 style="color:var(--blue);">Non-Uniform Power Maps</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Power map variance</strong> &mdash; tensor cores can hit 2&ndash;3 W/mm&sup2; locally while SRAM regions run at 0.3 W/mm&sup2;; hotspot-to-average ratio of 5&ndash;8&times; is common</li>
-        <li><strong class="accent2">On-die thermal sensors</strong> &mdash; 16&ndash;64 distributed diode sensors per die; sampled at 1&ndash;10 kHz; ring oscillator sensors provide finer spatial granularity</li>
-        <li><strong class="accent3">Thermal sensor accuracy</strong> &mdash; &plusmn;1&ndash;3 &deg;C after one-time calibration at wafer sort; digital readout via ADC with 10&ndash;12 bit resolution</li>
+        <li><strong class="b">Power map variance</strong> &mdash; tensor cores can hit 2&ndash;3 W/mm&sup2; locally while SRAM regions run at 0.3 W/mm&sup2;; hotspot-to-average ratio of 5&ndash;8&times; is common</li>
+        <li><strong class="a">On-die thermal sensors</strong> &mdash; 16&ndash;64 distributed diode sensors per die; sampled at 1&ndash;10 kHz; ring oscillator sensors provide finer spatial granularity</li>
+        <li><strong class="g">Thermal sensor accuracy</strong> &mdash; &plusmn;1&ndash;3 &deg;C after one-time calibration at wafer sort; digital readout via ADC with 10&ndash;12 bit resolution</li>
       </ul>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>Sensor count</dt>
         <dd>H100: 32 thermal diodes; MI300X: 48 per XCD; Gaudi 3: ~24</dd>
         <dt>Response time</dt>
@@ -590,45 +560,44 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Mitigation Strategies</h3>
+      <h3 style="color:var(--amber);">Mitigation Strategies</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Floorplan optimisation</strong> &mdash; interleave high-power (compute) and low-power (SRAM, I/O) blocks; avoid clustering tensor cores</li>
-        <li><strong class="accent2">Dynamic workload migration</strong> &mdash; OS/firmware redistributes threads away from hot regions; effective for multi-core CPUs, less so for fixed-function accelerators</li>
-        <li><strong class="accent3">Power gating rotation</strong> &mdash; temporarily disable hotspot SM/CU clusters and redistribute work to cooler units; 5&ndash;10% throughput cost</li>
-        <li><strong class="accent4">HBM/logic thermal coupling</strong> &mdash; in 2.5D packages (CoWoS), HBM stacks (T<sub>j,max</sub> = 95 &deg;C for HBM3e) are heated by adjacent logic die; thermal guard rings and interposer-level heat spreading required</li>
+        <li><strong class="b">Floorplan optimisation</strong> &mdash; interleave high-power (compute) and low-power (SRAM, I/O) blocks; avoid clustering tensor cores</li>
+        <li><strong class="a">Dynamic workload migration</strong> &mdash; OS/firmware redistributes threads away from hot regions; effective for multi-core CPUs, less so for fixed-function accelerators</li>
+        <li><strong class="g">Power gating rotation</strong> &mdash; temporarily disable hotspot SM/CU clusters and redistribute work to cooler units; 5&ndash;10% throughput cost</li>
+        <li><strong class="p">HBM/logic thermal coupling</strong> &mdash; in 2.5D packages (CoWoS), HBM stacks (T<sub>j,max</sub> = 95 &deg;C for HBM3e) are heated by adjacent logic die; thermal guard rings and interposer-level heat spreading required</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent4">HBM thermal limit:</strong> HBM3e junction limit is 95 &deg;C (JEDEC), only 10 &deg;C above nominal &mdash; tighter than the logic die. HBM is often the first component to trigger throttling on 2.5D AI accelerators.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="p">HBM thermal limit:</strong> HBM3e junction limit is 95 &deg;C (JEDEC), only 10 &deg;C above nominal &mdash; tighter than the logic die. HBM is often the first component to trigger throttling on 2.5D AI accelerators.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 17: Thermal Throttling -->
 <!-- ============================================================ -->
-<section>
-  <h2>Thermal Throttling</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>Thermal Throttling</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Hardware Throttling Mechanisms</h3>
+      <h3 style="color:var(--blue);">Hardware Throttling Mechanisms</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">PROCHOT#</strong> &mdash; bidirectional signal; asserted when T<sub>j</sub> exceeds thermal control threshold (e.g., 97 &deg;C); triggers immediate frequency reduction</li>
-        <li><strong class="accent2">Thermal trip</strong> &mdash; hard shutdown at T<sub>j</sub> = 105&ndash;115 &deg;C; non-maskable; prevents silicon damage; hysteresis of 10&ndash;20 &deg;C before restart</li>
-        <li><strong class="accent3">DVFS throttling</strong> &mdash; reduce V<sub>core</sub> and frequency together; P &propto; V&sup2;f, so 10% frequency reduction yields ~27% power reduction</li>
-        <li><strong class="accent4">Clock gating</strong> &mdash; disable clocks to idle functional units; fine-grained (per-SM) in modern GPUs; response time &lt; 1 &mu;s</li>
+        <li><strong class="b">PROCHOT#</strong> &mdash; bidirectional signal; asserted when T<sub>j</sub> exceeds thermal control threshold (e.g., 97 &deg;C); triggers immediate frequency reduction</li>
+        <li><strong class="a">Thermal trip</strong> &mdash; hard shutdown at T<sub>j</sub> = 105&ndash;115 &deg;C; non-maskable; prevents silicon damage; hysteresis of 10&ndash;20 &deg;C before restart</li>
+        <li><strong class="g">DVFS throttling</strong> &mdash; reduce V<sub>core</sub> and frequency together; P &propto; V&sup2;f, so 10% frequency reduction yields ~27% power reduction</li>
+        <li><strong class="p">Clock gating</strong> &mdash; disable clocks to idle functional units; fine-grained (per-SM) in modern GPUs; response time &lt; 1 &mu;s</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Firmware Thermal Control Loop</h3>
-      <div class="arch-stack" style="max-width:320px;">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.2); color:var(--accent);">Thermal Sensors (diodes, ring osc)</div>
-        <div class="flow-arrow">&darr; ADC @ 1&ndash;10 kHz</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.2); color:var(--accent2);">Thermal Controller (PID loop in FW)</div>
-        <div class="flow-arrow">&darr; Target: T<sub>j</sub> &le; T<sub>throttle</sub></div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.2); color:var(--accent3);">Actuators: DVFS, power limit, fan PWM</div>
+      <h3 style="color:var(--amber);">Firmware Thermal Control Loop</h3>
+      <div style="display:flex;flex-direction:column;gap:0" style="max-width:320px;">
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(126,184,218,0.2); color:var(--blue);">Thermal Sensors (diodes, ring osc)</div>
+        <div class="ss-arrow">&darr; ADC @ 1&ndash;10 kHz</div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(232,168,124,0.2); color:var(--amber);">Thermal Controller (PID loop in FW)</div>
+        <div class="ss-arrow">&darr; Target: T<sub>j</sub> &le; T<sub>throttle</sub></div>
+        <div class="card" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em" style="background:rgba(143,212,164,0.2); color:var(--green);">Actuators: DVFS, power limit, fan PWM</div>
       </div>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>Control period</dt>
         <dd>1&ndash;10 ms for GPU thermal controller; 100 ms for BMC fan control</dd>
         <dt>Hysteresis</dt>
@@ -637,23 +606,22 @@
         <dd>Continuously adjusts clock within thermal/power envelope; ~100 MHz steps every 10 ms</dd>
       </dl>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 18: 3D Stacking Thermal Challenges -->
 <!-- ============================================================ -->
-<section>
-  <h2>3D Stacking Thermal Challenges</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>3D Stacking Thermal Challenges</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Inter-Die Thermal Resistance</h3>
+      <h3 style="color:var(--blue);">Inter-Die Thermal Resistance</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Die-to-die bonding</strong> &mdash; hybrid bonding (Cu-Cu): R<sub>th</sub> = 0.5&ndash;2.0 &deg;C&middot;mm&sup2;/W; micro-bump (solder): R<sub>th</sub> = 5&ndash;15 &deg;C&middot;mm&sup2;/W; underfill thermal conductivity: 0.3&ndash;0.7 W/m&middot;K</li>
-        <li><strong class="accent2">TSV thermal paths</strong> &mdash; copper TSVs (k = 400 W/m&middot;K) act as thermal vias; at 10 &mu;m pitch and 30% area coverage, effective through-silicon conductivity doubles</li>
-        <li><strong class="accent3">Bottom die trapped heat</strong> &mdash; in face-to-face bonding, bottom die has no direct path to heatsink; heat must flow through top die or through substrate (R<sub>th,sub</sub> &gt; 5&times; R<sub>th,top</sub>)</li>
+        <li><strong class="b">Die-to-die bonding</strong> &mdash; hybrid bonding (Cu-Cu): R<sub>th</sub> = 0.5&ndash;2.0 &deg;C&middot;mm&sup2;/W; micro-bump (solder): R<sub>th</sub> = 5&ndash;15 &deg;C&middot;mm&sup2;/W; underfill thermal conductivity: 0.3&ndash;0.7 W/m&middot;K</li>
+        <li><strong class="a">TSV thermal paths</strong> &mdash; copper TSVs (k = 400 W/m&middot;K) act as thermal vias; at 10 &mu;m pitch and 30% area coverage, effective through-silicon conductivity doubles</li>
+        <li><strong class="g">Bottom die trapped heat</strong> &mdash; in face-to-face bonding, bottom die has no direct path to heatsink; heat must flow through top die or through substrate (R<sub>th,sub</sub> &gt; 5&times; R<sub>th,top</sub>)</li>
       </ul>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>HBM3e stack</dt>
         <dd>12-high die stack; R<sub>th</sub> from base to top DRAM &asymp; 4&ndash;8 &deg;C/W; limits per-stack power to ~20 W</dd>
         <dt>SoIC thermal</dt>
@@ -661,37 +629,35 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Solutions for 3D Thermal</h3>
+      <h3 style="color:var(--amber);">Solutions for 3D Thermal</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Backside power delivery (BSPDN)</strong> &mdash; frees frontside for cooling; Intel PowerVia, TSMC N2P backside; reduces R<sub>jc</sub> by thinning the thermal path</li>
-        <li><strong class="accent2">Thermal TSVs</strong> &mdash; dedicated copper pillars (40&ndash;100 &mu;m diameter) placed in non-functional areas; 20&ndash;40% R<sub>th</sub> reduction</li>
-        <li><strong class="accent3">Microfluidic inter-die cooling</strong> &mdash; research: IMEC/Georgia Tech demonstrated microchannels between bonded dies; coolant flows between die layers; R<sub>th</sub> &lt; 0.5 &deg;C/W at 250 W/cm&sup2;</li>
-        <li><strong class="accent4">Foveros thermal limit</strong> &mdash; Intel Foveros currently limited to ~1 W/mm&sup2; combined stack power; active cooling between layers needed for &gt;3D stacks</li>
+        <li><strong class="b">Backside power delivery (BSPDN)</strong> &mdash; frees frontside for cooling; Intel PowerVia, TSMC N2P backside; reduces R<sub>jc</sub> by thinning the thermal path</li>
+        <li><strong class="a">Thermal TSVs</strong> &mdash; dedicated copper pillars (40&ndash;100 &mu;m diameter) placed in non-functional areas; 20&ndash;40% R<sub>th</sub> reduction</li>
+        <li><strong class="g">Microfluidic inter-die cooling</strong> &mdash; research: IMEC/Georgia Tech demonstrated microchannels between bonded dies; coolant flows between die layers; R<sub>th</sub> &lt; 0.5 &deg;C/W at 250 W/cm&sup2;</li>
+        <li><strong class="p">Foveros thermal limit</strong> &mdash; Intel Foveros currently limited to ~1 W/mm&sup2; combined stack power; active cooling between layers needed for &gt;3D stacks</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">The 3D thermal wall:</strong> without inter-die cooling, 3D stacks are limited to ~200 W total. Microfluidic and backside cooling are critical enablers for true 3D compute scaling.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="b">The 3D thermal wall:</strong> without inter-die cooling, 3D stacks are limited to ~200 W total. Microfluidic and backside cooling are critical enablers for true 3D compute scaling.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 19: Section — System & Data Center -->
 <!-- ============================================================ -->
-<section class="section-slide">
-  <p class="section-num">Section V</p>
-  <h2>System &amp; Data Center Thermal</h2>
-  <p class="dim" style="font-size:0.75em;">Rack-level cooling &middot; Hot/cold aisle &middot; AI supercomputer cooling &middot; ASHRAE guidelines</p>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">Section V</span><h2>System &amp; Data Center Thermal</h2></div>
+  <p>Rack-level cooling &middot; Hot/cold aisle &middot; AI supercomputer cooling &middot; ASHRAE guidelines</p>
 </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 20: Data Center Thermal Architecture -->
 <!-- ============================================================ -->
-<section>
-  <h2>Data Center Thermal Architecture</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Data Center Thermal Architecture</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Rack-Level Power Density</h3>
+      <h3 style="color:var(--blue);">Rack-Level Power Density</h3>
       <table>
         <tr><th>Era</th><th>Rack Power</th><th>Cooling Method</th></tr>
         <tr><td>2015 &mdash; General compute</td><td>5&ndash;10 kW</td><td>Raised floor air</td></tr>
@@ -700,7 +666,7 @@
         <tr><td>2025 &mdash; B200 / MI300X</td><td>80&ndash;120 kW</td><td>Full DLC or immersion</td></tr>
         <tr><td>2026+ &mdash; Rubin / next-gen</td><td>120&ndash;200 kW</td><td>Advanced liquid, microfluidic</td></tr>
       </table>
-      <dl class="kv" style="margin-top:0.5em;">
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:.2em .6em;font-size:.52em" style="margin-top:0.5em;">
         <dt>ASHRAE A1</dt>
         <dd>15&ndash;32 &deg;C dry bulb inlet; recommended for most datacenter equipment</dd>
         <dt>ASHRAE W32</dt>
@@ -710,75 +676,73 @@
       </dl>
     </div>
     <div>
-      <h3 style="color:var(--accent2);">Hot/Cold Aisle Containment</h3>
+      <h3 style="color:var(--amber);">Hot/Cold Aisle Containment</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Cold aisle containment</strong> &mdash; enclose cold aisle with doors + roof; prevents mixing; reduces CRAC energy by 20&ndash;30%; supply air 18&ndash;24 &deg;C</li>
-        <li><strong class="accent2">Hot aisle containment</strong> &mdash; enclose hot aisle; exhaust directly to return plenum; allows higher supply temps (27 &deg;C+) for more free cooling hours</li>
-        <li><strong class="accent3">Chimney cabinets</strong> &mdash; vertical exhaust ducts on rack top; direct hot air to ceiling plenum; popular in retrofit scenarios</li>
+        <li><strong class="b">Cold aisle containment</strong> &mdash; enclose cold aisle with doors + roof; prevents mixing; reduces CRAC energy by 20&ndash;30%; supply air 18&ndash;24 &deg;C</li>
+        <li><strong class="a">Hot aisle containment</strong> &mdash; enclose hot aisle; exhaust directly to return plenum; allows higher supply temps (27 &deg;C+) for more free cooling hours</li>
+        <li><strong class="g">Chimney cabinets</strong> &mdash; vertical exhaust ducts on rack top; direct hot air to ceiling plenum; popular in retrofit scenarios</li>
       </ul>
-      <h3 style="color:var(--accent3); margin-top:0.6em;">Liquid-to-Liquid vs Liquid-to-Air</h3>
+      <h3 style="color:var(--green); margin-top:0.6em;">Liquid-to-Liquid vs Liquid-to-Air</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Liquid-to-air</strong> &mdash; dry coolers on rooftop; no water consumption; limited by ambient wet-bulb temperature; viable to ~40 kW/rack</li>
-        <li><strong class="accent2">Liquid-to-liquid</strong> &mdash; cooling towers or evaporative condensers; higher efficiency; WUE of 0.5&ndash;1.5 L/kWh; required for &gt;60 kW/rack in hot climates</li>
+        <li><strong class="b">Liquid-to-air</strong> &mdash; dry coolers on rooftop; no water consumption; limited by ambient wet-bulb temperature; viable to ~40 kW/rack</li>
+        <li><strong class="a">Liquid-to-liquid</strong> &mdash; cooling towers or evaporative condensers; higher efficiency; WUE of 0.5&ndash;1.5 L/kWh; required for &gt;60 kW/rack in hot climates</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 21: AI Supercomputer Cooling -->
 <!-- ============================================================ -->
-<section>
-  <h2>AI Supercomputer Cooling</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>AI Supercomputer Cooling</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">NVIDIA DGX SuperPOD</h3>
+      <h3 style="color:var(--blue);">NVIDIA DGX SuperPOD</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">DGX B200</strong> &mdash; 8&times;B200 GPUs &times; 1000 W = 8 kW GPU + ~4 kW system = <strong>~12 kW per node</strong></li>
-        <li><strong class="accent2">SuperPOD</strong> &mdash; 32&ndash;64 DGX nodes; 384&ndash;768 kW total; <strong>requires DLC</strong> (CoolIT or Vertiv manifolds)</li>
-        <li><strong class="accent3">NVLink domain</strong> &mdash; 72 GPUs connected via NVLink Switch; cable tray thermal management adds 2&ndash;5 kW</li>
+        <li><strong class="b">DGX B200</strong> &mdash; 8&times;B200 GPUs &times; 1000 W = 8 kW GPU + ~4 kW system = <strong>~12 kW per node</strong></li>
+        <li><strong class="a">SuperPOD</strong> &mdash; 32&ndash;64 DGX nodes; 384&ndash;768 kW total; <strong>requires DLC</strong> (CoolIT or Vertiv manifolds)</li>
+        <li><strong class="g">NVLink domain</strong> &mdash; 72 GPUs connected via NVLink Switch; cable tray thermal management adds 2&ndash;5 kW</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.6em;">Google TPU Pod</h3>
+      <h3 style="color:var(--amber); margin-top:0.6em;">Google TPU Pod</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent2">TPU v5p pod</strong> &mdash; 8,960 chips; estimated 2&ndash;3 MW total; liquid-cooled with proprietary cold plates</li>
-        <li><strong class="accent3">TPU v6 (Trillium)</strong> &mdash; 4&times; performance/watt improvement claimed; still liquid-cooled; pod scale increasing</li>
+        <li><strong class="a">TPU v5p pod</strong> &mdash; 8,960 chips; estimated 2&ndash;3 MW total; liquid-cooled with proprietary cold plates</li>
+        <li><strong class="g">TPU v6 (Trillium)</strong> &mdash; 4&times; performance/watt improvement claimed; still liquid-cooled; pod scale increasing</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Meta Grand Teton</h3>
+      <h3 style="color:var(--green);">Meta Grand Teton</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent">Open Rack v3</strong> &mdash; 48V power shelf; designed for 100 kW/rack; OCP-standard liquid cooling manifolds</li>
-        <li><strong class="accent2">Grand Teton platform</strong> &mdash; 8-GPU training platform; hybrid air+liquid; cold plate on GPUs, air for ancillary components</li>
+        <li><strong class="b">Open Rack v3</strong> &mdash; 48V power shelf; designed for 100 kW/rack; OCP-standard liquid cooling manifolds</li>
+        <li><strong class="a">Grand Teton platform</strong> &mdash; 8-GPU training platform; hybrid air+liquid; cold plate on GPUs, air for ancillary components</li>
       </ul>
-      <h3 style="color:var(--accent4); margin-top:0.6em;">Microsoft Maia 100</h3>
+      <h3 style="color:var(--purple); margin-top:0.6em;">Microsoft Maia 100</h3>
       <ul style="font-size:0.68em;">
-        <li><strong class="accent4">Custom ASIC</strong> &mdash; TSMC 5 nm, ~820 mm&sup2;; TDP ~500 W; designed with liquid cooling as primary</li>
-        <li><strong class="accent">Sidekick liquid cooling</strong> &mdash; proprietary cold plate with integrated manifold; designed for &gt;100 kW/rack density</li>
-        <li><strong class="accent3">Co-design</strong> &mdash; chip and cooling system designed simultaneously; thermal constraints fed back to floorplan team from day one</li>
+        <li><strong class="p">Custom ASIC</strong> &mdash; TSMC 5 nm, ~820 mm&sup2;; TDP ~500 W; designed with liquid cooling as primary</li>
+        <li><strong class="b">Sidekick liquid cooling</strong> &mdash; proprietary cold plate with integrated manifold; designed for &gt;100 kW/rack density</li>
+        <li><strong class="g">Co-design</strong> &mdash; chip and cooling system designed simultaneously; thermal constraints fed back to floorplan team from day one</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.5em;">
-        <strong class="accent">Trend:</strong> every major AI hyperscaler now designs custom cooling alongside custom silicon. Thermal co-design is no longer optional.
+      <div class="card amber" style="margin-top:0.5em;">
+        <strong class="b">Trend:</strong> every major AI hyperscaler now designs custom cooling alongside custom silicon. Thermal co-design is no longer optional.
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 22: Case Studies -->
 <!-- ============================================================ -->
-<section>
-  <h2>Case Studies</h2>
-  <div class="box-row" style="margin-top:0.5em;">
-    <div class="box" style="max-width:280px;">
-      <h3 style="color:var(--accent);">NVIDIA H100 / B200</h3>
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>Case Studies</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div class="card" style="max-width:280px;">
+      <h3 style="color:var(--blue);">NVIDIA H100 / B200</h3>
       <ul style="text-align:left;">
         <li>H100 SXM: 700 W, vapour chamber heatsink, air-cooled baseline; DLC option with CoolIT cold plate (R<sub>th</sub> = 0.04 &deg;C/W)</li>
         <li>B200: 1000 W, <strong>DLC mandatory</strong>; dual-die (2&times;Blackwell) on CoWoS-L; custom liquid manifold per baseboard</li>
         <li>Grace-Blackwell NVL72: 72 GPUs in liquid-cooled rack; ~120 kW/rack</li>
       </ul>
     </div>
-    <div class="box" style="max-width:280px;">
-      <h3 style="color:var(--accent2);">AMD MI300X</h3>
+    <div class="card" style="max-width:280px;">
+      <h3 style="color:var(--amber);">AMD MI300X</h3>
       <ul style="text-align:left;">
         <li>750 W TDP; 12 chiplets (8 XCD + 4 IOD) on CoWoS-equivalent; massive 5,332 mm&sup2; package</li>
         <li>Custom vapour chamber spans full OAM module footprint; R<sub>spreading</sub> &lt; 0.01 &deg;C/W</li>
@@ -786,67 +750,65 @@
       </ul>
     </div>
   </div>
-  <div class="box-row" style="margin-top:0.4em;">
-    <div class="box" style="max-width:280px;">
-      <h3 style="color:var(--accent3);">Intel Ponte Vecchio</h3>
+  <div class="cols cols-2" style="margin-top:0.4em;">
+    <div class="card" style="max-width:280px;">
+      <h3 style="color:var(--green);">Intel Ponte Vecchio</h3>
       <ul style="text-align:left;">
         <li>600 W TDP; 47 tiles on Foveros + EMIB; base tile and compute tiles in 3D stack</li>
         <li>Liquid cooled from launch (Aurora supercomputer); cold plate with microchannel inserts; R<sub>th,total</sub> &asymp; 0.055 &deg;C/W</li>
         <li>Thermal challenge: non-uniform power across 47 tiles; FEM-guided tile placement optimisation</li>
       </ul>
     </div>
-    <div class="box" style="max-width:280px;">
-      <h3 style="color:var(--accent4);">TSMC Direct-to-Silicon</h3>
+    <div class="card" style="max-width:280px;">
+      <h3 style="color:var(--purple);">TSMC Direct-to-Silicon</h3>
       <ul style="text-align:left;">
         <li>Microchannels etched into silicon backside (50 &mu;m wide, 200 &mu;m deep); coolant flows directly over active die</li>
         <li>Demonstrated 2.6 kW with R<sub>th</sub> = 0.055 &deg;C/W; &Delta;T<sub>j</sub> = 143 &deg;C &rarr; T<sub>j</sub> &le; 180 &deg;C (test) / designed for T<sub>j</sub> &le; 90 &deg;C at 1 kW</li>
         <li>Roadmap: production-ready by 2026&ndash;2027; enables &gt;1500 W accelerators on N2/A16 process</li>
       </ul>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 23: References & Further Reading -->
 <!-- ============================================================ -->
-<section>
-  <h2>References &amp; Further Reading</h2>
-  <div class="two-col" style="margin-top:0.5em;">
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>References &amp; Further Reading</h2></div>
+  <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
-      <h3 style="color:var(--accent);">Books &amp; Standards</h3>
+      <h3 style="color:var(--blue);">Books &amp; Standards</h3>
       <ul style="font-size:0.62em;">
-        <li><strong class="accent">Incropera, DeWitt et al.</strong> &mdash; <em>Fundamentals of Heat and Mass Transfer</em>, 8th Ed., Wiley, 2017</li>
-        <li><strong class="accent2">Bar-Cohen, A.</strong> &mdash; <em>Encyclopedia of Thermal Packaging</em>, World Scientific, 2013</li>
-        <li><strong class="accent3">JEDEC JESD51</strong> &mdash; thermal measurement standards (JESD51-1 through JESD51-14); defines R<sub>jc</sub>, R<sub>ja</sub> methodologies</li>
-        <li><strong class="accent4">ASHRAE TC 9.9</strong> &mdash; <em>Thermal Guidelines for Data Processing Environments</em>, 5th Ed., 2021</li>
-        <li><strong class="accent">Mahajan, R. et al.</strong> &mdash; "Embedded Multi-Die Interconnect Bridge," IEEE ECTC 2016</li>
+        <li><strong class="b">Incropera, DeWitt et al.</strong> &mdash; <em>Fundamentals of Heat and Mass Transfer</em>, 8th Ed., Wiley, 2017</li>
+        <li><strong class="a">Bar-Cohen, A.</strong> &mdash; <em>Encyclopedia of Thermal Packaging</em>, World Scientific, 2013</li>
+        <li><strong class="g">JEDEC JESD51</strong> &mdash; thermal measurement standards (JESD51-1 through JESD51-14); defines R<sub>jc</sub>, R<sub>ja</sub> methodologies</li>
+        <li><strong class="p">ASHRAE TC 9.9</strong> &mdash; <em>Thermal Guidelines for Data Processing Environments</em>, 5th Ed., 2021</li>
+        <li><strong class="b">Mahajan, R. et al.</strong> &mdash;"Embedded Multi-Die Interconnect Bridge," IEEE ECTC 2016</li>
       </ul>
-      <h3 style="color:var(--accent2); margin-top:0.6em;">Papers</h3>
+      <h3 style="color:var(--amber); margin-top:0.6em;">Papers</h3>
       <ul style="font-size:0.62em;">
-        <li><strong class="accent">TSMC</strong> &mdash; "Direct Liquid Cooling of High-Performance Chips," IEEE ECTC 2024</li>
-        <li><strong class="accent2">Wei, J.</strong> &mdash; "Challenges in cooling design of CPU packages," <em>Heat Transfer Engineering</em>, 29(2), 2008</li>
-        <li><strong class="accent3">IMEC</strong> &mdash; "Microfluidic cooling for 3D-stacked ICs," IEEE 3DIC 2023</li>
+        <li><strong class="b">TSMC</strong> &mdash;"Direct Liquid Cooling of High-Performance Chips," IEEE ECTC 2024</li>
+        <li><strong class="a">Wei, J.</strong> &mdash;"Challenges in cooling design of CPU packages," <em>Heat Transfer Engineering</em>, 29(2), 2008</li>
+        <li><strong class="g">IMEC</strong> &mdash;"Microfluidic cooling for 3D-stacked ICs," IEEE 3DIC 2023</li>
       </ul>
     </div>
     <div>
-      <h3 style="color:var(--accent3);">Industry Resources</h3>
+      <h3 style="color:var(--green);">Industry Resources</h3>
       <ul style="font-size:0.62em;">
-        <li><strong class="accent">NVIDIA</strong> &mdash; DGX B200 System Design Guide; thermal architecture white papers</li>
-        <li><strong class="accent2">CoolIT Systems</strong> &mdash; Direct Liquid Cooling reference architectures for OCP/OAM</li>
-        <li><strong class="accent3">Vertiv</strong> &mdash; Liebert CDU sizing guides; PUE analysis tools</li>
-        <li><strong class="accent4">Open Compute Project (OCP)</strong> &mdash; OAM v2 specification; Advanced Cooling Solutions workgroup</li>
-        <li><strong class="accent">GRC / LiquidCool</strong> &mdash; Immersion cooling deployment guides and TCO calculators</li>
+        <li><strong class="b">NVIDIA</strong> &mdash; DGX B200 System Design Guide; thermal architecture white papers</li>
+        <li><strong class="a">CoolIT Systems</strong> &mdash; Direct Liquid Cooling reference architectures for OCP/OAM</li>
+        <li><strong class="g">Vertiv</strong> &mdash; Liebert CDU sizing guides; PUE analysis tools</li>
+        <li><strong class="p">Open Compute Project (OCP)</strong> &mdash; OAM v2 specification; Advanced Cooling Solutions workgroup</li>
+        <li><strong class="b">GRC / LiquidCool</strong> &mdash; Immersion cooling deployment guides and TCO calculators</li>
       </ul>
-      <div class="highlight-bar" style="margin-top:0.8em;">
-        <strong class="accent">Next:</strong> <em>Presentation 13</em> &mdash; next topic in the Modern SoC Design series
+      <div class="card amber" style="margin-top:0.8em;">
+        <strong class="b">Next:</strong> <em>Presentation 13</em> &mdash; next topic in the Modern SoC Design series
       </div>
-      <p class="dim" style="margin-top:0.8em; font-size:0.62em;">
+      <p style="color:var(--muted)" style="margin-top:0.8em; font-size:0.62em;">
         Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> &middot; Playfair Display + DM Sans + JetBrains Mono<br>
         Educational use. Data from public specifications and published papers.
       </p>
     </div>
-  </div>
-</section>
+  </section>
 
 </div><!-- /slides -->
 </div><!-- /reveal -->
@@ -857,15 +819,16 @@
 Reveal.initialize({
   hash: true,
   slideNumber: 'c/t',
-  showSlideNumber: 'all',
   transition: 'fade',
   transitionSpeed: 'fast',
-  backgroundTransition: 'fade',
+  controls: true,
+  progress: true,
   center: false,
-  margin: 0.02,
-  width: 1280,
+  width: 1100,
   height: 900,
-  plugins: [ RevealHighlight ]
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
 });
 </script>
 <script>
