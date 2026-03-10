@@ -479,7 +479,7 @@
         ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(W-20, y); ctx.stroke();
       });
       // PLL source
-      ctx.fillStyle = '#7ef7c0'; ctx.font = '600 12px"JetBrains Mono", monospace';
+      ctx.fillStyle = '#7ef7c0'; ctx.font = '600 12px "JetBrains Mono", monospace';
       ctx.fillText('PLL', W/2 - 12, 20);
       // Leaf buffers
       ctx.fillStyle = '#f76e7e';
@@ -491,7 +491,7 @@
         }
       }
       // Legend
-      ctx.font = '11px"DM Sans", sans-serif';
+      ctx.font = '11px "DM Sans", sans-serif';
       ctx.fillStyle = '#7eb8f7'; ctx.fillText('Spine (vertical trunk)', 20, H-8);
       ctx.fillStyle = '#f7a05a'; ctx.fillText('Horizontal branches', 200, H-8);
       ctx.fillStyle = '#f76e7e'; ctx.fillText('Leaf buffers', 400, H-8);
@@ -657,9 +657,9 @@ module sync_2ff #(
   assign data_out = sync_ff2;
 
   // Synthesis attributes
-  // synopsys sync_set_reset"rst_n"
-  (* dont_touch ="true" *)
-  (* async_reg ="true" *)
+  // synopsys sync_set_reset "rst_n"
+  (* dont_touch = "true" *)
+  (* async_reg = "true" *)
 endmodule</code></pre>
     <div class="card purple" style="margin-top:0.8em;">
       <h3>Synchronization Latency</h3>

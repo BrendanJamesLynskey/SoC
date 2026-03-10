@@ -155,6 +155,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">02</span><h2>Why Specialised Hardware?</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">the end of free scaling</p>
 
   <div class="cols cols-2" style="margin-top:0.6rem;gap:1.4rem;">
     <div>
@@ -203,6 +204,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">03</span><h2>The Roofline Model</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">arithmetic intensity as the design compass</p>
 
   <div class="cols cols-2" style="gap:1.6rem;">
     <div>
@@ -283,6 +285,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">04</span><h2>Compute Primitives: MAC → GEMM → Tensor</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">the hierarchy of matrix operations</p>
 
   <div class="cols cols-3" style="margin-top:0.6rem;">
     <div class="card">
@@ -340,6 +343,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">05</span><h2>Systolic Arrays</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">data flowing like a heartbeat through a 2D PE mesh</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -462,6 +466,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">06</span><h2>Dataflow Architectures</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">execution driven by data availability, not program counters</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -509,6 +514,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">07</span><h2>Numerical Formats &amp; Mixed Precision</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">matching bit-width to workload sensitivity</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -554,13 +560,14 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">08</span><h2>Sparsity Exploitation</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">skipping zeros — architectural and algorithmic approaches</p>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
     <div class="card">
       <h3>Sources of Sparsity</h3>
       <ul>
         <li><strong>Activation sparsity</strong>: ReLU sets negative activations to zero; 50–80% sparse in practice</li>
-        <li><strong>Weight pruning</strong>: iterative magnitude pruning removes -weight connections</li>
+        <li><strong>Weight pruning</strong>: iterative magnitude pruning removes small-weight connections</li>
         <li><strong>Structured pruning</strong>: remove entire filters/heads — hardware-friendly but accuracy cost</li>
         <li><strong>Unstructured pruning</strong>: arbitrary zero pattern — needs sparse HW to exploit</li>
         <li><strong>Dynamic sparsity</strong>: varies per input; harder to schedule statically</li>
@@ -612,6 +619,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">09</span><h2>Memory Hierarchy in AI Accelerators</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">keeping compute fed — the bandwidth pyramid</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -677,6 +685,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">10</span><h2>Transformer Accelerator Micro-Architecture</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">mapping attention and FFN layers onto silicon</p>
 
   <div class="cols cols-2" style="gap:1.4rem;">
     <div>
@@ -729,6 +738,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">11</span><h2>Quantisation for Inference</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">reducing bit-width without sacrificing accuracy</p>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
     <div class="card">
@@ -778,6 +788,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">12</span><h2>GPU Architecture: NVIDIA Hopper H100</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">the current standard bearer for AI compute</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -827,6 +838,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">13</span><h2>Google TPU Architecture</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">purpose-built ASIC for TensorFlow / JAX workloads</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -886,6 +898,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">14</span><h2>NPU Integration in SoCs</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">on-device AI — from smartphone to datacenter SoC</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -963,6 +976,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">15</span><h2>Parallelism Strategies for Large Models</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">distributing compute and memory across accelerators</p>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
     <div class="card">
@@ -1019,6 +1033,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">16</span><h2>CNN Accelerator Design</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">convolutional workloads — structure, tiling, and reuse</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -1045,7 +1060,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
         <ul>
           <li><strong>Line buffer</strong>: store H×W rows of input; slide window without re-reading DRAM</li>
           <li><strong>Double buffering</strong>: DMA fills buffer B while PE array consumes buffer A</li>
-          <li><strong>Weight caching</strong>:  kernels (3×3×C_in×C_out) fit in on-chip SRAM; reuse across output tiles</li>
+          <li><strong>Weight caching</strong>: small kernels (3×3×C_in×C_out) fit in on-chip SRAM; reuse across output tiles</li>
           <li><strong>Activation reuse</strong>: output-stationary on OH×OW tile; stream weights past</li>
           <li><strong>Fusion</strong>: Conv + BN + ReLU fused into single kernel — eliminates 2× DRAM round trips</li>
         </ul>
@@ -1069,6 +1084,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">17</span><h2>The AI Compiler Stack</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">bridging high-level ML frameworks to bare silicon</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -1135,6 +1151,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">18</span><h2>Power Efficiency &amp; Performance per Watt</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">TOPS/W — the metric that matters for edge and datacenter alike</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -1183,6 +1200,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">19</span><h2>Case Study: NVIDIA Blackwell B200</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">the current apex of ML accelerator design (2024)</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -1228,6 +1246,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">20</span><h2>Case Study: Apple Neural Engine (ANE)</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">efficiency-first on-device inference — 38 TOPS at &lt;5W</p>
 
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
@@ -1281,6 +1300,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">21</span><h2>Emerging Directions</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">what comes after the current generation</p>
 
   <div class="cols cols-3" style="margin-top:0.5rem;">
     <div class="card">
@@ -1323,6 +1343,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">22</span><h2>Summary &amp; Key Takeaways</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">AI / ML Accelerator Architectures — Presentation 05</p>
 
   <div class="cols cols-2" style="gap:1.5rem;margin-top:0.6rem;">
     <div>

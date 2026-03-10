@@ -155,6 +155,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">02</span><h2>Training vs Inference — Fundamentally Different Problems</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">different bottlenecks demand different silicon</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -200,6 +201,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">03</span><h2>The Inference Deployment Landscape</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">cloud · on-premise · edge · endpoint</p>
 
   <div class="cols cols-3" style="gap:1.1rem;margin-top:0.6rem;">
     <div>
@@ -250,7 +252,7 @@
     <h3>MCU / Microcontroller (TinyML)</h3>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.8em;font-size:0.65em;">
       <div><span style="color:var(--accent);">Devices:</span> STM32, Nordic nRF, RP2350</div>
-      <div><span style="color:var(--accent);">Models:</span> MobileNetV3-, keyword spotting</div>
+      <div><span style="color:var(--accent);">Models:</span> MobileNetV3-tiny, keyword spotting</div>
       <div><span style="color:var(--accent);">RAM:</span> 256 KB – 8 MB SRAM</div>
       <div><span style="color:var(--accent);">TDP:</span> &lt;100 mW — often &lt;1 mW</div>
     </div>
@@ -263,6 +265,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">04</span><h2>Quantisation — The Foundation of Efficient Inference</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">mapping floating-point tensors to fixed-width integers</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -321,6 +324,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">05</span><h2>INT8 &amp; INT4 Hardware Pipelines</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">from MAC arrays to dequantisation and accumulation</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -417,6 +421,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">06</span><h2>The LLM Inference Pipeline</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">prefill · decode · KV-cache — three distinct hardware problems</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -494,6 +499,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">07</span><h2>Memory Bandwidth — The Dominant Inference Bottleneck</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">why decode is nearly always memory-bound</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -556,6 +562,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">08</span><h2>NPU Micro-Architecture for Inference</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">dataflow, scratchpad, DMA, and scheduling</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.4rem;">
     <div>
@@ -641,6 +648,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">09</span><h2>Sparsity Exploitation in Inference</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">skipping zeros for free compute and bandwidth savings</p>
 
   <div class="cols cols-3" style="gap:1rem;margin-top:0.6rem;">
     <div>
@@ -659,7 +667,7 @@
         <h3>Weight Sparsity (Pruning)</h3>
         <ul>
           <li><strong>Unstructured pruning</strong> — individual weights zeroed; requires sparse accumulator or VLIW schedule; poor hardware efficiency</li>
-          <li><strong>Structured pruning</strong> — channels, heads, or layers removed; standard dense matmul on  tensors</li>
+          <li><strong>Structured pruning</strong> — channels, heads, or layers removed; standard dense matmul on smaller tensors</li>
           <li><strong>2:4 structured sparsity</strong> — exactly 2 non-zeros per 4 weights; 2× throughput on NVIDIA Tensor Cores from Ampere onwards; negligible accuracy loss at 50%</li>
         </ul>
       </div>
@@ -699,7 +707,7 @@
       </div>
       <div class="accent-box green">
         <strong style="color:var(--accent3);">Speculative Decoding as "temporal sparsity":</strong>
-         draft model generates candidate tokens; large model verifies N at once.
+         small draft model generates candidate tokens; large model verifies N at once.
         Effective throughput gain: 2–4× on typical LLM tasks without quality loss.
       </div>
     </div>
@@ -712,6 +720,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">10</span><h2>On-Device LLM SoC Architecture</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">unified memory, heterogeneous compute, and the Apple M-series blueprint</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -764,7 +773,7 @@
         <ul>
           <li><strong>Zero-copy</strong> — GPU tokenises, NPU runs LLM decode, CPU runs runtime logic — all share the same physical DRAM pages</li>
           <li><strong>Coherent</strong> — no explicit DMA transfers or pinned buffers between engines</li>
-          <li><strong>LLM-friendly</strong> — 70B INT4 model ≈ 35 GB: fits M3 Ultra (192 GB) easily; fits M4 Pro (48 GB) at  models</li>
+          <li><strong>LLM-friendly</strong> — 70B INT4 model ≈ 35 GB: fits M3 Ultra (192 GB) easily; fits M4 Pro (48 GB) at smaller models</li>
           <li><strong>Bandwidth pooled</strong> — 120–800 GB/s shared; no PCIe bottleneck (≤64 GB/s)</li>
         </ul>
       </div>
@@ -791,6 +800,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">11</span><h2>Mobile &amp; Edge NPU Comparison</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">flagship SoC inference capabilities — 2024/2025</p>
 
   <table class="dtable" style="margin-top:0.7rem;font-size:0.62em;">
     <tr>
@@ -896,6 +906,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">12</span><h2>Power Management for ML Inference</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">DVFS, power domains, and thermal budget</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -966,6 +977,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">13</span><h2>The Inference Compiler &amp; Runtime Stack</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">from model checkpoint to efficient silicon execution</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1044,6 +1056,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">14</span><h2>TinyML — Inference at the Extreme Edge</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">sub-milliwatt neural networks on microcontrollers</p>
 
   <div class="cols cols-3" style="gap:1rem;margin-top:0.6rem;">
     <div>
@@ -1108,6 +1121,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">15</span><h2>CNN Inference Optimisation</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">convolution, tiling, im2col, and depthwise separability</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1163,6 +1177,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">16</span><h2>Inference Serving Systems &amp; Batching Strategies</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">maximising GPU utilisation across concurrent requests</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1227,6 +1242,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">17</span><h2>Distributed Inference — Tensor &amp; Pipeline Parallelism</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">splitting models across multiple accelerators</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1234,7 +1250,7 @@
         <h3>Why Distribute?</h3>
         <ul>
           <li><strong>Model doesn't fit one device</strong> — Llama 3.1 405B FP16: 810 GB; requires 10+ A100 80GB</li>
-          <li><strong>Latency requirements</strong> — distribute GEMM across devices →  per-device matrix → lower latency per layer</li>
+          <li><strong>Latency requirements</strong> — distribute GEMM across devices → smaller per-device matrix → lower latency per layer</li>
           <li><strong>Throughput scaling</strong> — additional devices handle more concurrent requests</li>
         </ul>
       </div>
@@ -1284,6 +1300,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">18</span><h2>Case Study: NVIDIA H100 / H200 for Inference</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">the dominant cloud inference platform — 2024</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1314,7 +1331,7 @@
           <li><strong>Transformer Engine</strong> — FP8 Tensor Cores; dynamic per-layer precision selection; loss-free FP8 inference for most LLMs</li>
           <li><strong>WGMMA (Warpgroup MMA)</strong> — asynchronous matrix multiply across warp groups; decouples data movement from compute</li>
           <li><strong>TMA (Tensor Memory Accelerator)</strong> — hardware-managed multi-dimensional tile DMA; no software prefetch code needed</li>
-          <li><strong>MIG (Multi-Instance GPU)</strong> — partition H100 into up to 7 isolated inference instances; efficient for -model serving</li>
+          <li><strong>MIG (Multi-Instance GPU)</strong> — partition H100 into up to 7 isolated inference instances; efficient for small-model serving</li>
           <li><strong>Confidential Computing</strong> — TEE for sensitive inference workloads (medical, financial)</li>
         </ul>
       </div>
@@ -1336,6 +1353,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">19</span><h2>Case Study: Qualcomm Cloud AI 100 Ultra</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">purpose-built inference ASIC — not a repurposed training GPU</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1363,7 +1381,7 @@
         <ul>
           <li><strong>No FP64 / FP32 training paths</strong> — die area focused entirely on INT8/INT4 MAC arrays and SRAM</li>
           <li><strong>128 MB on-chip SRAM</strong> — KV-cache tiers: hot tokens in SRAM, cold in LPDDR; reduces off-chip reads for short-context decode</li>
-          <li><strong>Multi-chip module</strong> — two dies per Ultra card; 2× die yield benefit from  die; NVLink-equivalent internal interconnect</li>
+          <li><strong>Multi-chip module</strong> — two dies per Ultra card; 2× die yield benefit from smaller die; NVLink-equivalent internal interconnect</li>
           <li><strong>Compiler-driven scheduling</strong> — Qualcomm's AIC compiler statically schedules all DMA and compute; no dynamic dispatch overhead</li>
           <li><strong>Network-attached inference</strong> — designed for rack-scale pod with PCIe fabric; flexible scaling from 1 to 64 cards</li>
         </ul>
@@ -1389,6 +1407,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">20</span><h2>Case Study: Groq LPU — Compiler-as-Hardware</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">deterministic dataflow execution for ultra-low inference latency</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1439,6 +1458,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">21</span><h2>Security Considerations in Inference SoCs</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">model protection, TEE, and inference-time attacks</p>
 
   <div class="cols cols-3" style="gap:1rem;margin-top:0.6rem;">
     <div>
@@ -1497,6 +1517,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">22</span><h2>Emerging Inference Techniques</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">speculative decoding · medusa · SSMs · analog compute</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -1505,7 +1526,7 @@
         <ul>
           <li><strong>Algorithm</strong>: draft model generates K tokens autoregressively; target model verifies all K+1 in single forward pass (parallel GEMM)</li>
           <li>Acceptance probability: p_accepted = min(1, p_target / p_draft) per token via rejection sampling</li>
-          <li><strong>Speedup</strong>: K_accepted × (T_target / T_draft) — effective when draft model is 10–50× </li>
+          <li><strong>Speedup</strong>: K_accepted × (T_target / T_draft) — effective when draft model is 10–50× smaller</li>
           <li><strong>Self-speculative</strong> (Medusa, Eagle): draft heads attached to target model; share hidden states</li>
           <li>Medusa-2: 2–3× speedup on Vicuna-13B; multiple parallel draft heads predict positions 1 to N simultaneously</li>
           <li><strong>Hardware implication</strong>: turns memory-bound GEMV decode into compute-bound GEMM verification — transforms the roofline operating point</li>
@@ -1518,7 +1539,7 @@
         <ul>
           <li>Alternative to Transformer attention; recurrent state representation with linear-time decode</li>
           <li><strong>Inference advantage</strong>: O(1) memory per token (fixed state vector vs O(N) KV-cache growth)</li>
-          <li><strong>Hardware implication</strong>: no KV-cache → no KV bandwidth bottleneck; fits  SRAM even at long context</li>
+          <li><strong>Hardware implication</strong>: no KV-cache → no KV bandwidth bottleneck; fits tiny SRAM even at long context</li>
           <li>Mamba-2: structured state space; selective SSM — matches Transformer quality at 1B+ parameters</li>
           <li>Hybrid architectures (Jamba, Zamba): interleaved attention + SSM layers — best of both</li>
         </ul>
@@ -1541,6 +1562,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">23</span><h2>Power-Performance Trade-off Summary</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">TOPS/W across the deployment spectrum</p>
 
   <table class="dtable" style="margin-top:0.6rem;font-size:0.62em;">
     <tr>
@@ -1585,6 +1607,7 @@
 <section data-background-color="#0a0a0f">
 
   <div class="slide-hdr"><span class="tag">24</span><h2>Summary &amp; Key Takeaways</h2></div>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">SoCs for ML Inference</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>

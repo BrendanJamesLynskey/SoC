@@ -309,7 +309,9 @@ set_retention ret_npu \
 <!-- SLIDE 7: Section — DVFS -->
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
-  <div class="slide-hdr"><span class="tag">Section II</span><h2>Dynamic Voltage &amp; Frequency Scaling</h2></section>
+  <div class="slide-hdr"><span class="tag">Section II</span><h2>Dynamic Voltage &amp; Frequency Scaling</h2></div>
+  <p style="color:var(--muted); font-size:0.56em; margin-top:0.5em;">The most effective runtime power optimization: trading voltage for cubic power savings</p>
+</section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 8: DVFS Fundamentals -->
@@ -435,7 +437,9 @@ set_retention ret_npu \
 <!-- SLIDE 11: Section — Voltage Regulation -->
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
-  <div class="slide-hdr"><span class="tag">Section III</span><h2>Voltage Regulation</h2></section>
+  <div class="slide-hdr"><span class="tag">Section III</span><h2>Voltage Regulation</h2></div>
+  <p style="color:var(--muted); font-size:0.56em; margin-top:0.5em;">PMICs, LDOs, switching regulators &amp; the move to on-die voltage regulation</p>
+</section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 12: PMIC Architecture -->
@@ -496,10 +500,10 @@ set_retention ret_npu \
         <li><strong class="b">Efficiency</strong> &mdash; &eta; = V<sub>out</sub>/V<sub>in</sub>; if V<sub>in</sub>=1.0V, V<sub>out</sub>=0.75V, &eta;=75%; poor for large V<sub>in</sub>&ndash;V<sub>out</sub> gaps</li>
         <li><strong class="b">Noise</strong> &mdash; extremely low output noise (&lt;10 &mu;V<sub>rms</sub>); ideal for PLL, ADC, and analog supplies</li>
         <li><strong class="b">Response</strong> &mdash; fast transient response (~10 ns); no switching artifacts</li>
-        <li><strong class="b">Area</strong> &mdash;  die area; no inductors; integrates well on-die</li>
+        <li><strong class="b">Area</strong> &mdash; small die area; no inductors; integrates well on-die</li>
       </ul>
       <div class="card amber" style="margin-top:0.5em;">
-        <strong>Use LDOs for:</strong> PLL/analog supply, low-noise domains,  voltage drops, low-current rails (&lt;1 A)
+        <strong>Use LDOs for:</strong> PLL/analog supply, low-noise domains, small voltage drops, low-current rails (&lt;1 A)
       </div>
     </div>
     <div>
@@ -580,7 +584,9 @@ set_retention ret_npu \
 <!-- SLIDE 15: Section — ML Workload Power Optimization -->
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
-  <div class="slide-hdr"><span class="tag">Section IV</span><h2>ML Workload Power Optimization</h2></section>
+  <div class="slide-hdr"><span class="tag">Section IV</span><h2>ML Workload Power Optimization</h2></div>
+  <p style="color:var(--muted); font-size:0.56em; margin-top:0.5em;">Dark silicon, clock gating, workload awareness &amp; low-power design at advanced nodes</p>
+</section>
 
 <!-- ============================================================ -->
 <!-- SLIDE 16: Dark Silicon & Utilization -->

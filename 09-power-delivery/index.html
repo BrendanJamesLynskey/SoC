@@ -145,7 +145,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Why Power Delivery Matters for ML SoCs</h2></div>
-  <p style="color:var(--muted);font-size:.48em">the hardest problem nobody outside silicon talks about</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">the hardest problem nobody outside silicon talks about</p>
 
   <div class="cols cols-2" style="gap:.5em" style="margin-top:0.5rem;">
     <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1">700&ndash;1200 W</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">TDP of modern AI accelerators (B200, MI300X)</span></div>
@@ -200,7 +200,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery Network Overview</h2></div>
-  <p style="color:var(--muted);font-size:.48em">VRM &rarr; PCB &rarr; Package &rarr; Die &mdash; every stage matters</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">VRM &rarr; PCB &rarr; Package &rarr; Die &mdash; every stage matters</p>
 
   <div style="display:flex;flex-direction:column;gap:0" style="margin-top:0.6rem;">
     <div class="card blue" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">VRM (Voltage Regulator Module) &mdash; 48&thinsp;V &rarr; 0.75&thinsp;V, multi-phase buck, &lt;1&thinsp;m&Omega; output impedance</div>
@@ -244,7 +244,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>PDN Impedance &amp; Target Impedance</h2></div>
-  <p style="color:var(--muted);font-size:.48em">frequency-domain view of power delivery quality</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">frequency-domain view of power delivery quality</p>
 
   <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace" style="margin-top:0.5rem;margin-bottom:0.7rem;">
     Z_target = V_ripple / I_transient &nbsp;&nbsp;&mdash;&nbsp;&nbsp; e.g. Z_target = 22.5 mV / 600 A = 37.5 &micro;&Omega;
@@ -296,7 +296,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Decoupling Capacitor Hierarchy</h2></div>
-  <p style="color:var(--muted);font-size:.48em">ESL and ESR dominate performance at each stage</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">ESL and ESR dominate performance at each stage</p>
 
   <table style="margin-top:0.5rem;">
     <tr>
@@ -343,7 +343,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>IR Drop Analysis</h2></div>
-  <p style="color:var(--muted);font-size:.48em">static vs dynamic drop, current density, and electromigration</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">static vs dynamic drop, current density, and electromigration</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -411,7 +411,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>VRM Topologies for AI Accelerators</h2></div>
-  <p style="color:var(--muted);font-size:.48em">multi-phase buck converters, DrMOS, and transient response</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">multi-phase buck converters, DrMOS, and transient response</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -445,7 +445,7 @@
           <li><strong>DrMOS</strong>: Driver + high-side + low-side FETs in single package (8&times;8 mm)</li>
           <li>Infineon TDA21490: 90A continuous, R_DS(on) &lt; 0.5 m&Omega;</li>
           <li>Renesas ISL99390: 90A, integrated temperature sensing</li>
-          <li><strong>GaN power stages</strong> &mdash; higher f_sw (2&ndash;4 MHz),  inductors, faster transient</li>
+          <li><strong>GaN power stages</strong> &mdash; higher f_sw (2&ndash;4 MHz), smaller inductors, faster transient</li>
           <li>EPC2302: GaN FET, 1.3 m&Omega;, enables &gt;2 MHz switching</li>
         </ul>
       </div>
@@ -468,7 +468,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>On-Package Voltage Regulation (PIVR)</h2></div>
-  <p style="color:var(--muted);font-size:.48em">Intel FIVR and the push to integrate regulation into the package</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">Intel FIVR and the push to integrate regulation into the package</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -497,7 +497,7 @@
           <li><strong>Faster transient response</strong> &mdash; 100 ns vs 10&ndash;50 &micro;s for board VRM</li>
           <li><strong>Per-domain regulation</strong> &mdash; separate rails for each core, GPU, IO, etc.</li>
           <li><strong>Reduced guardband</strong> &mdash; 30&ndash;50 mV savings enables higher frequency or lower power</li>
-          <li><strong>Fewer board components</strong> &mdash; simpler motherboard,  form factor</li>
+          <li><strong>Fewer board components</strong> &mdash; simpler motherboard, smaller form factor</li>
           <li><strong>Dynamic power savings</strong> &mdash; rapid DVFS during idle/burst cycles</li>
         </ul>
       </div>
@@ -520,7 +520,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>On-Die LDO &amp; Integrated Voltage Regulators</h2></div>
-  <p style="color:var(--muted);font-size:.48em">granular per-block DVFS with fully on-die regulation</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">granular per-block DVFS with fully on-die regulation</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -589,7 +589,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>BSPDN &mdash; Backside Power Delivery Network</h2></div>
-  <p style="color:var(--muted);font-size:.48em">Intel PowerVia, TSMC N2P &mdash; decoupling power from signal routing</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">Intel PowerVia, TSMC N2P &mdash; decoupling power from signal routing</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -645,7 +645,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>eDTC &mdash; Embedded Deep Trench Capacitors</h2></div>
-  <p style="color:var(--muted);font-size:.48em">TSMC's on-die capacitance revolution for PDN impedance</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">TSMC's on-die capacitance revolution for PDN impedance</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -702,7 +702,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Through-Silicon Via Power Delivery</h2></div>
-  <p style="color:var(--muted);font-size:.48em">TSV arrays for 2.5D/3D stacking &mdash; current capacity, thermal co-design</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">TSV arrays for 2.5D/3D stacking &mdash; current capacity, thermal co-design</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -766,7 +766,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery for 700W+ AI GPUs</h2></div>
-  <p style="color:var(--muted);font-size:.48em">NVIDIA Blackwell architecture, 48V racks, connector challenges</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">NVIDIA Blackwell architecture, 48V racks, connector challenges</p>
 
   <div class="cols cols-2" style="gap:.5em" style="margin-top:0.5rem;">
     <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1">1200 W</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">NVIDIA B200 TDP (max)</span></div>
@@ -816,7 +816,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>di/dt Management in ML Training Workloads</h2></div>
-  <p style="color:var(--muted);font-size:.48em">GEMM&rarr;communication switching, droop events, firmware mitigation</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">GEMM&rarr;communication switching, droop events, firmware mitigation</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -868,7 +868,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Integrity Simulation &amp; Signoff</h2></div>
-  <p style="color:var(--muted);font-size:.48em">static/dynamic IR drop tools, EM analysis, PDN extraction, workload co-simulation</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">static/dynamic IR drop tools, EM analysis, PDN extraction, workload co-simulation</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -925,7 +925,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery in Chiplet Architectures</h2></div>
-  <p style="color:var(--muted);font-size:.48em">per-chiplet regulation, interposer PDN, power gating coordination</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">per-chiplet regulation, interposer PDN, power gating coordination</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
@@ -981,7 +981,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Case Studies &mdash; Power Delivery in Production AI Silicon</h2></div>
-  <p style="color:var(--muted);font-size:.48em">NVIDIA B200, AMD MI300X, Intel Ponte Vecchio, Apple M2 Ultra</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">NVIDIA B200, AMD MI300X, Intel Ponte Vecchio, Apple M2 Ultra</p>
 
   <table style="margin-top:0.5rem;">
     <tr>
@@ -1079,7 +1079,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>References &amp; Further Reading</h2></div>
-  <p style="color:var(--muted);font-size:.48em">papers, standards, and resources for deeper study</p>
+  <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">papers, standards, and resources for deeper study</p>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
