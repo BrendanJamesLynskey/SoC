@@ -57,58 +57,86 @@ h1{
 }
 
 main{padding:2.5rem 4rem 5rem;}
-.grid{
+
+/* ── Column headers ── */
+.grid-hdr{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
-  gap:1.2rem;
+  grid-template-columns:3.2rem 1fr 1.6fr 7rem;
+  gap:0 1.4rem;
+  padding:0 1.6rem 0.6rem;
   margin-top:2rem;
+  border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);
 }
 
-.card{
-  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
-  padding:1.5rem 1.6rem;position:relative;
-  display:flex;flex-direction:column;gap:0.8rem;
-}
-.card.available{
+/* ── Row cards ── */
+.row{
+  display:grid;
+  grid-template-columns:3.2rem 1fr 1.6fr 7rem;
+  gap:0 1.4rem;
+  align-items:center;
+  background:var(--bg3);
+  border:1px solid var(--border);
   border-left:3px solid var(--amber);
-  cursor:pointer;text-decoration:none;color:inherit;
+  border-radius:4px;
+  padding:1rem 1.6rem;
+  margin-top:0.55rem;
+  text-decoration:none;color:inherit;
   transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;
 }
-.card.available:hover{
+.row:hover{
   border-color:var(--amber);
-  transform:translateY(-2px);
-  box-shadow:0 8px 32px rgba(245,166,35,0.1);
+  transform:translateY(-1px);
+  box-shadow:0 6px 24px rgba(245,166,35,0.08);
 }
-.card.planned{border-left:3px solid var(--border);opacity:0.6;}
 
-.card-num{
+.row-num{
   font-family:'JetBrains Mono',monospace;
-  font-size:0.6rem;letter-spacing:0.12em;color:var(--muted);
+  font-size:0.82rem;font-weight:600;color:var(--amber);
+  text-align:center;
 }
-.card-title{
+.row-info{display:flex;flex-direction:column;gap:0.2rem;}
+.row-title{
   font-family:'Playfair Display',serif;
-  font-size:1.05rem;color:#ffffff;line-height:1.3;
+  font-size:0.95rem;color:#ffffff;line-height:1.3;
 }
-.card-topics{
-  font-size:0.72rem;color:var(--muted);line-height:1.6;
+.row-topics{
+  font-size:0.68rem;color:var(--muted);line-height:1.5;
 }
-.card-status{
+.row-status{
+  text-align:right;
   font-family:'JetBrains Mono',monospace;
-  font-size:0.6rem;letter-spacing:0.08em;margin-top:auto;padding-top:0.8rem;
-  border-top:1px solid var(--border);
+  font-size:0.58rem;letter-spacing:0.06em;
+  color:var(--muted);
 }
-.status-done{color:var(--amber);}
-.status-plan{color:var(--border);}
-
+.row-slides{color:var(--amber);}
 .launch-btn{
-  display:inline-block;margin-top:0.5rem;
-  font-family:'JetBrains Mono',monospace;font-size:0.62rem;letter-spacing:0.08em;
+  display:inline-block;margin-top:0.35rem;
+  font-family:'JetBrains Mono',monospace;font-size:0.58rem;letter-spacing:0.08em;
   color:var(--amber);border:1px solid rgba(245,166,35,0.35);
-  padding:0.3em 0.8em;border-radius:2px;
+  padding:0.25em 0.7em;border-radius:2px;
   transition:background 0.15s,color 0.15s;
 }
-.card.available:hover .launch-btn{
+.row:hover .launch-btn{
   background:var(--amber);color:var(--bg);
+}
+
+/* ── Responsive: stack on narrow screens ── */
+@media(max-width:740px){
+  header{padding:2rem 1.5rem 1.5rem;}
+  main{padding:1.5rem 1.5rem 3rem;}
+  .grid-hdr{display:none;}
+  .row{
+    grid-template-columns:2.4rem 1fr;
+    grid-template-rows:auto auto;
+    gap:0.3rem 1rem;
+    padding:1rem 1.2rem;
+  }
+  .row-num{grid-row:1/3;}
+  .row-topics{grid-column:2;}
+  .row-status{grid-column:2;text-align:left;margin-top:0.3rem;}
 }
 
 footer{
@@ -128,144 +156,135 @@ footer a:hover{color:var(--amber);}
   <p class="tagline">
     Interactive slide decks covering modern System-on-Chip design end-to-end — from advanced packaging
     and chiplet architectures through memory hierarchies, on-chip interconnects, and silicon implementation.
-    Click any completed presentation below to launch it.
+    Click any row below to launch a presentation.
   </p>
 </header>
 
 <main>
-<div class="grid">
-
-  <a class="card available" href="01-soc-packaging/">
-    <div class="card-num">01</div>
-    <div class="card-title">Modern SoC Packaging</div>
-    <div class="card-topics">Wire bond · Flip-chip · Fan-out · 2.5D CoWoS &amp; EMIB · 3D stacking · Chiplets · UCIe · Thermal &amp; power delivery</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 30 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="02-on-chip-interconnect/">
-    <div class="card-num">02</div>
-    <div class="card-title">On-Chip Interconnect &amp; NoC Design</div>
-    <div class="card-topics">Bus vs crossbar · AXI/ACE · CHI · Network-on-Chip topologies · Coherency protocols · QoS &amp; arbitration</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 31 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="03-memory-hierarchy/">
-    <div class="card-num">03</div>
-    <div class="card-title">Memory Hierarchy in ML Accelerator SoCs</div>
-    <div class="card-topics">SRAM bitcells · Cache design · DRAM fundamentals · DDR5 · LPDDR5/6 · GDDR7 · HBM3/3E/4 · CXL memory</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 23 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="04-serdes-io/">
-    <div class="card-num">04</div>
-    <div class="card-title">High-Speed SerDes &amp; I/O</div>
-    <div class="card-topics">PCIe 5/6 · UCIe PHY · PAM4 signaling · CDR · Equalization · Die-to-die links · Co-packaged optics</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 23 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="05-ai-ml-accelerator-architectures/">
-    <div class="card-num">05</div>
-    <div class="card-title">AI / ML Accelerator Architectures</div>
-    <div class="card-topics">Roofline model · Systolic arrays · Dataflow engines · Sparsity · Mixed precision · NPU integration · Transformer accelerators · H100 &amp; TPU case studies</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 22 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="06-socs-for-ml-inference/">
-    <div class="card-num">06</div>
-    <div class="card-title">SoCs for ML Inference</div>
-    <div class="card-topics">Training vs inference · Quantisation (INT8/INT4/FP8) · KV-cache · NPU micro-architecture · On-device LLMs · Speculative decoding · TinyML · Groq LPU &amp; H100 case studies</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 24 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="07-security-in-soc-design/">
-    <div class="card-num">07</div>
-    <div class="card-title">Security in SoC Design</div>
-    <div class="card-topics">Hardware root of trust · Secure boot · TrustZone &amp; RME · Side-channel attacks &amp; countermeasures · PUFs · TRNG · Crypto accelerators · Memory encryption · Remote attestation · Supply-chain security</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 22 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="08-cxl-in-ml-accelerator-socs/">
-    <div class="card-num">08</div>
-    <div class="card-title">CXL in ML Accelerator SoCs</div>
-    <div class="card-topics">CXL.io · CXL.cache · CXL.mem · Memory pooling · Fabric switches · Type 1/2/3 devices · SoC integration</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 22 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="09-power-delivery/">
-    <div class="card-num">09</div>
-    <div class="card-title">Modern ML Accelerator SoC Power Delivery</div>
-    <div class="card-topics">BSPDN · PIVR · On-die voltage regulation · PDN impedance · eDTC · Power integrity · IR drop</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 22 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="10-soc-verification/">
-    <div class="card-num">10</div>
-    <div class="card-title">Modern SoC Verification</div>
-    <div class="card-topics">RTL simulation · Formal verification · Emulation · FPGA prototyping · UVM · DFT · Coverage closure</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 23 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="11-power-management/">
-    <div class="card-num">11</div>
-    <div class="card-title">Power Management in ML Accelerator SoCs</div>
-    <div class="card-topics">DVFS · Power domains · PMICs · LDO vs switching regulators · Dark silicon · Power gating strategies</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 23 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="12-thermal-management/">
-    <div class="card-num">12</div>
-    <div class="card-title">Thermal Management in ML Accelerator SoCs</div>
-    <div class="card-topics">Thermal design power · Direct liquid cooling · Vapour chambers · TIM materials · Throttling · Hotspot mitigation</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 23 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
-  <a class="card available" href="13-clocks-and-resets/">
-    <div class="card-num">13</div>
-    <div class="card-title">Clocks and Resets in ML Accelerator SoCs</div>
-    <div class="card-topics">PLL design · Clock distribution · Clock domain crossing · GALS · Reset sequencing · Jitter budgets</div>
-    <div class="card-status">
-      <span class="status-done">✅ Complete — 23 slides</span><br>
-      <span class="launch-btn">▶ Launch</span>
-    </div>
-  </a>
-
+<div class="grid-hdr">
+  <span>#</span>
+  <span>Presentation</span>
+  <span>Topics</span>
+  <span style="text-align:right">Status</span>
 </div>
+
+<a class="row" href="01-soc-packaging/">
+  <div class="row-num">01</div>
+  <div class="row-info">
+    <div class="row-title">Modern SoC Packaging</div>
+  </div>
+  <div class="row-topics">Wire bond · Flip-chip · Fan-out · 2.5D CoWoS &amp; EMIB · 3D stacking · Chiplets · UCIe · Thermal &amp; power delivery</div>
+  <div class="row-status"><span class="row-slides">30 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="02-on-chip-interconnect/">
+  <div class="row-num">02</div>
+  <div class="row-info">
+    <div class="row-title">On-Chip Interconnect &amp; NoC Design</div>
+  </div>
+  <div class="row-topics">Bus vs crossbar · AXI/ACE · CHI · Network-on-Chip topologies · Coherency protocols · QoS &amp; arbitration</div>
+  <div class="row-status"><span class="row-slides">31 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="03-memory-hierarchy/">
+  <div class="row-num">03</div>
+  <div class="row-info">
+    <div class="row-title">Memory Hierarchy in ML Accelerator SoCs</div>
+  </div>
+  <div class="row-topics">SRAM bitcells · Cache design · DRAM fundamentals · DDR5 · LPDDR5/6 · GDDR7 · HBM3/3E/4 · CXL memory</div>
+  <div class="row-status"><span class="row-slides">23 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="04-serdes-io/">
+  <div class="row-num">04</div>
+  <div class="row-info">
+    <div class="row-title">High-Speed SerDes &amp; I/O</div>
+  </div>
+  <div class="row-topics">PCIe 5/6 · UCIe PHY · PAM4 signaling · CDR · Equalization · Die-to-die links · Co-packaged optics</div>
+  <div class="row-status"><span class="row-slides">23 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="05-ai-ml-accelerator-architectures/">
+  <div class="row-num">05</div>
+  <div class="row-info">
+    <div class="row-title">AI / ML Accelerator Architectures</div>
+  </div>
+  <div class="row-topics">Roofline model · Systolic arrays · Dataflow engines · Sparsity · Mixed precision · NPU integration · Transformer accelerators · H100 &amp; TPU case studies</div>
+  <div class="row-status"><span class="row-slides">22 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="06-socs-for-ml-inference/">
+  <div class="row-num">06</div>
+  <div class="row-info">
+    <div class="row-title">SoCs for ML Inference</div>
+  </div>
+  <div class="row-topics">Training vs inference · Quantisation (INT8/INT4/FP8) · KV-cache · NPU micro-architecture · On-device LLMs · Speculative decoding · TinyML · Groq LPU &amp; H100 case studies</div>
+  <div class="row-status"><span class="row-slides">24 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="07-security-in-soc-design/">
+  <div class="row-num">07</div>
+  <div class="row-info">
+    <div class="row-title">Security in SoC Design</div>
+  </div>
+  <div class="row-topics">Hardware root of trust · Secure boot · TrustZone &amp; RME · Side-channel attacks &amp; countermeasures · PUFs · TRNG · Crypto accelerators · Memory encryption · Remote attestation · Supply-chain security</div>
+  <div class="row-status"><span class="row-slides">22 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="08-cxl-in-ml-accelerator-socs/">
+  <div class="row-num">08</div>
+  <div class="row-info">
+    <div class="row-title">CXL in ML Accelerator SoCs</div>
+  </div>
+  <div class="row-topics">CXL.io · CXL.cache · CXL.mem · Memory pooling · Fabric switches · Type 1/2/3 devices · SoC integration</div>
+  <div class="row-status"><span class="row-slides">22 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="09-power-delivery/">
+  <div class="row-num">09</div>
+  <div class="row-info">
+    <div class="row-title">Modern ML Accelerator SoC Power Delivery</div>
+  </div>
+  <div class="row-topics">BSPDN · PIVR · On-die voltage regulation · PDN impedance · eDTC · Power integrity · IR drop</div>
+  <div class="row-status"><span class="row-slides">22 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="10-soc-verification/">
+  <div class="row-num">10</div>
+  <div class="row-info">
+    <div class="row-title">Modern SoC Verification</div>
+  </div>
+  <div class="row-topics">RTL simulation · Formal verification · Emulation · FPGA prototyping · UVM · DFT · Coverage closure</div>
+  <div class="row-status"><span class="row-slides">23 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="11-power-management/">
+  <div class="row-num">11</div>
+  <div class="row-info">
+    <div class="row-title">Power Management in ML Accelerator SoCs</div>
+  </div>
+  <div class="row-topics">DVFS · Power domains · PMICs · LDO vs switching regulators · Dark silicon · Power gating strategies</div>
+  <div class="row-status"><span class="row-slides">23 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="12-thermal-management/">
+  <div class="row-num">12</div>
+  <div class="row-info">
+    <div class="row-title">Thermal Management in ML Accelerator SoCs</div>
+  </div>
+  <div class="row-topics">Thermal design power · Direct liquid cooling · Vapour chambers · TIM materials · Throttling · Hotspot mitigation</div>
+  <div class="row-status"><span class="row-slides">23 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
+<a class="row" href="13-clocks-and-resets/">
+  <div class="row-num">13</div>
+  <div class="row-info">
+    <div class="row-title">Clocks and Resets in ML Accelerator SoCs</div>
+  </div>
+  <div class="row-topics">PLL design · Clock distribution · Clock domain crossing · GALS · Reset sequencing · Jitter budgets</div>
+  <div class="row-status"><span class="row-slides">23 slides</span><br><span class="launch-btn">▶ Launch</span></div>
+</a>
+
 </main>
 
 <footer>

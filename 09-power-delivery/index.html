@@ -147,11 +147,11 @@
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Why Power Delivery Matters for ML SoCs</h2></div>
   <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">the hardest problem nobody outside silicon talks about</p>
 
-  <div class="cols cols-2" style="gap:.5em" style="margin-top:0.5rem;">
+  <div class="cols cols-2" style="gap:.5em;margin-top:0.5rem;">
     <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1">700&ndash;1200 W</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">TDP of modern AI accelerators (B200, MI300X)</span></div>
-    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--amber);">600+ A</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Peak current at 0.75&thinsp;V core supply</span></div>
-    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--green);">&lt;3%</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Voltage noise budget (&plusmn;22&thinsp;mV at 0.75&thinsp;V)</span></div>
-    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--purple);">100+ A/ns</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">di/dt transient during workload switching</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--amber);display:block;line-height:1">600+ A</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Peak current at 0.75&thinsp;V core supply</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--green);display:block;line-height:1">&lt;3%</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Voltage noise budget (&plusmn;22&thinsp;mV at 0.75&thinsp;V)</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--purple);display:block;line-height:1">100+ A/ns</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">di/dt transient during workload switching</span></div>
   </div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.7rem;">
@@ -202,7 +202,7 @@
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery Network Overview</h2></div>
   <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">VRM &rarr; PCB &rarr; Package &rarr; Die &mdash; every stage matters</p>
 
-  <div style="display:flex;flex-direction:column;gap:0" style="margin-top:0.6rem;">
+  <div style="display:flex;flex-direction:column;gap:0;margin-top:0.6rem;">
     <div class="card blue" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">VRM (Voltage Regulator Module) &mdash; 48&thinsp;V &rarr; 0.75&thinsp;V, multi-phase buck, &lt;1&thinsp;m&Omega; output impedance</div>
     <div class="ss-arrow">&darr;</div>
     <div class="card amber" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.52em;padding:.3em">PCB Planes &amp; Traces &mdash; 12&ndash;20 layer stackup, 50&ndash;200&thinsp;&micro;&Omega; sheet resistance, bulk &amp; MLCC decaps</div>
@@ -246,7 +246,7 @@
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>PDN Impedance &amp; Target Impedance</h2></div>
   <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">frequency-domain view of power delivery quality</p>
 
-  <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace" style="margin-top:0.5rem;margin-bottom:0.7rem;">
+  <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace;margin-top:0.5rem;margin-bottom:0.7rem;">
     Z_target = V_ripple / I_transient &nbsp;&nbsp;&mdash;&nbsp;&nbsp; e.g. Z_target = 22.5 mV / 600 A = 37.5 &micro;&Omega;
   </div>
 
@@ -372,7 +372,7 @@
     <div>
       <div class="card">
         <h3 style="color:var(--green)">Electromigration &amp; Black's Equation</h3>
-        <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace" style="margin-bottom:0.6rem;">
+        <div class="card green" style="text-align:center;font-family:'JetBrains Mono',monospace;margin-bottom:0.6rem;">
           MTTF = A &times; J<sup>&minus;n</sup> &times; exp(E_a / k_B T)
         </div>
         <ul>
@@ -768,11 +768,11 @@
 <div class="slide-hdr"><span class="tag">TOPIC</span><h2>Power Delivery for 700W+ AI GPUs</h2></div>
   <p style="color:var(--muted); font-size:.48em; letter-spacing:.06em; margin-bottom:.3em;">NVIDIA Blackwell architecture, 48V racks, connector challenges</p>
 
-  <div class="cols cols-2" style="gap:.5em" style="margin-top:0.5rem;">
+  <div class="cols cols-2" style="gap:.5em;margin-top:0.5rem;">
     <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1">1200 W</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">NVIDIA B200 TDP (max)</span></div>
-    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--amber);">1600 A</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Peak current at 0.75V Vcore</span></div>
-    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--green);">48V</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Rack-level bus voltage (OCP)</span></div>
-    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--blue);display:block;line-height:1" style="color:var(--purple);">2&times; dies</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Multi-die module (NVLink-C2C)</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--amber);display:block;line-height:1">1600 A</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Peak current at 0.75V Vcore</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--green);display:block;line-height:1">48V</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Rack-level bus voltage (OCP)</span></div>
+    <div class="card" style="text-align:center"><span style="font-family:'Playfair Display',serif;font-size:1.3em;color:var(--purple);display:block;line-height:1">2&times; dies</span><span style="font-size:.48em;color:var(--muted);display:block;margin-top:.2em">Multi-die module (NVLink-C2C)</span></div>
   </div>
 
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.6rem;">

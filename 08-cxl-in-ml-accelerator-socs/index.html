@@ -172,7 +172,7 @@
 <!-- ============================================================ -->
 <section data-background-color="#0a0a0f">
   <div class="slide-hdr"><span class="tag">04</span><h2>Why CXL for ML Accelerators?</h2></div>
-  <p style="color:var(--muted)" style="margin-bottom:0.4em;">The memory wall is the dominant bottleneck in modern ML workloads</p>
+  <p style="color:var(--muted);margin-bottom:0.4em;">The memory wall is the dominant bottleneck in modern ML workloads</p>
 
   <div class="cols cols-2">
     <div>
@@ -726,7 +726,7 @@
 
       <p style="margin-top:0.3em;">Host A dynamically allocates 1.5 TB for KV-cache. Host B uses 800 GB. When Host C goes idle, its 700 GB returns to the pool. FM reallocates to Host A within microseconds — no data migration needed via DCD.</p>
 
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="margin-top:0.3em;"><span style="color:var(--muted)">Allocation granularity</span><span class="mono a">256 MB — 1 TB extents</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em; margin-top:0.3em;"><span style="color:var(--muted)">Allocation granularity</span><span class="mono a">256 MB — 1 TB extents</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Reallocation time</span><span class="mono accent2">~10-100 μs (FM-API)</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Max hosts per pool</span><span class="mono accent3">16 (MLD), 4096+ (DCD/GFA)</span></div>
     </div>
@@ -919,7 +919,7 @@
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL controller</span><span class="mono accent2">5-10 ns</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">PHY + link</span><span class="mono accent3">30-40 ns</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Remote DRAM</span><span class="mono accent4">40-60 ns</span></div>
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="border-top:1px solid var(--amber);"><span class="a" style="font-weight:700;">Total round-trip</span><span class="mono a" style="font-weight:700;">~170-250 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em; border-top:1px solid var(--amber);"><span class="a" style="font-weight:700;">Total round-trip</span><span class="mono a" style="font-weight:700;">~170-250 ns</span></div>
     </div>
   </div>
 </section>
