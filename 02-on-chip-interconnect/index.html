@@ -120,6 +120,42 @@
   .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
   .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+
+  /* Utility classes */
+  .accent  { color: var(--amber) !important; }
+  .accent2 { color: var(--green) !important; }
+  .accent3 { color: var(--blue) !important; }
+  .accent4 { color: var(--purple) !important; }
+  .dim     { color: var(--muted) !important; }
+  .small   { font-size: 0.7em !important; }
+  .smaller { font-size: 0.6em !important; }
+  .tiny    { font-size: 0.5em !important; }
+  .left    { text-align: left !important; }
+
+  /* Mesh diagram via CSS grid */
+  .mesh-grid { display: grid; gap: 2px; margin: 0.4em auto; max-width: 420px; }
+  .mesh-node { width: 100%; aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.4em; font-weight: 700; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--border); }
+  .mesh-node.xp    { background: var(--bg3); color: var(--muted); }
+  .mesh-node.cpu   { background: rgba(96,165,250,0.2); color: var(--blue); border-color: var(--blue); }
+  .mesh-node.mem   { background: rgba(245,166,35,0.2); color: var(--amber); border-color: var(--amber); }
+  .mesh-node.io    { background: rgba(78,203,141,0.2); color: var(--green); border-color: var(--green); }
+  .mesh-node.cache { background: rgba(167,139,250,0.2); color: var(--purple); border-color: var(--purple); }
+
+  /* Channel diagram */
+  .channel-row { display: flex; align-items: center; gap: 0.5em; margin: 0.2em 0; font-size: 0.6em; }
+  .channel-label { width: 120px; text-align: right; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .channel-arrow { flex: 1; height: 3px; border-radius: 2px; position: relative; }
+  .channel-arrow::after { content: '\25B8'; position: absolute; right: -0.5em; top: -0.6em; font-size: 1.2em; }
+  .channel-arrow.bidir::before { content: '\25C2'; position: absolute; left: -0.5em; top: -0.6em; font-size: 1.2em; }
+
+  /* Protocol stack layers */
+  .proto-stack { display: flex; flex-direction: column; gap: 2px; max-width: 350px; margin: 0.3em auto; }
+  .proto-layer { padding: 0.35em 0.6em; border-radius: 5px; text-align: center; font-size: 0.55em; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+  /* Architecture diagram via CSS */
+  .arch-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0.5em auto; max-width: 700px; }
+  .arch-layer { width: 100%; padding: 0.4em 0.8em; border-radius: 6px; text-align: center; font-size: 0.6em; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
 .reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>

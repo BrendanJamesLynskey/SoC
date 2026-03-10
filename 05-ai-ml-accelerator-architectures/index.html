@@ -120,6 +120,59 @@
   .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
   .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+
+  /* ─── kv rows ─── */
+  .kv-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-label { color: var(--muted); }
+  .kv-value { font-family: 'JetBrains Mono', monospace; color: var(--amber); }
+  .kv-value.amber { color: var(--amber); }
+  .kv-value.green { color: var(--green); }
+  .kv-value.red   { color: var(--red); }
+
+  /* ─── accent box ─── */
+  .accent-box {
+    background: linear-gradient(135deg, rgba(245,166,35,0.07), rgba(245,166,35,0.02));
+    border: 1px solid rgba(245,166,35,0.25); border-radius: 3px;
+    padding: 0.9em 1.1em; font-size: 0.72em; line-height: 1.55;
+  }
+  .accent-box.amber { background: linear-gradient(135deg, rgba(245,166,35,0.07), rgba(245,166,35,0.02)); border-color: rgba(245,166,35,0.25); }
+  .accent-box.green { background: linear-gradient(135deg, rgba(78,203,141,0.07), rgba(78,203,141,0.02)); border-color: rgba(78,203,141,0.25); }
+  .accent-box.red   { background: linear-gradient(135deg, rgba(248,113,113,0.07), rgba(248,113,113,0.02)); border-color: rgba(248,113,113,0.25); }
+
+  /* ─── timeline ─── */
+  .timeline { position: relative; padding-left: 1.8rem; }
+  .timeline::before { content:''; position:absolute; left:0.5rem; top:0.4em; bottom:0; width:1px; background: var(--border); }
+  .tl-item { position:relative; margin-bottom:0.9em; }
+  .tl-item::before { content:''; position:absolute; left:-1.38rem; top:0.4em; width:0.55rem; height:0.55rem; border-radius:50%; background: var(--amber); border:2px solid var(--bg); }
+  .tl-item.amber::before { background: var(--amber); }
+  .tl-item.green::before { background: var(--green); }
+  .tl-label { font-family: 'JetBrains Mono', monospace; font-size:0.58em; color: var(--amber); }
+  .tl-item.amber .tl-label { color: var(--amber); }
+  .tl-item.green .tl-label { color: var(--green); }
+  .tl-text  { font-size: 0.72em; color: var(--text); line-height:1.45; margin-top:0.15em; }
+
+  /* ─── table ─── */
+  .dtable { width:100%; border-collapse:collapse; font-size:0.65em; }
+  .dtable th { background: var(--bg3); color: var(--amber); font-family: 'JetBrains Mono', monospace; font-size:0.92em; letter-spacing:0.07em; padding:0.55em 0.7em; border:1px solid var(--border); text-align:left; }
+  .dtable td { padding:0.45em 0.7em; border:1px solid var(--border); color: var(--text); }
+  .dtable tr:nth-child(even) td { background:rgba(255,255,255,0.015); }
+  .dtable td.hi { color: var(--amber); font-family: 'JetBrains Mono', monospace; }
+  .dtable td.am { color: var(--amber); font-family: 'JetBrains Mono', monospace; }
+  .dtable td.gr { color: var(--green); font-family: 'JetBrains Mono', monospace; }
+  .dtable td.rd { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── equation ─── */
+  .eq { font-family: 'JetBrains Mono', monospace; font-size:0.72em; color: var(--green); background: var(--bg3); border:1px solid var(--border); padding:0.5em 1em; border-radius:3px; text-align:center; }
+
+  /* ─── figure helpers ─── */
+  .fig { text-align:center; }
+  .fig-caption { font-family: 'JetBrains Mono', monospace; font-size:0.5em; color: var(--muted); margin-top:0.5em; }
+
+  /* ─── inline highlight utilities ─── */
+  .hi { color: var(--amber); font-family: 'JetBrains Mono', monospace; }
+  .rd { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
 .reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>

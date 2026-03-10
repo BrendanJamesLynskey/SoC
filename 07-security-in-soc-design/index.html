@@ -120,6 +120,27 @@
   .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
   .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+
+  /* ─── accent color utility classes ─── */
+  .a2 { color: var(--green); }
+  .a3 { color: var(--blue); }
+  .a4 { color: var(--purple); }
+
+  /* ─── canvas / viz containers ─── */
+  .canvas-wrap {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 5px; padding: 0.6em;
+    display: flex; align-items: center; justify-content: center;
+  }
+  canvas { display: block; }
+
+  /* ─── stat label/value ─── */
+  .lbl { font-size: 0.55em; color: var(--muted); display: block; margin-top: 0.3em; }
+  .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5em; color: var(--amber); display: block; line-height: 1;
+  }
+
 .reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
 </head>
