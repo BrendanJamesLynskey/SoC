@@ -265,7 +265,7 @@
         Attainable FLOPS = min( Peak FLOPS ,  I × Peak BW )
       </div>
       <div class="card">
-        <h3>Arithmetic Intensity <span style="color:var(--accent3)">I</span></h3>
+        <h3>Arithmetic Intensity <span style="color:var(--blue)">I</span></h3>
         <div class="kv-row"><span class="kv-label">Definition</span><span class="kv-value">FLOP / byte of DRAM traffic</span></div>
         <div class="kv-row"><span class="kv-label">Dense GEMM (large)</span><span class="kv-value green">~300 FLOP/B</span></div>
         <div class="kv-row"><span class="kv-label">Conv2D (large kernel)</span><span class="kv-value green">~100 FLOP/B</span></div>
@@ -283,7 +283,7 @@
     </div>
     <div>
       <!-- SVG roofline chart -->
-      <svg viewBox="0 0 320 210" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.4rem;">
+      <svg viewBox="0 0 320 210" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:0.4rem;">
         <!-- axes -->
         <line x1="30" y1="10" x2="30" y2="180" stroke="#2a3048" stroke-width="1.5">
         <line x1="30" y1="180" x2="310" y2="180" stroke="#2a3048" stroke-width="1.5">
@@ -423,7 +423,7 @@
     </div>
     <!-- SVG 4×4 systolic array -->
     <div class="fig">
-      <svg viewBox="0 0 300 260" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
+      <svg viewBox="0 0 300 260" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;">
         <defs>
           <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
             <path d="M0,0 L0,6 L6,3 z" fill="#7eb8f7" opacity="0.7">
@@ -677,7 +677,7 @@
   <div class="cols cols-2" style="gap:1.5rem;">
     <div>
       <!-- Memory pyramid SVG -->
-      <svg viewBox="0 0 300 230" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.5rem;">
+      <svg viewBox="0 0 300 230" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:0.5rem;">
         <!-- L0: Register file -->
         <polygon points="120,20 180,20 200,50 100,50" fill="rgba(126,247,192,0.3)" stroke="#7ef7c0" stroke-width="1">
         <text x="150" y="39" fill="#7ef7c0" font-size="8" font-family="'JetBrains Mono',monospace" text-anchor="middle">Register File</text>
@@ -1440,7 +1440,7 @@ for N, C_out, OH, OW, C_in, KH, KW:<br>
       <span>✅ 02 On-Chip Interconnect</span>
       <span style="color:var(--muted);">📋 03 Memory Hierarchy (next)</span>
       <span>04 SerDes &amp; I/O</span>
-      <span style="color:var(--accent);font-weight:600;">▶ 05 AI/ML Accelerator Architectures</span>
+      <span style="color:var(--amber);font-weight:600;">▶ 05 AI/ML Accelerator Architectures</span>
       <span>06 SoCs for ML Inference</span>
       <span>07 Security in SoC</span>
       <span>… 13 Clocks &amp; Resets</span>

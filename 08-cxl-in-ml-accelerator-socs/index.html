@@ -218,21 +218,21 @@
   <div class="cols cols-2" style="margin-top:0.5em;">
     <div>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent); border-color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--amber); border-color:var(--amber);">
           CXL.io &nbsp;(PCIe Transaction Layer)
         </div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2); border-color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--green); border-color:var(--green);">
           CXL.cache &nbsp;(Device → Host coherency)
         </div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3); border-color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--blue); border-color:var(--blue);">
           CXL.mem &nbsp;(Host → Device memory)
         </div>
         <div class="ss-arrow">▼</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4); border-color:var(--accent4);">
+        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--purple); border-color:var(--purple);">
           CXL ARB/MUX &nbsp;(Flex Bus Arbitration)
         </div>
         <div class="ss-arrow">▼</div>
-        <div class="arch-layer" style="background:var(--surface2); color:var(--dim);">
+        <div class="arch-layer" style="background:var(--bg3); color:var(--muted);">
           PCIe 5.0 / 6.0 PHY &nbsp;(32/64 GT/s per lane)
         </div>
       </div>
@@ -354,10 +354,10 @@
     <div>
       <h3 class="g">CXL.io Transaction Types</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.10); color:var(--accent);">Memory Read / Write (MRd, MWr)</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.08); color:var(--accent2);">Config Read / Write (CfgRd0/1, CfgWr0/1)</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.08); color:var(--accent3);">Completion (Cpl, CplD)</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.08); color:var(--accent4);">Message (Msg, MsgD) — vendor-defined, error</div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.10); color:var(--amber);">Memory Read / Write (MRd, MWr)</div>
+        <div class="arch-layer" style="background:rgba(232,168,124,0.08); color:var(--green);">Config Read / Write (CfgRd0/1, CfgWr0/1)</div>
+        <div class="arch-layer" style="background:rgba(143,212,164,0.08); color:var(--blue);">Completion (Cpl, CplD)</div>
+        <div class="arch-layer" style="background:rgba(196,157,216,0.08); color:var(--purple);">Message (Msg, MsgD) — vendor-defined, error</div>
       </div>
 
       <h3 class="g" style="margin-top:0.6em;">Boot Flow</h3>
@@ -404,19 +404,19 @@
       <h3 class="g">Snoop Flow Example</h3>
       <p>Device reads host memory line (cold miss):</p>
       <div class="arch-stack" style="margin-top:0.3em;">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--amber);">
           1. Device sends D2H Req: RdShared(addr)
         </div>
         <div class="ss-arrow">↓</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--green);">
           2. Host home agent checks snoop filter
         </div>
         <div class="ss-arrow">↓</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--blue);">
           3. Host sends H2D Resp: GO-S + H2D Data (64B)
         </div>
         <div class="ss-arrow">↓</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">
+        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--purple);">
           4. Device installs line in Shared state
         </div>
       </div>
@@ -450,14 +450,14 @@
       </table>
 
       <h3 class="g" style="margin-top:0.5em;">Bias Modes</h3>
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Host Bias</span><span class="mono accent">Host caches device memory — device snoops host on access</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Host Bias</span><span class="mono a">Host caches device memory — device snoops host on access</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Device Bias</span><span class="mono accent2">Device controls caching — host snoops device on access</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Shared Bias</span><span class="mono accent3">Both can cache — full coherency protocol engaged</span></div>
     </div>
     <div>
       <h3 class="g">Latency Budget</h3>
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">PCIe PHY traversal</span><span class="mono accent">~30-40 ns</span></div>
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL protocol overhead</span><span class="mono accent">~20-30 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">PCIe PHY traversal</span><span class="mono a">~30-40 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL protocol overhead</span><span class="mono a">~20-30 ns</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Device-side DRAM access</span><span class="mono accent2">~40-60 ns (DDR5)</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Total CXL.mem read</span><span class="mono accent3">~150-250 ns</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Local DDR5 comparison</span><span class="mono dim">~80-100 ns</span></div>
@@ -527,15 +527,15 @@
   </table>
 
   <div class="cols cols-3" style="margin-top:0.5em;">
-    <div class="card blue" style="border-left:3px solid var(--accent);">
+    <div class="card blue" style="border-left:3px solid var(--amber);">
       <h3 class="a">Type 1 — Coherent I/O</h3>
       <p>Device caches host memory for low-latency access. No device memory exposed to host. Ideal for SmartNICs that snoop packet buffers in host LLC.</p>
     </div>
-    <div class="card amber" style="border-left:3px solid var(--accent2);">
+    <div class="card amber" style="border-left:3px solid var(--green);">
       <h3 class="g">Type 2 — Accelerator</h3>
       <p>Full bidirectional coherency. Device has its own memory <em>and</em> caches host memory. The critical type for ML accelerator SoCs — enables unified virtual addressing.</p>
     </div>
-    <div class="card green" style="border-left:3px solid var(--accent3);">
+    <div class="card green" style="border-left:3px solid var(--blue);">
       <h3 class="g">Type 3 — Memory Expander</h3>
       <p>No device-side caching of host memory. Host accesses device memory via CXL.mem. Simplest controller — highest density, lowest cost per GB.</p>
     </div>
@@ -553,15 +553,15 @@
     <div>
       <h3 class="a">Architecture</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent);">Host CPU (CXL Root Port)</div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--amber);">Host CPU (CXL Root Port)</div>
         <div class="ss-arrow">↕ CXL.io + CXL.mem</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">CXL Type 3 Controller</div>
+        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--blue);">CXL Type 3 Controller</div>
         <div class="ss-arrow">↕ DDR5 PHY</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--accent2);">DDR5 DRAM (up to 2 TB per device)</div>
+        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--green);">DDR5 DRAM (up to 2 TB per device)</div>
       </div>
 
       <h3 class="g" style="margin-top:0.5em;">Bandwidth Characteristics</h3>
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL x16 (PCIe 5.0)</span><span class="mono accent">~63 GB/s per direction</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL x16 (PCIe 5.0)</span><span class="mono a">~63 GB/s per direction</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL x16 (PCIe 6.0)</span><span class="mono accent3">~126 GB/s per direction</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">DDR5-5600 (2ch)</span><span class="mono accent2">~89.6 GB/s</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Read latency</span><span class="mono accent4">170-250 ns typical</span></div>
@@ -605,13 +605,13 @@
     <div>
       <h3 class="g">Type 2 Architecture</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">Host CPU + System Memory</div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--amber);">Host CPU + System Memory</div>
         <div class="ss-arrow">↕ CXL.io + CXL.cache + CXL.mem</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">Type 2 CXL Controller + Coherency Agent</div>
+        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--green);">Type 2 CXL Controller + Coherency Agent</div>
         <div class="ss-arrow">↕</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--accent3);">ML Compute Engine (Systolic / Tensor Core)</div>
+        <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--blue);">ML Compute Engine (Systolic / Tensor Core)</div>
         <div class="ss-arrow">↕</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">Device-Attached HBM3 / GDDR7</div>
+        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--purple);">Device-Attached HBM3 / GDDR7</div>
       </div>
 
       <div class="card amber" style="margin-top:0.5em;">
@@ -640,15 +640,15 @@
     <div>
       <h3 class="a">Single-Level Switch (CXL 2.0)</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--amber);">
           Host 0 &nbsp; | &nbsp; Host 1 &nbsp; | &nbsp; Host 2 &nbsp; | &nbsp; Host 3
         </div>
         <div class="ss-arrow">↕ Upstream Ports</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.15); color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.15); color:var(--green);">
           CXL 2.0 Switch + Fabric Manager
         </div>
         <div class="ss-arrow">↕ Downstream Ports (Virtual CXL Switches)</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--blue);">
           Type 3 Mem | Type 3 Mem | Type 2 Accel | Type 3 Mem
         </div>
       </div>
@@ -658,19 +658,19 @@
     <div>
       <h3 class="g">Multi-Level Switching (CXL 3.0+)</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--amber);">
           Host Rack 0 &nbsp; | &nbsp; Host Rack 1
         </div>
         <div class="ss-arrow">↕</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--accent4);">
+        <div class="arch-layer" style="background:rgba(196,157,216,0.12); color:var(--purple);">
           Level-2 CXL Switch (Spine)
         </div>
         <div class="ss-arrow">↕</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--green);">
           Level-1 Switch &nbsp; | &nbsp; Level-1 Switch
         </div>
         <div class="ss-arrow">↕</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--blue);">
           Memory Pool &nbsp; | &nbsp; Accelerators &nbsp; | &nbsp; Memory Pool
         </div>
       </div>
@@ -709,24 +709,24 @@
     <div>
       <h3 class="g">Pooling for ML Inference Clusters</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--amber);">
           Inference Host A (serving GPT-4o)
         </div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--green);">
           Inference Host B (serving Llama-3-70B)
         </div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">
+        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--purple);">
           Inference Host C (idle — scaling down)
         </div>
         <div class="ss-arrow">↕ CXL Switch</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.15); color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.15); color:var(--blue);">
           Shared CXL Memory Pool (4 TB DDR5)
         </div>
       </div>
 
       <p style="margin-top:0.3em;">Host A dynamically allocates 1.5 TB for KV-cache. Host B uses 800 GB. When Host C goes idle, its 700 GB returns to the pool. FM reallocates to Host A within microseconds — no data migration needed via DCD.</p>
 
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="margin-top:0.3em;"><span style="color:var(--muted)">Allocation granularity</span><span class="mono accent">256 MB — 1 TB extents</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="margin-top:0.3em;"><span style="color:var(--muted)">Allocation granularity</span><span class="mono a">256 MB — 1 TB extents</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Reallocation time</span><span class="mono accent2">~10-100 μs (FM-API)</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Max hosts per pool</span><span class="mono accent3">16 (MLD), 4096+ (DCD/GFA)</span></div>
     </div>
@@ -794,13 +794,13 @@
 
       <h3 class="g" style="margin-top:0.4em;">CXL Tiered Memory Approach</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.15); color:var(--amber);">
           Tier 0: HBM3E (hot KV layers) — 80 GB, ~3.2 TB/s
         </div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--green);">
           Tier 1: CXL DDR5 (warm KV layers) — 2 TB, ~64 GB/s
         </div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.10); color:var(--blue);">
           Tier 2: CXL PMem / CXL SSD (cold KV layers) — 16 TB
         </div>
       </div>
@@ -855,14 +855,14 @@
     <div>
       <h3 class="g">Pooled Model Sharding</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--amber);">
           Inference Server 0 (Layers 0-19 in HBM)
         </div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.10); color:var(--green);">
           Inference Server 1 (Layers 20-39 in HBM)
         </div>
         <div class="ss-arrow">↕ CXL Switch</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.15); color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.15); color:var(--blue);">
           Shared CXL Pool: Full model weights (140 GB) + KV-cache (2 TB)
         </div>
       </div>
@@ -870,7 +870,7 @@
       <p style="margin-top:0.3em;">Each server keeps its pipeline-parallel shard in HBM for fast GEMM execution. The shared CXL pool holds the complete model copy for failover, plus the distributed KV-cache that both servers read during cross-shard attention.</p>
 
       <h3 class="p" style="margin-top:0.4em;">CXL vs RDMA for ML</h3>
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL latency</span><span class="mono accent">150-250 ns (load/store)</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL latency</span><span class="mono a">150-250 ns (load/store)</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">RDMA latency</span><span class="mono accent2">1-2 μs (verb post + completion)</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL granularity</span><span class="mono accent3">64 B (cache line)</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">RDMA granularity</span><span class="mono accent4">4 KB+ (page-level practical minimum)</span></div>
@@ -889,19 +889,19 @@
     <div>
       <h3 class="a">SoC Integration Architecture</h3>
       <div class="arch-stack">
-        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--accent);">
+        <div class="arch-layer" style="background:rgba(126,184,218,0.12); color:var(--amber);">
           ML Compute Clusters (Tensor Cores / Systolic Arrays)
         </div>
         <div class="ss-arrow">↕ On-chip NoC (AXI/CHI)</div>
-        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--accent2);">
+        <div class="arch-layer" style="background:rgba(232,168,124,0.12); color:var(--green);">
           CXL Controller IP (Type 2: cache agent + mem decoder)
         </div>
         <div class="ss-arrow">↕ AMBA CHI-to-CXL Bridge</div>
-        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--accent3);">
+        <div class="arch-layer" style="background:rgba(143,212,164,0.12); color:var(--blue);">
           CXL/PCIe Dual-Mode PHY (32/64 GT/s SerDes)
         </div>
         <div class="ss-arrow">↕ Package bumps / retimers</div>
-        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--accent4);">
+        <div class="arch-layer" style="background:rgba(196,157,216,0.10); color:var(--purple);">
           CXL Root Port / Switch (off-chip)
         </div>
       </div>
@@ -915,11 +915,11 @@
         <li><strong class="p">Latency budget:</strong></li>
       </ul>
 
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">On-chip NoC</span><span class="mono accent">10-15 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">On-chip NoC</span><span class="mono a">10-15 ns</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">CXL controller</span><span class="mono accent2">5-10 ns</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">PHY + link</span><span class="mono accent3">30-40 ns</span></div>
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;"><span style="color:var(--muted)">Remote DRAM</span><span class="mono accent4">40-60 ns</span></div>
-      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="border-top:1px solid var(--accent);"><span class="a" style="font-weight:700;">Total round-trip</span><span class="mono accent" style="font-weight:700;">~170-250 ns</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:.15em 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.52em;" style="border-top:1px solid var(--amber);"><span class="a" style="font-weight:700;">Total round-trip</span><span class="mono a" style="font-weight:700;">~170-250 ns</span></div>
     </div>
   </div>
 </section>
@@ -988,11 +988,11 @@
   </table>
 
   <div class="cols cols-3" style="margin-top:0.4em;">
-    <div class="card blue" style="border-left:3px solid var(--accent);">
+    <div class="card blue" style="border-left:3px solid var(--amber);">
       <h3 class="a">Intel SPR + Samsung CMM-D</h3>
       <p>First production CXL memory tiering deployment. Linux kernel 6.3+ with NUMA-aware CXL memory tiering via <span class="mono">cxl_mem</span> driver. ~180 ns measured read latency.</p>
     </div>
-    <div class="card green" style="border-left:3px solid var(--accent3);">
+    <div class="card green" style="border-left:3px solid var(--blue);">
       <h3 class="g">Astera Labs Leo + SK hynix CMS</h3>
       <p>Demonstrated 4-host memory pooling with dynamic allocation. Each host gained access to 384 GB shared CXL memory. Hot-plug device migration in &lt;50 μs.</p>
     </div>

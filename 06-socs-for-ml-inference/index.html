@@ -313,10 +313,10 @@
   <div class="card" style="margin-top:0.9rem;">
     <h3>MCU / Microcontroller (TinyML)</h3>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.8em;font-size:0.65em;">
-      <div><span style="color:var(--accent);">Devices:</span> STM32, Nordic nRF, RP2350</div>
-      <div><span style="color:var(--accent);">Models:</span> MobileNetV3-tiny, keyword spotting</div>
-      <div><span style="color:var(--accent);">RAM:</span> 256 KB – 8 MB SRAM</div>
-      <div><span style="color:var(--accent);">TDP:</span> &lt;100 mW — often &lt;1 mW</div>
+      <div><span style="color:var(--amber);">Devices:</span> STM32, Nordic nRF, RP2350</div>
+      <div><span style="color:var(--amber);">Models:</span> MobileNetV3-tiny, keyword spotting</div>
+      <div><span style="color:var(--amber);">RAM:</span> 256 KB – 8 MB SRAM</div>
+      <div><span style="color:var(--amber);">TDP:</span> &lt;100 mW — often &lt;1 mW</div>
     </div>
   </div>
 </section>
@@ -367,12 +367,12 @@
         </table>
       </div>
       <div class="accent-box" style="margin-top:0.9rem;">
-        <strong style="color:var(--accent);">Key insight:</strong> INT8 cuts model size 4× vs FP32
+        <strong style="color:var(--amber);">Key insight:</strong> INT8 cuts model size 4× vs FP32
         and doubles throughput on Tensor Cores. INT4 halves again — at the cost of careful
         per-group calibration to maintain accuracy.
       </div>
       <div class="accent-box green" style="margin-top:0.6rem;">
-        <strong style="color:var(--accent3);">SmoothQuant:</strong> migrates quantisation difficulty
+        <strong style="color:var(--blue);">SmoothQuant:</strong> migrates quantisation difficulty
         from activations (large dynamic range) to weights (stable range) via a per-channel
         smoothing factor — enabling accurate W8A8 without QAT.
       </div>
@@ -391,7 +391,7 @@
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
       <!-- INT8 pipeline SVG -->
-      <svg viewBox="0 0 380 210" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
+      <svg viewBox="0 0 380 210" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;">
         <text x="190" y="18" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">INT8 GEMM PIPELINE</text>
         <!-- boxes -->
         <rect x="10" y="28" width="72" height="34" rx="3" fill="#1a1f2e" stroke="#2a3048">
@@ -469,7 +469,7 @@
         <div class="kv-row"><span class="kv-label">W2 / binary</span><span class="kv-value red">Large loss except specialised nets</span></div>
       </div>
       <div class="accent-box" style="margin-top:0.8rem;">
-        <strong style="color:var(--accent);">Rule of thumb:</strong> INT8 is generally safe for
+        <strong style="color:var(--amber);">Rule of thumb:</strong> INT8 is generally safe for
         large models (&gt;7B); INT4 requires per-group quantisation and calibration for &lt;2%
         accuracy loss. Below 7B parameters, quantisation sensitivity rises sharply.
       </div>
@@ -488,7 +488,7 @@
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
       <!-- Pipeline diagram -->
-      <svg viewBox="0 0 360 200" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
+      <svg viewBox="0 0 360 200" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;">
         <text x="180" y="16" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">LLM INFERENCE PHASES</text>
 
         <!-- Prefill box -->
@@ -583,7 +583,7 @@
         <div class="kv-row"><span class="kv-label">Practical GPU utilisation (decode)</span><span class="kv-value red">&lt;5%</span></div>
       </div>
       <div class="accent-box red" style="margin-top:0.8rem;">
-        <strong style="color:var(--accent4);">Implication:</strong> A 70B model decode pass
+        <strong style="color:var(--purple);">Implication:</strong> A 70B model decode pass
         on H100 utilises roughly 0.7% of available FLOPS. The silicon is mostly idle —
         waiting for weights and KV vectors to arrive from HBM.
       </div>
@@ -629,7 +629,7 @@
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.4rem;">
     <div>
       <!-- NPU block diagram SVG -->
-      <svg viewBox="0 0 360 230" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
+      <svg viewBox="0 0 360 230" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;">
         <text x="180" y="16" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">NPU BLOCK DIAGRAM</text>
 
         <!-- Host Interface -->
@@ -762,13 +762,13 @@
     </div>
     <div>
       <div class="accent-box amber" style="margin-bottom:0.7rem;">
-        <strong style="color:var(--accent2);">FlashAttention sparsity:</strong> Online softmax
+        <strong style="color:var(--green);">FlashAttention sparsity:</strong> Online softmax
         computation with block-sparse attention masks. O(N) HBM reads vs O(N²) for
         standard attention — transforms attention from memory-bound to compute-bound
         for long contexts.
       </div>
       <div class="accent-box green">
-        <strong style="color:var(--accent3);">Speculative Decoding as "temporal sparsity":</strong>
+        <strong style="color:var(--blue);">Speculative Decoding as "temporal sparsity":</strong>
          small draft model generates candidate tokens; large model verifies N at once.
         Effective throughput gain: 2–4× on typical LLM tasks without quality loss.
       </div>
@@ -787,7 +787,7 @@
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
       <!-- On-device SoC SVG -->
-      <svg viewBox="0 0 360 230" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
+      <svg viewBox="0 0 360 230" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;">
         <text x="180" y="16" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">ON-DEVICE AI SoC (APPLE M4-STYLE)</text>
 
         <!-- CPU cluster -->
@@ -949,13 +949,13 @@
 
   <div class="cols cols-2" style="gap:1rem;margin-top:0.9rem;">
     <div class="accent-box">
-      <strong style="color:var(--accent);">Memory bandwidth is the binding constraint</strong>
+      <strong style="color:var(--amber);">Memory bandwidth is the binding constraint</strong>
       for on-device LLMs. TOPS matters little if the DMA can't feed the NPU fast enough.
       Qualcomm's 135 GB/s explains why SD X Elite runs larger models than A18 Pro despite
       similar TOPS.
     </div>
     <div class="accent-box amber">
-      <strong style="color:var(--accent2);">INT4 is the practical sweet spot</strong>
+      <strong style="color:var(--green);">INT4 is the practical sweet spot</strong>
       for on-device: 7B model = ~3.5 GB at W4, fits in 8 GB LPDDR with headroom for
       activations and OS. INT8 doubles this to ~7 GB — tight for 8 GB devices.
     </div>
@@ -978,23 +978,23 @@
         <div style="font-size:0.65em;margin-top:0.4rem;">
           <div style="display:flex;align-items:center;gap:0.6em;margin-bottom:0.4em;">
             <span style="color:var(--muted);width:10em;">MAC Array</span>
-            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:55%;background:var(--accent);"></div></div>
-            <span style="color:var(--accent);width:2.5em;">~55%</span>
+            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:55%;background:var(--amber);"></div></div>
+            <span style="color:var(--amber);width:2.5em;">~55%</span>
           </div>
           <div style="display:flex;align-items:center;gap:0.6em;margin-bottom:0.4em;">
             <span style="color:var(--muted);width:10em;">SRAM (scratchpad)</span>
-            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:25%;background:var(--accent3);"></div></div>
-            <span style="color:var(--accent3);width:2.5em;">~25%</span>
+            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:25%;background:var(--blue);"></div></div>
+            <span style="color:var(--blue);width:2.5em;">~25%</span>
           </div>
           <div style="display:flex;align-items:center;gap:0.6em;margin-bottom:0.4em;">
             <span style="color:var(--muted);width:10em;">DMA / Fabric</span>
-            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:12%;background:var(--accent2);"></div></div>
-            <span style="color:var(--accent2);width:2.5em;">~12%</span>
+            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:12%;background:var(--green);"></div></div>
+            <span style="color:var(--green);width:2.5em;">~12%</span>
           </div>
           <div style="display:flex;align-items:center;gap:0.6em;">
             <span style="color:var(--muted);width:10em;">Control / Scheduler</span>
-            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:8%;background:var(--accent4);"></div></div>
-            <span style="color:var(--accent4);width:2.5em;">~8%</span>
+            <div class="prog-wrap" style="flex:1;"><div class="prog-bar" style="width:8%;background:var(--purple);"></div></div>
+            <span style="color:var(--purple);width:2.5em;">~8%</span>
           </div>
         </div>
         <div style="font-size:0.58em;color:var(--muted);margin-top:0.6em;">SRAM leakage grows with size; at 16 MB+ scratchpad, SRAM can exceed MAC array power at idle.</div>
@@ -1044,7 +1044,7 @@
   <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
     <div>
       <!-- Compiler stack SVG -->
-      <svg viewBox="0 0 340 260" class="diag" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;">
+      <svg viewBox="0 0 340 260" class="diag" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;">
         <text x="170" y="18" fill="#7eb8f7" font-family="'JetBrains Mono',monospace" font-size="9" text-anchor="middle" letter-spacing="2">INFERENCE COMPILER STACK</text>
 
         <rect x="10" y="28" width="320" height="28" rx="2" fill="#1a1f2e" stroke="#7eb8f7">
@@ -1104,7 +1104,7 @@
         <div class="kv-row"><span class="kv-label">ONNX Runtime</span><span class="kv-value">Cross-platform EP dispatch</span></div>
       </div>
       <div class="accent-box" style="margin-top:0.8rem;">
-        <strong style="color:var(--accent);">Triton / OpenAI:</strong> Python-embedded DSL that
+        <strong style="color:var(--amber);">Triton / OpenAI:</strong> Python-embedded DSL that
         compiles to GPU PTX; enables research teams to write custom attention kernels
         (FlashAttention-2/3) at near-cuBLAS efficiency without CUDA expertise.
       </div>
@@ -1169,7 +1169,7 @@
       </ul>
     </div>
     <div class="accent-box green">
-      <strong style="color:var(--accent3);">Ethos-U55 / U65 architecture:</strong> 64 or 512 MAC
+      <strong style="color:var(--blue);">Ethos-U55 / U65 architecture:</strong> 64 or 512 MAC
       units, weight streaming from Flash via DMA, activation SRAM double-buffered. Power: 8 mW
       at 64 MACs/cycle. A keyword spotting network runs continuously on Ethos-U55 at
       &lt;0.1 mW average — less than an LED.
@@ -1289,7 +1289,7 @@
         </ul>
       </div>
       <div class="accent-box" style="margin-top:0.8rem;">
-        <strong style="color:var(--accent);">Latency vs throughput trade-off:</strong>
+        <strong style="color:var(--amber);">Latency vs throughput trade-off:</strong>
         larger batch → better GPU utilisation (throughput) but higher time-to-first-token
         (TTFT). Disaggregated prefill/decode routing resolves both simultaneously at
         hyperscale — separate pools for each optimisation objective.
@@ -1348,7 +1348,7 @@
         </ul>
       </div>
       <div class="accent-box amber" style="margin-top:0.8rem;">
-        <strong style="color:var(--accent2);">LLM serving at hyperscale:</strong>
+        <strong style="color:var(--green);">LLM serving at hyperscale:</strong>
         GPT-4 class models use TP=8 within a node (NVLink) + PP across nodes (InfiniBand).
         Expert parallelism on top for MoE — 3D parallelism in production.
       </div>
@@ -1431,7 +1431,7 @@
         <div class="kv-row"><span class="kv-label">Form factor</span><span class="kv-value">HHHL PCIe card</span></div>
       </div>
       <div class="accent-box green" style="margin-top:0.9rem;">
-        <strong style="color:var(--accent3);">LPDDR vs HBM trade-off:</strong> LPDDR5X is
+        <strong style="color:var(--blue);">LPDDR vs HBM trade-off:</strong> LPDDR5X is
         cheaper per GB than HBM3, enabling 136 GB at lower cost. Bandwidth (2.2 TB/s) lags
         HBM3 (3.35 TB/s) but for INT4 decode the gap narrows — 4× fewer bytes fetched
         per weight element.
@@ -1485,7 +1485,7 @@
         <div class="kv-row"><span class="kv-label">Llama 3 8B throughput</span><span class="kv-value green">~750 tok/s (batch=1)</span></div>
       </div>
       <div class="accent-box" style="margin-top:0.9rem;">
-        <strong style="color:var(--accent);">80 TB/s SRAM bandwidth</strong> completely
+        <strong style="color:var(--amber);">80 TB/s SRAM bandwidth</strong> completely
         eliminates HBM as the bottleneck — GEMV becomes compute-bound, not memory-bound.
         Result: 750 tok/s single-stream latency vs H100's ~50 tok/s — 15× faster decode.
       </div>
@@ -1560,13 +1560,13 @@
 
   <div class="cols cols-2" style="gap:1rem;margin-top:0.9rem;">
     <div class="accent-box">
-      <strong style="color:var(--accent);">On-device privacy advantage:</strong> edge inference
+      <strong style="color:var(--amber);">On-device privacy advantage:</strong> edge inference
       never transmits user data to cloud — inference is local by design. Apple Intelligence
       Private Cloud Compute extends this: cloud inference uses TEE, no user data retained,
       independently auditable firmware.
     </div>
     <div class="accent-box amber">
-      <strong style="color:var(--accent2);">Differential privacy for output:</strong> adding
+      <strong style="color:var(--green);">Differential privacy for output:</strong> adding
       calibrated noise to logits before sampling provides formal privacy guarantees in
       scenarios where model outputs might leak training data membership.
     </div>
@@ -1649,13 +1649,13 @@
 
   <div class="cols cols-2" style="gap:1rem;margin-top:0.9rem;">
     <div class="accent-box">
-      <strong style="color:var(--accent);">TOPS/W divergence:</strong> edge NPUs achieve
+      <strong style="color:var(--amber);">TOPS/W divergence:</strong> edge NPUs achieve
       40–60 TOPS/W; datacenter GPUs sit at 5–7 TOPS/W. The 10× gap reflects power delivery,
       cooling infrastructure, and the absence of DRAM bandwidth overhead on-edge
       with unified memory.
     </div>
     <div class="accent-box amber">
-      <strong style="color:var(--accent2);">Selection criteria:</strong> choose by model size
+      <strong style="color:var(--green);">Selection criteria:</strong> choose by model size
       (requires DRAM capacity), latency requirement (requires SRAM bandwidth or low-latency
       fabric), throughput (requires TOPS × utilisation), and cost-per-token (TCO analysis
       including power, rack space, and DRAM cost).
@@ -1719,7 +1719,7 @@
           <span>✅ 03 Memory Hierarchy</span>
           <span>✅ 04 SerDes &amp; I/O</span>
           <span>✅ 05 AI/ML Accelerator Architectures</span>
-          <span style="color:var(--accent);font-weight:600;">▶ 06 SoCs for ML Inference</span>
+          <span style="color:var(--amber);font-weight:600;">▶ 06 SoCs for ML Inference</span>
           <span>07 Security in SoC</span>
           <span>08 CXL in ML SoCs</span>
           <span>… 13 Clocks &amp; Resets</span>
