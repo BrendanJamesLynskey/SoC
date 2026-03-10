@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modern SoC Verification — Modern SoC Design Series</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --r-background-color: #0a0a0f;
+    --r-main-font: 'DM Sans', sans-serif;
+    --r-heading-font: 'Playfair Display', serif;
+    --r-code-font: 'JetBrains Mono', monospace;
+    --r-main-font-size: 28px;
+    --r-heading-color: #e8e4df;
+    --r-main-color: #c8c4bf;
+    --r-link-color: #7eb8da;
+    --r-link-color-hover: #a8d4ef;
+    --r-selection-background-color: #2a5a7a;
+    --accent: #7eb8da; --accent2: #e8a87c; --accent3: #8fd4a4; --accent4: #c49dd8;
+    --dim: #6a6660; --surface: #16161e; --surface2: #1e1e28;
+  }
+
+  .reveal { font-weight: 400; }
+  .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-shadow: none; }
+  .reveal h1 { font-size: 2.0em; font-weight: 900; }
+  .reveal h2 { font-size: 1.35em; }
+  .reveal h3 { font-size: 1.0em; color: var(--accent); font-family: var(--r-main-font); font-weight: 700; }
+  .reveal p, .reveal li { line-height: 1.6; }
+  .reveal ul { list-style: none; padding-left: 0; }
+  .reveal ul li { position: relative; padding-left: 1.4em; margin-bottom: 0.4em; }
+  .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  .reveal code { font-family: var(--r-code-font); font-size: 0.85em; }
+  .reveal pre { width: 100%; box-shadow: none; }
+  .reveal pre code { padding: 1em 1.2em; border-radius: 8px; background: var(--surface); border: 1px solid #2a2a35; max-height: 520px; font-size: 0.55em; line-height: 1.55; }
+  .reveal .slide-number { font-family: var(--r-code-font); font-size: 0.6em; color: var(--dim); background: transparent; }
+  .reveal blockquote { background: var(--surface); border-left: 4px solid var(--accent); padding: 0.8em 1.2em; font-style: normal; border-radius: 0 8px 8px 0; width: 90%; margin: 0.8em auto; font-size: 0.85em; }
+
+  /* Utility */
+  .accent  { color: var(--accent) !important; }
+  .accent2 { color: var(--accent2) !important; }
+  .accent3 { color: var(--accent3) !important; }
+  .accent4 { color: var(--accent4) !important; }
+  .dim     { color: var(--dim) !important; }
+  .mono    { font-family: var(--r-code-font) !important; }
+  .small   { font-size: 0.7em !important; }
+  .smaller { font-size: 0.6em !important; }
+  .tiny    { font-size: 0.5em !important; }
+  .left    { text-align: left !important; }
+  .center  { text-align: center !important; }
+
+  /* Tag / badge */
+  .tag { display: inline-block; padding: 0.15em 0.6em; border-radius: 4px; font-size: 0.55em; font-family: var(--r-code-font); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; margin: 0 0.15em; }
+  .tag-blue   { background: rgba(126,184,218,0.18); color: var(--accent); }
+  .tag-orange { background: rgba(232,168,124,0.18); color: var(--accent2); }
+  .tag-green  { background: rgba(143,212,164,0.18); color: var(--accent3); }
+  .tag-purple { background: rgba(196,157,216,0.18); color: var(--accent4); }
+  .tag-dim    { background: rgba(106,102,96,0.18);  color: var(--dim); }
+
+  /* Tables */
+  .reveal table { border-collapse: collapse; margin: 0.6em auto; font-size: 0.65em; width: 95%; }
+  .reveal table th { background: var(--surface2); color: var(--accent); font-weight: 700; padding: 0.5em 0.7em; border-bottom: 2px solid var(--accent); text-align: left; }
+  .reveal table td { padding: 0.45em 0.7em; border-bottom: 1px solid #2a2a35; }
+  .reveal table tr:last-child td { border-bottom: none; }
+
+  /* Diagrams / boxes */
+  .box-row { display: flex; gap: 0.8em; justify-content: center; flex-wrap: wrap; margin: 0.6em 0; }
+  .box { background: var(--surface); border: 1px solid #2a2a35; border-radius: 8px; padding: 0.7em 1em; flex: 1; min-width: 180px; max-width: 320px; text-align: center; }
+  .box h3 { margin: 0 0 0.3em; font-size: 0.85em; }
+  .box p, .box ul { font-size: 0.65em; margin: 0; }
+
+  /* Two-col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; align-items: start; }
+  .two-col.wide-left { grid-template-columns: 1.3fr 0.7fr; }
+  .two-col.wide-right { grid-template-columns: 0.7fr 1.3fr; }
+
+  /* Numbered steps */
+  .steps { counter-reset: step; padding-left: 0; }
+  .steps li { counter-increment: step; padding-left: 2.2em; }
+  .steps li::before { content: counter(step); position: absolute; left: 0; width: 1.5em; height: 1.5em; background: var(--accent); color: var(--r-background-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 700; }
+
+  /* Slide-specific */
+  .title-slide h1 { font-size: 2.2em; margin-bottom: 0.15em; }
+  .title-slide .subtitle { font-size: 0.85em; color: var(--accent); margin-bottom: 0.5em; font-family: var(--r-main-font); }
+  .title-slide .meta { font-size: 0.55em; color: var(--dim); }
+
+  .section-slide { background: linear-gradient(135deg, #0d1420 0%, #0a0a0f 100%); }
+  .section-slide h2 { font-size: 1.8em; }
+  .section-slide .section-num { font-family: var(--r-code-font); font-size: 0.6em; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.3em; }
+
+  /* Architecture diagram via CSS */
+  .arch-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0.5em auto; max-width: 700px; }
+  .arch-layer { width: 100%; padding: 0.4em 0.8em; border-radius: 6px; text-align: center; font-size: 0.6em; font-weight: 700; font-family: var(--r-code-font); }
+
+  /* Animated underline on headings */
+  .reveal section h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--accent);
+    margin: 0.25em auto 0;
+    border-radius: 2px;
+  }
+
+  .section-slide h2::after,
+  .title-slide h1::after { display: none; }
+
+  /* Key-value layout */
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2em 1em; font-size: 0.7em; text-align: left; margin: 0.5em auto; max-width: 90%; }
+  .kv dt { color: var(--accent); font-weight: 700; white-space: nowrap; font-family: var(--r-code-font); font-size: 0.9em; }
+  .kv dd { margin: 0; }
+
+  /* Flow arrow */
+  .flow-arrow { color: var(--dim); font-size: 1.4em; margin: 0.15em 0; }
+
+  /* Highlight bar */
+  .highlight-bar { background: linear-gradient(90deg, rgba(126,184,218,0.12) 0%, transparent 100%); border-left: 3px solid var(--accent); padding: 0.5em 1em; margin: 0.5em 0; border-radius: 0 6px 6px 0; font-size: 0.75em; }
+
+  /* Footer attribution */
+  .slide-footer { position: absolute; bottom: 1em; left: 50%; transform: translateX(-50%); font-size: 0.35em; color: var(--dim); font-family: var(--r-code-font); }
+
+  /* Overflow fix */
+  .reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- SLIDE 1: Title -->
+<!-- ============================================================ -->
+<section class="title-slide" data-background-gradient="radial-gradient(ellipse at 30% 50%, #111828 0%, #0a0a0f 70%)">
+  <p class="mono small accent" style="letter-spacing:0.15em;">MODERN SOC DESIGN &middot; PRESENTATION 10</p>
+  <h1>Modern SoC Verification</h1>
+  <p class="subtitle">From RTL Simulation to Silicon Sign-Off</p>
+  <p class="meta" style="margin-top:1.5em;">
+    RTL simulation &middot; Formal verification &middot; Emulation &middot; FPGA prototyping &middot; UVM &middot; DFT &middot; Coverage closure
+  </p>
+  <p class="meta" style="margin-top:1em;">Navigate: <span class="mono">&rarr; &larr;</span> &nbsp;|&nbsp; Overview: <span class="mono">Esc</span> &nbsp;|&nbsp; Fullscreen: <span class="mono">F</span></p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2: The Verification Challenge -->
+<!-- ============================================================ -->
+<section>
+  <h2>The Verification Challenge</h2>
+  <div class="two-col" style="margin-top:0.6em;">
+    <div class="left">
+      <ul style="font-size:0.72em;">
+        <li><strong class="accent">60&ndash;70% of SoC development effort</strong> is spent on verification &mdash; more engineers verify than design</li>
+        <li><strong class="accent2">State-space explosion</strong> &mdash; a modern SoC with 10<sup>10</sup> transistors has 2<sup>10<sup>10</sup></sup> possible states; exhaustive testing is mathematically impossible</li>
+        <li><strong class="accent3">Bug escape cost</strong> &mdash; a bug found in silicon costs <strong>1000&times;</strong> more to fix than one caught in RTL simulation</li>
+        <li><strong class="accent4">Schedule pressure</strong> &mdash; verification is almost always on the critical path to tape-out</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:0.6em;">
+        Industry average: <strong class="accent">~60%</strong> of first silicon respins are caused by logic/functional bugs that escaped verification.
+      </div>
+    </div>
+    <div>
+      <h3>Cost of Bug Escape</h3>
+      <table>
+        <tr><th>Stage Found</th><th>Relative Cost</th></tr>
+        <tr><td>RTL Simulation</td><td class="accent">1&times;</td></tr>
+        <tr><td>Gate-Level Sim</td><td class="accent">3&ndash;5&times;</td></tr>
+        <tr><td>Emulation</td><td class="accent2">10&ndash;50&times;</td></tr>
+        <tr><td>FPGA Prototype</td><td class="accent2">50&ndash;100&times;</td></tr>
+        <tr><td>First Silicon</td><td class="accent4">500&ndash;1000&times;</td></tr>
+        <tr><td>In-Field</td><td class="accent4">1000&ndash;10,000&times;</td></tr>
+      </table>
+      <blockquote style="font-size:0.68em; margin-top:0.5em;">
+        "Verification is the art of proving that a design does what it should &mdash; and does <em>not</em> do what it shouldn't."
+        <br><span class="dim small">&mdash; Stu Sutherland</span>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3: Section I — Simulation-Based Verification -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section I</p>
+  <h2>Simulation-Based Verification</h2>
+  <p class="dim" style="font-size:0.75em;">RTL simulation &middot; UVM methodology &middot; Assertions &middot; Coverage-driven verification</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4: RTL Simulation -->
+<!-- ============================================================ -->
+<section>
+  <h2>RTL Simulation</h2>
+  <p class="small dim">The foundation of all digital verification &mdash; cycle-by-cycle behavioral modeling</p>
+  <div class="two-col" style="margin-top:0.4em;">
+    <div class="left">
+      <h3>Event-Driven Simulation</h3>
+      <ul style="font-size:0.68em;">
+        <li><strong class="accent">Principle</strong> &mdash; evaluate only signals that change; maintain an event queue sorted by simulation time</li>
+        <li><strong class="accent2">Languages</strong> &mdash; Verilog/SystemVerilog for RTL and testbench; VHDL in aerospace/defense and European designs</li>
+        <li><strong>4-state logic</strong> &mdash; <code>0, 1, X, Z</code> model unknown and high-impedance states critical for reset and bus behavior</li>
+        <li><strong>Scheduling</strong> &mdash; Active, Inactive, NBA, Observed, Reactive regions per IEEE 1800 semantics</li>
+      </ul>
+      <dl class="kv" style="margin-top:0.5em; font-size:0.85em;">
+        <dt>VCS</dt><dd>Synopsys &mdash; compiled sim, fastest single-threaded</dd>
+        <dt>Xcelium</dt><dd>Cadence &mdash; multi-core parallel simulation</dd>
+        <dt>Questa</dt><dd>Siemens &mdash; strong debug, UVM integration</dd>
+        <dt>Verilator</dt><dd>Open-source &mdash; 2-state, cycle-accurate, ~10&times; faster for synthesizable code</dd>
+      </dl>
+    </div>
+    <div>
+      <h3>Simulation Speed Hierarchy</h3>
+      <div class="arch-stack" style="max-width:380px;">
+        <div class="arch-layer" style="background:#2a4a3a; font-size:0.5em;">Behavioral / TLM — 10&ndash;100 MHz effective</div>
+        <div class="arch-layer" style="background:#2a3a5a; font-size:0.5em;">RTL (2-state, Verilator) — 1&ndash;10 MHz</div>
+        <div class="arch-layer" style="background:#3a3a5a; font-size:0.5em;">RTL (4-state, VCS/Xcelium) — 100 kHz&ndash;1 MHz</div>
+        <div class="arch-layer" style="background:#4a3a3a; font-size:0.5em;">Gate-Level Sim (SDF timing) — 1&ndash;100 kHz</div>
+        <div class="arch-layer" style="background:#5a2a2a; font-size:0.5em;">Transistor-Level (SPICE) — &lt;1 Hz</div>
+      </div>
+      <div class="highlight-bar" style="margin-top:0.5em; font-size:0.65em;">
+        A full SoC booting Linux at RTL speed (~100 kHz) would take <strong class="accent2">~28 hours</strong> for 10 billion cycles. Emulation is essential.
+      </div>
+      <pre><code class="language-systemverilog">// Simple directed test in SystemVerilog
+module tb_counter;
+  logic clk, rst_n, en;
+  logic [7:0] count;
+
+  counter dut(.clk, .rst_n, .en, .count);
+
+  initial begin
+    clk = 0;
+    forever #5ns clk = ~clk;
+  end
+
+  initial begin
+    rst_n = 0; en = 0;
+    #20ns rst_n = 1;
+    #10ns en = 1;
+    repeat(256) @(posedge clk);
+    $finish;
+  end
+endmodule</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5: UVM (Universal Verification Methodology) -->
+<!-- ============================================================ -->
+<section>
+  <h2>UVM &mdash; Universal Verification Methodology</h2>
+  <p class="small dim">IEEE 1800.2 standard &mdash; the industry-standard framework for reusable, scalable verification</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>UVM Architecture</h3>
+      <div class="arch-stack" style="max-width:360px;">
+        <div class="arch-layer" style="background:#3a5a7a; font-size:0.5em;">Test (extends uvm_test)</div>
+        <div class="arch-layer" style="background:#2a4a6a; font-size:0.5em;">Environment (env) &mdash; agents + scoreboard + coverage</div>
+        <div style="display:flex; gap:2px; width:100%;">
+          <div class="arch-layer" style="background:#3a4a3a; font-size:0.45em; flex:1;">Agent (active)</div>
+          <div class="arch-layer" style="background:#4a3a4a; font-size:0.45em; flex:1;">Agent (passive)</div>
+        </div>
+        <div style="display:flex; gap:2px; width:100%;">
+          <div class="arch-layer" style="background:#2a5a3a; font-size:0.42em; flex:1;">Sequencer</div>
+          <div class="arch-layer" style="background:#2a3a5a; font-size:0.42em; flex:1;">Driver</div>
+          <div class="arch-layer" style="background:#4a2a3a; font-size:0.42em; flex:1;">Monitor</div>
+        </div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.15); font-size:0.45em; border:1px solid var(--accent);">Scoreboard &amp; Coverage Collector</div>
+        <div class="arch-layer" style="background:#2a2a3a; font-size:0.5em;">DUT (Design Under Test)</div>
+      </div>
+      <ul style="font-size:0.62em; margin-top:0.4em;">
+        <li><strong class="accent">Sequencer</strong> &mdash; generates stimulus transactions</li>
+        <li><strong class="accent2">Driver</strong> &mdash; converts transactions to pin-level signals</li>
+        <li><strong class="accent3">Monitor</strong> &mdash; observes interface, creates transactions</li>
+        <li><strong class="accent4">Scoreboard</strong> &mdash; reference model comparison</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Constrained Random Verification</h3>
+      <pre><code class="language-systemverilog">class axi_transaction extends uvm_sequence_item;
+  rand bit [31:0] addr;
+  rand bit [7:0]  data[];
+  rand axi_burst_e burst_type;
+  rand bit [3:0]  len;
+
+  // Constraints focus stimulus on corners
+  constraint c_aligned {
+    addr[1:0] == 2'b00;  // word-aligned
+  }
+  constraint c_burst {
+    burst_type dist {
+      FIXED := 10, INCR := 60, WRAP := 30
+    };
+  }
+  constraint c_len {
+    len inside {[0:3], 7, 15};  // AXI legal
+  }
+
+  `uvm_object_utils_begin(axi_transaction)
+    `uvm_field_int(addr, UVM_ALL_ON)
+    `uvm_field_array_int(data, UVM_ALL_ON)
+    `uvm_field_enum(axi_burst_e,
+                    burst_type, UVM_ALL_ON)
+  `uvm_object_utils_end
+endclass</code></pre>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.3em;">
+        <strong>Key insight:</strong> Constrained random + coverage-driven verification finds corner-case bugs that directed tests miss. Typically achieves <strong class="accent3">10&times;</strong> higher bug-find rate per engineer-hour.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6: SystemVerilog Assertions (SVA) -->
+<!-- ============================================================ -->
+<section>
+  <h2>SystemVerilog Assertions (SVA)</h2>
+  <p class="small dim">Embedding design intent directly into RTL &mdash; continuous checking across all simulation cycles</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Immediate vs Concurrent</h3>
+      <table>
+        <tr><th>Type</th><th>Timing</th><th>Use Case</th></tr>
+        <tr><td><span class="tag tag-blue">Immediate</span></td><td>Combinational (no clock)</td><td>Checking invariants in procedural code</td></tr>
+        <tr><td><span class="tag tag-green">Concurrent</span></td><td>Clock-based, multi-cycle</td><td>Protocol checking, temporal properties</td></tr>
+      </table>
+      <pre><code class="language-systemverilog">// Immediate assertion
+always_comb begin
+  assert (onehot(grant))
+    else $error("Grant not one-hot!");
+end
+
+// Concurrent: AXI handshake protocol
+property axi_handshake;
+  @(posedge clk) disable iff (!rst_n)
+  valid |-> s_eventually ready;
+endproperty
+assert property (axi_handshake)
+  else $error("AXI handshake timeout");
+
+// Concurrent: data stability
+property axi_stable;
+  @(posedge clk) disable iff (!rst_n)
+  (valid && !ready) |=>
+    ($stable(addr) && $stable(data));
+endproperty
+assert property (axi_stable);</code></pre>
+    </div>
+    <div>
+      <h3>Property &amp; Sequence Syntax</h3>
+      <pre><code class="language-systemverilog">// Sequence: request followed by grant
+sequence req_grant_seq;
+  req ##[1:5] gnt;  // 1-5 cycle delay
+endsequence
+
+// Property: grant must be followed by ack
+property grant_ack_p;
+  @(posedge clk) disable iff (!rst_n)
+  gnt |-> ##[1:3] ack;
+endproperty
+
+// Cover property for functional coverage
+cover property (
+  @(posedge clk)
+  req ##1 gnt ##1 ack
+);</code></pre>
+      <h3 style="margin-top:0.5em;">Assertion-Based Verification Methodology</h3>
+      <ul style="font-size:0.62em;">
+        <li><strong class="accent">White-box</strong> &mdash; assertions inside RTL modules; designers write them during coding</li>
+        <li><strong class="accent2">Black-box</strong> &mdash; interface protocol monitors; verification engineers author</li>
+        <li><strong class="accent3">Formal</strong> &mdash; same SVA properties proven exhaustively by formal tools</li>
+        <li><strong class="accent4">Coverage</strong> &mdash; <code>cover property</code> tracks when specific scenarios occur</li>
+      </ul>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.3em;">
+        Industry best practice: <strong class="accent">&ge;2 assertions per FSM state</strong>, protocol checkers on every bus interface, and X-propagation assertions on all resets.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7: Coverage-Driven Verification -->
+<!-- ============================================================ -->
+<section>
+  <h2>Coverage-Driven Verification</h2>
+  <p class="small dim">Measuring what you have verified &mdash; the quantitative backbone of verification signoff</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Coverage Types</h3>
+      <table>
+        <tr><th>Type</th><th>Measures</th><th>Source</th></tr>
+        <tr><td><span class="tag tag-blue">Line</span></td><td>Which RTL lines executed</td><td>Automatic</td></tr>
+        <tr><td><span class="tag tag-blue">Branch</span></td><td>if/else/case paths taken</td><td>Automatic</td></tr>
+        <tr><td><span class="tag tag-blue">Toggle</span></td><td>Signal 0&rarr;1 and 1&rarr;0</td><td>Automatic</td></tr>
+        <tr><td><span class="tag tag-green">FSM</span></td><td>States visited, arcs traversed</td><td>Automatic</td></tr>
+        <tr><td><span class="tag tag-orange">Functional</span></td><td>Spec scenarios hit</td><td>Manual</td></tr>
+        <tr><td><span class="tag tag-purple">Cross</span></td><td>Combinations of coverpoints</td><td>Manual</td></tr>
+      </table>
+      <pre><code class="language-systemverilog">covergroup axi_cg @(posedge clk);
+  cp_burst: coverpoint burst_type {
+    bins fixed = {FIXED};
+    bins incr  = {INCR};
+    bins wrap  = {WRAP};
+  }
+  cp_size: coverpoint size {
+    bins byte   = {0};
+    bins hword  = {1};
+    bins word   = {2};
+    bins dword  = {3};
+  }
+  // Cross: all burst x size combos
+  bxs: cross cp_burst, cp_size;
+endgroup</code></pre>
+    </div>
+    <div>
+      <h3>Coverage Closure Process</h3>
+      <div class="arch-stack" style="max-width:350px;">
+        <div class="arch-layer" style="background:#2a4a3a; font-size:0.48em;">1. Write Coverage Model (from spec)</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#2a3a5a; font-size:0.48em;">2. Run Constrained Random Regressions</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#3a4a5a; font-size:0.48em;">3. Analyze Coverage Holes</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#4a3a3a; font-size:0.48em;">4. Refine Constraints or Add Directed Tests</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#3a5a3a; font-size:0.48em;">5. Merge Coverage Across Seeds &amp; Tests</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:rgba(143,212,164,0.25); font-size:0.48em; border:1px solid var(--accent3);">6. Signoff: Code &ge;95%, Functional &ge;100%</div>
+      </div>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.4em;">
+        <strong>Typical signoff targets:</strong><br>
+        Line &ge; <strong class="accent">95%</strong> &nbsp;|&nbsp;
+        Branch &ge; <strong class="accent">90%</strong> &nbsp;|&nbsp;
+        Toggle &ge; <strong class="accent2">85%</strong> &nbsp;|&nbsp;
+        FSM &ge; <strong class="accent3">100%</strong> &nbsp;|&nbsp;
+        Functional &ge; <strong class="accent3">100%</strong>
+      </div>
+      <p class="tiny dim" style="margin-top:0.3em;">Unreachable code/states must be formally proven unreachable and waivered &mdash; never silently excluded.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8: Section II — Formal & Static Methods -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section II</p>
+  <h2>Formal &amp; Static Methods</h2>
+  <p class="dim" style="font-size:0.75em;">Model checking &middot; Equivalence checking &middot; CDC/RDC analysis &middot; Lint</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9: Formal Verification -->
+<!-- ============================================================ -->
+<section>
+  <h2>Formal Verification</h2>
+  <p class="small dim">Exhaustive mathematical proof &mdash; no stimulus required, no coverage gaps</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Model Checking Fundamentals</h3>
+      <ul style="font-size:0.66em;">
+        <li><strong class="accent">Bounded</strong> &mdash; proves properties hold for <em>N</em> clock cycles (e.g., N=50); cannot guarantee behavior beyond bound</li>
+        <li><strong class="accent3">Unbounded</strong> &mdash; proves property holds for <em>all</em> reachable states forever; uses induction, k-induction, interpolation, or IC3/PDR</li>
+        <li><strong class="accent2">Counterexample</strong> &mdash; if property fails, tool provides minimal waveform trace to reproduce the bug</li>
+        <li><strong class="accent4">Complexity</strong> &mdash; state space is 2<sup>N</sup> where N = number of state bits; formal typically effective on blocks &le;500K gates</li>
+      </ul>
+      <dl class="kv" style="margin-top:0.4em; font-size:0.82em;">
+        <dt>Jasper</dt><dd>Cadence &mdash; market leader in formal apps</dd>
+        <dt>VC Formal</dt><dd>Synopsys &mdash; tight VCS/Verdi integration</dd>
+        <dt>Questa Formal</dt><dd>Siemens &mdash; strong CDC/formal combo</dd>
+        <dt>SymbiYosys</dt><dd>Open-source &mdash; Yosys + SMT solvers</dd>
+      </dl>
+    </div>
+    <div>
+      <h3>Property Types</h3>
+      <table>
+        <tr><th>Property</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td><span class="tag tag-blue">Safety</span></td><td>"Bad thing never happens"</td><td>No deadlock on bus</td></tr>
+        <tr><td><span class="tag tag-green">Liveness</span></td><td>"Good thing eventually happens"</td><td>Every request gets response</td></tr>
+        <tr><td><span class="tag tag-orange">Fairness</span></td><td>"No starvation"</td><td>Arbiter grants all ports</td></tr>
+      </table>
+      <pre><code class="language-systemverilog">// Formal assumptions + assertions
+// Prove FIFO never overflows
+module fifo_formal #(DEPTH=16) (
+  input logic clk, rst_n, push, pop
+);
+  logic [$clog2(DEPTH):0] count;
+
+  // Assumption: environment constraint
+  assume property (@(posedge clk)
+    disable iff (!rst_n)
+    (count == DEPTH) |-> !push);
+
+  // Assertion: count never exceeds DEPTH
+  assert property (@(posedge clk)
+    disable iff (!rst_n)
+    count <= DEPTH);
+
+  // Liveness: FIFO eventually drains
+  assert property (@(posedge clk)
+    disable iff (!rst_n)
+    (count > 0) |-> s_eventually (count == 0));
+endmodule</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: Formal Apps -->
+<!-- ============================================================ -->
+<section>
+  <h2>Formal Verification Apps</h2>
+  <p class="small dim">Pre-packaged formal solutions for common SoC verification challenges</p>
+  <div class="box-row" style="margin-top:0.3em;">
+    <div class="box" style="max-width:260px;">
+      <h3 class="accent">Connectivity</h3>
+      <p>Prove that SoC integration wiring is correct: interrupt routing, MUX selections, address decode, pin connections. Replaces 1000s of directed tests.</p>
+      <p class="tiny dim">Jasper Connectivity / VC Formal CC</p>
+    </div>
+    <div class="box" style="max-width:260px;">
+      <h3 class="accent2">Register Verification</h3>
+      <p>Automatically verify CSR read/write behavior, field access policies (RW, RO, W1C, RC), reset values against register spec (RALF/IP-XACT/SystemRDL).</p>
+      <p class="tiny dim">Jasper FRV / VC Formal REG</p>
+    </div>
+    <div class="box" style="max-width:260px;">
+      <h3 class="accent3">Deadlock &amp; Livelock</h3>
+      <p>Exhaustively prove that protocol FSMs cannot deadlock or enter infinite non-progress loops. Critical for NoC routers, cache coherence, arbiters.</p>
+      <p class="tiny dim">Jasper DLV / VC Formal DPV</p>
+    </div>
+  </div>
+  <div class="box-row" style="margin-top:0.3em;">
+    <div class="box" style="max-width:260px;">
+      <h3 class="accent4">Security Path</h3>
+      <p>Prove that secure assets (keys, fuses, privileged registers) are unreachable from untrusted interfaces. Information flow analysis across all possible execution paths.</p>
+      <p class="tiny dim">Jasper SPV / Radix-S</p>
+    </div>
+    <div class="box" style="max-width:260px;">
+      <h3 style="color:var(--accent);">X-Propagation</h3>
+      <p>Detect where X-optimism in RTL simulation masks real hardware behavior. Proves that unknown values on reset or uninitialized memories cannot reach functional outputs.</p>
+      <p class="tiny dim">Jasper X-Prop / Questa X-Check</p>
+    </div>
+    <div class="box" style="max-width:260px;">
+      <h3 style="color:var(--accent2);">Equivalence Checking</h3>
+      <p>LEC (Logic Equivalence Checking): prove RTL &equiv; gate-level netlist after synthesis. Sequential equivalence for retiming, clock-gating, datapath optimization.</p>
+      <p class="tiny dim">Conformal LEC / Formality / SLEC</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: Static Analysis — Lint, CDC, RDC -->
+<!-- ============================================================ -->
+<section>
+  <h2>Static Analysis &mdash; Lint, CDC, RDC</h2>
+  <p class="small dim">Catch structural and multi-clock bugs without simulation</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Lint &mdash; RTL Code Quality</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong class="accent">Spyglass</strong> (Synopsys) &mdash; industry standard for lint + CDC + power</li>
+        <li><strong class="accent2">Ascent</strong> (Real Intent) &mdash; advanced X-analysis and reset checking</li>
+        <li>Catches: width mismatches, undriven nets, incomplete sensitivity lists, inferred latches, multi-driven signals, naming convention violations</li>
+        <li>Mandatory step before synthesis; clean lint = fewer downstream surprises</li>
+      </ul>
+      <h3 style="margin-top:0.5em;">CDC &mdash; Clock Domain Crossing</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong>Single biggest cause of silicon respins</strong> &mdash; metastability bugs are non-deterministic, nearly impossible to catch in simulation</li>
+        <li>Structural checks: synchronizer detection, FIFO depth adequacy, convergence, reconvergence</li>
+        <li>Formal CDC: prove data coherency and no data loss across domains using formal methods</li>
+      </ul>
+    </div>
+    <div>
+      <h3>RDC &mdash; Reset Domain Crossing</h3>
+      <ul style="font-size:0.64em;">
+        <li>Similar to CDC but for asynchronous reset release across domains</li>
+        <li>Verify reset sequencing, ordered de-assertion, and no glitches during reset release</li>
+        <li>Critical in power-managed SoCs with many reset domains</li>
+      </ul>
+      <h3 style="margin-top:0.5em;">Power-Aware Checks</h3>
+      <table>
+        <tr><th>Check</th><th>Standard</th><th>Catches</th></tr>
+        <tr><td>Isolation</td><td>UPF/CPF</td><td>Missing isolation cells on power boundary crossings</td></tr>
+        <tr><td>Retention</td><td>UPF/CPF</td><td>State lost on power-down without save/restore</td></tr>
+        <tr><td>Level Shift</td><td>UPF/CPF</td><td>Voltage domain crossings without level shifters</td></tr>
+        <tr><td>Power Seq</td><td>UPF/CPF</td><td>Incorrect power-up/down sequencing</td></tr>
+      </table>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.4em;">
+        <strong>Modern SoCs:</strong> 50&ndash;200+ clock domains, 10&ndash;30+ power domains. Automated static analysis is the only viable approach.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: Section III — Hardware-Assisted Verification -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section III</p>
+  <h2>Hardware-Assisted Verification</h2>
+  <p class="dim" style="font-size:0.75em;">Emulation &middot; FPGA prototyping &middot; Bridging simulation and silicon</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 13: Emulation -->
+<!-- ============================================================ -->
+<section>
+  <h2>Emulation</h2>
+  <p class="small dim">Custom hardware to run full SoC designs at 1&ndash;10 MHz &mdash; 100&ndash;1000&times; faster than simulation</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Emulation Platforms</h3>
+      <table>
+        <tr><th>Platform</th><th>Vendor</th><th>Architecture</th><th>Capacity</th></tr>
+        <tr><td class="accent">Palladium Z2</td><td>Cadence</td><td>Custom processors</td><td>15B gates</td></tr>
+        <tr><td class="accent2">Veloce Strato</td><td>Siemens</td><td>Custom ASIC</td><td>15B gates</td></tr>
+        <tr><td class="accent3">ZeBu EP1</td><td>Synopsys</td><td>FPGA-based</td><td>20B gates</td></tr>
+      </table>
+      <h3 style="margin-top:0.5em;">Compile Flow</h3>
+      <div class="arch-stack" style="max-width:320px;">
+        <div class="arch-layer" style="background:#2a3a5a; font-size:0.45em;">RTL + Testbench Partition</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#3a4a5a; font-size:0.45em;">Synthesis &amp; Mapping to Emulator</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#4a4a3a; font-size:0.45em;">Partition &amp; Place Across Emulator Units</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#3a5a3a; font-size:0.45em;">Run at 1&ndash;10 MHz (ICE or SCE mode)</div>
+      </div>
+    </div>
+    <div>
+      <h3>Use Cases</h3>
+      <ul style="font-size:0.66em;">
+        <li><strong class="accent">Software-driven verification</strong> &mdash; boot real firmware, RTOS, Linux kernel; find HW/SW co-design bugs</li>
+        <li><strong class="accent2">Long-sequence tests</strong> &mdash; run billions of cycles: PCIe link training, DDR initialization, USB enumeration</li>
+        <li><strong class="accent3">Power estimation</strong> &mdash; FSDB/VCD activity dumped from emulator fed to power analysis tools (Joules/PrimeTime PX)</li>
+        <li><strong class="accent4">Low-power verification</strong> &mdash; UPF-aware emulation validates power domain transitions at speed</li>
+      </ul>
+      <dl class="kv" style="margin-top:0.4em; font-size:0.82em;">
+        <dt>ICE Mode</dt><dd>In-Circuit Emulation &mdash; real external interfaces (PCIe, Ethernet)</dd>
+        <dt>SCE Mode</dt><dd>Simulation Co-Emulation &mdash; testbench in simulator, DUT in emulator</dd>
+        <dt>Speed</dt><dd>1&ndash;10 MHz (design dependent)</dd>
+        <dt>Cost</dt><dd>$5M&ndash;$50M+ per system</dd>
+        <dt>Compile</dt><dd>Hours to days for full SoC (incremental: minutes)</dd>
+      </dl>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.3em;">
+        <strong>Key advantage:</strong> emulation is deterministic and fully debuggable (waveform dump) &mdash; unlike FPGA prototyping.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 14: FPGA Prototyping -->
+<!-- ============================================================ -->
+<section>
+  <h2>FPGA Prototyping</h2>
+  <p class="small dim">Running SoC designs on multi-FPGA boards at near-real-time speeds</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>FPGA Prototyping Platforms</h3>
+      <table>
+        <tr><th>Platform</th><th>Vendor</th><th>Speed</th><th>Use</th></tr>
+        <tr><td class="accent">HAPS-100</td><td>Synopsys</td><td>~200 MHz</td><td>Pre-silicon SW dev</td></tr>
+        <tr><td class="accent2">Protium X2</td><td>Cadence</td><td>~100 MHz</td><td>HW/SW co-validation</td></tr>
+        <tr><td class="accent3">Custom</td><td>Various</td><td>50&ndash;150 MHz</td><td>Customer-specific</td></tr>
+      </table>
+      <h3 style="margin-top:0.5em;">Partitioning Challenges</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong class="accent2">Multi-FPGA partitioning</strong> &mdash; large SoCs span 4&ndash;16+ FPGAs; inter-FPGA routing adds latency and reduces frequency</li>
+        <li><strong>Memory mapping</strong> &mdash; on-chip SRAMs must be mapped to FPGA block RAMs or external DRAM</li>
+        <li><strong>Clock conversion</strong> &mdash; multi-clock designs require careful PLL configuration across FPGAs</li>
+        <li><strong>Hard IP</strong> &mdash; SerDes, analog blocks, and custom memory macros need behavioral models or bypass</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Emulation vs FPGA Prototyping</h3>
+      <table>
+        <tr><th>Feature</th><th>Emulation</th><th>FPGA Proto</th></tr>
+        <tr><td>Speed</td><td>1&ndash;10 MHz</td><td class="accent3">50&ndash;200 MHz</td></tr>
+        <tr><td>Debug</td><td class="accent3">Full waveform</td><td>Limited probes</td></tr>
+        <tr><td>Compile time</td><td>Hours</td><td>Hours&ndash;days</td></tr>
+        <tr><td>Determinism</td><td class="accent3">Deterministic</td><td>Non-deterministic</td></tr>
+        <tr><td>Cost</td><td>$5M&ndash;$50M</td><td class="accent3">$50K&ndash;$500K</td></tr>
+        <tr><td>Primary use</td><td>HW verification</td><td>SW development</td></tr>
+      </table>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.4em;">
+        <strong>Early software development:</strong> FPGA prototypes enable OS bring-up, driver development, and application benchmarking <strong class="accent">6&ndash;12 months before silicon</strong>. This is often the primary ROI justification.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 15: Section IV — SoC-Level Verification -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section IV</p>
+  <h2>SoC-Level Verification</h2>
+  <p class="dim" style="font-size:0.75em;">Integration verification &middot; DFT &middot; Performance validation &middot; System-level scenarios</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 16: SoC Integration Verification -->
+<!-- ============================================================ -->
+<section>
+  <h2>SoC Integration Verification</h2>
+  <p class="small dim">Proving the whole is correct when the parts are assembled</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Integration Checklist</h3>
+      <ul class="steps" style="font-size:0.64em;">
+        <li><strong>IP connectivity</strong> &mdash; all ports wired, no dangling nets, correct polarity (active-high/low), width matching</li>
+        <li><strong>Address map</strong> &mdash; decode logic matches spec; no aliasing or holes; all CSRs accessible from correct masters</li>
+        <li><strong>Interrupt routing</strong> &mdash; all IRQ lines reach GIC/PLIC; edge/level sensitivity correct; no missed or spurious interrupts</li>
+        <li><strong>Clock &amp; reset topology</strong> &mdash; each IP gets correct clock and reset; gating/ungating sequences verified</li>
+        <li><strong>Power domain mapping</strong> &mdash; isolation/retention cells correctly inserted; power sequencing validated</li>
+        <li><strong>DMA paths</strong> &mdash; all DMA channels reach intended memory regions through correct NoC routes</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Integration Verification Methods</h3>
+      <div class="box-row">
+        <div class="box" style="min-width:140px; max-width:200px;">
+          <h3 class="accent" style="font-size:0.75em;">Formal</h3>
+          <p style="font-size:0.58em;">Connectivity checking (Jasper/VC Formal) proves wiring against spreadsheet spec. 100% completeness.</p>
+        </div>
+        <div class="box" style="min-width:140px; max-width:200px;">
+          <h3 class="accent2" style="font-size:0.75em;">Simulation</h3>
+          <p style="font-size:0.58em;">C-based tests running on embedded CPU; boot sequence, register access, interrupt exercises.</p>
+        </div>
+        <div class="box" style="min-width:140px; max-width:200px;">
+          <h3 class="accent3" style="font-size:0.75em;">Emulation</h3>
+          <p style="font-size:0.58em;">Full firmware boot; OS driver bring-up; real-world traffic scenarios at ~MHz speed.</p>
+        </div>
+      </div>
+      <h3 style="margin-top:0.4em;">SoC Verification Architecture</h3>
+      <div class="arch-stack" style="max-width:380px;">
+        <div class="arch-layer" style="background:#3a5a7a; font-size:0.45em;">SoC-Level Tests (C/UVM/PSS)</div>
+        <div class="arch-layer" style="background:#2a4a6a; font-size:0.45em;">Subsystem Verification (CPU+cache, GPU+mem)</div>
+        <div class="arch-layer" style="background:#3a3a5a; font-size:0.45em;">IP-Level UVM Environments (reused)</div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.15); font-size:0.42em; border:1px solid var(--accent);">VIP Libraries (AXI, AHB, PCIe, DDR, USB, AMBA)</div>
+        <div class="arch-layer" style="background:#2a2a3a; font-size:0.45em;">RTL Design (SoC top-level)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 17: DFT (Design for Testability) -->
+<!-- ============================================================ -->
+<section>
+  <h2>DFT &mdash; Design for Testability</h2>
+  <p class="small dim">Enabling post-silicon manufacturing test to catch defects in fabricated chips</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>DFT Techniques</h3>
+      <table>
+        <tr><th>Technique</th><th>Purpose</th><th>Coverage Target</th></tr>
+        <tr><td><span class="tag tag-blue">Scan</span></td><td>Convert FFs to scan chains; shift-in test patterns, capture, shift-out</td><td>&ge;95% stuck-at</td></tr>
+        <tr><td><span class="tag tag-green">ATPG</span></td><td>Automatic Test Pattern Generation for stuck-at, transition, path-delay faults</td><td>&ge;98% combined</td></tr>
+        <tr><td><span class="tag tag-orange">LBIST</span></td><td>Logic Built-In Self-Test &mdash; on-chip PRBS generation + MISR compression</td><td>In-field test</td></tr>
+        <tr><td><span class="tag tag-purple">MBIST</span></td><td>Memory BIST &mdash; march algorithms for SRAM/ROM defect detection</td><td>100% memory</td></tr>
+      </table>
+      <h3 style="margin-top:0.4em;">Scan Architecture</h3>
+      <div class="arch-stack" style="max-width:340px;">
+        <div class="arch-layer" style="background:#3a5a7a; font-size:0.45em;">ATE (Automatic Test Equipment)</div>
+        <div class="flow-arrow center">&darr;</div>
+        <div class="arch-layer" style="background:#2a4a3a; font-size:0.45em;">Scan-In &rarr; Scan Chains (1000s) &rarr; Scan-Out</div>
+        <div class="arch-layer" style="background:#3a3a5a; font-size:0.45em;">Codec: Decompressor &harr; Compressor</div>
+        <div class="arch-layer" style="background:#2a2a3a; font-size:0.45em;">Combinational Logic (DUT)</div>
+      </div>
+    </div>
+    <div>
+      <h3>JTAG / IEEE 1149.1</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong class="accent">TAP Controller</strong> &mdash; 4-wire interface (TCK, TMS, TDI, TDO) + optional TRST</li>
+        <li><strong>Boundary Scan</strong> &mdash; test board-level connectivity without physical probes; each pin has a boundary scan cell</li>
+        <li><strong class="accent2">IJTAG (IEEE 1687)</strong> &mdash; hierarchical access to on-chip instruments (MBIST, sensors, debug) through scan infrastructure</li>
+        <li><strong class="accent3">IEEE 1838</strong> &mdash; 3D test access for die-to-die testing in stacked packages</li>
+      </ul>
+      <h3 style="margin-top:0.4em;">Manufacturing Test Economics</h3>
+      <dl class="kv" style="font-size:0.82em;">
+        <dt>Test time</dt><dd>100ms&ndash;2s per die (cost: $0.01&ndash;$0.10/sec on ATE)</dd>
+        <dt>DPPM</dt><dd>Target &lt;10 Defective Parts Per Million</dd>
+        <dt>Test cost</dt><dd>5&ndash;15% of total chip manufacturing cost</dd>
+        <dt>Pattern count</dt><dd>10K&ndash;1M+ patterns (compressed on-chip)</dd>
+      </dl>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.3em;">
+        <strong>DFT insertion happens during synthesis</strong> &mdash; scan replacement, compression logic, BIST controllers are added by tools (DFT Compiler, Tessent, Modus).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 18: Performance Verification -->
+<!-- ============================================================ -->
+<section>
+  <h2>Performance Verification</h2>
+  <p class="small dim">Ensuring the SoC meets bandwidth, latency, and throughput targets under real traffic</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Traffic Generation &amp; Analysis</h3>
+      <ul style="font-size:0.66em;">
+        <li><strong class="accent">Synthetic traffic generators</strong> &mdash; programmable AXI/CHI masters that inject controlled read/write patterns with configurable burst size, outstanding transactions, and address distribution</li>
+        <li><strong class="accent2">Trace-driven replay</strong> &mdash; capture real workload traces (from FPGA prototype or architecture sim) and replay on RTL</li>
+        <li><strong class="accent3">Performance monitors</strong> &mdash; on-chip counters for latency histograms, bandwidth measurement, queue occupancy, stall cycles</li>
+      </ul>
+      <h3 style="margin-top:0.4em;">Key Performance Metrics</h3>
+      <dl class="kv" style="font-size:0.82em;">
+        <dt>Read Latency</dt><dd>Cycles from AXI AR to R-last (target: &lt;100 cycles to DDR)</dd>
+        <dt>BW Utilization</dt><dd>Achieved / theoretical peak (target: &gt;80%)</dd>
+        <dt>QoS Violation</dt><dd>% transactions exceeding deadline (target: 0%)</dd>
+        <dt>Interconnect Contention</dt><dd>NoC link saturation under worst-case traffic</dd>
+      </dl>
+    </div>
+    <div>
+      <h3>NoC Performance Validation</h3>
+      <div class="arch-stack" style="max-width:370px;">
+        <div style="display:flex; gap:2px; width:100%;">
+          <div class="arch-layer" style="background:#3a5a3a; font-size:0.42em; flex:1;">CPU Cluster</div>
+          <div class="arch-layer" style="background:#3a3a5a; font-size:0.42em; flex:1;">GPU</div>
+          <div class="arch-layer" style="background:#5a3a3a; font-size:0.42em; flex:1;">NPU</div>
+          <div class="arch-layer" style="background:#3a5a5a; font-size:0.42em; flex:1;">DMA</div>
+        </div>
+        <div class="arch-layer" style="background:rgba(126,184,218,0.2); font-size:0.45em; border:1px solid var(--accent);">NoC (Network-on-Chip) &mdash; QoS, arbitration, routing</div>
+        <div style="display:flex; gap:2px; width:100%;">
+          <div class="arch-layer" style="background:#2a4a5a; font-size:0.42em; flex:1;">DDR MC 0</div>
+          <div class="arch-layer" style="background:#2a4a5a; font-size:0.42em; flex:1;">DDR MC 1</div>
+          <div class="arch-layer" style="background:#4a4a2a; font-size:0.42em; flex:1;">SRAM</div>
+          <div class="arch-layer" style="background:#4a2a4a; font-size:0.42em; flex:1;">PCIe/CXL</div>
+        </div>
+      </div>
+      <h3 style="margin-top:0.4em;">Memory Subsystem Verification</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong>DDR protocol verification</strong> &mdash; VIP checks timing (tRCD, tRP, tRFC), command sequencing, refresh, and training</li>
+        <li><strong>Cache coherency</strong> &mdash; ACE/CHI protocol checks; coherence race conditions; snoop filter correctness</li>
+        <li><strong>End-to-end data integrity</strong> &mdash; ECC injection, poison propagation, and error reporting paths</li>
+      </ul>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.3em;">
+        Performance bugs are often found late because they require full-chip simulation or emulation with realistic traffic &mdash; plan for <strong class="accent2">dedicated performance regression suites</strong>.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 19: Section V — Modern Challenges -->
+<!-- ============================================================ -->
+<section class="section-slide">
+  <p class="section-num">Section V</p>
+  <h2>Modern Challenges</h2>
+  <p class="dim" style="font-size:0.75em;">AI/ML SoC verification &middot; Verification signoff &middot; Emerging tools and methods</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 20: AI/ML SoC Verification -->
+<!-- ============================================================ -->
+<section>
+  <h2>AI/ML SoC Verification</h2>
+  <p class="small dim">Unique challenges when verifying neural processing units and accelerator datapaths</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Systolic Array Verification</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong class="accent">Matrix multiply correctness</strong> &mdash; verify NxN PE arrays against golden reference for all supported precisions (FP32, FP16, BF16, FP8, INT8, INT4)</li>
+        <li><strong class="accent2">Dataflow validation</strong> &mdash; weight-stationary, output-stationary, and row-stationary patterns; verify data movement matches architecture spec</li>
+        <li><strong>Boundary conditions</strong> &mdash; non-square matrices, partial tiles, zero padding, accumulator overflow/underflow</li>
+        <li><strong class="accent3">Numerical precision</strong> &mdash; FP8 (E4M3/E5M2) rounding modes, denormal handling, NaN/Inf propagation, mixed-precision accumulation (e.g., FP8 multiply &rarr; FP32 accumulate)</li>
+      </ul>
+      <h3 style="margin-top:0.4em;">DMA Engine Challenges</h3>
+      <ul style="font-size:0.64em;">
+        <li>Multi-dimensional tensor DMA: strided access, transpose, tiling</li>
+        <li>Outstanding transaction management across multiple channels</li>
+        <li>Coherency with CPU caches when sharing data buffers</li>
+        <li>Descriptor chain verification: linked-list DMA, scatter-gather</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Multi-Clock NPU Domains</h3>
+      <table>
+        <tr><th>Domain</th><th>Frequency</th><th>CDC Challenge</th></tr>
+        <tr><td>PE Array</td><td>1&ndash;2 GHz</td><td>Weight load from SRAM domain</td></tr>
+        <tr><td>SRAM Ctrl</td><td>1&ndash;1.5 GHz</td><td>Activation shuffle between banks</td></tr>
+        <tr><td>NoC Interface</td><td>0.5&ndash;1 GHz</td><td>AXI async FIFO crossings</td></tr>
+        <tr><td>Config/CSR</td><td>200&ndash;500 MHz</td><td>Register access from APB domain</td></tr>
+      </table>
+      <h3 style="margin-top:0.4em;">End-to-End Inference Validation</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong class="accent">Golden model</strong> &mdash; PyTorch/TensorFlow reference output (bit-accurate after quantization)</li>
+        <li><strong class="accent2">Compiler verification</strong> &mdash; verify that the NPU compiler's generated command stream produces correct layer-by-layer outputs</li>
+        <li><strong class="accent3">Full-network tests</strong> &mdash; run ResNet-50, BERT, GPT inference on emulator; compare output tensors against golden (tolerance: &le;1 ULP for INT, &le;0.1% relative for FP)</li>
+      </ul>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.3em;">
+        <strong>AI verification trend:</strong> using ML models to guide stimulus generation &mdash; reinforcement learning agents that maximize coverage.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 21: Verification Signoff -->
+<!-- ============================================================ -->
+<section>
+  <h2>Verification Signoff</h2>
+  <p class="small dim">The systematic process of declaring a design verified and ready for tape-out</p>
+  <div class="two-col" style="margin-top:0.3em;">
+    <div class="left">
+      <h3>Regression Management</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong class="accent">Nightly regressions</strong> &mdash; 10K&ndash;100K+ test seeds run across server farm; results triaged by morning</li>
+        <li><strong>Seed management</strong> &mdash; failed seeds saved and replayed for debug; passing seeds archived for coverage</li>
+        <li><strong class="accent2">Coverage merging</strong> &mdash; aggregate coverage across all tests, seeds, and platforms (sim + emulation + formal)</li>
+        <li><strong>Incremental regressions</strong> &mdash; only re-run tests affected by RTL changes (dependency tracking)</li>
+      </ul>
+      <h3 style="margin-top:0.4em;">Bug Rate Curves</h3>
+      <ul style="font-size:0.64em;">
+        <li><strong>Bug discovery rate</strong> plotted over time &mdash; must show clear declining trend before signoff</li>
+        <li><strong class="accent3">Weibull model</strong> &mdash; project remaining bugs from observed bug-find rate; predict when target bug density is reached</li>
+        <li>All P0/P1 bugs must be resolved; P2 bugs waivered with documented risk</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Tape-Out Verification Checklist</h3>
+      <table>
+        <tr><th>Criterion</th><th>Target</th><th>Status</th></tr>
+        <tr><td>Functional coverage</td><td>&ge;100%</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>Code coverage (line)</td><td>&ge;95%</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>Code coverage (branch)</td><td>&ge;90%</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>Formal proofs</td><td>All converged</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>CDC signoff</td><td>0 violations</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>Lint (Spyglass)</td><td>0 errors</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>LEC (RTL vs netlist)</td><td>Equivalent</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>DFT coverage (ATPG)</td><td>&ge;98%</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>Bug rate</td><td>Declining &ge;4 weeks</td><td><span class="tag tag-green">PASS</span></td></tr>
+        <tr><td>Open P0/P1 bugs</td><td>0</td><td><span class="tag tag-green">PASS</span></td></tr>
+      </table>
+      <div class="highlight-bar" style="font-size:0.62em; margin-top:0.3em;">
+        <strong>Formal signoff:</strong> all formal properties must reach <span class="accent3">proven</span>, <span class="accent2">bounded-proven (N&ge;50)</span>, or <span class="accent4">waivered with justification</span>. No <span class="accent4">inconclusive</span> results at tape-out.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 22: Case Studies & Tools Landscape -->
+<!-- ============================================================ -->
+<section>
+  <h2>Verification Tools Landscape</h2>
+  <p class="small dim">The three major EDA vendors and the growing open-source ecosystem</p>
+  <div style="margin-top:0.3em;">
+    <table>
+      <tr>
+        <th>Category</th>
+        <th><span class="accent">Synopsys</span></th>
+        <th><span class="accent2">Cadence</span></th>
+        <th><span class="accent3">Siemens EDA</span></th>
+        <th><span class="accent4">Open Source</span></th>
+      </tr>
+      <tr>
+        <td>RTL Simulation</td>
+        <td>VCS</td>
+        <td>Xcelium</td>
+        <td>Questa Sim</td>
+        <td>Verilator, Icarus</td>
+      </tr>
+      <tr>
+        <td>Debug</td>
+        <td>Verdi</td>
+        <td>SimVision / Indago</td>
+        <td>Questa Visualizer</td>
+        <td>GTKWave, Surfer</td>
+      </tr>
+      <tr>
+        <td>Formal</td>
+        <td>VC Formal</td>
+        <td>Jasper</td>
+        <td>Questa Formal</td>
+        <td>SymbiYosys, modelchecker</td>
+      </tr>
+      <tr>
+        <td>Emulation</td>
+        <td>ZeBu EP1</td>
+        <td>Palladium Z2</td>
+        <td>Veloce Strato</td>
+        <td>&mdash;</td>
+      </tr>
+      <tr>
+        <td>FPGA Proto</td>
+        <td>HAPS-100</td>
+        <td>Protium X2</td>
+        <td>Veloce proFPGA</td>
+        <td>LiteX, custom</td>
+      </tr>
+      <tr>
+        <td>Lint / CDC</td>
+        <td>Spyglass</td>
+        <td>JasperGold CDC</td>
+        <td>Questa CDC</td>
+        <td>Verilator lint, SVLint</td>
+      </tr>
+      <tr>
+        <td>DFT</td>
+        <td>DFT Compiler</td>
+        <td>Modus</td>
+        <td>Tessent</td>
+        <td>&mdash;</td>
+      </tr>
+      <tr>
+        <td>Coverage</td>
+        <td>Verdi Coverage</td>
+        <td>vManager / IMC</td>
+        <td>Questa CoverCheck</td>
+        <td>&mdash;</td>
+      </tr>
+      <tr>
+        <td>UVM Framework</td>
+        <td colspan="3" style="text-align:center;">IEEE 1800.2 &mdash; all three support standard UVM</td>
+        <td>cocotb (Python), CHISEL/ChiselTest, pyuvm</td>
+      </tr>
+    </table>
+  </div>
+  <div class="box-row" style="margin-top:0.4em;">
+    <div class="box" style="max-width:300px;">
+      <h3 class="accent4">Open-Source Momentum</h3>
+      <p><strong>Verilator</strong> &mdash; cycle-accurate C++ sim, now supports UVM subset, multi-threading, and is the default for RISC-V verification. <strong>cocotb</strong> &mdash; Python-based testbench framework gaining traction for rapid prototyping and ML-driven test generation.</p>
+    </div>
+    <div class="box" style="max-width:300px;">
+      <h3 class="accent">Portable Stimulus (PSS)</h3>
+      <p><strong>Accellera PSS 2.0</strong> &mdash; write test intent once, generate tests for simulation, emulation, FPGA, and post-silicon. Declarative constraint-based approach. Rising adoption in SoC-level verification.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 23: References & Further Reading -->
+<!-- ============================================================ -->
+<section>
+  <h2>References &amp; Further Reading</h2>
+  <div class="left" style="max-width:90%; margin:0 auto; font-size:0.55em; line-height:1.8;">
+    <p>
+      <strong class="accent">IEEE 1800-2017</strong> &mdash; SystemVerilog Language Reference Manual (LRM)<br>
+      <strong class="accent">IEEE 1800.2-2020</strong> &mdash; Universal Verification Methodology (UVM) standard<br>
+      <strong class="accent">Accellera PSS 2.0</strong> &mdash; Portable Stimulus Standard specification<br>
+      <strong class="accent">Spear, C.</strong> &mdash; <em>SystemVerilog for Verification</em>, 3rd ed., Springer, 2012<br>
+      <strong class="accent">Bromley, J.</strong> &mdash; <em>SystemVerilog Assertions Handbook</em>, VhdlCohen Publishing<br>
+      <strong class="accent">Bergeron, J. et al.</strong> &mdash; <em>Verification Methodology Manual for SystemVerilog</em>, Springer<br>
+      <strong class="accent">Synopsys</strong> &mdash; VCS, Verdi, ZeBu EP1, Spyglass, DFT Compiler documentation<br>
+      <strong class="accent">Cadence</strong> &mdash; Xcelium, Jasper, Palladium Z2, Modus product literature<br>
+      <strong class="accent">Siemens EDA</strong> &mdash; Questa, Veloce Strato, Tessent technical references<br>
+      <strong class="accent">Wilson Research Group</strong> &mdash; DVCON Functional Verification Study (annual industry survey)<br>
+      <strong class="accent">Verilator</strong> &mdash; <a href="https://verilator.org">verilator.org</a> &mdash; open-source SystemVerilog simulator<br>
+      <strong class="accent">cocotb</strong> &mdash; <a href="https://www.cocotb.org">cocotb.org</a> &mdash; Python-based verification framework
+    </p>
+    <p class="dim" style="margin-top:0.8em; font-size:0.85em;">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> &middot; Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use. Code examples provided as-is.
+    </p>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  showSlideNumber: 'all',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'fade',
+  center: false,
+  margin: 0.02,
+  width: 1280,
+  height: 900,
+  plugins: [ RevealHighlight ]
+});
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
+</script>
+</body>
+</html>

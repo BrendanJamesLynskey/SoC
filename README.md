@@ -21,12 +21,12 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 | 05 | AI / ML Accelerator Architectures | 22 | ✅ Complete |
 | 06 | SoCs for ML Inference | 24 | ✅ Complete |
 | 07 | Security in SoC Design | 22 | ✅ Complete |
-| 08 | CXL in ML Accelerator SoCs | — | Planned |
-| 09 | Modern ML Accelerator SoC Power Delivery | — | Planned |
-| 10 | Modern SoC Verification | — | Planned |
-| 11 | Power Management in ML Accelerator SoCs | — | Planned |
-| 12 | Thermal Management in ML Accelerator SoCs | — | Planned |
-| 13 | Clocks and Resets in ML Accelerator SoCs | — | Planned |
+| 08 | CXL in ML Accelerator SoCs | 22 | ✅ Complete |
+| 09 | Modern ML Accelerator SoC Power Delivery | 22 | ✅ Complete |
+| 10 | Modern SoC Verification | 23 | ✅ Complete |
+| 11 | Power Management in ML Accelerator SoCs | 23 | ✅ Complete |
+| 12 | Thermal Management in ML Accelerator SoCs | 23 | ✅ Complete |
+| 13 | Clocks and Resets in ML Accelerator SoCs | 23 | ✅ Complete |
 
 ---
 
@@ -196,6 +196,120 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ---
 
+## Presentation 08: CXL in ML Accelerator SoCs
+
+22 interactive slides covering:
+
+**CXL Protocol Foundation** — CXL protocol stack: CXL.io (PCIe-based discovery/enumeration), CXL.cache (host-managed device cache coherency, D2H/H2D snoop flows), CXL.mem (device-attached memory, M2S/S2M channels, HDM decoders, bias modes). ARB/MUX flex bus multiplexing. 68B vs 256B flit formats.
+
+**CXL Evolution** — CXL 1.0/1.1 (PCIe 5.0, 64 GB/s), CXL 2.0 (switching, pooling, Type 3 devices), CXL 3.0 (PCIe 6.0 PAM4, 128 GB/s, multi-level switching, back-invalidation, GFA), CXL 3.1 (port-based routing, extended PBR, TSP security). Per-version feature and bandwidth comparison.
+
+**Device Taxonomy** — Type 1 (CXL.io + CXL.cache — SmartNICs, accelerators without own memory), Type 2 (all three protocols — GPUs, FPGAs with coherent host memory access), Type 3 (CXL.io + CXL.mem — memory expanders). Detailed per-type protocol usage, examples, and ML integration scenarios.
+
+**CXL Fabric & Pooling** — Single-level and multi-level switching, Fabric Manager API, dynamic capacity devices (DCD). Memory pooling: shared CXL DRAM across multiple hosts, dynamic allocation, multi-headed memory. ML inference cluster pooling economics.
+
+**CXL for ML Workloads** — KV-cache expansion (tiered HBM/CXL DDR5/CXL PMem for LLM serving, latency-hiding prefetch). Memory-bandwidth-bound inference (pooled model sharding, CXL vs RDMA). CXL SoC integration: PHY IP, controller IP, CHI-CXL bridge, latency budget breakdown.
+
+**Case Studies** — Intel Sapphire Rapids CXL 1.1, AMD Genoa CXL 2.0, Samsung CMM-D/CMM-H CXL memory modules, SK hynix CMS, Astera Labs Leo fabric switches, Micron CZ120 memory expander.
+
+---
+
+## Presentation 09: Modern ML Accelerator SoC Power Delivery
+
+22 interactive slides covering:
+
+**PDN Fundamentals** — Power delivery network from VRM through PCB, package, and die. Impedance at each stage. Target impedance (Z_target = V_ripple / I_transient) and frequency-domain analysis. Anti-resonance mitigation.
+
+**Decoupling Hierarchy** — Bulk capacitors, MLCCs, package MIM caps, on-die MOS caps, and embedded deep trench capacitors (eDTC). ESL/ESR analysis at each level. TSMC eDTC capacitance density roadmap.
+
+**IR Drop** — Static vs dynamic IR drop analysis. Current density maps, electromigration reliability (Black's equation). Signoff criteria and margin budgets.
+
+**Voltage Regulation** — Multi-phase buck VRM topologies, DrMOS, 48V direct-to-load conversion. Package-integrated voltage regulators (PIVR/Intel FIVR) for per-core DVFS. On-die LDO and integrated voltage regulators (IVR): digital LDOs, switched-capacitor converters, area/efficiency trade-offs.
+
+**Advanced PDN Technologies** — Backside Power Delivery Network (BSPDN): Intel PowerVia, TSMC N2P/A16 backside power, routing and IR-drop benefits. eDTC integration. TSV power delivery for 2.5D/3D packages.
+
+**ML Accelerator Challenges** — 700W+ AI GPU power architecture (NVIDIA Blackwell 48V path). di/dt management for GEMM↔communication switching transients. Power integrity simulation tools and signoff. Chiplet power delivery and per-chiplet regulation.
+
+**Case Studies** — NVIDIA B200 power architecture, AMD MI300X power delivery, Intel Ponte Vecchio FIVR, Apple M2 Ultra unified memory power.
+
+---
+
+## Presentation 10: Modern SoC Verification
+
+23 interactive slides covering:
+
+**Simulation-Based Verification** — RTL simulation: event-driven simulation, 4-state logic, VCS/Xcelium/Questa/Verilator tool comparison. UVM architecture: agent, driver, monitor, scoreboard, sequencer, constrained-random stimulus, coverage-driven methodology. SystemVerilog Assertions (SVA): immediate vs concurrent assertions, property/sequence syntax examples.
+
+**Coverage-Driven Verification** — Functional coverage, code coverage (line/branch/toggle/FSM), cross-coverage. Covergroup examples. Coverage closure process and signoff targets.
+
+**Formal & Static Methods** — Model checking: bounded vs unbounded proofs, property types, Jasper/VC Formal/Questa Formal. Formal apps: connectivity checking, register verification, deadlock/livelock detection, security path verification, X-propagation. Static analysis: lint (Spyglass/Ascent), CDC, RDC, power-aware checks (UPF/CPF).
+
+**Hardware-Assisted Verification** — Emulation: Palladium/Veloce/ZeBu architectures, ~1–10 MHz speed, ICE/SCE modes. FPGA prototyping: HAPS/Protium, ~50–200 MHz, partitioning challenges, early software development.
+
+**SoC-Level Verification** — Integration verification: connectivity, interrupt routing, address map, power domain testing. DFT: scan insertion, ATPG, Logic BIST, Memory BIST, JTAG boundary scan. Performance verification: traffic generators, NoC validation, memory subsystem verification.
+
+**Modern Challenges** — AI/ML SoC verification: systolic arrays, FP8/INT4 datapath precision, DMA engines, multi-clock NPUs, end-to-end inference validation. Verification signoff: regression management, bug rate curves, tape-out checklist.
+
+**Tools Landscape** — Synopsys VCS/Verdi/ZeBu, Cadence Xcelium/Jasper/Palladium, Siemens Questa/Veloce, open-source (Verilator, cocotb, CHISEL).
+
+---
+
+## Presentation 11: Power Management in ML Accelerator SoCs
+
+23 interactive slides covering:
+
+**Power Domain Architecture** — Domain partitioning: always-on, switchable, retention domains. Isolation cells, level shifters, retention registers. Power gating: header/footer switches, rush current control, 7-step gating sequence (save→isolate→clamp→gate→ungate→de-isolate→restore), wake-up latency. UPF/CPF (IEEE 1801) power intent specification and power-aware verification.
+
+**DVFS** — P = αCV²f fundamentals, operating point tables, voltage-frequency curves, adaptive voltage scaling (AVS), guardband reduction. DVFS implementation: on-die droop detectors, PLL/FLL relock, firmware governors. Per-domain DVFS in ML SoCs: independent NPU/GPU/CPU/memory controller domains.
+
+**Voltage Regulation** — PMIC architecture: multi-rail design, I²C/SPI/SVID control, sequencing, fault protection. LDO vs switching regulators: efficiency, noise, area trade-offs. On-die regulation: digital LDOs, Intel FIVR/PIVR, granular voltage islands.
+
+**ML Workload Optimization** — Dark silicon and utilization: spatial/temporal power scheduling, chiplet budgeting. Clock gating: ICG cells, fine vs coarse-grained, ML-specific gating (sparsity, operand-aware). Workload-aware power management: training phases, inference batching, dynamic power capping, RAPL/NVML/HSMP. Low-power design: multi-Vt libraries, gate-length biasing, power-aware synthesis, leakage at advanced nodes.
+
+**System-Level** — Thermal-power co-management (DTPM), feedback loops, edge thermal constraints.
+
+**Case Studies** — NVIDIA H100 power management, Apple M3 Ultra DVFS, AMD MI300X power domains, Google TPU v5p power architecture, Qualcomm Hexagon DSP power states.
+
+---
+
+## Presentation 12: Thermal Management in ML Accelerator SoCs
+
+23 interactive slides covering:
+
+**Thermal Fundamentals** — Heat transfer mechanisms (conduction, convection, radiation). Thermal resistance networks (Rjc, Rcs, Rsa). Thermal RC models. TDP definition vs real power dissipation. Junction temperature limits and worst-case workloads.
+
+**Thermal Interface Materials** — TIM1 (die-to-IHS) and TIM2 (IHS-to-heatsink). Thermal conductivity comparison: paste, pad, liquid metal, graphite, solder TIM. Pump-out and dry-out degradation mechanisms.
+
+**Air Cooling** — Heatsink design: fin geometry, baseplate spreading, heat pipe integration. Vapour chambers: operating principle (evaporation→transport→condensation→wick return), thermal spreading performance. Fan and airflow: CFD-optimized designs, push-pull configurations, acoustic constraints, server rack airflow management.
+
+**Liquid Cooling** — Cold plate designs: direct-to-chip, microchannel geometries, coolant selection, flow rate vs pressure drop. Direct liquid cooling: TSMC direct-to-silicon (0.055 °C/W at 2.6 kW). Immersion cooling: single-phase vs two-phase, dielectric fluids (3M Novec), data center deployment, PUE impact.
+
+**On-Die Thermal Management** — Hotspot mitigation: non-uniform power maps, on-die thermal sensors, dynamic workload migration, HBM/logic thermal coupling in 2.5D/3D. Thermal throttling: PROCHOT, hardware frequency/voltage reduction, firmware control loops. 3D stacking thermal challenges: inter-die resistance, TSV thermal paths, HBM stack limits.
+
+**System & Data Center** — Rack-level cooling (42–100+ kW per rack), hot/cold aisle containment, ASHRAE guidelines. AI supercomputer cooling: NVIDIA DGX SuperPOD, Google TPU pods, Meta Grand Teton, Microsoft Maia.
+
+**Case Studies** — NVIDIA H100/B200 thermal solutions, AMD MI300X vapour chamber, Intel Ponte Vecchio liquid cooling, TSMC direct-to-silicon cooling roadmap.
+
+---
+
+## Presentation 13: Clocks and Resets in ML Accelerator SoCs
+
+23 interactive slides covering:
+
+**Clock Generation** — Charge-pump PLL architecture (PFD→CP→LPF→VCO→divider), loop bandwidth, lock time, phase noise. Advanced PLL types: ADPLL (all-digital), fractional-N, bang-bang PLL for SerDes CDR, sub-picosecond jitter PLLs. PLL specification comparison: period jitter, cycle-to-cycle jitter, phase noise (dBc/Hz), lock time, tuning range, power.
+
+**Clock Distribution** — Clock tree synthesis: H-tree, mesh, fishbone topologies; skew minimisation, insertion delay, useful skew, OCV/AOCV. Clock mesh and spine: global low-skew distribution, grid shielding, capacitive loading analysis. Clock gating: ICG cells (latch-based), hierarchical gating, efficiency metrics.
+
+**Clock Domain Crossing** — Metastability theory and MTBF calculation. Synchroniser design (2-FF, 3-FF). CDC data transfer: toggle synchroniser, gray-code FIFO, MUX recirculation, handshake protocols. Async FIFO design with gray-code pointers. CDC verification: Spyglass CDC, Meridian CDC, Questa CDC, reconvergence and glitch detection. GALS: mesochronous, plesiochronous, heterochronous interfaces; pausable clocking; GALS wrappers.
+
+**Reset Architecture** — Synchronous vs asynchronous reset. Async-assert/sync-deassert pattern with Verilog examples. Reset tree distribution. Reset sequencing: multi-domain ordering, POR, brown-out detection, watchdog timer, warm vs cold reset, SoC reset state machine.
+
+**ML Accelerator Specifics** — Multi-domain clock architecture (NPU core, SRAM, NoC, HBM PHY, PCIe, management processor) with independent DVFS. Jitter budgets: HBM PHY allocation, SerDes reference clock requirements, DDR/LPDDR specs, PLL cascading jitter accumulation (RSS).
+
+**Case Studies** — NVIDIA GPU GPC boost clocking, AMD MI300X Infinity Fabric clocking, Apple SoC clock domains, Intel Ponte Vecchio multi-tile clocking.
+
+---
+
 ## Repository Structure
 
 ```
@@ -213,7 +327,19 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 │   └── index.html
 ├── 06-socs-for-ml-inference/
 │   └── index.html
-└── 07-security-in-soc-design/
+├── 07-security-in-soc-design/
+│   └── index.html
+├── 08-cxl-in-ml-accelerator-socs/
+│   └── index.html
+├── 09-power-delivery/
+│   └── index.html
+├── 10-soc-verification/
+│   └── index.html
+├── 11-power-management/
+│   └── index.html
+├── 12-thermal-management/
+│   └── index.html
+└── 13-clocks-and-resets/
     └── index.html
 ```
 
@@ -247,6 +373,18 @@ Each presentation is a single self-contained `index.html`. No build step, no npm
 **ML Inference:** Groq LPU Architecture · AMD MI300X Architecture White Paper · Apple M-series Architecture Overview · vLLM Paged Attention (SOSP 2023)
 
 **Security:** NIST SP 800-90A/B/C (DRBG, Entropy Sources) · NIST FIPS 203/204/205 (ML-KEM, ML-DSA, SLH-DSA) · TCG DICE Architecture Specification · Arm TrustZone / CCA Architecture Reference · AMD SEV-SNP Architecture Guide · Kocher et al., "Differential Power Analysis," CRYPTO 1999 · Mangard, Oswald & Popp, *Power Analysis Attacks*, Springer 2007 · Rührmair et al., "PUF Modelling Attacks," ACM CCS 2010 · SEMI T20 Supply Chain Integrity Standard · IPC-1782 Traceability Standard
+
+**CXL:** CXL Consortium Specifications 1.0–3.1 · Sharma et al., "An Introduction to the Compute Express Link," IEEE Micro 2022 · Pond et al., "CXL Memory Pooling for ML Inference," ASPLOS 2023 · Linux CXL Subsystem Documentation
+
+**Power Delivery:** Swaminathan & Engin, *Power Integrity Modeling and Design for Semiconductors and Systems*, Prentice Hall · Intel PowerVia Technology White Paper · TSMC N2P/A16 Backside Power Delivery · Jakushokas et al., "Power Distribution Networks with On-Chip Decoupling Capacitors," Springer 2011
+
+**Verification:** Spear, *SystemVerilog for Verification*, Springer · IEEE 1800-2017 (SystemVerilog) · Accellera UVM 1.2 Reference Guide · Cadence Jasper Formal Verification · Synopsys ZeBu Architecture White Paper · Foster et al., *Assertion-Based Design*, Springer
+
+**Power Management:** IEEE 1801 (UPF) · Rabaey et al., *Digital Integrated Circuits*, Prentice Hall · Brooks & Martonosi, "Dynamic Thermal Management for High-Performance Microprocessors," HPCA 2001 · NVIDIA NVML/DCGM Documentation · Intel RAPL Specification
+
+**Thermal:** ASHRAE TC 9.9, *Thermal Guidelines for Data Processing Environments* · Bar-Cohen & Iyengar, *Design and Optimization of Thermal Systems*, Wiley · TSMC Direct-to-Silicon Liquid Cooling Technology · Kandlikar et al., "Review of Heat Transfer Enhancement in Microchannels," ASME 2005
+
+**Clocks & Resets:** Razavi, *Design of Analog CMOS Integrated Circuits* (PLL chapters) · Kundert, *The Designer's Guide to Spice and Spectre* · Ginosar, "Metastability and Synchronizers: A Tutorial," IEEE Design & Test 2011 · Cummings, "Simulation and Synthesis Techniques for Asynchronous FIFO Design," SNUG 2002
 
 ## License
 

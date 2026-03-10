@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modern ML Accelerator SoC Power Delivery — From VRM to Transistor</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+    --r-background-color: #0a0a0f;
+    --r-main-font: 'DM Sans', sans-serif;
+    --r-heading-font: 'Playfair Display', serif;
+    --r-code-font: 'JetBrains Mono', monospace;
+    --r-main-font-size: 28px;
+    --r-heading-color: #e8e4df;
+    --r-main-color: #c8c4bf;
+    --r-link-color: #7eb8da;
+    --r-link-color-hover: #a8d4ef;
+    --r-selection-background-color: #2a5a7a;
+    --accent: #7eb8da;
+    --accent2: #e8a87c;
+    --accent3: #8fd4a4;
+    --accent4: #c49dd8;
+    --dim: #6a6660;
+    --surface: #16161e;
+    --surface2: #1e1e28;
+    --bg: #0a0a0f;
+    --panel: #16161e;
+    --border: #2a2a3a;
+    --muted: #6a6660;
+    --text: #c8c4bf;
+    --white: #e8e4df;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Playfair Display', serif;
+    --sans: 'DM Sans', sans-serif;
+}
+
+/* ─── reveal base ─── */
+.reveal-viewport { background: var(--bg); }
+.reveal { font-family: var(--sans); font-size: 1.55rem; color: var(--text); }
+.reveal h1,.reveal h2,.reveal h3,.reveal h4 {
+  font-family: var(--serif); letter-spacing: 0.01em; text-transform: none;
+  margin-bottom: 0.5em; color: var(--white); text-shadow: none;
+}
+.reveal h1 { font-size: 1.8em; line-height: 1.15; }
+.reveal h2 { font-size: 1.3em; }
+.reveal h3 { font-size: 1.05em; color: var(--accent); }
+.reveal p  { line-height: 1.55; margin: 0.4em 0; font-size: 0.82em; }
+.reveal ul { list-style: none; padding: 0; margin: 0; }
+.reveal ul li { padding: 0.18em 0 0.18em 1.2em; position: relative; font-size: 0.78em; line-height: 1.5; }
+.reveal ul li::before { content: "\25B8"; position: absolute; left: 0; color: var(--accent); }
+.reveal ul ul li::before { color: var(--accent2); content: "\25E6"; }
+.reveal section { padding: 0 !important; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+
+/* ─── accent/utility classes ─── */
+.accent  { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.dim     { color: var(--muted); }
+.mono    { font-family: var(--mono); font-size: 0.85em; }
+.small   { font-size: 0.82em; }
+.smaller { font-size: 0.72em; }
+.tiny    { font-size: 0.6em; }
+.left    { text-align: left; }
+.center  { text-align: center; }
+
+/* ─── slide shell ─── */
+.slide {
+  width: 100%; height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  padding: 2.8rem 3.4rem 1.6rem;
+  background: var(--bg);
+  position: relative; overflow: hidden;
+}
+.slide::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+}
+
+/* ─── hero / title slide ─── */
+.hero, .title-slide {
+  justify-content: center; align-items: flex-start;
+  background: radial-gradient(ellipse 80% 60% at 70% 50%, #111828 0%, var(--bg) 70%);
+}
+.hero::after, .title-slide::after {
+  content: '';
+  position: absolute; right: -6rem; top: -6rem;
+  width: 42rem; height: 42rem; border-radius: 50%;
+  border: 1px solid rgba(126,184,218,0.08);
+  box-shadow: 0 0 0 4rem rgba(126,184,218,0.03), 0 0 0 8rem rgba(126,184,218,0.015);
+  pointer-events: none;
+}
+.hero-eyebrow { font-family: var(--mono); font-size: 0.62em; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1.2em; }
+.hero h1, .title-slide h1 { font-size: 2.1em; line-height: 1.1; max-width: 14em; }
+.hero-sub { font-size: 0.72em; color: var(--muted); margin-top: 1.2em; max-width: 38em; line-height: 1.7; }
+.hero-tags { display: flex; gap: 0.7em; flex-wrap: wrap; margin-top: 1.8em; }
+
+/* ─── section slide ─── */
+.section-slide {
+  justify-content: center; align-items: flex-start;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, #111828 0%, var(--bg) 70%);
+}
+.section-num {
+  font-family: var(--mono); font-size: 3.5em; font-weight: 700;
+  color: rgba(126,184,218,0.12); line-height: 1; margin-bottom: 0.1em;
+}
+
+/* ─── tags ─── */
+.tag { font-family: var(--mono); font-size: 0.55em; padding: 0.3em 0.8em; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); }
+.tag-blue  { background: rgba(126,184,218,0.12); color: var(--accent);  border-color: rgba(126,184,218,0.3); }
+.tag-amber { background: rgba(232,168,124,0.12); color: var(--accent2); border-color: rgba(232,168,124,0.3); }
+.tag-green { background: rgba(143,212,164,0.12); color: var(--accent3); border-color: rgba(143,212,164,0.3); }
+.tag-purple{ background: rgba(196,157,216,0.12); color: var(--accent4); border-color: rgba(196,157,216,0.3); }
+
+/* ─── positioning helpers ─── */
+.slide-num { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; right: 2em; }
+.series-badge { font-family: var(--mono); font-size: 0.52em; color: var(--border); position: absolute; bottom: 1.4em; left: 2em; }
+.slide-title { font-size: 1.0em; margin-bottom: 0.1em; }
+.slide-subtitle { font-size: 0.62em; color: var(--muted); font-family: var(--mono); letter-spacing: 0.06em; margin-bottom: 0.6em; }
+.slide-footer { font-family: var(--mono); font-size: 0.45em; color: var(--muted); position: absolute; bottom: 1.4em; left: 2em; }
+hr.div { border: none; border-top: 1px solid var(--border); margin: 0.8em 0; }
+
+/* ─── layout helpers ─── */
+.cols { display: grid; gap: 2rem; margin-top: 0.8rem; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-2-1 { grid-template-columns: 2fr 1fr; }
+.cols-1-2 { grid-template-columns: 1fr 2fr; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 0.8rem; }
+.two-col-60-40 { display: grid; grid-template-columns: 60fr 40fr; gap: 2rem; margin-top: 0.8rem; }
+.two-col-40-60 { display: grid; grid-template-columns: 40fr 60fr; gap: 2rem; margin-top: 0.8rem; }
+
+/* ─── panel ─── */
+.panel {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1.2rem 1.4rem;
+  position: relative;
+}
+.panel-title {
+  font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.5em;
+}
+.panel-title.amber { color: var(--accent2); }
+.panel-title.green { color: var(--accent3); }
+.panel-title.purple { color: var(--accent4); }
+.panel h3 { margin-top: 0; }
+
+/* ─── box / box-row ─── */
+.box {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.6em 0.9em;
+  font-family: var(--mono); font-size: 0.62em;
+  text-align: center; color: var(--text);
+}
+.box.blue   { border-color: var(--accent);  color: var(--accent);  }
+.box.amber  { border-color: var(--accent2); color: var(--accent2); }
+.box.green  { border-color: var(--accent3); color: var(--accent3); }
+.box.purple { border-color: var(--accent4); color: var(--accent4); }
+.box-row { display: flex; gap: 0.8em; margin: 0.6em 0; flex-wrap: wrap; }
+.box-row .box { flex: 1; }
+
+/* ─── key-value rows ─── */
+.kv-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
+.kv-row:last-child { border-bottom: none; }
+.kv-label { color: var(--muted); }
+.kv-value { font-family: var(--mono); color: var(--accent); }
+.kv-value.amber { color: var(--accent2); }
+.kv-value.green { color: var(--accent3); }
+.kv-value.purple { color: var(--accent4); }
+.kv { display: flex; justify-content: space-between; align-items: baseline; padding: 0.22em 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7em; }
+
+/* ─── steps ─── */
+.steps { counter-reset: step; padding-left: 0; }
+.steps li { counter-increment: step; list-style: none; padding-left: 2em; position: relative; margin-bottom: 0.5em; }
+.steps li::before { content: counter(step); position: absolute; left: 0; font-family: var(--mono); font-weight: 700; color: var(--accent); font-size: 0.9em; }
+
+/* ─── arch-stack ─── */
+.arch-stack { display: flex; flex-direction: column; gap: 0; }
+.arch-layer {
+  padding: 0.5em 1em; text-align: center;
+  font-family: var(--mono); font-size: 0.62em;
+  border: 1px solid var(--border); background: var(--panel);
+}
+.arch-layer.blue   { border-color: var(--accent);  color: var(--accent);  background: rgba(126,184,218,0.07); }
+.arch-layer.amber  { border-color: var(--accent2); color: var(--accent2); background: rgba(232,168,124,0.07); }
+.arch-layer.green  { border-color: var(--accent3); color: var(--accent3); background: rgba(143,212,164,0.07); }
+.arch-layer.purple { border-color: var(--accent4); color: var(--accent4); background: rgba(196,157,216,0.07); }
+
+/* ─── flow arrow ─── */
+.flow-arrow { text-align: center; font-size: 1.2em; color: var(--muted); line-height: 1; padding: 0.1em 0; }
+
+/* ─── highlight bar ─── */
+.highlight-bar {
+  background: linear-gradient(135deg, rgba(126,184,218,0.07), rgba(126,184,218,0.02));
+  border: 1px solid rgba(126,184,218,0.25); border-radius: 3px;
+  padding: 0.9em 1.1em; font-size: 0.72em; line-height: 1.55;
+}
+.highlight-bar.amber { background: linear-gradient(135deg, rgba(232,168,124,0.07), rgba(232,168,124,0.02)); border-color: rgba(232,168,124,0.25); }
+.highlight-bar.green { background: linear-gradient(135deg, rgba(143,212,164,0.07), rgba(143,212,164,0.02)); border-color: rgba(143,212,164,0.25); }
+.highlight-bar.purple { background: linear-gradient(135deg, rgba(196,157,216,0.07), rgba(196,157,216,0.02)); border-color: rgba(196,157,216,0.25); }
+
+/* ─── accent box ─── */
+.accent-box {
+  background: linear-gradient(135deg, rgba(126,184,218,0.07), rgba(126,184,218,0.02));
+  border: 1px solid rgba(126,184,218,0.25); border-radius: 3px;
+  padding: 0.9em 1.1em; font-size: 0.72em; line-height: 1.55;
+}
+.accent-box.amber { background: linear-gradient(135deg, rgba(232,168,124,0.07), rgba(232,168,124,0.02)); border-color: rgba(232,168,124,0.25); }
+.accent-box.green { background: linear-gradient(135deg, rgba(143,212,164,0.07), rgba(143,212,164,0.02)); border-color: rgba(143,212,164,0.25); }
+.accent-box.purple { background: linear-gradient(135deg, rgba(196,157,216,0.07), rgba(196,157,216,0.02)); border-color: rgba(196,157,216,0.25); }
+
+/* ─── stat row ─── */
+.stat-row { display: flex; gap: 1em; margin: 0.6em 0; }
+.stat {
+  flex: 1; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.7em 0.9em; text-align: center;
+}
+.stat .val {
+  font-family: var(--serif); font-size: 1.5em; color: var(--accent); display: block; line-height: 1;
+}
+.stat .lbl { font-size: 0.55em; color: var(--muted); display: block; margin-top: 0.3em; }
+
+/* ─── table ─── */
+.dtable { width: 100%; border-collapse: collapse; font-size: 0.65em; }
+.dtable th { background: var(--panel); color: var(--accent); font-family: var(--mono); font-size: 0.92em; letter-spacing: 0.07em; padding: 0.55em 0.7em; border: 1px solid var(--border); text-align: left; }
+.dtable td { padding: 0.45em 0.7em; border: 1px solid var(--border); color: var(--text); }
+.dtable tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+.dtable td.hi { color: var(--accent); font-family: var(--mono); }
+.dtable td.am { color: var(--accent2); font-family: var(--mono); }
+.dtable td.gr { color: var(--accent3); font-family: var(--mono); }
+.dtable td.pr { color: var(--accent4); font-family: var(--mono); }
+
+/* ─── equation ─── */
+.eq { font-family: var(--mono); font-size: 0.72em; color: var(--accent3); background: var(--panel); border: 1px solid var(--border); padding: 0.5em 1em; border-radius: 3px; text-align: center; }
+
+/* ─── timeline ─── */
+.timeline { position: relative; padding-left: 1.8rem; }
+.timeline::before { content:''; position:absolute; left:0.5rem; top:0.4em; bottom:0; width:1px; background: var(--border); }
+.tl-item { position:relative; margin-bottom:0.9em; }
+.tl-item::before { content:''; position:absolute; left:-1.38rem; top:0.4em; width:0.55rem; height:0.55rem; border-radius:50%; background: var(--accent); border:2px solid var(--bg); }
+.tl-item.amber::before { background: var(--accent2); }
+.tl-item.green::before { background: var(--accent3); }
+.tl-label { font-family: var(--mono); font-size:0.58em; color: var(--accent); }
+.tl-item.amber .tl-label { color: var(--accent2); }
+.tl-item.green .tl-label { color: var(--accent3); }
+.tl-text  { font-size: 0.72em; color: var(--text); line-height:1.45; margin-top:0.15em; }
+
+/* ─── code blocks ─── */
+.reveal pre {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; font-size: 0.6em; margin: 0;
+  box-shadow: none;
+}
+.reveal pre code { padding: 0.8em 1em; }
+
+/* ─── blockquote ─── */
+.reveal blockquote {
+  background: var(--panel); border-left: 3px solid var(--accent);
+  padding: 0.8em 1.2em; margin: 0.6em 0; font-size: 0.75em;
+  color: var(--text); font-style: italic; width: auto;
+  box-shadow: none;
+}
+
+/* ─── SVG diagrams ─── */
+svg.diag { width:100%; height:auto; display:block; }
+
+/* ─── progress bar ─── */
+.prog-wrap { background:var(--panel); border:1px solid var(--border); border-radius:2px; height:0.55rem; margin:0.35em 0; }
+.prog-bar  { height:100%; border-radius:2px; }
+
+/* ─── reveal overrides ─── */
+.reveal .controls { color: var(--accent); }
+.reveal .progress  { color: var(--accent); height: 3px; }
+.reveal .slide-number { font-family: var(--mono); font-size: 0.4em; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- SLIDE 1: Title                                               -->
+<!-- ============================================================ -->
+<section>
+<div class="slide hero" style="background: radial-gradient(ellipse at 30% 50%, #111828 0%, var(--bg) 70%);">
+  <div class="hero-eyebrow">Modern SoC Design Series &middot; Presentation 09</div>
+  <h1>ML Accelerator SoC<br/>Power Delivery</h1>
+  <p class="hero-sub">
+    From VRM to Transistor &mdash; Delivering 1000&thinsp;W+ to AI Silicon.
+    A rigorous tour of PDN impedance, backside power, integrated voltage regulation,
+    and the techniques that keep next-generation ML accelerators within their voltage noise budget.
+  </p>
+  <div class="hero-tags">
+    <span class="tag">BSPDN</span>
+    <span class="tag">PIVR</span>
+    <span class="tag">On-die Voltage Regulation</span>
+    <span class="tag">PDN Impedance</span>
+    <span class="tag">eDTC</span>
+    <span class="tag">Power Integrity</span>
+    <span class="tag">IR Drop</span>
+  </div>
+  <div class="series-badge">Modern SoC Design Series</div>
+  <div class="slide-num">01 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2: Why Power Delivery Matters                          -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Why Power Delivery Matters for ML SoCs</div>
+  <div class="slide-subtitle">the hardest problem nobody outside silicon talks about</div>
+
+  <div class="stat-row" style="margin-top:0.5rem;">
+    <div class="stat"><span class="val">700&ndash;1200 W</span><span class="lbl">TDP of modern AI accelerators (B200, MI300X)</span></div>
+    <div class="stat"><span class="val" style="color:var(--accent2);">600+ A</span><span class="lbl">Peak current at 0.75&thinsp;V core supply</span></div>
+    <div class="stat"><span class="val" style="color:var(--accent3);">&lt;3%</span><span class="lbl">Voltage noise budget (&plusmn;22&thinsp;mV at 0.75&thinsp;V)</span></div>
+    <div class="stat"><span class="val" style="color:var(--accent4);">100+ A/ns</span><span class="lbl">di/dt transient during workload switching</span></div>
+  </div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.7rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title amber">Why It Is Getting Harder</div>
+        <ul>
+          <li><strong>Lower Vdd</strong> &mdash; sub-0.8&thinsp;V rails shrink absolute noise margin</li>
+          <li><strong>Higher current density</strong> &mdash; &gt;2&thinsp;A/mm&sup2; in modern logic tiles</li>
+          <li><strong>Bursty workloads</strong> &mdash; GEMM&rarr;all-reduce transitions create massive di/dt</li>
+          <li><strong>Larger die / multi-die</strong> &mdash; reticle-limit dies and chiplet assemblies lengthen PDN</li>
+          <li><strong>Thermal co-stress</strong> &mdash; hot spots raise local resistance, worsening IR drop</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Consequences of Poor Power Delivery</div>
+        <ul>
+          <li><strong>Timing failures</strong> &mdash; voltage droop slows gates, violates setup constraints</li>
+          <li><strong>Frequency guardband</strong> &mdash; 10&ndash;15% clock reduction to tolerate worst-case droop</li>
+          <li><strong>Electromigration</strong> &mdash; J &gt; J_crit accelerates void formation (Black&rsquo;s law)</li>
+          <li><strong>Reliability</strong> &mdash; repeated thermal cycling fatigues solder bumps/pillars</li>
+          <li><strong>Power waste</strong> &mdash; voltage guardbands &times; current = wasted Watts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-bar amber" style="margin-top:0.7rem;">
+    Every 1% reduction in voltage guardband for a 1000&thinsp;W accelerator recovers ~10&thinsp;W &mdash; equivalent to a meaningful gain in TOPS/W for inference workloads.
+  </div>
+  <div class="slide-num">02 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3: Section — PDN Fundamentals                          -->
+<!-- ============================================================ -->
+<section>
+<div class="slide section-slide">
+  <div class="section-num">I</div>
+  <h2>PDN Fundamentals</h2>
+  <p class="hero-sub" style="margin-top:0.4em;">
+    Impedance targets, decoupling hierarchies, and IR drop &mdash; the physics that constrain
+    every watt reaching the transistor.
+  </p>
+  <div class="slide-num">03 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4: PDN Overview                                        -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Power Delivery Network Overview</div>
+  <div class="slide-subtitle">VRM &rarr; PCB &rarr; Package &rarr; Die &mdash; every stage matters</div>
+
+  <div class="arch-stack" style="margin-top:0.6rem;">
+    <div class="arch-layer blue">VRM (Voltage Regulator Module) &mdash; 48&thinsp;V &rarr; 0.75&thinsp;V, multi-phase buck, &lt;1&thinsp;m&Omega; output impedance</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="arch-layer amber">PCB Planes &amp; Traces &mdash; 12&ndash;20 layer stackup, 50&ndash;200&thinsp;&micro;&Omega; sheet resistance, bulk &amp; MLCC decaps</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="arch-layer green">Package Substrate &mdash; 8&ndash;16 RDL layers, &micro;-bumps / C4 bumps, package decoupling caps (100s of nF)</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="arch-layer purple">On-Die PDN &mdash; M1&ndash;M15 metal stack, on-die MOS caps / eDTC, &lt;10&thinsp;m&Omega; target at &gt;100&thinsp;MHz</div>
+  </div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.8rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Impedance Budget by Stage</div>
+        <table class="dtable">
+          <tr><th>Stage</th><th>Z_typ</th><th>Frequency Range</th><th>Key Elements</th></tr>
+          <tr><td>VRM</td><td class="hi">&lt;1 m&Omega;</td><td>DC &ndash; 100 kHz</td><td>Output filter LC</td></tr>
+          <tr><td>PCB</td><td class="am">0.5&ndash;2 m&Omega;</td><td>100 kHz &ndash; 10 MHz</td><td>Bulk + MLCC caps</td></tr>
+          <tr><td>Package</td><td class="gr">1&ndash;5 m&Omega;</td><td>10&ndash;200 MHz</td><td>Pkg caps, TSVs</td></tr>
+          <tr><td>On-die</td><td class="pr">&lt;1 m&Omega;</td><td>&gt;200 MHz</td><td>MOS caps, eDTC</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title amber">Typical Numbers &mdash; 700W AI GPU</div>
+        <div class="kv-row"><span class="kv-label">Core voltage (Vdd)</span><span class="kv-value">0.75 V nominal</span></div>
+        <div class="kv-row"><span class="kv-label">Peak current</span><span class="kv-value amber">~930 A</span></div>
+        <div class="kv-row"><span class="kv-label">Bump / pillar count</span><span class="kv-value">50,000+ power bumps</span></div>
+        <div class="kv-row"><span class="kv-label">PCB decoupling</span><span class="kv-value green">~10 mF (MLCC array)</span></div>
+        <div class="kv-row"><span class="kv-label">Package decoupling</span><span class="kv-value green">200&ndash;800 nF</span></div>
+        <div class="kv-row"><span class="kv-label">On-die MOS cap</span><span class="kv-value green">100&ndash;300 nF</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">04 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5: PDN Impedance & Target Impedance                    -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">PDN Impedance &amp; Target Impedance</div>
+  <div class="slide-subtitle">frequency-domain view of power delivery quality</div>
+
+  <div class="eq" style="margin-top:0.5rem;margin-bottom:0.7rem;">
+    Z_target = V_ripple / I_transient &nbsp;&nbsp;&mdash;&nbsp;&nbsp; e.g. Z_target = 22.5 mV / 600 A = 37.5 &micro;&Omega;
+  </div>
+
+  <div class="cols cols-2" style="gap:1.4rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Target Impedance Method</div>
+        <ul>
+          <li><strong>Flat impedance</strong> &mdash; maintain Z &lt; Z_target from DC to ~1&thinsp;GHz</li>
+          <li><strong>Anti-resonance peaks</strong> &mdash; occur at transitions between cap stages; must be damped below target</li>
+          <li><strong>Series resonance</strong> of each cap stage creates a &ldquo;valley&rdquo; in Z(f) where that stage dominates</li>
+          <li><strong>Parallel resonance</strong> between adjacent stages creates dangerous peaks</li>
+          <li>Analysis via S-parameter measurements or 3D EM extraction tools (Ansys SIwave, Cadence Sigrity)</li>
+        </ul>
+      </div>
+      <div class="accent-box" style="margin-top:0.7rem;">
+        For a 1000&thinsp;W SoC at 0.75&thinsp;V with 3% noise margin: Z_target = 0.0225 / 1333 = <strong style="color:var(--accent);">16.9&thinsp;&micro;&Omega;</strong> &mdash; an extraordinarily low impedance to maintain across decades of frequency.
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Frequency Regimes</div>
+        <table class="dtable">
+          <tr><th>Regime</th><th>Freq</th><th>Dominant Elements</th></tr>
+          <tr><td>VRM loop</td><td class="hi">DC &ndash; 50 kHz</td><td>VRM feedback + output caps</td></tr>
+          <tr><td>PCB resonance</td><td class="am">50 kHz &ndash; 5 MHz</td><td>Bulk + MLCC bank</td></tr>
+          <tr><td>Package cavity</td><td class="gr">5&ndash;200 MHz</td><td>Pkg caps + substrate planes</td></tr>
+          <tr><td>On-die network</td><td class="pr">200 MHz &ndash; 2 GHz</td><td>On-die decap + grid R/L</td></tr>
+          <tr><td>On-die local</td><td>&gt;2 GHz</td><td>Local wiring + gate cap</td></tr>
+        </table>
+      </div>
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Anti-Resonance Mitigation</div>
+        <ul>
+          <li>Overlap ESR-damped capacitor values to smooth transitions</li>
+          <li>Use controlled-ESR capacitors to flatten peaks</li>
+          <li>Distribute package caps spatially to reduce mutual inductance</li>
+          <li>eDTC on-die capacitance pushes mid-frequency Z below target</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">05 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6: Decoupling Capacitor Hierarchy                      -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Decoupling Capacitor Hierarchy</div>
+  <div class="slide-subtitle">ESL and ESR dominate performance at each stage</div>
+
+  <table class="dtable" style="margin-top:0.5rem;">
+    <tr>
+      <th>Cap Type</th><th>Capacitance</th><th>ESR</th><th>ESL</th><th>f_res</th><th>Location</th><th>Role</th>
+    </tr>
+    <tr>
+      <td><strong>Bulk electrolytic</strong></td><td class="hi">100&ndash;1000 &micro;F</td><td class="am">5&ndash;50 m&Omega;</td>
+      <td>5&ndash;20 nH</td><td class="gr">50&ndash;200 kHz</td><td>PCB near VRM</td><td>Energy reservoir, VRM decoupling</td>
+    </tr>
+    <tr>
+      <td><strong>MLCC (0402/0201)</strong></td><td class="hi">100 nF &ndash; 22 &micro;F</td><td class="am">2&ndash;10 m&Omega;</td>
+      <td>200&ndash;800 pH</td><td class="gr">2&ndash;30 MHz</td><td>PCB under socket</td><td>Mid-frequency decoupling</td>
+    </tr>
+    <tr>
+      <td><strong>Package MIM caps</strong></td><td class="hi">10&ndash;200 nF</td><td class="am">10&ndash;50 m&Omega;</td>
+      <td>30&ndash;100 pH</td><td class="gr">50&ndash;500 MHz</td><td>Package substrate</td><td>Package resonance suppression</td>
+    </tr>
+    <tr>
+      <td><strong>On-die MOS cap</strong></td><td class="hi">50&ndash;200 nF</td><td class="am">1&ndash;5 m&Omega;</td>
+      <td>&lt;10 pH</td><td class="gr">&gt;1 GHz</td><td>Die (filler cells)</td><td>High-freq local decoupling</td>
+    </tr>
+    <tr>
+      <td><strong>eDTC (deep trench)</strong></td><td class="hi">100&ndash;500 nF</td><td class="am">&lt;2 m&Omega;</td>
+      <td>&lt;5 pH</td><td class="gr">&gt;2 GHz</td><td>Die (BEOL/substrate)</td><td>Ultra-high-freq, replaces area</td>
+    </tr>
+  </table>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.7rem;">
+    <div>
+      <div class="highlight-bar" style="margin-bottom:0;">
+        <strong style="color:var(--accent);">ESL is the enemy.</strong> At high frequencies, Z = 2&pi;f &middot; ESL dominates. A 10&thinsp;&micro;F cap with 1&thinsp;nH ESL has Z = 6.3&thinsp;&Omega; at 1&thinsp;GHz &mdash; useless for on-die decoupling. Only on-die caps with sub-10&thinsp;pH ESL matter above 200&thinsp;MHz.
+      </div>
+    </div>
+    <div>
+      <div class="highlight-bar amber" style="margin-bottom:0;">
+        <strong style="color:var(--accent2);">Modern PDN: 1000+ MLCC</strong> on the PCB, 100+ package caps in the substrate, and &gt;15% of die area dedicated to on-die decoupling (MOS cap filler + eDTC). Total system decoupling: ~10&ndash;15 mF.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">06 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7: IR Drop Analysis                                    -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">IR Drop Analysis</div>
+  <div class="slide-subtitle">static vs dynamic drop, current density, and electromigration</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Static IR Drop</div>
+        <ul>
+          <li><strong>V_drop = I &times; R_path</strong> from pad to transistor</li>
+          <li>Dominated by metal stack sheet resistance (Cu at 5nm: R_sheet ~50&ndash;100 m&Omega;/sq for M1)</li>
+          <li>Worst at die center &mdash; longest path from peripheral power bumps</li>
+          <li>Typical budget: 20&ndash;40 mV static drop (3&ndash;5% of Vdd)</li>
+          <li>Mitigation: thicker upper metals (M12&ndash;M15 at 3&ndash;5&thinsp;&micro;m), denser bump grid, BSPDN</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Dynamic IR Drop</div>
+        <ul>
+          <li><strong>V_drop = L &times; di/dt + I &times; R</strong> &mdash; inductive component dominates during transients</li>
+          <li>Triggered by simultaneous switching of large logic blocks</li>
+          <li>Can exceed static drop by 2&ndash;5&times; during worst-case events</li>
+          <li>Duration: typically 1&ndash;50 ns droop events</li>
+          <li>Mitigation: decoupling, staggered clock enables, power-aware placement</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Electromigration &amp; Black's Equation</div>
+        <div class="eq" style="margin-bottom:0.6rem;">
+          MTTF = A &times; J<sup>&minus;n</sup> &times; exp(E_a / k_B T)
+        </div>
+        <ul>
+          <li><strong>J</strong> &mdash; current density (A/cm&sup2;); <strong>n</strong> &asymp; 1&ndash;2 for Cu</li>
+          <li><strong>E_a</strong> &mdash; activation energy (~0.7&ndash;0.9 eV for Cu dual-damascene)</li>
+          <li><strong>T</strong> &mdash; temperature; 10&deg;C rise &rarr; ~2&times; EM rate acceleration</li>
+          <li>J_max for Cu at 105&deg;C: ~1&ndash;2 MA/cm&sup2; (varies by process / metal level)</li>
+          <li>Power grid wires must be sized for EM limits, not just IR drop</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">Current Density Maps</div>
+        <ul>
+          <li>Generated via vectorless or VCD-based dynamic analysis</li>
+          <li>Hot spots correlate with high-activity macro blocks (tensor cores, SRAM banks)</li>
+          <li>Tools: Cadence Voltus, Synopsys RedHawk, Ansys Totem</li>
+          <li>Signoff criteria: max dynamic droop &lt; 8&ndash;10% Vdd, EM margin &gt;10 years at 105&deg;C</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">07 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8: Section — Voltage Regulation                        -->
+<!-- ============================================================ -->
+<section>
+<div class="slide section-slide">
+  <div class="section-num">II</div>
+  <h2>Voltage Regulation</h2>
+  <p class="hero-sub" style="margin-top:0.4em;">
+    From board-level VRMs to package-integrated and on-die regulators &mdash;
+    moving regulation closer to the load.
+  </p>
+  <div class="slide-num">08 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9: VRM Topologies                                      -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">VRM Topologies for AI Accelerators</div>
+  <div class="slide-subtitle">multi-phase buck converters, DrMOS, and transient response</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Multi-Phase Buck Converter</div>
+        <ul>
+          <li><strong>Topology</strong> &mdash; N interleaved buck phases (typically 12&ndash;20 phases for &gt;600A)</li>
+          <li><strong>Switching freq</strong> &mdash; 400&ndash;800 kHz per phase; effective ripple at N&times;f_sw</li>
+          <li><strong>Current sharing</strong> &mdash; DCR sensing or hall-effect; &lt;5% imbalance target</li>
+          <li><strong>Efficiency</strong> &mdash; 90&ndash;93% at full load for 12V&rarr;0.75V conversion</li>
+          <li><strong>Transient response</strong> &mdash; droop during 0&rarr;full-load step: V_droop = L_out &times; di/dt</li>
+          <li><strong>Output filter</strong> &mdash; L: 50&ndash;150 nH/phase, C_out: 10&ndash;30 mF total</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">48V Direct Conversion</div>
+        <ul>
+          <li>OCP Open Rack V3: 48V bus eliminates 12V intermediate stage</li>
+          <li><strong>4:1 ratio</strong> &mdash; 48V &rarr; ~12V via switched-cap, then multi-phase buck to Vcore</li>
+          <li>Or direct 48V&rarr;0.75V using high-ratio topologies (Vicor, Infineon)</li>
+          <li>Reduces I&sup2;R losses in PCB (4&times; lower current at 48V vs 12V)</li>
+          <li>NVIDIA HGX B200: 48V input, ~1200W per GPU module</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">DrMOS &amp; Smart Power Stages</div>
+        <ul>
+          <li><strong>DrMOS</strong>: Driver + high-side + low-side FETs in single package (8&times;8 mm)</li>
+          <li>Infineon TDA21490: 90A continuous, R_DS(on) &lt; 0.5 m&Omega;</li>
+          <li>Renesas ISL99390: 90A, integrated temperature sensing</li>
+          <li><strong>GaN power stages</strong> &mdash; higher f_sw (2&ndash;4 MHz), smaller inductors, faster transient</li>
+          <li>EPC2302: GaN FET, 1.3 m&Omega;, enables &gt;2 MHz switching</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">VRM Spec Example &mdash; AI GPU Card</div>
+        <div class="kv-row"><span class="kv-label">Input voltage</span><span class="kv-value">48V (rack) or 12V (legacy)</span></div>
+        <div class="kv-row"><span class="kv-label">Output voltage</span><span class="kv-value amber">0.65&ndash;0.85V (DVFS range)</span></div>
+        <div class="kv-row"><span class="kv-label">Max current</span><span class="kv-value amber">900&ndash;1600 A</span></div>
+        <div class="kv-row"><span class="kv-label">Phase count</span><span class="kv-value green">16&ndash;24 phases</span></div>
+        <div class="kv-row"><span class="kv-label">Efficiency</span><span class="kv-value green">&gt;90% at 80% load</span></div>
+        <div class="kv-row"><span class="kv-label">Load-step response</span><span class="kv-value">&lt;25 mV droop for 500A step</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">09 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: PIVR — Package-Integrated Voltage Regulation       -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">On-Package Voltage Regulation (PIVR)</div>
+  <div class="slide-subtitle">Intel FIVR and the push to integrate regulation into the package</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Intel Fully Integrated Voltage Regulator (FIVR)</div>
+        <ul>
+          <li>First deployed in <strong>Haswell (2013)</strong>; refined through Alder Lake, Meteor Lake</li>
+          <li><strong>Topology</strong> &mdash; on-die multi-phase buck with thin-film inductors on package</li>
+          <li>Switching frequency: <strong>60&ndash;140 MHz</strong> (100&times; higher than board VRM)</li>
+          <li>Enables <strong>per-core DVFS</strong> with &lt;100 ns voltage transition</li>
+          <li>Inductor: air-core thin-film, ~1&ndash;2 nH, embedded in package substrate</li>
+          <li>Efficiency: <strong>85&ndash;90%</strong> (trades ~3% vs board VRM for faster response)</li>
+        </ul>
+      </div>
+
+      <div class="accent-box" style="margin-top:0.7rem;">
+        FIVR eliminates the PCB-to-die impedance for the regulated domain. The VRM output is
+        <em>inside</em> the package &mdash; reducing PDN inductance by 10&ndash;50&times; versus board regulation.
+        This translates directly to reduced voltage guardband.
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title amber">Advantages Over Board VRM</div>
+        <ul>
+          <li><strong>Faster transient response</strong> &mdash; 100 ns vs 10&ndash;50 &micro;s for board VRM</li>
+          <li><strong>Per-domain regulation</strong> &mdash; separate rails for each core, GPU, IO, etc.</li>
+          <li><strong>Reduced guardband</strong> &mdash; 30&ndash;50 mV savings enables higher frequency or lower power</li>
+          <li><strong>Fewer board components</strong> &mdash; simpler motherboard, smaller form factor</li>
+          <li><strong>Dynamic power savings</strong> &mdash; rapid DVFS during idle/burst cycles</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title green">PIVR in AI Accelerators</div>
+        <ul>
+          <li><strong>Intel Ponte Vecchio</strong> &mdash; FIVR with per-tile regulation across 47 chiplets</li>
+          <li><strong>Intel Gaudi 3</strong> &mdash; FIVR for independent HBM and compute voltage domains</li>
+          <li>Package inductors: 2.5D embedded thin-film on EMIB interposer</li>
+          <li>Trade-off: FIVR consumes ~2&ndash;4% die area for power FETs + control</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">10 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: On-Die LDO & IVR                                   -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">On-Die LDO &amp; Integrated Voltage Regulators</div>
+  <div class="slide-subtitle">granular per-block DVFS with fully on-die regulation</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">On-Die LDO (Low Dropout Regulator)</div>
+        <ul>
+          <li><strong>Topology</strong> &mdash; PMOS pass transistor + error amplifier, fully in standard CMOS</li>
+          <li><strong>Dropout</strong> &mdash; 50&ndash;100 mV minimum (V_in &minus; V_out)</li>
+          <li><strong>Efficiency</strong> &mdash; &eta; = V_out / V_in &asymp; 85&ndash;93% (limited by dropout)</li>
+          <li><strong>Bandwidth</strong> &mdash; loop BW up to 100&ndash;500 MHz &mdash; excellent transient response</li>
+          <li><strong>Area</strong> &mdash; ~0.01&ndash;0.05 mm&sup2; per LDO instance, distributed across die</li>
+          <li><strong>Use case</strong> &mdash; per-core, per-SRAM-bank, or per-tensor-unit voltage islands</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Digital LDO</div>
+        <ul>
+          <li>Array of parallel PMOS switches with binary-weighted widths</li>
+          <li>Digital comparator + shift register replaces analog error amp</li>
+          <li><strong>Advantage</strong> &mdash; fully synthesizable, scales with process node</li>
+          <li><strong>Disadvantage</strong> &mdash; limit-cycle oscillation, slower response than analog LDO</li>
+          <li>Hybrid designs combine coarse digital + fine analog paths</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">On-Die Switched-Cap IVR</div>
+        <ul>
+          <li>Charge-pump topology: 2:1 or 3:2 ratio conversion using on-die MOS caps</li>
+          <li><strong>Efficiency</strong> &mdash; &gt;90% at fixed rational conversion ratios</li>
+          <li>No inductors required &mdash; fully CMOS compatible</li>
+          <li>Flying capacitors: MOS-cap or MIM-cap in BEOL stack</li>
+          <li><strong>Limitation</strong> &mdash; fixed ratio; cascaded with LDO for fine regulation</li>
+          <li>Apple M-series: switched-cap + LDO for per-cluster voltage islands</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">Trade-offs: Board vs Package vs Die Regulation</div>
+        <table class="dtable">
+          <tr><th>Metric</th><th>Board VRM</th><th>PIVR (FIVR)</th><th>On-Die LDO</th></tr>
+          <tr><td>Efficiency</td><td class="gr">90&ndash;95%</td><td class="am">85&ndash;90%</td><td class="am">85&ndash;93%</td></tr>
+          <tr><td>Transient (ns)</td><td>10,000&ndash;50,000</td><td class="hi">100&ndash;1,000</td><td class="hi">1&ndash;50</td></tr>
+          <tr><td>Guardband saved</td><td>baseline</td><td class="gr">30&ndash;50 mV</td><td class="gr">50&ndash;80 mV</td></tr>
+          <tr><td>Die area cost</td><td class="gr">0%</td><td class="am">2&ndash;4%</td><td class="am">3&ndash;8%</td></tr>
+          <tr><td>Granularity</td><td>1&ndash;2 rails</td><td>4&ndash;16 domains</td><td class="hi">100s of islands</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">11 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: Section — Advanced PDN Technologies                -->
+<!-- ============================================================ -->
+<section>
+<div class="slide section-slide">
+  <div class="section-num">III</div>
+  <h2>Advanced PDN Technologies</h2>
+  <p class="hero-sub" style="margin-top:0.4em;">
+    Backside power delivery, deep trench capacitors, and TSV-based power &mdash;
+    the innovations redefining what is physically possible.
+  </p>
+  <div class="slide-num">12 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 13: BSPDN                                              -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">BSPDN &mdash; Backside Power Delivery Network</div>
+  <div class="slide-subtitle">Intel PowerVia, TSMC N2P &mdash; decoupling power from signal routing</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">How BSPDN Works</div>
+        <ul>
+          <li><strong>Conventional (frontside)</strong> &mdash; power &amp; signal share the same BEOL metal stack</li>
+          <li><strong>BSPDN</strong> &mdash; power rails delivered through the <em>backside</em> of the wafer via nano-TSVs</li>
+          <li>Wafer is thinned to ~1&ndash;3 &micro;m, backside metallization added (2&ndash;4 metal layers)</li>
+          <li>Nano-TSVs (~50&ndash;200 nm diameter) connect backside power to frontside transistors</li>
+          <li>Signal routing uses full BEOL stack &mdash; no power rails consuming M1/M2 tracks</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Intel PowerVia (Intel 20A / 18A)</div>
+        <ul>
+          <li>First production BSPDN: <strong>Intel 20A (2024)</strong></li>
+          <li>Backside power with RibbonFET (gate-all-around) transistors</li>
+          <li><strong>30&ndash;50% IR drop reduction</strong> vs frontside at iso-density</li>
+          <li>6&ndash;10% frequency uplift from reduced voltage guardband</li>
+          <li>Cell height reduction: enables 6T SRAM at higher density</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Benefits of BSPDN</div>
+        <ul>
+          <li><strong>IR drop</strong> &mdash; 30&ndash;50% reduction; shorter, wider power paths to transistors</li>
+          <li><strong>Signal routing</strong> &mdash; 15&ndash;25% more tracks available (no VDD/VSS on M1/M2)</li>
+          <li><strong>Cell density</strong> &mdash; tighter standard cell pitch; potential 10&ndash;20% area reduction</li>
+          <li><strong>Decoupling</strong> &mdash; backside metal planes act as distributed capacitance</li>
+          <li><strong>Thermal</strong> &mdash; direct backside metal contact to heat sink / cold plate</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">TSMC Backside Power (N2P, A16)</div>
+        <div class="kv-row"><span class="kv-label">Node</span><span class="kv-value">N2P (2026), A16 (2026+)</span></div>
+        <div class="kv-row"><span class="kv-label">TSV diameter</span><span class="kv-value amber">~50&ndash;100 nm nano-TSV</span></div>
+        <div class="kv-row"><span class="kv-label">Backside metals</span><span class="kv-value green">2&ndash;4 layers</span></div>
+        <div class="kv-row"><span class="kv-label">IR drop improvement</span><span class="kv-value green">25&ndash;40% vs N2</span></div>
+        <div class="kv-row"><span class="kv-label">Density benefit</span><span class="kv-value">~10% logic density gain</span></div>
+        <div class="kv-row"><span class="kv-label">Target customers</span><span class="kv-value purple">HPC, AI accelerators, mobile AP</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">13 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 14: eDTC                                               -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">eDTC &mdash; Embedded Deep Trench Capacitors</div>
+  <div class="slide-subtitle">TSMC's on-die capacitance revolution for PDN impedance</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">What is eDTC?</div>
+        <ul>
+          <li>Deep trenches etched into the silicon substrate, lined with high-k dielectric and filled with conductor</li>
+          <li>Capacitance density: <strong>250&ndash;400 nF/mm&sup2;</strong> (vs ~20 nF/mm&sup2; for MOS-cap filler)</li>
+          <li>10&ndash;20&times; higher capacitance density than conventional on-die MOS decaps</li>
+          <li>Trenches are ~5&ndash;10 &micro;m deep, ~100&ndash;200 nm wide, etched into Si substrate</li>
+          <li>Process: adapted from DRAM deep trench technology</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Impact on PDN Impedance</div>
+        <ul>
+          <li><strong>2&ndash;5&times; reduction</strong> in on-die PDN impedance at 200 MHz&ndash;2 GHz</li>
+          <li>Pushes anti-resonance peaks below target impedance</li>
+          <li>Enables flatter Z(f) profile across critical frequency band</li>
+          <li>Reduces need for package-level decoupling caps (cost saving)</li>
+          <li>Particularly impactful for large-die ML accelerators with high di/dt</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">TSMC eDTC Technology Roadmap</div>
+        <table class="dtable">
+          <tr><th>Generation</th><th>Node</th><th>Density</th><th>ESL</th><th>Status</th></tr>
+          <tr><td>Gen 1</td><td class="hi">N5/N4</td><td class="am">~250 nF/mm&sup2;</td><td>&lt;5 pH</td><td class="gr">Production</td></tr>
+          <tr><td>Gen 2</td><td class="hi">N3E</td><td class="am">~350 nF/mm&sup2;</td><td>&lt;3 pH</td><td class="gr">Production</td></tr>
+          <tr><td>Gen 3</td><td class="hi">N2</td><td class="am">~500 nF/mm&sup2;</td><td>&lt;2 pH</td><td>Development</td></tr>
+        </table>
+      </div>
+
+      <div class="highlight-bar green" style="margin-top:0.7rem;">
+        For a 600 mm&sup2; die with 10% area allocated to eDTC at 400 nF/mm&sup2;:
+        <strong>24 &micro;F of on-die capacitance</strong> with sub-5 pH ESL &mdash; this fundamentally
+        changes the PDN impedance profile, suppressing resonance peaks that were previously
+        the dominant source of voltage noise above 100 MHz.
+      </div>
+
+      <div class="accent-box amber" style="margin-top:0.7rem;">
+        NVIDIA and AMD have both adopted TSMC eDTC for their latest data center GPUs,
+        citing 2&ndash;3% frequency improvement from reduced voltage guardband alone.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">14 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 15: TSV Power Delivery                                 -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Through-Silicon Via Power Delivery</div>
+  <div class="slide-subtitle">TSV arrays for 2.5D/3D stacking &mdash; current capacity, thermal co-design</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">TSV Power Delivery Basics</div>
+        <ul>
+          <li><strong>TSV diameter</strong> &mdash; 5&ndash;10 &micro;m (standard), 1&ndash;3 &micro;m (fine-pitch for 3D)</li>
+          <li><strong>Resistance per TSV</strong> &mdash; ~10&ndash;50 m&Omega; (depending on diameter/depth)</li>
+          <li><strong>Current per TSV</strong> &mdash; 10&ndash;50 mA per via at EM limits</li>
+          <li><strong>Pitch</strong> &mdash; 30&ndash;100 &micro;m; dense arrays needed for high-current delivery</li>
+          <li>For 500A total: need ~10,000&ndash;50,000 power TSVs</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">2.5D Interposer PDN (CoWoS)</div>
+        <ul>
+          <li>TSMC CoWoS-S: silicon interposer with TSVs connecting package to chiplets</li>
+          <li>Interposer TSVs: 10 &micro;m diameter, 100 &micro;m depth, ~25 m&Omega; each</li>
+          <li>Power planes in interposer RDL layers (3&ndash;4 metal layers)</li>
+          <li>Decoupling capacitors can be placed on interposer (MIM caps)</li>
+          <li>Total power TSV count for HBM+GPU assembly: 50,000+</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">3D Stacking Power Challenges</div>
+        <ul>
+          <li><strong>Thermal stacking</strong> &mdash; top die heated by bottom die; T_junction rises &rarr; higher R &rarr; worse IR drop</li>
+          <li><strong>TSV area overhead</strong> &mdash; 5&ndash;15% of die area consumed by TSV keep-out zones</li>
+          <li><strong>Reliability</strong> &mdash; Cu TSV pumping, thermo-mechanical stress, Cu/oxide delamination</li>
+          <li><strong>IR drop compounds</strong> &mdash; power must traverse multiple die layers in series</li>
+          <li>AMD 3D V-Cache: ~100k TSVs for power + signal between CCD and cache die</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">Thermal-Power Co-Design</div>
+        <div class="kv-row"><span class="kv-label">Cu resistivity temp coeff</span><span class="kv-value">+0.39%/&deg;C</span></div>
+        <div class="kv-row"><span class="kv-label">100&deg;C vs 25&deg;C R increase</span><span class="kv-value amber">~30% higher resistance</span></div>
+        <div class="kv-row"><span class="kv-label">Impact on IR drop</span><span class="kv-value amber">20&ndash;30% worse at hot spots</span></div>
+        <div class="kv-row"><span class="kv-label">Mitigation</span><span class="kv-value green">Thermal-aware placement, microfluidic cooling</span></div>
+        <div class="kv-row"><span class="kv-label">3D power budget</span><span class="kv-value">Often limited to 50&ndash;100 W/die for 3D stack</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">15 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 16: Section — ML Accelerator Challenges                -->
+<!-- ============================================================ -->
+<section>
+<div class="slide section-slide">
+  <div class="section-num">IV</div>
+  <h2>ML Accelerator Challenges</h2>
+  <p class="hero-sub" style="margin-top:0.4em;">
+    Real-world power delivery for 700W+ AI GPUs, di/dt management during training workloads,
+    power integrity simulation, and chiplet architectures.
+  </p>
+  <div class="slide-num">16 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 17: 700W+ AI GPU Power                                 -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Power Delivery for 700W+ AI GPUs</div>
+  <div class="slide-subtitle">NVIDIA Blackwell architecture, 48V racks, connector challenges</div>
+
+  <div class="stat-row" style="margin-top:0.5rem;">
+    <div class="stat"><span class="val">1200 W</span><span class="lbl">NVIDIA B200 TDP (max)</span></div>
+    <div class="stat"><span class="val" style="color:var(--accent2);">1600 A</span><span class="lbl">Peak current at 0.75V Vcore</span></div>
+    <div class="stat"><span class="val" style="color:var(--accent3);">48V</span><span class="lbl">Rack-level bus voltage (OCP)</span></div>
+    <div class="stat"><span class="val" style="color:var(--accent4);">2&times; dies</span><span class="lbl">Multi-die module (NVLink-C2C)</span></div>
+  </div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.6rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">NVIDIA Blackwell Power Architecture</div>
+        <ul>
+          <li><strong>B200 module</strong> &mdash; 2 GPU dies on CoWoS-L substrate + 8 HBM3E stacks</li>
+          <li><strong>48V input</strong> &mdash; 48V&rarr;~6V (switched-cap IBC) &rarr; 0.75V (multi-phase buck)</li>
+          <li><strong>VRM</strong> &mdash; 20+ phase digital multi-phase controller per die</li>
+          <li><strong>Power connector</strong> &mdash; 16-pin 12VHPWR (or 48V direct via backplane)</li>
+          <li><strong>PCB</strong> &mdash; 16+ layer, 2oz+ Cu, dedicated power planes per voltage rail</li>
+          <li><strong>Package</strong> &mdash; CoWoS-L with &gt;60,000 power bumps per die</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title amber">48V to Point-of-Load Path</div>
+        <div class="arch-stack">
+          <div class="arch-layer blue">48V Rack Bus (OCP Open Rack V3)</div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="arch-layer amber">48V&rarr;6V IBC (Intermediate Bus Converter, switched-cap, 98% eff.)</div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="arch-layer green">6V&rarr;0.75V Multi-Phase Buck (20-phase, 91% eff.)</div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="arch-layer purple">PCB &rarr; Package &rarr; Die PDN (&lt;50m&Omega; total path)</div>
+        </div>
+      </div>
+
+      <div class="highlight-bar" style="margin-top:0.7rem;">
+        Cable &amp; connector challenges at 1200W: 16-pin 12VHPWR handles 600W at 12V (50A/pin).
+        At 48V, the same 600W needs only 12.5A &mdash; enabling thinner cables and reducing I&sup2;R loss by 16&times;.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">17 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 18: di/dt Management                                   -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">di/dt Management in ML Training Workloads</div>
+  <div class="slide-subtitle">GEMM&rarr;communication switching, droop events, firmware mitigation</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">The di/dt Problem in ML Training</div>
+        <ul>
+          <li><strong>GEMM phase</strong> &mdash; all tensor cores active, ~100% utilization, peak current draw</li>
+          <li><strong>Communication phase</strong> &mdash; NVLink/ICI all-reduce; tensor cores idle, current drops 40&ndash;60%</li>
+          <li><strong>Transition</strong> &mdash; 500&ndash;1000A swing in &lt;1 &micro;s &rarr; massive Ldi/dt voltage droop</li>
+          <li>Droop magnitude: <strong>50&ndash;100 mV</strong> for worst-case transitions</li>
+          <li>Occurs predictably at layer boundaries in transformer training</li>
+          <li>Frequency: every 100&ndash;500 &micro;s during typical LLM training iterations</li>
+        </ul>
+      </div>
+
+      <div class="accent-box amber" style="margin-top:0.7rem;">
+        A 1000A swing in 500 ns with 50 pH effective PDN inductance produces V_droop = L &times; di/dt =
+        50 pH &times; 2&times;10&sup9; A/s = <strong style="color:var(--accent2);">100 mV droop</strong> &mdash; exceeding the entire noise budget.
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Hardware Mitigation</div>
+        <ul>
+          <li><strong>On-die decoupling</strong> &mdash; eDTC + MOS caps provide charge reservoir for &lt;50 ns events</li>
+          <li><strong>Staggered clock gating</strong> &mdash; spread wake-up across 10&ndash;50 ns window</li>
+          <li><strong>Current-step limiters</strong> &mdash; on-die circuits that limit max di/dt by throttling clock enables</li>
+          <li><strong>Adaptive clocking</strong> &mdash; drooping clock tracks supply voltage, maintaining timing margins</li>
+          <li><strong>PIVR/FIVR</strong> &mdash; fast VRM response (&lt;1 &micro;s) catches medium-duration droops</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">Firmware &amp; Software Mitigation</div>
+        <ul>
+          <li><strong>Workload scheduling</strong> &mdash; overlap compute and communication to smooth transitions</li>
+          <li><strong>DVFS pre-positioning</strong> &mdash; lower voltage before known idle &rarr; reduce droop magnitude</li>
+          <li><strong>Droop predictor</strong> &mdash; ML model predicting upcoming di/dt events, pre-activating mitigations</li>
+          <li><strong>Power throttling</strong> &mdash; firmware caps max current ramp rate during phase transitions</li>
+          <li>NVIDIA GPU firmware: dynamic power balancing across SMs to limit aggregate di/dt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">18 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 19: Power Integrity Simulation                         -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Power Integrity Simulation &amp; Signoff</div>
+  <div class="slide-subtitle">static/dynamic IR drop tools, EM analysis, PDN extraction, workload co-simulation</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Signoff Tool Landscape</div>
+        <table class="dtable">
+          <tr><th>Tool</th><th>Vendor</th><th>Capability</th></tr>
+          <tr><td class="hi">Voltus</td><td>Cadence</td><td>Static &amp; dynamic IR drop, EM, multi-rail</td></tr>
+          <tr><td class="hi">RedHawk</td><td>Synopsys (Ansys)</td><td>Dynamic droop, thermal-aware IR, chip-pkg co-sim</td></tr>
+          <tr><td class="hi">Totem</td><td>Ansys</td><td>Full-chip EM/IR, power grid optimization</td></tr>
+          <tr><td class="hi">SIwave</td><td>Ansys</td><td>Package/PCB PDN extraction, S-parameter</td></tr>
+          <tr><td class="hi">Sigrity</td><td>Cadence</td><td>Package/board PI, PDN impedance analysis</td></tr>
+        </table>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Analysis Flow</div>
+        <ol class="steps">
+          <li>Extract die power grid (RLC network, 10M+ nodes)</li>
+          <li>Map switching activity from VCD or vectorless estimation</li>
+          <li>Combine with package/PCB model (S-parameter or lumped RLC)</li>
+          <li>Run transient simulation over representative workload window</li>
+          <li>Report worst-case droop map, EM hotspots, voltage histogram</li>
+        </ol>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Workload-Driven Power Integrity</div>
+        <ul>
+          <li><strong>VCD-based</strong> &mdash; captures exact switching; 10&ndash;100 TB of data for full-chip AI accelerator</li>
+          <li><strong>Vectorless</strong> &mdash; statistical estimation; faster but less accurate</li>
+          <li><strong>Hybrid</strong> &mdash; VCD for critical blocks (tensor cores), vectorless for rest</li>
+          <li><strong>ML workload models</strong> &mdash; abstract current waveforms for GEMM, conv, attention phases</li>
+          <li>Signoff corner: worst-case voltage at slowest process, highest T, max current</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">Modern Signoff Criteria</div>
+        <div class="kv-row"><span class="kv-label">Max static IR drop</span><span class="kv-value">&lt;3&ndash;5% Vdd</span></div>
+        <div class="kv-row"><span class="kv-label">Max dynamic droop</span><span class="kv-value amber">&lt;8&ndash;10% Vdd</span></div>
+        <div class="kv-row"><span class="kv-label">EM lifetime target</span><span class="kv-value green">&gt;10 years at T_j = 105&deg;C</span></div>
+        <div class="kv-row"><span class="kv-label">Bump current limit</span><span class="kv-value">&lt;150 mA/bump (C4), &lt;30 mA (&micro;bump)</span></div>
+        <div class="kv-row"><span class="kv-label">Via current limit</span><span class="kv-value">Per-layer EM spec from foundry PDK</span></div>
+        <div class="kv-row"><span class="kv-label">Simulation nodes</span><span class="kv-value purple">10M&ndash;100M for large AI dies</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">19 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 20: Chiplet Power Delivery                             -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Power Delivery in Chiplet Architectures</div>
+  <div class="slide-subtitle">per-chiplet regulation, interposer PDN, power gating coordination</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Chiplet PDN Challenges</div>
+        <ul>
+          <li><strong>Multiple voltage domains</strong> &mdash; compute, IO, HBM PHY each need distinct Vdd</li>
+          <li><strong>Cross-chiplet transients</strong> &mdash; one chiplet's di/dt couples through shared interposer PDN</li>
+          <li><strong>Interposer IR drop</strong> &mdash; silicon interposer adds 5&ndash;20 m&Omega; series resistance per path</li>
+          <li><strong>Power bump density</strong> &mdash; limited by &micro;-bump pitch (40&ndash;55 &micro;m for CoWoS)</li>
+          <li><strong>Independent DVFS</strong> &mdash; requires per-chiplet VRM or IVR with isolation</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Per-Chiplet Voltage Regulation</div>
+        <ul>
+          <li><strong>Option A</strong> &mdash; board VRM per chiplet (separate power domain from PCB)</li>
+          <li><strong>Option B</strong> &mdash; PIVR per chiplet (Intel Ponte Vecchio approach)</li>
+          <li><strong>Option C</strong> &mdash; shared VRM + on-die LDO per chiplet (AMD MI300X)</li>
+          <li>Trade-off: board VRM is efficient but slow; on-die LDO is fast but wastes ~5&ndash;10%</li>
+          <li>Emerging: GaN-based package-integrated regulators for per-chiplet fast regulation</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Power Gating Coordination</div>
+        <ul>
+          <li><strong>Inrush current</strong> &mdash; enabling a power-gated chiplet draws 50&ndash;200A in 100 ns</li>
+          <li><strong>Sequencing</strong> &mdash; stagger chiplet wake-up to limit aggregate di/dt</li>
+          <li><strong>Retention</strong> &mdash; state retention power gating keeps SRAM live at lower voltage</li>
+          <li><strong>Protocol</strong> &mdash; chiplet power manager communicates with global power controller via sideband</li>
+          <li>AMD MI300X: 8 XCD + 4 IOD chiplets with coordinated power management</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">Interposer PDN Design</div>
+        <div class="kv-row"><span class="kv-label">Interposer technology</span><span class="kv-value">TSMC CoWoS-S (Si), CoWoS-L (organic + Si bridge)</span></div>
+        <div class="kv-row"><span class="kv-label">Power TSVs per chiplet</span><span class="kv-value amber">5,000&ndash;15,000</span></div>
+        <div class="kv-row"><span class="kv-label">Interposer metal layers</span><span class="kv-value green">3&ndash;4 (2 for power planes)</span></div>
+        <div class="kv-row"><span class="kv-label">MIM cap on interposer</span><span class="kv-value green">10&ndash;50 nF/mm&sup2;</span></div>
+        <div class="kv-row"><span class="kv-label">IR drop (interposer only)</span><span class="kv-value">&lt;10 mV at full load</span></div>
+        <div class="kv-row"><span class="kv-label">Cross-coupling isolation</span><span class="kv-value purple">Separate power TSV arrays per domain</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">20 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 21: Case Studies                                       -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">Case Studies &mdash; Power Delivery in Production AI Silicon</div>
+  <div class="slide-subtitle">NVIDIA B200, AMD MI300X, Intel Ponte Vecchio, Apple M2 Ultra</div>
+
+  <table class="dtable" style="margin-top:0.5rem;">
+    <tr>
+      <th>Attribute</th>
+      <th>NVIDIA B200</th>
+      <th>AMD MI300X</th>
+      <th>Intel Ponte Vecchio</th>
+      <th>Apple M2 Ultra</th>
+    </tr>
+    <tr>
+      <td><strong>TDP</strong></td>
+      <td class="hi">1000&ndash;1200 W</td>
+      <td class="am">750 W</td>
+      <td class="gr">600 W</td>
+      <td class="pr">~60 W (peak)</td>
+    </tr>
+    <tr>
+      <td><strong>Die count</strong></td>
+      <td>2 GPU dies + 8 HBM3E</td>
+      <td>8 XCD + 4 IOD + 8 HBM3</td>
+      <td>47 tiles (Xe-HPC)</td>
+      <td>2 M2 Max dies (UltraFusion)</td>
+    </tr>
+    <tr>
+      <td><strong>Process</strong></td>
+      <td class="hi">TSMC N4P</td>
+      <td class="am">TSMC N5/N6</td>
+      <td class="gr">Intel 4 + TSMC N5</td>
+      <td class="pr">TSMC N5P</td>
+    </tr>
+    <tr>
+      <td><strong>Packaging</strong></td>
+      <td>CoWoS-L</td>
+      <td>2.5D with active interposer</td>
+      <td>EMIB + Foveros</td>
+      <td>UltraFusion (CoW bridge)</td>
+    </tr>
+    <tr>
+      <td><strong>Voltage regulation</strong></td>
+      <td>Board VRM (48V&rarr;Vcore)</td>
+      <td>Board VRM + on-die LDO</td>
+      <td class="gr">FIVR (per-tile)</td>
+      <td>On-package PMIC + on-die LDO</td>
+    </tr>
+    <tr>
+      <td><strong>On-die decap tech</strong></td>
+      <td class="hi">eDTC + MOS cap</td>
+      <td class="am">eDTC + MOS cap</td>
+      <td>MOS cap (no eDTC)</td>
+      <td>MOS cap</td>
+    </tr>
+    <tr>
+      <td><strong>Peak current</strong></td>
+      <td class="hi">~1600 A</td>
+      <td class="am">~1000 A</td>
+      <td class="gr">~800 A</td>
+      <td class="pr">~80 A</td>
+    </tr>
+    <tr>
+      <td><strong>PDN innovation</strong></td>
+      <td>48V direct, massive decap</td>
+      <td>Active interposer PDN</td>
+      <td>FIVR across 47 tiles</td>
+      <td>Ultra-low-power DVFS</td>
+    </tr>
+    <tr>
+      <td><strong>di/dt mitigation</strong></td>
+      <td>FW power balancing</td>
+      <td>Staggered CU wake</td>
+      <td>Per-tile adaptive clocking</td>
+      <td>Per-cluster LDO + DVFS</td>
+    </tr>
+  </table>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.7rem;">
+    <div>
+      <div class="accent-box" style="margin-bottom:0;">
+        <strong style="color:var(--accent);">NVIDIA B200</strong> represents the state of the art in brute-force PDN engineering:
+        48V input, 20+ phase VRM, CoWoS-L with 100k+ power bumps, eDTC Gen 2, and firmware-level
+        current management. Total system PDN capacitance exceeds 15 mF.
+      </div>
+    </div>
+    <div>
+      <div class="accent-box green" style="margin-bottom:0;">
+        <strong style="color:var(--accent3);">Intel Ponte Vecchio</strong> is the most aggressive in voltage regulation integration:
+        FIVR provides per-tile DVFS across 47 heterogeneous tiles, reducing guardband by ~40 mV
+        and enabling 5&ndash;8% higher frequency than equivalent board-regulated design.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">21 / 22</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 22: References & Further Reading                       -->
+<!-- ============================================================ -->
+<section>
+<div class="slide">
+  <div class="slide-title">References &amp; Further Reading</div>
+  <div class="slide-subtitle">papers, standards, and resources for deeper study</div>
+
+  <div class="cols cols-2" style="gap:1.4rem;margin-top:0.5rem;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Key Papers &amp; Publications</div>
+        <ul>
+          <li>M. Swaminathan &amp; A.E. Engin, <em>&ldquo;Power Integrity Modeling and Design for Semiconductors and Systems&rdquo;</em>, Prentice Hall, 2007</li>
+          <li>L. Smith, R. Anderson, T. Roy, <em>&ldquo;Power Distribution System Design Methodology and Capacitor Selection for Modern CMOS Technology&rdquo;</em>, IEEE Trans. AP, 1999</li>
+          <li>N. Sturcken et al., <em>&ldquo;A Switched-Inductor Integrated Voltage Regulator with Nonlinear Feedback&rdquo;</em>, IEEE JSSC, 2012</li>
+          <li>E. Burton et al., <em>&ldquo;FIVR &mdash; Fully Integrated Voltage Regulators on 4th Gen Intel Core SoCs&rdquo;</em>, IEEE APEC, 2014</li>
+          <li>TSMC, <em>&ldquo;eDTC: Deep Trench Capacitor for Advanced PDN&rdquo;</em>, IEDM 2022</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title amber">Industry Standards</div>
+        <ul>
+          <li><strong>OCP Open Rack V3</strong> &mdash; 48V rack power distribution specification</li>
+          <li><strong>PCI-SIG CEM 5.0</strong> &mdash; 12VHPWR connector (600W) specification</li>
+          <li><strong>JEDEC JEP-148</strong> &mdash; Electromigration reliability qualification guidelines</li>
+          <li><strong>IEEE 1801 (UPF)</strong> &mdash; Unified Power Format for power intent specification</li>
+          <li><strong>JEDEC JESD51</strong> &mdash; Thermal measurement standards for semiconductor packages</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title green">Conference Venues</div>
+        <ul>
+          <li><strong>IEEE ECTC</strong> &mdash; Electronic Components and Technology Conference (packaging &amp; PDN)</li>
+          <li><strong>IEEE IEDM</strong> &mdash; International Electron Devices Meeting (eDTC, BSPDN process)</li>
+          <li><strong>IEEE ISSCC</strong> &mdash; International Solid-State Circuits Conference (IVR, LDO design)</li>
+          <li><strong>IEEE APEC</strong> &mdash; Applied Power Electronics Conference (VRM, power conversion)</li>
+          <li><strong>DesignCon</strong> &mdash; Signal &amp; power integrity, PDN measurement techniques</li>
+          <li><strong>Hot Chips</strong> &mdash; AI accelerator architecture &amp; power delivery overviews</li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:0.7rem;">
+        <div class="panel-title purple">EDA &amp; Simulation Resources</div>
+        <ul>
+          <li><strong>Cadence Voltus / Sigrity</strong> &mdash; die + package power integrity co-simulation</li>
+          <li><strong>Synopsys RedHawk / PrimeRail</strong> &mdash; EM/IR signoff, adaptive voltage analysis</li>
+          <li><strong>Ansys SIwave / HFSS</strong> &mdash; 3D EM extraction for package PDN</li>
+          <li><strong>Keysight ADS / PathWave</strong> &mdash; board-level PDN simulation &amp; measurement</li>
+          <li><strong>Open-source: OpenROAD</strong> &mdash; IR drop analysis in open-source EDA flow</li>
+        </ul>
+      </div>
+
+      <div class="highlight-bar purple" style="margin-top:0.7rem;">
+        Next in the series: <strong>Presentation 10</strong> &mdash; exploring thermal management and cooling
+        architectures for high-power AI silicon.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">22 / 22</div>
+</div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: false,
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1280,
+  height: 900,
+  margin: 0.02,
+  plugins: [ RevealHighlight ],
+  keyboard: {
+    39: 'next',
+    37: 'prev'
+  }
+});
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
+</script>
+</body>
+</html>

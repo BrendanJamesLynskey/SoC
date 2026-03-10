@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clocks &amp; Resets in ML Accelerator SoCs — Modern SoC Series</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css"/>
+<style>
+:root {
+  --bg:      #0d0f14;
+  --surface: #13161e;
+  --panel:   #1a1f2e;
+  --border:  #2a3048;
+  --accent:  #7eb8f7;
+  --accent2: #f7a05a;
+  --accent3: #7ef7c0;
+  --accent4: #f76e7e;
+  --muted:   #8892aa;
+  --text:    #dde4f0;
+  --white:   #ffffff;
+}
+
+.reveal-viewport { background: var(--bg); }
+.reveal .slides { font-family: 'DM Sans', sans-serif; }
+
+/* -- slide base -- */
+.reveal .slides section {
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* -- top accent bar -- */
+.reveal .slides section::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+}
+
+/* -- headings -- */
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: 'Playfair Display', serif;
+  color: var(--white);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.reveal h1 { font-size: 2.2em; line-height: 1.1; }
+.reveal h2 { font-size: 1.55em; line-height: 1.15; margin-bottom: 0.6em; }
+.reveal h3 { font-size: 1.1em; color: var(--accent); margin-bottom: 0.4em; }
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.8em; display: block;
+}
+
+/* -- body text -- */
+.reveal p { font-size: 0.78em; line-height: 1.7; color: var(--text); margin: 0.4em 0; }
+.reveal ul { list-style: none; padding: 0; margin: 0; }
+.reveal ul li {
+  font-size: 0.75em; line-height: 1.65; color: var(--text);
+  padding-left: 1.2em; position: relative; margin-bottom: 0.18em;
+}
+.reveal ul li::before { content: '·'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+.reveal ul li.a2::before { color: var(--accent2); }
+.reveal ul li.a3::before { color: var(--accent3); }
+.reveal ul li.a4::before { color: var(--accent4); }
+
+/* -- layout helpers -- */
+.cols { display: grid; gap: 1.4em; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-60-40 { grid-template-columns: 60fr 40fr; }
+.cols-40-60 { grid-template-columns: 40fr 60fr; }
+
+.panel {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 5px; padding: 1em 1.1em;
+}
+.panel.accent-left  { border-left: 3px solid var(--accent);  }
+.panel.accent2-left { border-left: 3px solid var(--accent2); }
+.panel.accent3-left { border-left: 3px solid var(--accent3); }
+.panel.accent4-left { border-left: 3px solid var(--accent4); }
+.panel h3 { margin-top: 0; }
+
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52em; letter-spacing: 0.06em;
+  padding: 0.2em 0.6em; border-radius: 2px; display: inline-block;
+  margin-bottom: 0.5em;
+}
+.tag-blue  { background: rgba(126,184,247,0.15); color: var(--accent);  border: 1px solid rgba(126,184,247,0.3); }
+.tag-amber { background: rgba(247,160, 90,0.15); color: var(--accent2); border: 1px solid rgba(247,160, 90,0.3); }
+.tag-green { background: rgba(126,247,192,0.15); color: var(--accent3); border: 1px solid rgba(126,247,192,0.3); }
+.tag-red   { background: rgba(247,110,126,0.15); color: var(--accent4); border: 1px solid rgba(247,110,126,0.3); }
+
+.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
+.dim  { color: var(--muted); }
+.hl   { color: var(--accent); font-weight: 600; }
+.hl2  { color: var(--accent2); font-weight: 600; }
+.hl3  { color: var(--accent3); font-weight: 600; }
+.hl4  { color: var(--accent4); font-weight: 600; }
+
+.slide-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5em; color: var(--muted);
+  position: absolute; top: 1.2em; right: 1.4em;
+  letter-spacing: 0.12em;
+}
+
+hr.div { border: none; border-top: 1px solid var(--border); margin: 0.8em 0; }
+
+/* -- canvas / viz containers -- */
+.canvas-wrap {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 5px; padding: 0.6em;
+  display: flex; align-items: center; justify-content: center;
+}
+canvas { display: block; }
+
+/* -- code blocks -- */
+.reveal pre {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; font-size: 0.6em; margin: 0;
+  box-shadow: none;
+}
+.reveal pre code { padding: 0.8em 1em; }
+
+/* -- tables -- */
+.reveal table {
+  font-size: 0.62em; border-collapse: collapse; width: 100%;
+  margin: 0.5em 0;
+}
+.reveal table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9em; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--accent); background: var(--panel); padding: 0.6em 0.8em;
+  border-bottom: 2px solid var(--border); text-align: left;
+}
+.reveal table td {
+  padding: 0.5em 0.8em; border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.reveal table tr:hover td { background: rgba(126,184,247,0.04); }
+
+/* -- title slide -- */
+.title-slide {
+  display: flex; flex-direction: column;
+  justify-content: center; padding: 2.5rem 3rem;
+  min-height: 100%;
+}
+.title-slide h1 { font-size: 2.6em; margin-bottom: 0.3em; }
+.title-slide .subtitle {
+  font-size: 0.8em; color: var(--muted); max-width: 36em; line-height: 1.7;
+  margin-top: 0.6em;
+}
+.title-slide .meta {
+  margin-top: 2em;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em; color: var(--muted); letter-spacing: 0.1em;
+  border-top: 1px solid var(--border); padding-top: 1em;
+  display: flex; gap: 2.5em;
+}
+
+/* -- diagram elements -- */
+.box {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.4em 0.7em;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62em;
+  text-align: center; color: var(--text);
+}
+.box.blue  { border-color: var(--accent);  color: var(--accent);  }
+.box.amber { border-color: var(--accent2); color: var(--accent2); }
+.box.green { border-color: var(--accent3); color: var(--accent3); }
+.box.red   { border-color: var(--accent4); color: var(--accent4); }
+
+.stat-row { display: flex; gap: 1em; margin: 0.6em 0; }
+.stat {
+  flex: 1; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.7em 0.9em; text-align: center;
+}
+.stat .val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5em; color: var(--accent); display: block; line-height: 1;
+}
+.stat .lbl { font-size: 0.55em; color: var(--muted); display: block; margin-top: 0.3em; }
+
+/* -- flow diagram -- */
+.flow-row {
+  display: flex; align-items: center; gap: 0.3em;
+  flex-wrap: wrap; margin: 0.6em 0;
+}
+.flow-row .arrow { color: var(--muted); font-size: 0.7em; }
+
+/* -- blockquotes -- */
+.reveal blockquote {
+  background: var(--panel); border-left: 3px solid var(--accent);
+  padding: 0.8em 1.1em; margin: 0.6em 0; font-size: 0.75em;
+  color: var(--text); font-style: italic; border-radius: 0 4px 4px 0;
+  width: auto;
+}
+
+.reveal .slides > section { overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- =====================================================
+     01 - TITLE
+     ===================================================== -->
+<section>
+<div class="title-slide">
+  <span class="eyebrow">Modern SoC Design - 13</span>
+  <h1>Clocks &amp; Resets in<br/>ML Accelerator SoCs</h1>
+  <p class="subtitle">
+    PLL design &middot; Clock distribution &middot; Clock domain crossing &middot;
+    GALS architectures &middot; Reset sequencing &middot; Jitter budgets
+  </p>
+  <div class="meta">
+    <span>22 slides</span>
+    <span>Modern SoC Design Series</span>
+    <span>&larr; &rarr; to navigate &middot; Esc overview &middot; F fullscreen</span>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     02 - WHY CLOCKS & RESETS MATTER
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">02 / 22</div>
+<span class="eyebrow">Motivation</span>
+<h2>Why Clocks &amp; Resets Matter</h2>
+<div class="stat-row">
+  <div class="stat"><span class="val">3+ GHz</span><span class="lbl">Typical ML accelerator core frequency</span></div>
+  <div class="stat"><span class="val">~40%</span><span class="lbl">ECO spins attributed to clock/reset issues</span></div>
+  <div class="stat"><span class="val">&lt;1 ps</span><span class="lbl">Jitter budget for 112G SerDes reference clocks</span></div>
+</div>
+<div class="cols cols-2" style="margin-top:0.9em;">
+  <div class="panel accent-left">
+    <h3>Timing Closure at GHz Frequencies</h3>
+    <ul>
+      <li>At 3 GHz, a clock period is ~333 ps &mdash; setup margin of 30&ndash;50 ps leaves zero room for clock uncertainty</li>
+      <li>Clock skew across a 600 mm&sup2; die can exceed 100 ps without careful CTS</li>
+      <li>Process variation (PVT corners) adds 15&ndash;25% frequency uncertainty; must be budgeted in clock planning</li>
+      <li>Multi-billion transistor designs have 50&ndash;200+ clock domains, each with unique frequency and phase requirements</li>
+      <li>Clock-related failures are the #1 cause of silicon re-spins in complex SoCs</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Impact on ML Workloads</h3>
+    <ul>
+      <li class="a2"><span class="hl2">HBM PHY</span> &mdash; 2.4 GT/s per pin requires &lt;3 ps RMS jitter on the transmit clock</li>
+      <li class="a2"><span class="hl2">SerDes (PCIe 6.0)</span> &mdash; 64 GT/s PAM4 demands sub-picosecond reference clock jitter</li>
+      <li class="a2"><span class="hl2">Systolic arrays</span> &mdash; thousands of MACs sharing a clock tree; 1 ps of skew = incorrect accumulation</li>
+      <li class="a2"><span class="hl2">DVFS</span> &mdash; dynamic frequency scaling for power efficiency requires seamless clock switching under load</li>
+      <li class="a2">Improper reset sequencing can corrupt weight memory, break coherency, or brick PLL lock-up</li>
+    </ul>
+  </div>
+</div>
+<p class="dim" style="margin-top:0.7em;">
+  Modern ML accelerators like NVIDIA H100 have 10+ independent clock domains with frequencies spanning 30 MHz (management) to 2.1+ GHz (SM cores),
+  each requiring independent PLL, distribution tree, and reset sequencing.
+</p>
+</section>
+
+<!-- =====================================================
+     03 - SECTION: CLOCK GENERATION
+     ===================================================== -->
+<section style="padding:2.2rem 3rem; display:flex; flex-direction:column; justify-content:center;">
+<div class="slide-num">03 / 22</div>
+<span class="eyebrow" style="color:var(--accent2);">Section I</span>
+<h2 style="font-size:2em;">Clock Generation</h2>
+<p style="max-width:32em;">PLL architectures, specifications, and advanced clocking techniques for multi-GHz ML accelerator SoCs.</p>
+<div class="flow-row" style="margin-top:1.5em;">
+  <div class="box blue">Reference Osc</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box blue">PFD</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box amber">Charge Pump</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box amber">Loop Filter</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box green">VCO</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box green">Output Divider</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box red">Clk Out</div>
+</div>
+<div class="flow-row" style="margin-top:0.3em;">
+  <span class="dim" style="font-size:0.6em; margin-left:auto;">Feedback Divider (/N) closes the loop from output back to PFD</span>
+</div>
+</section>
+
+<!-- =====================================================
+     04 - PLL ARCHITECTURE
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">04 / 22</div>
+<span class="eyebrow">Clock Generation</span>
+<h2>PLL Architecture</h2>
+<p>The charge-pump PLL is the workhorse of SoC clock generation, converting a low-frequency crystal reference (typically 25&ndash;100 MHz) into GHz-range domain clocks.</p>
+<div class="cols cols-60-40" style="margin-top:0.8em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>Charge-Pump PLL Block Diagram</h3>
+      <ul>
+        <li><span class="hl">Phase-Frequency Detector (PFD)</span> &mdash; compares reference and feedback edges; generates UP/DOWN pulses proportional to phase error</li>
+        <li><span class="hl">Charge Pump (CP)</span> &mdash; converts PFD pulses into current; typical I<sub>CP</sub> = 50&ndash;500 &mu;A; matching UP/DN currents critical for spur reduction</li>
+        <li><span class="hl">Loop Filter (LPF)</span> &mdash; 2nd/3rd order RC filter; sets loop bandwidth (typically f<sub>ref</sub>/10 to f<sub>ref</sub>/20); determines lock time and jitter peaking</li>
+        <li><span class="hl">VCO</span> &mdash; LC-tank (GHz) or ring oscillator (lower area); K<sub>VCO</sub> = 200&ndash;800 MHz/V; typical phase noise &minus;110 dBc/Hz @ 1 MHz offset</li>
+        <li><span class="hl">Feedback Divider (/N)</span> &mdash; programmable integer or fractional; f<sub>out</sub> = f<sub>ref</sub> &times; N/M; determines output frequency granularity</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Loop Bandwidth Trade-offs</h3>
+      <ul>
+        <li class="a2"><span class="hl2">Wide BW (&gt;1 MHz)</span> &mdash; fast lock (&lt;5 &mu;s), tracks reference noise, suppresses VCO noise</li>
+        <li class="a2"><span class="hl2">Narrow BW (&lt;100 kHz)</span> &mdash; slow lock (&gt;50 &mu;s), filters reference noise, exposes VCO noise</li>
+        <li class="a2">Optimal BW: crossover point where reference and VCO noise contributions are equal</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left">
+      <h3>Lock Time</h3>
+      <ul>
+        <li class="a3">Frequency acquisition: 2&ndash;5 &mu;s (aided by frequency detector)</li>
+        <li class="a3">Phase lock: 5&ndash;20 &mu;s for analog PLL</li>
+        <li class="a3">Settling to &lt;1 ps jitter: 50&ndash;200 &mu;s</li>
+        <li class="a3">Critical for DVFS: must re-lock within voltage transition window</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     05 - ADVANCED PLL TYPES
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">05 / 22</div>
+<span class="eyebrow">Clock Generation</span>
+<h2>Advanced PLL Types</h2>
+<div class="cols cols-2" style="margin-top:0.5em;">
+  <div class="panel accent-left">
+    <h3>All-Digital PLL (ADPLL)</h3>
+    <ul>
+      <li>Replaces analog charge pump + VCO with <span class="hl">TDC + digital loop filter + DCO</span></li>
+      <li>Time-to-Digital Converter (TDC): ~5 ps resolution using inverter delay chains</li>
+      <li>Digitally Controlled Oscillator (DCO): varactor bank with thermometer-coded tuning</li>
+      <li>Fully synthesizable, portable across process nodes; dominates in FinFET designs</li>
+      <li>Intel/AMD use ADPLLs extensively for core clock generation in 5 nm and below</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Fractional-N PLL</h3>
+    <ul>
+      <li class="a2">Achieves non-integer frequency ratios via <span class="hl2">delta-sigma modulator</span> dithering the divider ratio</li>
+      <li class="a2">Frequency resolution: f<sub>ref</sub> / 2<sup>24</sup> (sub-Hz with 100 MHz reference)</li>
+      <li class="a2">Quantization noise shaped out of band by 3rd-order MASH modulator</li>
+      <li class="a2">Enables fine-grained DVFS steps (e.g., 1 MHz granularity at 2+ GHz)</li>
+      <li class="a2">Spur cancellation via DAC-based charge pump compensation</li>
+    </ul>
+  </div>
+</div>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div class="panel accent3-left">
+    <h3>Bang-Bang PLL (BBPLL)</h3>
+    <ul>
+      <li class="a3">Uses binary phase detector (Alexander or Hogge) &mdash; outputs only early/late</li>
+      <li class="a3">Inherently nonlinear; analyzed via describing function or Markov chain models</li>
+      <li class="a3">Dominates in <span class="hl3">SerDes CDR</span> at 56&ndash;112 Gbps</li>
+      <li class="a3">Jitter tolerance vs. jitter transfer trade-off set by loop gain proportional/integral paths</li>
+    </ul>
+  </div>
+  <div class="panel accent4-left">
+    <h3>Sub-Picosecond Jitter PLLs</h3>
+    <ul>
+      <li class="a4">State-of-art: &lt;50 fs RMS integrated jitter (12 kHz&ndash;20 MHz)</li>
+      <li class="a4">LC-tank VCO with tail-current filtering and flicker noise reduction</li>
+      <li class="a4">Injection-locked oscillators achieve &lt;100 fs by leveraging reference edge timing</li>
+      <li class="a4">Required for 224G SerDes and next-gen HBM4 PHY interfaces</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     06 - PLL SPECIFICATIONS
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">06 / 22</div>
+<span class="eyebrow">Clock Generation</span>
+<h2>PLL Specifications &amp; Comparison</h2>
+<p>Key PLL metrics that determine suitability for different clock domains in an ML accelerator SoC.</p>
+<table style="margin-top:0.6em;">
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Analog CP-PLL</th>
+      <th>ADPLL</th>
+      <th>Frac-N PLL</th>
+      <th>BBPLL (CDR)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="hl">RMS Jitter (integ.)</span></td>
+      <td>200&ndash;500 fs</td>
+      <td>300&ndash;800 fs</td>
+      <td>150&ndash;400 fs</td>
+      <td>100&ndash;300 fs</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Phase Noise @ 1 MHz</span></td>
+      <td>&minus;110 dBc/Hz</td>
+      <td>&minus;100 dBc/Hz</td>
+      <td>&minus;112 dBc/Hz</td>
+      <td>&minus;108 dBc/Hz</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Lock Time</span></td>
+      <td>5&ndash;20 &mu;s</td>
+      <td>1&ndash;10 &mu;s</td>
+      <td>10&ndash;50 &mu;s</td>
+      <td>N/A (tracking)</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Freq. Range</span></td>
+      <td>0.5&ndash;4 GHz</td>
+      <td>0.2&ndash;6 GHz</td>
+      <td>0.5&ndash;5 GHz</td>
+      <td>10&ndash;60 GHz</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Power</span></td>
+      <td>3&ndash;8 mW</td>
+      <td>1&ndash;5 mW</td>
+      <td>5&ndash;15 mW</td>
+      <td>10&ndash;30 mW</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Area (5 nm)</span></td>
+      <td>0.02&ndash;0.05 mm&sup2;</td>
+      <td>0.005&ndash;0.02 mm&sup2;</td>
+      <td>0.03&ndash;0.08 mm&sup2;</td>
+      <td>0.01&ndash;0.04 mm&sup2;</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Portability</span></td>
+      <td style="color:var(--accent4);">Poor</td>
+      <td style="color:var(--accent3);">Excellent</td>
+      <td style="color:var(--accent2);">Moderate</td>
+      <td style="color:var(--accent2);">Moderate</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Use Case</span></td>
+      <td>Core clocks</td>
+      <td>Core + DVFS</td>
+      <td>Fine-grained DVFS</td>
+      <td>SerDes CDR</td>
+    </tr>
+  </tbody>
+</table>
+<blockquote style="margin-top:0.7em;">
+  A modern ML accelerator SoC (e.g., H100, Gaudi 3, TPU v5) typically instantiates 10&ndash;30 PLLs: 2&ndash;4 for compute cores (ADPLL, DVFS-capable),
+  4&ndash;8 for HBM/DDR PHYs (low-jitter fractional-N), 4&ndash;12 for SerDes lanes (BBPLL CDR), and 1&ndash;2 for management/always-on domains.
+</blockquote>
+</section>
+
+<!-- =====================================================
+     07 - SECTION: CLOCK DISTRIBUTION
+     ===================================================== -->
+<section style="padding:2.2rem 3rem; display:flex; flex-direction:column; justify-content:center;">
+<div class="slide-num">07 / 22</div>
+<span class="eyebrow" style="color:var(--accent3);">Section II</span>
+<h2 style="font-size:2em;">Clock Distribution</h2>
+<p style="max-width:34em;">Getting a clean clock edge from PLL output to billions of flip-flops with minimal skew, jitter, and power overhead.</p>
+<div class="stat-row" style="margin-top:1.5em;">
+  <div class="stat"><span class="val">&lt;30 ps</span><span class="lbl">Target global clock skew (5 nm)</span></div>
+  <div class="stat"><span class="val">~30%</span><span class="lbl">Dynamic power consumed by clock network</span></div>
+  <div class="stat"><span class="val">10<sup>6</sup>+</span><span class="lbl">Clock buffers in a large ML SoC</span></div>
+</div>
+</section>
+
+<!-- =====================================================
+     08 - CLOCK TREE SYNTHESIS
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">08 / 22</div>
+<span class="eyebrow">Clock Distribution</span>
+<h2>Clock Tree Synthesis</h2>
+<div class="cols cols-2" style="margin-top:0.5em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>Topologies</h3>
+      <ul>
+        <li><span class="hl">H-Tree</span> &mdash; symmetric binary-branching tree; inherently balanced; used for global clock spines; O(N) wire length</li>
+        <li><span class="hl">Mesh / Grid</span> &mdash; interconnected grid shorts all leaf nodes; lowest skew (&lt;5 ps) but highest power; used for critical clock domains</li>
+        <li><span class="hl">Fishbone / Spine</span> &mdash; central trunk with lateral branches; good skew/power trade-off; most common in ASIC CTS</li>
+        <li><span class="hl">Hybrid</span> &mdash; mesh at top level, trees at cluster level &mdash; NVIDIA Hopper uses this for SM clock distribution</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>Useful Skew</h3>
+      <ul>
+        <li class="a3">Intentionally skewing clock arrival at specific endpoints to fix setup/hold violations</li>
+        <li class="a3">CTS tools (Innovus, ICC2) support useful-skew optimization: can recover 5&ndash;15% frequency</li>
+        <li class="a3">Must not violate hold timing on any path &mdash; hold fix requires delay insertion</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left">
+      <h3>CTS Goals &amp; Constraints</h3>
+      <ul>
+        <li class="a2"><span class="hl2">Skew:</span> &lt;30 ps global, &lt;10 ps local (within cluster)</li>
+        <li class="a2"><span class="hl2">Insertion delay:</span> 200&ndash;500 ps from PLL output to leaf flip-flop</li>
+        <li class="a2"><span class="hl2">Transition time:</span> &lt;80 ps at leaf to avoid short-circuit power</li>
+        <li class="a2"><span class="hl2">Buffer sizing:</span> graded drive strengths (16x &rarr; 8x &rarr; 4x &rarr; 2x)</li>
+        <li class="a2"><span class="hl2">NDR (Non-Default Rules):</span> double-width, double-spacing for clock nets to reduce coupling noise</li>
+        <li class="a2"><span class="hl2">Shielding:</span> ground wires flanking clock routes to reduce cross-talk induced jitter</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left" style="margin-top:0.8em;">
+      <h3>OCV &amp; AOCV Derating</h3>
+      <ul>
+        <li class="a4">On-Chip Variation (OCV) derating: 5&ndash;10% on clock path delays</li>
+        <li class="a4">Advanced OCV (AOCV) uses statistical depth-based derating &mdash; less pessimistic</li>
+        <li class="a4">POCV (Parametric OCV): per-cell sigma values for sign-off accuracy</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     09 - CLOCK MESH & SPINE
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">09 / 22</div>
+<span class="eyebrow">Clock Distribution</span>
+<h2>Clock Mesh &amp; Spine Architecture</h2>
+<div class="cols cols-60-40" style="margin-top:0.5em;">
+  <div>
+    <div id="mesh-canvas-wrap" class="canvas-wrap" style="height:300px;">
+      <canvas id="meshCanvas" width="560" height="280"></canvas>
+    </div>
+    <script>
+    (function(){
+      var c = document.getElementById('meshCanvas');
+      if(!c) return;
+      var ctx = c.getContext('2d');
+      var W = c.width, H = c.height;
+      ctx.strokeStyle = '#2a3048'; ctx.lineWidth = 1;
+      // Draw mesh grid
+      for(var i = 0; i < 8; i++){
+        var x = 40 + i * 70;
+        ctx.beginPath(); ctx.moveTo(x, 30); ctx.lineTo(x, H-30); ctx.stroke();
+      }
+      for(var j = 0; j < 6; j++){
+        var y = 30 + j * 46;
+        ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(W-40, y); ctx.stroke();
+      }
+      // Highlight spine
+      ctx.strokeStyle = '#7eb8f7'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(W/2, 10); ctx.lineTo(W/2, H-10); ctx.stroke();
+      // Highlight horizontal trunks
+      ctx.strokeStyle = '#f7a05a'; ctx.lineWidth = 2;
+      [76, 168, 260].forEach(function(y){
+        ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(W-20, y); ctx.stroke();
+      });
+      // PLL source
+      ctx.fillStyle = '#7ef7c0'; ctx.font = '600 12px "JetBrains Mono", monospace';
+      ctx.fillText('PLL', W/2 - 12, 20);
+      // Leaf buffers
+      ctx.fillStyle = '#f76e7e';
+      for(var i = 0; i < 8; i++){
+        for(var j = 0; j < 6; j++){
+          ctx.beginPath();
+          ctx.arc(40 + i*70, 30 + j*46, 3, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+      // Legend
+      ctx.font = '11px "DM Sans", sans-serif';
+      ctx.fillStyle = '#7eb8f7'; ctx.fillText('Spine (vertical trunk)', 20, H-8);
+      ctx.fillStyle = '#f7a05a'; ctx.fillText('Horizontal branches', 200, H-8);
+      ctx.fillStyle = '#f76e7e'; ctx.fillText('Leaf buffers', 400, H-8);
+    })();
+    </script>
+  </div>
+  <div>
+    <div class="panel accent-left">
+      <h3>Global Clock Mesh</h3>
+      <ul>
+        <li>Metal grid (M10&ndash;M12) driven by multiple pre-drivers from the PLL</li>
+        <li>Self-averaging: any single buffer failure does not create hot-spot skew</li>
+        <li>Achieves &lt;5 ps skew across full die at cost of 2&ndash;3&times; power vs. tree</li>
+        <li>Used for the most critical domain: NPU core clock in ML accelerators</li>
+      </ul>
+    </div>
+    <div class="panel accent2-left" style="margin-top:0.8em;">
+      <h3>Clock Grid Shielding</h3>
+      <ul>
+        <li class="a2">VSS shield wires on both sides of clock routes</li>
+        <li class="a2">Reduces coupling-induced jitter by 60&ndash;80%</li>
+        <li class="a2">3&times; routing resource cost; justified only for &lt;10 critical clocks</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>Capacitive Loading</h3>
+      <ul>
+        <li class="a3">Typical ML core clock: 2&ndash;5 nF total load</li>
+        <li class="a3">At 2 GHz, P<sub>clk</sub> = C &times; V&sup2; &times; f = 5 nF &times; 0.75&sup2; &times; 2G &approx; 5.6 W per domain</li>
+        <li class="a3">Clock gating is essential &mdash; see slide 10</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     10 - CLOCK GATING
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">10 / 22</div>
+<span class="eyebrow">Clock Distribution</span>
+<h2>Clock Gating</h2>
+<p>Clock gating eliminates switching activity on idle logic, saving 25&ndash;60% of dynamic power in typical ML accelerators.</p>
+<div class="cols cols-2" style="margin-top:0.7em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>ICG Cell (Integrated Clock Gating)</h3>
+      <ul>
+        <li>Latch-based gating: enable sampled on negative edge, AND-gated with clock on positive edge</li>
+        <li>Prevents glitches &mdash; output transitions only when clock is low</li>
+        <li>Standard cell: <span class="mono">CKLNQD1</span> (typical library naming)</li>
+        <li>Insertion by synthesis tools (Design Compiler, Genus) with <span class="mono">-clock_gating</span> switch</li>
+      </ul>
+    </div>
+    <pre style="margin-top:0.8em;"><code class="language-verilog">// Latch-based ICG cell (RTL model)
+module icg_cell (
+  input  wire clk,
+  input  wire enable,
+  output wire gated_clk
+);
+  reg enable_latched;
+
+  // Latch enable on negative clock edge
+  always @(*) begin
+    if (!clk)
+      enable_latched = enable;
+  end
+
+  assign gated_clk = clk & enable_latched;
+endmodule</code></pre>
+  </div>
+  <div>
+    <div class="panel accent2-left">
+      <h3>Hierarchical Clock Gating</h3>
+      <ul>
+        <li class="a2"><span class="hl2">Level 0 (leaf):</span> register-level gating; each FF group has own ICG</li>
+        <li class="a2"><span class="hl2">Level 1 (block):</span> functional unit gating; disables entire MAC array, SRAM bank</li>
+        <li class="a2"><span class="hl2">Level 2 (cluster):</span> power domain gating; shuts off full compute cluster clock</li>
+        <li class="a2"><span class="hl2">Level 3 (global):</span> PLL shutdown or bypass to low-freq reference</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>Clock Gating Efficiency</h3>
+      <ul>
+        <li class="a3">Metric: % of flip-flops gated &mdash; target &gt;85% in synthesis</li>
+        <li class="a3">ML workloads: high gating efficiency due to bursty compute patterns</li>
+        <li class="a3">Sparsity-aware accelerators gate MAC columns when input is zero &mdash; 40&ndash;70% savings</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left" style="margin-top:0.8em;">
+      <h3>Enable Timing</h3>
+      <ul>
+        <li class="a4">Enable signal must be stable before rising clock edge</li>
+        <li class="a4">Setup time: ~100 ps to ICG latch (process dependent)</li>
+        <li class="a4">Multi-cycle enable paths need proper SDC constraints</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     11 - SECTION: CLOCK DOMAIN CROSSING
+     ===================================================== -->
+<section style="padding:2.2rem 3rem; display:flex; flex-direction:column; justify-content:center;">
+<div class="slide-num">11 / 22</div>
+<span class="eyebrow" style="color:var(--accent4);">Section III</span>
+<h2 style="font-size:2em;">Clock Domain Crossing</h2>
+<p style="max-width:34em;">Safely transferring data between asynchronous clock domains &mdash; the most error-prone aspect of multi-clock SoC design.</p>
+<div class="stat-row" style="margin-top:1.5em;">
+  <div class="stat"><span class="val">10<sup>5</sup>+</span><span class="lbl">CDC crossings in a large ML SoC</span></div>
+  <div class="stat"><span class="val">1&ndash;3</span><span class="lbl">Cycle latency penalty per synchronizer</span></div>
+  <div class="stat"><span class="val">&gt;10<sup>15</sup></span><span class="lbl">Required MTBF for safe operation (hours)</span></div>
+</div>
+</section>
+
+<!-- =====================================================
+     12 - CDC FUNDAMENTALS
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">12 / 22</div>
+<span class="eyebrow">Clock Domain Crossing</span>
+<h2>CDC Fundamentals &mdash; Metastability</h2>
+<div class="cols cols-60-40" style="margin-top:0.5em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>Metastability Theory</h3>
+      <ul>
+        <li>When a flip-flop samples a signal transitioning during its setup/hold window, the output enters a <span class="hl">metastable state</span></li>
+        <li>Resolution time is exponential: P(unresolved after t) = T<sub>0</sub> &middot; f<sub>clk</sub> &middot; f<sub>data</sub> &middot; e<sup>&minus;t/&tau;</sup></li>
+        <li>Time constant &tau; depends on process: ~20&ndash;40 ps in 5 nm FinFET</li>
+        <li>A single flip-flop at 2 GHz has MTBF of only seconds &mdash; completely insufficient</li>
+        <li>Two-stage synchronizer provides additional resolution time of one full clock period</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>MTBF Calculation</h3>
+      <ul>
+        <li class="a3"><span class="mono">MTBF = e<sup>(T<sub>res</sub>/&tau;)</sup> / (T<sub>0</sub> &middot; f<sub>clk</sub> &middot; f<sub>data</sub>)</span></li>
+        <li class="a3">T<sub>res</sub> = available resolution time (clock period minus setup time)</li>
+        <li class="a3">2-FF sync at 2 GHz: MTBF &approx; 10<sup>18</sup> hours (&gt;100 billion years)</li>
+        <li class="a3">3-FF sync: MTBF &approx; 10<sup>40</sup> hours; used when &tau; is not well characterized</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <pre><code class="language-verilog">// Two-Flop Synchronizer
+module sync_2ff #(
+  parameter WIDTH = 1
+)(
+  input  wire             clk_dst,
+  input  wire             rst_n,
+  input  wire [WIDTH-1:0] data_in,
+  output wire [WIDTH-1:0] data_out
+);
+  reg [WIDTH-1:0] sync_ff1, sync_ff2;
+
+  always @(posedge clk_dst or negedge rst_n) begin
+    if (!rst_n) begin
+      sync_ff1 <= '0;
+      sync_ff2 <= '0;
+    end else begin
+      sync_ff1 <= data_in;
+      sync_ff2 <= sync_ff1;
+    end
+  end
+
+  assign data_out = sync_ff2;
+
+  // Synthesis attributes
+  // synopsys sync_set_reset "rst_n"
+  (* dont_touch = "true" *)
+  (* async_reg = "true" *)
+endmodule</code></pre>
+    <div class="panel accent4-left" style="margin-top:0.8em;">
+      <h3>Synchronization Latency</h3>
+      <ul>
+        <li class="a4">2-FF: 1.5&ndash;2 destination clock cycles latency</li>
+        <li class="a4">3-FF: 2.5&ndash;3 cycles &mdash; use for high-frequency destinations</li>
+        <li class="a4">Latency is the cost of safety; cannot be avoided</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     13 - CDC DATA TRANSFER
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">13 / 22</div>
+<span class="eyebrow">Clock Domain Crossing</span>
+<h2>CDC Data Transfer Techniques</h2>
+<div class="cols cols-2" style="margin-top:0.5em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>Single-Bit Crossing</h3>
+      <ul>
+        <li><span class="hl">2-FF synchronizer</span> &mdash; for level signals; 2 cycles latency</li>
+        <li><span class="hl">Toggle synchronizer</span> &mdash; for pulses; sender toggles on pulse, receiver detects toggle change after 2-FF sync</li>
+        <li><span class="hl">Pulse synchronizer</span> &mdash; converts pulse to level, syncs, re-converts; handles pulse-to-pulse minimum spacing</li>
+      </ul>
+    </div>
+    <div class="panel accent2-left" style="margin-top:0.8em;">
+      <h3>Multi-Bit Crossing</h3>
+      <ul>
+        <li class="a2"><span class="hl2">Gray-code FIFO</span> &mdash; gold standard for streaming data; pointers encoded in Gray code cross domains safely</li>
+        <li class="a2"><span class="hl2">MUX recirculation</span> &mdash; data held stable in source, select signal synchronized; single-bit control crosses</li>
+        <li class="a2"><span class="hl2">Handshake protocol</span> &mdash; REQ/ACK 4-phase; lowest throughput but simplest; good for configuration registers</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent3-left" style="margin-bottom:0.8em;">
+      <h3>Async FIFO Design</h3>
+      <ul>
+        <li class="a3">Write pointer (binary) in write clock domain; read pointer (binary) in read domain</li>
+        <li class="a3">Gray-coded pointers cross to opposite domain via 2-FF sync</li>
+        <li class="a3">Full/empty determined by comparing synced pointers</li>
+        <li class="a3">Depth must be power-of-2 for Gray code to work correctly</li>
+      </ul>
+    </div>
+    <pre><code class="language-verilog">// Gray-code pointer crossing (async FIFO)
+// Write domain: binary write pointer
+wire [ADDR_W:0] wr_ptr_bin;
+wire [ADDR_W:0] wr_ptr_gray;
+assign wr_ptr_gray = wr_ptr_bin ^
+                     (wr_ptr_bin >> 1);
+
+// Sync gray write pointer to read domain
+reg [ADDR_W:0] wr_ptr_gray_r1, wr_ptr_gray_r2;
+always @(posedge rd_clk or negedge rd_rst_n) begin
+  if (!rd_rst_n) begin
+    wr_ptr_gray_r1 <= '0;
+    wr_ptr_gray_r2 <= '0;
+  end else begin
+    wr_ptr_gray_r1 <= wr_ptr_gray;
+    wr_ptr_gray_r2 <= wr_ptr_gray_r1;
+  end
+end
+
+// FIFO depth calculation:
+// depth >= (f_wr/f_rd) * burst_len + 2
+//   + synchronization latency margin</code></pre>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     14 - CDC VERIFICATION
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">14 / 22</div>
+<span class="eyebrow">Clock Domain Crossing</span>
+<h2>CDC Verification</h2>
+<p>Static CDC analysis catches structural violations; functional CDC verification ensures data integrity across domains.</p>
+<div class="cols cols-2" style="margin-top:0.7em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>Static CDC Analysis Tools</h3>
+      <table>
+        <thead><tr><th>Tool</th><th>Vendor</th><th>Key Capability</th></tr></thead>
+        <tbody>
+          <tr><td><span class="hl">SpyGlass CDC</span></td><td>Synopsys</td><td>Structural + protocol checks</td></tr>
+          <tr><td><span class="hl">Meridian CDC</span></td><td>Cadence</td><td>Formal + structural hybrid</td></tr>
+          <tr><td><span class="hl">Questa CDC</span></td><td>Siemens</td><td>Assertion-based CDC</td></tr>
+          <tr><td><span class="hl">Real Intent Ascent</span></td><td>Real Intent</td><td>Deep reconvergence analysis</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>Reconvergence Detection</h3>
+      <ul>
+        <li class="a3">Two signals from same source crossing to same destination via different synchronizers</li>
+        <li class="a3">Can arrive in different order &mdash; creates inconsistent state</li>
+        <li class="a3">Must be grouped into a single multi-bit crossing (FIFO or handshake)</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left">
+      <h3>Structural vs Functional CDC</h3>
+      <ul>
+        <li class="a2"><span class="hl2">Structural:</span> missing synchronizer, wrong synchronizer type, multi-bit bus without encoding</li>
+        <li class="a2"><span class="hl2">Functional:</span> data coherency, protocol correctness, FIFO overflow/underflow under realistic traffic</li>
+        <li class="a2">Structural finds ~80% of CDC bugs; functional CDC needed for remaining 20%</li>
+        <li class="a2">Formal CDC proves absence of metastability propagation using model checking</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left" style="margin-top:0.8em;">
+      <h3>Glitch Detection</h3>
+      <ul>
+        <li class="a4">Combinational logic on CDC path can produce glitches before synchronizer</li>
+        <li class="a4">Glitch = spurious transition sampled as valid data change</li>
+        <li class="a4">Rule: no combinational logic between source flop and synchronizer first stage</li>
+        <li class="a4">CDC tools flag <span class="mono">COMBO_LOGIC_ON_CDC_PATH</span> violations</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     15 - GALS ARCHITECTURES
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">15 / 22</div>
+<span class="eyebrow">Clock Domain Crossing</span>
+<h2>GALS &mdash; Globally Asynchronous, Locally Synchronous</h2>
+<p>GALS partitions the SoC into independently-clocked synchronous islands communicating through asynchronous interfaces.</p>
+<div class="cols cols-3" style="margin-top:0.7em;">
+  <div class="panel accent-left">
+    <h3>Mesochronous</h3>
+    <ul>
+      <li>Same frequency, unknown phase</li>
+      <li>Simplest: FIFO or phase aligner</li>
+      <li>Used between tiles sharing a PLL but with different distribution delays</li>
+      <li>Example: NVIDIA GPC-to-GPC within same clock domain</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Plesiochronous</h3>
+    <ul>
+      <li class="a2">Nearly same frequency (ppm offset)</li>
+      <li class="a2">Elastic buffer absorbs frequency difference</li>
+      <li class="a2">Used in multi-die systems with independent crystals</li>
+      <li class="a2">Example: CXL link between host and accelerator (600 ppm tolerance)</li>
+    </ul>
+  </div>
+  <div class="panel accent3-left">
+    <h3>Heterochronous</h3>
+    <ul>
+      <li class="a3">Completely unrelated frequencies</li>
+      <li class="a3">Requires full async FIFO or handshake</li>
+      <li class="a3">Most common in SoC: NPU @ 2 GHz vs. NoC @ 1 GHz vs. PCIe @ 250 MHz</li>
+      <li class="a3">Highest latency penalty but maximum flexibility</li>
+    </ul>
+  </div>
+</div>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div class="panel accent4-left">
+    <h3>Pausable Clocking</h3>
+    <ul>
+      <li class="a4">Clock is stretched (paused) when data is not ready at domain boundary</li>
+      <li class="a4">Mutual exclusion element (mutex) arbitrates between clock and handshake request</li>
+      <li class="a4">Zero-overhead when data is ready; stalls only on actual conflict</li>
+      <li class="a4">Used in ARM Cortex-M series for low-power GALS wrappers</li>
+    </ul>
+  </div>
+  <div class="panel accent-left">
+    <h3>GALS Wrapper Architecture</h3>
+    <ul>
+      <li>Each synchronous island wrapped with: local clock generator + async FIFO ports + handshake interfaces</li>
+      <li>Port controller handles flow control and data validity signaling</li>
+      <li>Enables per-island DVFS without global frequency coordination</li>
+      <li>Intel Ponte Vecchio uses GALS between its 47 tiles</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     16 - SECTION: RESET ARCHITECTURE
+     ===================================================== -->
+<section style="padding:2.2rem 3rem; display:flex; flex-direction:column; justify-content:center;">
+<div class="slide-num">16 / 22</div>
+<span class="eyebrow" style="color:var(--accent2);">Section IV</span>
+<h2 style="font-size:2em;">Reset Architecture</h2>
+<p style="max-width:34em;">Designing robust reset networks that bring a multi-domain SoC to a known state safely and in the correct order.</p>
+<div class="flow-row" style="margin-top:1.5em;">
+  <div class="box amber">Power-On Reset</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box amber">PLL Lock</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box green">Always-On Domain</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box green">Core Domains</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box blue">PHY Init</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box blue">Fabric &amp; IO</div>
+  <span class="arrow">&rarr;</span>
+  <div class="box red">Boot</div>
+</div>
+</section>
+
+<!-- =====================================================
+     17 - RESET DESIGN
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">17 / 22</div>
+<span class="eyebrow">Reset Architecture</span>
+<h2>Reset Design Patterns</h2>
+<div class="cols cols-2" style="margin-top:0.5em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>Synchronous vs Asynchronous Reset</h3>
+      <ul>
+        <li><span class="hl">Synchronous reset:</span> reset sampled on clock edge; clean timing but requires running clock to take effect</li>
+        <li><span class="hl">Asynchronous reset:</span> resets immediately regardless of clock; but deassertion can cause metastability</li>
+        <li><span class="hl">Industry standard:</span> <em>asynchronous assert, synchronous deassert</em> &mdash; best of both worlds</li>
+      </ul>
+    </div>
+    <pre style="margin-top:0.8em;"><code class="language-verilog">// Async assert, sync deassert reset synchronizer
+module reset_sync (
+  input  wire clk,
+  input  wire async_rst_n,  // from POR
+  output wire sync_rst_n    // to logic
+);
+  reg rst_ff1, rst_ff2;
+
+  always @(posedge clk or negedge async_rst_n) begin
+    if (!async_rst_n) begin
+      rst_ff1 <= 1'b0;  // async assert
+      rst_ff2 <= 1'b0;
+    end else begin
+      rst_ff1 <= 1'b1;  // sync deassert
+      rst_ff2 <= rst_ff1;
+    end
+  end
+
+  assign sync_rst_n = rst_ff2;
+endmodule</code></pre>
+  </div>
+  <div>
+    <div class="panel accent2-left">
+      <h3>Reset Synchronizer Design</h3>
+      <ul>
+        <li class="a2">One reset synchronizer per clock domain &mdash; ensures clean deassertion in each domain's timing</li>
+        <li class="a2">Reset synchronizer flops placed near PLL output with high-priority routing</li>
+        <li class="a2">Must use dedicated reset-sync cells from standard cell library (e.g., <span class="mono">RSDFQD1</span>)</li>
+        <li class="a2">Recovery/removal timing checks replace setup/hold for async reset paths</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>Reset Tree Distribution</h3>
+      <ul>
+        <li class="a3">Reset tree is built like a clock tree: balanced buffering for low skew</li>
+        <li class="a3">Reset assertion skew is less critical (all flops go to known state)</li>
+        <li class="a3">Reset deassertion skew is critical &mdash; must arrive at all flops within one clock period</li>
+        <li class="a3">CTS tools handle reset tree synthesis with <span class="mono">set_ideal_network -no_propagate</span> constraints</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left" style="margin-top:0.8em;">
+      <h3>Reset Glitch Filtering</h3>
+      <ul>
+        <li class="a4">External reset pins susceptible to noise; require deglitch filter (typically 100 ns&ndash;1 &mu;s)</li>
+        <li class="a4">Schmitt trigger inputs on reset pads</li>
+        <li class="a4">Brown-out detector holds reset during voltage droop</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     18 - RESET SEQUENCING
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">18 / 22</div>
+<span class="eyebrow">Reset Architecture</span>
+<h2>Reset Sequencing &amp; SoC Reset State Machine</h2>
+<div class="cols cols-60-40" style="margin-top:0.5em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>Multi-Domain Reset Ordering</h3>
+      <ul>
+        <li><span class="hl">Phase 1 &mdash; Power-On Reset (POR):</span> asserted when V<sub>DD</sub> crosses threshold (~0.7 V for 5 nm); held for 10&ndash;100 &mu;s until supply stabilizes</li>
+        <li><span class="hl">Phase 2 &mdash; PLL Lock:</span> reference clock starts; PLLs begin frequency acquisition; reset held until PLL LOCK indicator asserts (5&ndash;200 &mu;s)</li>
+        <li><span class="hl">Phase 3 &mdash; Always-On Domain:</span> PMU, RTC, reset controller, OTP &mdash; these must be operational before any other domain</li>
+        <li><span class="hl">Phase 4 &mdash; Core Domains:</span> NPU cores, SRAM arrays, DMA engines &mdash; released in dependency order</li>
+        <li><span class="hl">Phase 5 &mdash; PHY Init:</span> HBM PHY, SerDes, DDR PHY &mdash; each has internal training sequence post-reset</li>
+        <li><span class="hl">Phase 6 &mdash; Fabric &amp; I/O:</span> NoC, PCIe, Ethernet &mdash; link training begins after PHY is ready</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>Warm vs Cold Reset</h3>
+      <ul>
+        <li class="a3"><span class="hl3">Cold reset:</span> full POR equivalent; all state lost; PLLs re-lock; full boot sequence</li>
+        <li class="a3"><span class="hl3">Warm reset:</span> preserves DRAM content, PLL lock, and always-on domain state; faster recovery (~100 &mu;s vs. ~10 ms)</li>
+        <li class="a3">Watchdog timer triggers warm reset on firmware hang; escalates to cold reset after N failures</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left" style="margin-bottom:0.8em;">
+      <h3>Reset Sources</h3>
+      <ul>
+        <li class="a2"><span class="hl2">POR</span> &mdash; power-on detection circuit</li>
+        <li class="a2"><span class="hl2">Brown-out</span> &mdash; voltage droop detector</li>
+        <li class="a2"><span class="hl2">Watchdog</span> &mdash; timer expiry (firmware hang)</li>
+        <li class="a2"><span class="hl2">Software</span> &mdash; register write to reset controller</li>
+        <li class="a2"><span class="hl2">Debug</span> &mdash; JTAG system reset</li>
+        <li class="a2"><span class="hl2">Thermal</span> &mdash; over-temperature shutdown</li>
+        <li class="a2"><span class="hl2">Security</span> &mdash; tamper detection trigger</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left">
+      <h3>Reset State Machine</h3>
+      <ul>
+        <li class="a4"><span class="mono">POR_WAIT</span> &rarr; <span class="mono">PLL_LOCK</span> &rarr; <span class="mono">AON_INIT</span> &rarr; <span class="mono">CORE_INIT</span> &rarr; <span class="mono">PHY_TRAIN</span> &rarr; <span class="mono">ACTIVE</span></li>
+        <li class="a4">Timeout watchdog on each phase &mdash; escalates to POR on failure</li>
+        <li class="a4">Reset cause register captures source for firmware diagnostics</li>
+        <li class="a4">SoC reset controller is in always-on domain; survives warm reset</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     19 - SECTION: ML ACCELERATOR SPECIFICS
+     ===================================================== -->
+<section style="padding:2.2rem 3rem; display:flex; flex-direction:column; justify-content:center;">
+<div class="slide-num">19 / 22</div>
+<span class="eyebrow" style="color:var(--accent3);">Section V</span>
+<h2 style="font-size:2em;">ML Accelerator Specifics</h2>
+<p style="max-width:34em;">How clocking and reset challenges manifest specifically in large-scale ML accelerator SoCs, with real-world architectures and jitter budgets.</p>
+</section>
+
+<!-- =====================================================
+     20 - CLOCK ARCHITECTURE IN ML SOCs
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">20 / 22</div>
+<span class="eyebrow">ML Accelerator Specifics</span>
+<h2>Clock Architecture in ML SoCs</h2>
+<p>A typical ML accelerator has 6&ndash;15 major clock domains, each with independent PLL, distribution tree, and DVFS capability.</p>
+<table style="margin-top:0.6em;">
+  <thead>
+    <tr>
+      <th>Clock Domain</th>
+      <th>Typical Freq.</th>
+      <th>PLL Type</th>
+      <th>Jitter Req.</th>
+      <th>DVFS</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="hl">NPU / SM Core</span></td>
+      <td>1.5&ndash;2.5 GHz</td>
+      <td>ADPLL / Frac-N</td>
+      <td>&lt;1 ps RMS</td>
+      <td style="color:var(--accent3);">Yes</td>
+      <td>Boost clocking, per-cluster DVFS</td>
+    </tr>
+    <tr>
+      <td><span class="hl">SRAM / L2 Cache</span></td>
+      <td>1.0&ndash;2.0 GHz</td>
+      <td>ADPLL</td>
+      <td>&lt;2 ps RMS</td>
+      <td style="color:var(--accent3);">Yes</td>
+      <td>Often ratio-locked to core</td>
+    </tr>
+    <tr>
+      <td><span class="hl">NoC / Interconnect</span></td>
+      <td>1.0&ndash;1.8 GHz</td>
+      <td>ADPLL</td>
+      <td>&lt;3 ps RMS</td>
+      <td style="color:var(--accent3);">Yes</td>
+      <td>Separate from core for decoupling</td>
+    </tr>
+    <tr>
+      <td><span class="hl">HBM PHY</span></td>
+      <td>1.2&ndash;2.4 GHz</td>
+      <td>Frac-N</td>
+      <td>&lt;1.5 ps RMS</td>
+      <td style="color:var(--accent4);">Limited</td>
+      <td>Per-stack PLL; training required</td>
+    </tr>
+    <tr>
+      <td><span class="hl">PCIe / CXL</span></td>
+      <td>100 MHz ref</td>
+      <td>CDR (BBPLL)</td>
+      <td>&lt;0.5 ps RMS</td>
+      <td style="color:var(--accent4);">No</td>
+      <td>SerDes CDR per lane; 100 MHz refclk</td>
+    </tr>
+    <tr>
+      <td><span class="hl">Management CPU</span></td>
+      <td>200&ndash;500 MHz</td>
+      <td>Integer PLL</td>
+      <td>&lt;10 ps RMS</td>
+      <td style="color:var(--accent3);">Yes</td>
+      <td>Low-power always-on domain</td>
+    </tr>
+  </tbody>
+</table>
+<blockquote style="margin-top:0.7em;">
+  NVIDIA H100 (GH100): 8 HBM3 stacks each with dedicated PLL, 132 SMs grouped into GPCs with per-GPC boost clocking up to 1980 MHz,
+  NVLink 4.0 SerDes at 112 Gbps PAM4, and separate PCIe Gen5 refclk domain. Total: ~20+ PLLs on a single 814 mm&sup2; die.
+</blockquote>
+</section>
+
+<!-- =====================================================
+     21 - JITTER BUDGETS
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">21 / 22</div>
+<span class="eyebrow">ML Accelerator Specifics</span>
+<h2>Jitter Budgets for High-Speed Interfaces</h2>
+<div class="cols cols-2" style="margin-top:0.5em;">
+  <div>
+    <div class="panel accent-left">
+      <h3>HBM PHY Jitter Allocation</h3>
+      <ul>
+        <li><span class="hl">HBM3 (6.4 Gbps/pin):</span> 78 ps UI &mdash; total jitter budget ~15.6 ps (20% of UI)</li>
+        <li>PLL jitter contribution: &lt;1.5 ps RMS (&lt;10 ps pk-pk)</li>
+        <li>DLL jitter for DQS alignment: &lt;2 ps RMS</li>
+        <li>Crosstalk + SSN: ~5 ps deterministic jitter</li>
+        <li>Remaining margin: ~3 ps for silicon aging and temperature variation</li>
+      </ul>
+    </div>
+    <div class="panel accent3-left" style="margin-top:0.8em;">
+      <h3>DDR5 / LPDDR5 Clock Jitter</h3>
+      <ul>
+        <li class="a3">DDR5-6400: 312 ps UI; clock jitter budget &lt;2.5 ps RMS</li>
+        <li class="a3">LPDDR5X-8533: 234 ps UI; tighter &lt;1.8 ps RMS due to WCK-DQS tracking</li>
+        <li class="a3">Duty cycle distortion: must be &lt;47/53% for reliable sampling</li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="panel accent2-left">
+      <h3>SerDes Reference Clock</h3>
+      <ul>
+        <li class="a2"><span class="hl2">PCIe Gen5 (32 GT/s):</span> 100 MHz refclk, &lt;0.5 ps RMS jitter (PCIe CEM spec)</li>
+        <li class="a2"><span class="hl2">PCIe Gen6 (64 GT/s PAM4):</span> &lt;0.3 ps RMS; requires ultra-low-jitter XO + PLL cascade</li>
+        <li class="a2"><span class="hl2">112G Ethernet SerDes:</span> &lt;200 fs RMS reference clock jitter per IEEE 802.3ck</li>
+        <li class="a2"><span class="hl2">NVLink 4.0 (112 Gbps):</span> proprietary spec, estimated &lt;150 fs RMS reference jitter</li>
+      </ul>
+    </div>
+    <div class="panel accent4-left" style="margin-top:0.8em;">
+      <h3>PLL Cascading &amp; Jitter Accumulation</h3>
+      <ul>
+        <li class="a4">Multi-stage PLL chain: XO &rarr; system PLL &rarr; per-domain PLL &rarr; clock tree</li>
+        <li class="a4">Jitter adds as RSS: J<sub>total</sub> = &radic;(J<sub>1</sub>&sup2; + J<sub>2</sub>&sup2; + ... + J<sub>n</sub>&sup2;)</li>
+        <li class="a4">Each PLL stage contributes 100&ndash;300 fs; 3 stages = 170&ndash;520 fs total</li>
+        <li class="a4">Minimize cascade depth; use direct PLL output where possible for jitter-critical paths</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     22 - CASE STUDIES
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">22 / 22</div>
+<span class="eyebrow">Case Studies</span>
+<h2>Industry Case Studies</h2>
+<div class="cols cols-2" style="margin-top:0.5em;">
+  <div class="panel accent-left">
+    <h3>NVIDIA H100 / Hopper GPU</h3>
+    <ul>
+      <li><span class="hl">GPC Boost Clocking:</span> each GPC can boost independently up to 1980 MHz based on thermal headroom and power budget</li>
+      <li>Per-GPC ADPLL with &lt;5 &mu;s frequency transition; voltage regulator follows within 10 &mu;s</li>
+      <li>Clock mesh within each SM; H-tree between SMs in a GPC; global spine for GPC-to-GPC</li>
+      <li>8 HBM3 stacks, each with dedicated fractional-N PLL at 1.6 GHz (3.2 Gbps/pin)</li>
+      <li>NVLink 4.0: 18 links &times; 112 Gbps PAM4; BBPLL CDR per lane group</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>AMD MI300X / Infinity Fabric</h3>
+    <ul>
+      <li class="a2"><span class="hl2">XGMI (Infinity Fabric):</span> 32 GT/s links between 8 XCDs using dedicated reference PLLs with &lt;200 fs jitter</li>
+      <li class="a2">Each XCD (chiplet) has independent core PLL; mesochronous interface to Infinity Fabric</li>
+      <li class="a2">4 HBM3 stacks on each of 2 IODs; separate PLL per HBM channel</li>
+      <li class="a2">GALS architecture: each chiplet is a synchronous island; IOD acts as async bridge</li>
+    </ul>
+  </div>
+</div>
+<div class="cols cols-2" style="margin-top:0.8em;">
+  <div class="panel accent3-left">
+    <h3>Apple M-series SoC</h3>
+    <ul>
+      <li class="a3"><span class="hl3">Clock domains:</span> P-core (~3.5 GHz), E-core (~2.4 GHz), GPU (~1.4 GHz), Neural Engine (~2 GHz), fabric (~1 GHz), LPDDR5 PHY</li>
+      <li class="a3">Aggressive per-cluster DVFS with &lt;1 &mu;s transition time using ADPLL</li>
+      <li class="a3">Unified memory architecture means LPDDR5 clock domain serves all IPs &mdash; single jitter budget for system memory</li>
+      <li class="a3">Always-on SEP (Secure Enclave) domain with independent low-power oscillator</li>
+    </ul>
+  </div>
+  <div class="panel accent4-left">
+    <h3>Intel Ponte Vecchio</h3>
+    <ul>
+      <li class="a4"><span class="hl4">47 tiles</span> across base + compute + HBM + Xe Link + EMIB bridges</li>
+      <li class="a4">Each compute tile has independent PLL; 16 Xe cores per tile at up to 1.6 GHz</li>
+      <li class="a4">Xe Link: 8 ports &times; 16 lanes of 53 Gbps SerDes; CDR PLL per lane</li>
+      <li class="a4">Multi-tile reset sequencing managed by base tile &mdash; orchestrates power-on of compute tiles in defined order</li>
+      <li class="a4">Foveros 3D stacking adds vertical clock distribution challenges; TSV-based clock feeding</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- =====================================================
+     23 - REFERENCES
+     ===================================================== -->
+<section style="padding:2.2rem 3rem;">
+<div class="slide-num">23 / 22</div>
+<span class="eyebrow">References</span>
+<h2>References &amp; Further Reading</h2>
+<div class="cols cols-2" style="margin-top:0.5em;">
+  <div class="panel accent-left">
+    <h3>Books &amp; Standards</h3>
+    <ul>
+      <li>Razavi, <em>Design of Analog CMOS Integrated Circuits</em>, 2nd ed. &mdash; PLL fundamentals ch. 15&ndash;16</li>
+      <li>Dally &amp; Poulton, <em>Digital Systems Engineering</em> &mdash; synchronization, clock distribution</li>
+      <li>Cummings, <em>Simulation and Synthesis Techniques for Asynchronous FIFO Design</em> (SNUG 2002) &mdash; definitive CDC reference</li>
+      <li>JEDEC HBM3 spec (JESD238A) &mdash; jitter specs for HBM PHY</li>
+      <li>PCI-SIG PCIe 6.0 spec &mdash; reference clock jitter requirements</li>
+      <li>IEEE 802.3ck &mdash; 100/200/400 Gbps Ethernet SerDes jitter budgets</li>
+    </ul>
+  </div>
+  <div class="panel accent2-left">
+    <h3>Industry Resources</h3>
+    <ul>
+      <li class="a2">Synopsys SpyGlass CDC User Guide &mdash; CDC methodology and rule reference</li>
+      <li class="a2">Cadence Innovus CTS User Guide &mdash; clock tree synthesis techniques</li>
+      <li class="a2">NVIDIA GTC talks on Hopper architecture &mdash; clock domain and power management details</li>
+      <li class="a2">AMD ISSCC papers on Infinity Fabric clocking &mdash; multi-die clock distribution</li>
+      <li class="a2">Intel Ponte Vecchio Hot Chips 2022 presentation &mdash; multi-tile clocking challenges</li>
+      <li class="a2">Bjelogrlić et al., <em>Sub-100fs Jitter PLL Design</em>, JSSC 2023</li>
+    </ul>
+  </div>
+</div>
+<hr class="div" style="margin-top:1.2em;"/>
+<p class="dim" style="font-size:0.65em;">
+  Navigate: &larr; &rarr; arrow keys &middot; Esc for overview &middot; F for fullscreen &middot;
+  Part of the <a href="../" style="color:var(--accent);">Modern SoC Design</a> presentation series.
+</p>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: false,
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'none',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1200,
+  height: 900,
+  margin: 0.02,
+  plugins: [],
+});
+hljs.highlightAll();
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
+</script>
+</body>
+</html>
