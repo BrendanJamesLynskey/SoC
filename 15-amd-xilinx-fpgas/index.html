@@ -98,6 +98,7 @@
   .pill.purple{ color: var(--purple); border-color: var(--purple); }
   .pill.blue  { color: var(--blue); border-color: var(--blue); }
 
+  .reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
   .reveal .slide-footer { display: none; }
   .title-slide h1 { font-size: 1.8em; }
   .title-slide .subtitle {
@@ -407,19 +408,20 @@
       <div class="card amber" style="margin-bottom:.4em;">
         <h3>Processing System (PS)</h3>
         <ul>
-          <li><span class="a">APU</span>: Quad A53 @ 1.5 GHz, 1 MB L2</li>
-          <li><span class="a">RPU</span>: Dual R5F @ 600 MHz, lockstep/split</li>
-          <li><span class="a">GPU</span>: Mali-400 MP2 (EG/EV variants)</li>
-          <li><span class="a">PMU</span>: MicroBlaze — boot, power, isolation</li>
-          <li><span class="a">CSU</span>: RSA-4096 auth, AES-256 encryption, secure boot</li>
+          <li><span class="a">APU</span>: Quad-core ARM Cortex-A53 @ 1.5 GHz, 32KB L1I/D + 1 MB shared L2</li>
+          <li><span class="a">RPU</span>: Dual-core ARM Cortex-R5F @ 600 MHz, lockstep or split mode, TCMs</li>
+          <li><span class="a">GPU</span>: ARM Mali-400 MP2 (EG/EV variants)</li>
+          <li><span class="a">PMU</span>: MicroBlaze-based Platform Management Unit — boot, power domains, isolation</li>
+          <li><span class="a">CSU</span>: Configuration Security Unit — RSA-4096 auth, AES-256 encryption, secure boot chain</li>
         </ul>
       </div>
       <div class="card green">
         <h3>PS-PL Interfaces</h3>
         <ul>
-          <li><span class="g">AXI HPM</span>: 2x 128-bit master ports (PS→PL)</li>
-          <li><span class="g">AXI HPC</span>: 2x 128-bit coherent slave ports (PL→PS)</li>
-          <li><span class="g">AXI HP</span>: 4x 128-bit slave ports (PL→DDR)</li>
+          <li><span class="g">AXI HPM</span>: 2x 128-bit high-performance master ports (PS→PL)</li>
+          <li><span class="g">AXI HPC</span>: 2x 128-bit high-performance coherent slave ports (PL→PS, cache-coherent)</li>
+          <li><span class="g">AXI HP</span>: 4x 128-bit high-performance slave ports (PL→DDR)</li>
+          <li><span class="g">AXI LPD</span>: Low-power domain port for RPU-centric traffic</li>
           <li>Aggregate PS-PL bandwidth: <span class="g">&gt;100 GB/s</span></li>
         </ul>
       </div>
@@ -473,10 +475,10 @@
         <h3>Generational Evolution</h3>
         <table>
           <tr><th>Gen</th><th>ADC Rate</th><th>DAC Rate</th><th>Key Improvement</th></tr>
-          <tr><td>Gen 1</td><td>4.096 GSPS</td><td>6.554 GSPS</td><td>First direct RF SoC</td></tr>
-          <tr><td>Gen 2</td><td>5.0 GSPS</td><td>9.85 GSPS</td><td>Higher BW, better SFDR</td></tr>
-          <tr><td>Gen 3</td><td>5.0 GSPS</td><td>10.0 GSPS</td><td>SD-FEC hard IP</td></tr>
-          <tr><td>DFE</td><td>5.0 GSPS</td><td>10.0 GSPS</td><td>Hardened DFE for 5G</td></tr>
+          <tr><td>Gen 1 (ZU27/28/29DR)</td><td>4.096 GSPS</td><td>6.554 GSPS</td><td>First direct RF FPGA SoC</td></tr>
+          <tr><td>Gen 2 (ZU47/48/49DR)</td><td>5.0 GSPS</td><td>9.85 GSPS</td><td>Higher BW, better SFDR</td></tr>
+          <tr><td>Gen 3 (ZU65/67DR)</td><td>5.0 GSPS</td><td>10.0 GSPS</td><td>More tiles, SD-FEC hard IP</td></tr>
+          <tr><td>DFE (ZU21/25/27)</td><td>5.0 GSPS</td><td>10.0 GSPS</td><td>Hardened DFE for 5G NR</td></tr>
         </table>
       </div>
     </div>
@@ -494,9 +496,11 @@
       <div class="card blue">
         <h3>Target Applications</h3>
         <ul>
-          <li><span class="b">5G Massive MIMO</span> — eliminates per-antenna RF chains</li>
-          <li><span class="b">Phased Array Radar</span> — coherent multi-channel beamforming</li>
-          <li><span class="b">EW / SIGINT</span> — wideband sensing, 4+ GHz IBW</li>
+          <li><span class="b">5G Massive MIMO</span> — direct RF eliminates per-antenna RF chains</li>
+          <li><span class="b">Phased Array Radar</span> — multi-channel coherent beamforming</li>
+          <li><span class="b">Electronic Warfare</span> — wideband spectrum sensing &amp; jamming</li>
+          <li><span class="b">SIGINT / ELINT</span> — instantaneous bandwidth to 4+ GHz</li>
+          <li><span class="b">Spectrum Monitoring</span> — multi-GHz real-time analysis</li>
           <li><span class="b">Cable / Satellite</span> — multi-carrier modem consolidation</li>
         </ul>
       </div>
@@ -596,10 +600,12 @@
       <div class="card purple" style="margin-bottom:.4em;">
         <h3>AI Engine Tile Architecture</h3>
         <ul>
-          <li>Each tile: <span class="p">VLIW scalar</span> + <span class="p">512-bit SIMD</span> (8x INT8 / 16x INT4 MACs/cycle)</li>
-          <li><span class="p">32 KB data</span> + 16 KB program memory per tile</li>
-          <li><span class="p">Cascade streaming</span> between tiles — direct neighbor transfer, no NoC overhead</li>
-          <li>AXI4-Stream interfaces to PL for data ingress/egress</li>
+          <li>Each tile: <span class="p">VLIW scalar core</span> + <span class="p">512-bit SIMD vector unit</span></li>
+          <li>Vector unit: 8x INT8 MACs/cycle or 16x INT4 MACs/cycle or 8x FP32 operations</li>
+          <li><span class="p">32 KB local data memory</span> + 16 KB program memory per tile</li>
+          <li>Tiles interconnected via <span class="p">cascade streaming</span> — direct neighbor data transfer with no NoC overhead</li>
+          <li>AXI4-Stream interfaces to PL fabric for data ingress/egress</li>
+          <li>Each tile runs at <span class="p">1.0–1.25 GHz</span></li>
         </ul>
       </div>
       <div class="card amber">
@@ -784,17 +790,20 @@
         <table>
           <tr><th>Device</th><th>AI Engines</th><th>HBM</th><th>BW</th><th>LUTs</th></tr>
           <tr><td>VH1522</td><td>128</td><td>8 GB</td><td>410 GB/s</td><td>587K</td></tr>
+          <tr><td>VH1542</td><td>128</td><td>16 GB</td><td>410 GB/s</td><td>587K</td></tr>
           <tr><td>VH1582</td><td>192</td><td>16 GB</td><td>820 GB/s</td><td>929K</td></tr>
+          <tr><td>VH1742</td><td>304</td><td>32 GB</td><td>820 GB/s</td><td>1.97M</td></tr>
           <tr><td>VH1782</td><td>400</td><td>32 GB</td><td>820 GB/s</td><td>1.97M</td></tr>
         </table>
       </div>
       <div class="card blue">
         <h3>Acceleration Workloads</h3>
         <ul>
-          <li><span class="b">Genomics</span>: alignment &amp; variant calling on in-HBM references</li>
-          <li><span class="b">Financial risk</span>: Monte Carlo with massive state tables</li>
-          <li><span class="b">Network analytics</span>: DPI with regex at line rate</li>
-          <li><span class="b">Database / Graph</span>: in-memory joins, hash tables, graph traversal</li>
+          <li><span class="b">Genomics</span>: Smith-Waterman alignment, variant calling — large reference genome in HBM</li>
+          <li><span class="b">Financial risk</span>: Monte Carlo simulation with massive state tables</li>
+          <li><span class="b">Network analytics</span>: deep packet inspection with regex at line rate</li>
+          <li><span class="b">Database acceleration</span>: in-memory joins, Bloom filters, hash tables</li>
+          <li><span class="b">Graph analytics</span>: random-access graph traversal benefits from HBM bandwidth</li>
         </ul>
       </div>
     </div>
@@ -935,10 +944,13 @@
       <div class="card green">
         <h3>Vitis Libraries</h3>
         <ul>
-          <li>Open-source, optimized HLS libraries on GitHub</li>
-          <li><span class="g">Math</span>: BLAS, FFT, FIR, DDS</li>
+          <li>Open-source, performance-optimized HLS libraries on GitHub</li>
+          <li><span class="g">BLAS</span>: matrix multiply, solver, decomposition</li>
+          <li><span class="g">DSP</span>: FFT, FIR, DDS, mixer</li>
           <li><span class="g">Data Analytics</span>: regex, Bloom filter, sort, group-by</li>
-          <li><span class="g">Vision / Codec / Graph</span>: OpenCV funcs, gzip/zstd, PageRank</li>
+          <li><span class="g">Vision</span>: OpenCV-equivalent accelerated functions</li>
+          <li><span class="g">Codec</span>: gzip, zstd, snappy compression/decompression</li>
+          <li><span class="g">Graph</span>: PageRank, shortest path, triangle count</li>
         </ul>
       </div>
     </div>
@@ -956,10 +968,12 @@
       <div class="card blue">
         <h3>XRT Runtime &amp; Acceleration Workflow</h3>
         <ul>
-          <li><span class="b">XRT</span>: open-source host runtime for Alveo &amp; embedded</li>
+          <li><span class="b">XRT (Xilinx Runtime)</span>: open-source host runtime for Alveo / embedded</li>
           <li>OpenCL &amp; XRT native API for host-device communication</li>
-          <li>Flow: C++ → HLS → <code>.xo</code> → <code>v++</code> → <code>.xclbin</code></li>
-          <li>HW emulation via XSIM; supports PCIe &amp; embedded targets</li>
+          <li>Kernel execution: <code>xclbin</code> binary loaded at runtime</li>
+          <li>Flow: C++ kernel → HLS → <code>.xo</code> → <code>v++</code> linker → <code>.xclbin</code></li>
+          <li>Hardware emulation: full RTL sim via Vivado XSIM behind XRT abstraction</li>
+          <li>Supports PCIe-attached (Alveo) and embedded (Zynq/Versal) targets</li>
         </ul>
       </div>
     </div>
@@ -1255,13 +1269,16 @@
     <div>
       <table>
         <tr><th>Dimension</th><th>AMD (Xilinx)</th><th>Intel (Altera)</th><th>Lattice</th></tr>
-        <tr><td>High-End</td><td><span class="a">Versal 7nm</span></td><td><span class="b">Agilex 7/9</span></td><td>N/A</td></tr>
-        <tr><td>Mid / Low</td><td>Kintex / Artix</td><td>Agilex 5 / Cyclone</td><td><span class="g">Nexus FD-SOI</span></td></tr>
-        <tr><td>SoC + AI</td><td>Zynq / Versal AI Engine</td><td>Agilex SoC + Tensor</td><td>sensAI (soft)</td></tr>
-        <tr><td>RF / HBM</td><td><span class="a">RFSoC + Versal HBM</span></td><td>HBM planned</td><td>—</td></tr>
-        <tr><td>Top SerDes</td><td>112G PAM4</td><td>116G PAM4</td><td>12.5G</td></tr>
+        <tr><td>High-End</td><td><span class="a">Versal (7nm)</span></td><td><span class="b">Agilex 7/9 (7/5nm)</span></td><td>N/A</td></tr>
+        <tr><td>Mid-Range</td><td>Kintex US+ (16nm)</td><td>Agilex 5 (EMIB)</td><td>N/A</td></tr>
+        <tr><td>Low-Power</td><td>Artix (28/16nm)</td><td>Cyclone V / 10</td><td><span class="g">Nexus (28nm FD-SOI)</span></td></tr>
+        <tr><td>SoC</td><td>Zynq US+ / Versal</td><td>Agilex SoC (A53/A76)</td><td>—</td></tr>
+        <tr><td>AI Engines</td><td>AI Engine (VLIW+SIMD)</td><td>AI Tensor Blocks</td><td>sensAI (soft)</td></tr>
+        <tr><td>RF Integration</td><td><span class="a">RFSoC (ADC/DAC)</span></td><td>—</td><td>—</td></tr>
+        <tr><td>HBM</td><td>Virtex HBM / Versal HBM</td><td>Agilex 9 HBM (planned)</td><td>—</td></tr>
+        <tr><td>Top Serdes</td><td>112G PAM4 (GTM)</td><td>116G PAM4</td><td>12.5G</td></tr>
         <tr><td>Market Share</td><td><span class="a">~51%</span></td><td><span class="b">~35%</span></td><td><span class="g">~8%</span></td></tr>
-        <tr><td>Tools</td><td>Vivado / Vitis</td><td>Quartus / OneAPI</td><td>Radiant</td></tr>
+        <tr><td>Tool Suite</td><td>Vivado / Vitis</td><td>Quartus / OneAPI</td><td>Radiant / Propel</td></tr>
       </table>
     </div>
     <div>
@@ -1347,10 +1364,33 @@
 </div><!-- reveal -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
 <script>
-Reveal.initialize({ hash:true, navigationMode:'linear', controlsTutorial:false,
-  slideNumber:'c/t', showSlideNumber:'speaker',
-  width:1280, height:720, margin:0.04,
-  transition:'fade', transitionSpeed:'fast' });
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1100,
+  height: 900,
+  margin: 0.01
+});
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
 </script>
 </body>
 </html>
