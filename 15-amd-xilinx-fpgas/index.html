@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMD/Xilinx FPGA Technology &amp; Products — Modern SoC Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
+
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
+
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
+
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
+
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: .02em; }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- SLIDE 1 — TITLE -->
+<!-- ============================================================ -->
+<section class="title-slide">
+  <p class="meta">Modern SoC Design · Part 15</p>
+  <h1>AMD / Xilinx<br>FPGA Technology &amp; Products</h1>
+  <p class="subtitle">From Virtex to Versal — Architecture, Ecosystem &amp; Strategic Direction</p>
+  <p class="meta">23 Slides · Deep Dive</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2 — TABLE OF CONTENTS -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">00</span>
+    <h2>Agenda</h2>
+  </div>
+  <div class="cols cols-3">
+    <div class="card amber">
+      <h3>Heritage &amp; Organization</h3>
+      <ul>
+        <li>Xilinx Heritage &amp; AMD Acquisition</li>
+        <li>Adaptive Computing Division</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>UltraScale+ Families</h3>
+      <ul>
+        <li>Virtex UltraScale+ Deep Dive</li>
+        <li>Kintex UltraScale+ &amp; Artix</li>
+        <li>Zynq UltraScale+ MPSoC</li>
+        <li>Zynq RFSoC</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Versal Platform</h3>
+      <ul>
+        <li>Versal Architecture Overview</li>
+        <li>Versal AI Core Series</li>
+        <li>Versal AI Edge Series</li>
+        <li>Versal Premium Series</li>
+        <li>Versal HBM &amp; Gen 2 Roadmap</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Design Tools</h3>
+      <ul>
+        <li>Vivado Design Suite</li>
+        <li>Vitis Unified Platform</li>
+        <li>Vitis AI</li>
+      </ul>
+    </div>
+    <div class="card amber">
+      <h3>Markets &amp; Applications</h3>
+      <ul>
+        <li>Data Center &amp; Alveo</li>
+        <li>5G &amp; Communications</li>
+        <li>Automotive (XA)</li>
+        <li>Aerospace &amp; Defense</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3>Competition &amp; Outlook</h3>
+      <ul>
+        <li>vs Intel Agilex / Lattice Nexus</li>
+        <li>Strategic Direction &amp; Roadmap</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3 — XILINX HERITAGE & AMD ACQUISITION -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">01</span>
+    <h2>Xilinx Heritage &amp; AMD Acquisition</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Key Milestones</h3>
+        <ul>
+          <li><span class="a">1985</span> — Xilinx founded; invented the FPGA (XC2064)</li>
+          <li><span class="a">1998</span> — Virtex family: first modern FPGA with block RAM &amp; DLLs</li>
+          <li><span class="a">2004</span> — Virtex-4: first column-based architecture</li>
+          <li><span class="a">2010</span> — Virtex-7: 28 nm, 2M logic cells, first 2.5D interposer (SSI)</li>
+          <li><span class="a">2015</span> — UltraScale+ at 16 nm FinFET+, UltraRAM introduced</li>
+          <li><span class="a">2018</span> — Versal ACAP announced — FPGA + AI Engines + ARM SoC</li>
+          <li><span class="a">2020</span> — AMD announces $49B all-stock acquisition of Xilinx</li>
+          <li><span class="a">2022</span> — Acquisition closes Feb 14; Xilinx becomes AMD Adaptive Computing</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Strategic Rationale</h3>
+        <p>AMD sought <span class="g">heterogeneous compute</span> across CPU + GPU + FPGA + AI. Xilinx delivered:</p>
+        <ul>
+          <li>40+ years of programmable logic IP</li>
+          <li>Dominant share in <span class="g">Telecom, Aerospace, Automotive</span></li>
+          <li>Versal ACAP as the future adaptive platform</li>
+          <li>~8,500 patents in reconfigurable computing</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>Acquisition Economics</h3>
+        <ul>
+          <li><span class="p">$49B</span> all-stock deal (1.7234 AMD shares per Xilinx share)</li>
+          <li>Xilinx FY2022 revenue: <span class="p">~$3.7B</span></li>
+          <li>35x trailing P/E — premium for strategic positioning</li>
+          <li>Expected $300M+ annual synergies by Year 3</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4 — AMD ADAPTIVE COMPUTING DIVISION -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">02</span>
+    <h2>AMD Adaptive Computing Division</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Organization &amp; Revenue</h3>
+        <ul>
+          <li>Reports as <span class="a">Embedded segment</span> alongside embedded processors</li>
+          <li>Quarterly revenue ~$1.5B (FY2023), significant decline from Xilinx peak due to inventory digestion</li>
+          <li>Headed by VP/GM of Adaptive &amp; Embedded Computing Group</li>
+          <li>Engineering centers: San Jose, Dublin, Hyderabad, Singapore, Beijing</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Revenue Mix by End Market</h3>
+        <ul>
+          <li><span class="g">Communications</span> — ~35% (5G RAN, wireline)</li>
+          <li><span class="g">Data Center</span> — ~20% (Alveo, SmartNIC)</li>
+          <li><span class="g">Automotive / ISM</span> — ~20% (ADAS, industrial)</li>
+          <li><span class="g">A&amp;D</span> — ~15% (radar, EW, space)</li>
+          <li><span class="g">Other</span> — ~10% (broadcast, consumer, test)</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card blue">
+        <h3>Product Portfolio Overview</h3>
+        <table>
+          <tr><th>Family</th><th>Node</th><th>Category</th></tr>
+          <tr><td>Artix-7 / UltraScale+</td><td>28/16 nm</td><td>Cost-Optimized FPGA</td></tr>
+          <tr><td>Kintex-7 / UltraScale+</td><td>28/16 nm</td><td>Mid-Range FPGA</td></tr>
+          <tr><td>Virtex-7 / UltraScale+</td><td>28/16 nm</td><td>High-Performance FPGA</td></tr>
+          <tr><td>Zynq-7000</td><td>28 nm</td><td>SoC (A9 + FPGA)</td></tr>
+          <tr><td>Zynq UltraScale+ MPSoC</td><td>16 nm</td><td>SoC (A53/R5 + FPGA)</td></tr>
+          <tr><td>Zynq UltraScale+ RFSoC</td><td>16 nm</td><td>SoC + RF-ADC/DAC</td></tr>
+          <tr><td>Versal (AI Core/Edge/Premium/HBM)</td><td>7 nm</td><td>ACAP</td></tr>
+          <tr><td>Versal Gen 2</td><td>5/4 nm</td><td>Next-gen ACAP</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5 — VIRTEX ULTRASCALE+ DEEP DIVE -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">03</span>
+    <h2>Virtex UltraScale+ Architecture Deep Dive</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Fabric Architecture (16 nm FinFET+)</h3>
+        <ul>
+          <li><span class="a">CLB</span>: 8 six-input LUTs + 16 flip-flops per slice; 2 slices/CLB</li>
+          <li>LUTs optionally split as <span class="a">2x 5-input</span> or used as 64-bit distributed RAM / shift register</li>
+          <li><span class="a">UltraRAM</span>: 288 Kb dual-port SRAM blocks; cascade-chaining to build multi-MB on-chip buffers</li>
+          <li><span class="a">Block RAM</span>: 36 Kb true dual-port; configurable as 2x 18 Kb</li>
+          <li>Up to <span class="a">4.4M</span> system logic cells (VU19P — largest monolithic FPGA)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>DSP48E2 Slice</h3>
+        <ul>
+          <li>27x18 signed multiplier + 48-bit accumulator</li>
+          <li>Pre-adder for symmetric FIR filter optimization</li>
+          <li>Up to <span class="g">12,288 DSP slices</span> (VU13P)</li>
+          <li>891 MHz Fmax — <span class="g">~21.8 TMAC/s</span> peak INT8</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>GT Transceivers</h3>
+        <ul>
+          <li><span class="p">GTY</span>: up to 32.75 Gb/s NRZ per lane</li>
+          <li><span class="p">GTM</span> (VU27P/VU29P): 58G PAM4, 112G with FEC</li>
+          <li>Up to 120 GTY transceivers per device</li>
+          <li>Support for PCIe Gen3/Gen4, 100GbE, Interlaken, JESD204C</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>HBM Variants (VU35P / VU37P / VU45P / VU47P)</h3>
+        <ul>
+          <li><span class="b">HBM2</span> stacks integrated via 2.5D CoWoS interposer</li>
+          <li>VU37P: 2x HBM2 stacks = <span class="b">8 GB, 460 GB/s</span></li>
+          <li>VU47P: 2x HBM2 stacks = <span class="b">16 GB, 460 GB/s</span></li>
+          <li>32 pseudo-channels; AXI3 interface per channel</li>
+          <li>Key for financial tick-to-trade, genomics, network analytics</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6 — KINTEX ULTRASCALE+ & ARTIX -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">04</span>
+    <h2>Kintex UltraScale+ &amp; Artix Families</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Kintex UltraScale+ — Mid-Range Champion</h3>
+        <ul>
+          <li>16 nm FinFET+; optimized <span class="g">price/performance/watt</span></li>
+          <li>Up to <span class="g">1.1M</span> logic cells (KU19P)</li>
+          <li>Up to 128 GTY transceivers @ 32.75 Gb/s</li>
+          <li>2,160 DSP48E2 slices; up to 48 MB UltraRAM</li>
+          <li>Integrated PCIe Gen3 x16 &amp; Gen4 x8 hard blocks</li>
+          <li>Integrated 100G Ethernet MAC + PCS</li>
+        </ul>
+        <p style="margin-top:.2em;">Target: <span class="g">Wireless infrastructure, video, medical imaging, test &amp; measurement</span></p>
+      </div>
+      <div class="card amber">
+        <h3>Key Kintex Devices</h3>
+        <table>
+          <tr><th>Device</th><th>LCs</th><th>BRAM (Mb)</th><th>DSP</th><th>GTY</th></tr>
+          <tr><td>KU3P</td><td>356K</td><td>22</td><td>1,368</td><td>16</td></tr>
+          <tr><td>KU5P</td><td>523K</td><td>36</td><td>1,824</td><td>32</td></tr>
+          <tr><td>KU15P</td><td>1,045K</td><td>75</td><td>1,968</td><td>32</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card blue" style="margin-bottom:.4em;">
+        <h3>Artix UltraScale+ — Cost-Optimized</h3>
+        <ul>
+          <li>16 nm; lowest power in UltraScale+ family</li>
+          <li>Up to <span class="b">352K</span> logic cells (AU25P)</li>
+          <li>GTH transceivers @ 16.3 Gb/s (lower cost serdes)</li>
+          <li>No UltraRAM; Block RAM only (~11 Mb max)</li>
+          <li>Hardened PCIe Gen3 x8</li>
+          <li>I/O banks support DDR4 up to 2,400 MT/s</li>
+        </ul>
+        <p style="margin-top:.2em;">Target: <span class="b">Motor control, sensor fusion, protocol bridging, industrial IoT, low-cost video</span></p>
+      </div>
+      <div class="card purple">
+        <h3>Artix-7 (28 nm) — Still In Production</h3>
+        <ul>
+          <li>Lowest cost Xilinx FPGA; <span class="p">&lt;$10 BOM</span> at volume</li>
+          <li>Up to 215K logic cells; GTP transceivers @ 6.6 Gb/s</li>
+          <li>1.0V core; total device power often <span class="p">&lt;1 W</span></li>
+          <li>Automotive-grade XA variants available</li>
+          <li>Widely used in legacy designs, expected in production through 2030+</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7 — ZYNQ ULTRASCALE+ MPSOC -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">05</span>
+    <h2>Zynq UltraScale+ MPSoC</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Processing System (PS)</h3>
+        <ul>
+          <li><span class="a">APU</span>: Quad-core ARM Cortex-A53 @ 1.5 GHz, 32KB L1I/D + 1 MB shared L2</li>
+          <li><span class="a">RPU</span>: Dual-core ARM Cortex-R5F @ 600 MHz, lockstep or split mode, TCMs</li>
+          <li><span class="a">GPU</span>: ARM Mali-400 MP2 (EG/EV variants)</li>
+          <li><span class="a">PMU</span>: MicroBlaze-based Platform Management Unit — boot, power domains, isolation</li>
+          <li><span class="a">CSU</span>: Configuration Security Unit — RSA-4096 auth, AES-256 encryption, secure boot chain</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>PS-PL Interfaces</h3>
+        <ul>
+          <li><span class="g">AXI HPM</span>: 2x 128-bit high-performance master ports (PS→PL)</li>
+          <li><span class="g">AXI HPC</span>: 2x 128-bit high-performance coherent slave ports (PL→PS, cache-coherent)</li>
+          <li><span class="g">AXI HP</span>: 4x 128-bit high-performance slave ports (PL→DDR)</li>
+          <li><span class="g">AXI LPD</span>: Low-power domain port for RPU-centric traffic</li>
+          <li>Aggregate PS-PL bandwidth: <span class="g">&gt;100 GB/s</span></li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Security &amp; Isolation</h3>
+        <ul>
+          <li><span class="p">ARM TrustZone</span> on A53 — secure/non-secure worlds</li>
+          <li><span class="p">XMPU</span>: Xilinx Memory Protection Unit — region-based access control</li>
+          <li><span class="p">XPPU</span>: Xilinx Peripheral Protection Unit — per-peripheral access gating</li>
+          <li>Hardware root of trust with eFUSE-based key storage</li>
+          <li>Anti-tamper &amp; DPA-resistant AES engine</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Variants</h3>
+        <table>
+          <tr><th>Variant</th><th>PL LCs</th><th>Feature</th></tr>
+          <tr><td>ZU2–ZU5 (CG)</td><td>103–256K</td><td>Cost-optimized</td></tr>
+          <tr><td>ZU5–ZU9 (EG)</td><td>256–600K</td><td>+ GPU + Video Codec</td></tr>
+          <tr><td>ZU7–ZU19 (EV)</td><td>504–1.1M</td><td>+ H.264/H.265 VCU</td></tr>
+        </table>
+        <p style="margin-top:.2em;">EV variants include hardened <span class="b">H.264/H.265 Video Codec Unit</span> — 4K60 encode/decode</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8 — ZYNQ RFSOC -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">06</span>
+    <h2>Zynq UltraScale+ RFSoC</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Direct RF Sampling Architecture</h3>
+        <ul>
+          <li>Integrates <span class="a">RF-ADCs</span> (up to 14-bit, 5 GSPS) and <span class="a">RF-DACs</span> (up to 14-bit, 10 GSPS) on-die</li>
+          <li>Eliminates external mixer/IF stages — <span class="a">direct RF-to-digital</span></li>
+          <li>Up to <span class="a">16 ADC + 16 DAC</span> channels per device</li>
+          <li>Integrated digital down/up-converters (DDC/DUC) with NCOs</li>
+          <li>On-chip PLL for multi-tile synchronization (MTS)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Generational Evolution</h3>
+        <table>
+          <tr><th>Gen</th><th>ADC Rate</th><th>DAC Rate</th><th>Key Improvement</th></tr>
+          <tr><td>Gen 1 (ZU27/28/29DR)</td><td>4.096 GSPS</td><td>6.554 GSPS</td><td>First direct RF FPGA SoC</td></tr>
+          <tr><td>Gen 2 (ZU47/48/49DR)</td><td>5.0 GSPS</td><td>9.85 GSPS</td><td>Higher BW, better SFDR</td></tr>
+          <tr><td>Gen 3 (ZU65/67DR)</td><td>5.0 GSPS</td><td>10.0 GSPS</td><td>More tiles, SD-FEC hard IP</td></tr>
+          <tr><td>DFE (ZU21/25/27)</td><td>5.0 GSPS</td><td>10.0 GSPS</td><td>Hardened DFE for 5G NR</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>DFE Variant — 5G Optimized</h3>
+        <ul>
+          <li>Hardened <span class="p">Digital Front End</span> (DFE) blocks replace soft logic</li>
+          <li>DFE includes: CFR (crest factor reduction), DPD (digital pre-distortion), mixers, filters</li>
+          <li>Saves <span class="p">~50%</span> PL resources vs soft DFE implementation</li>
+          <li>Enables <span class="p">200 MHz IBW per antenna</span> for 5G NR FR1</li>
+          <li>Integrated SD-FEC (LDPC/Turbo) hard blocks for channel coding</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Target Applications</h3>
+        <ul>
+          <li><span class="b">5G Massive MIMO</span> — direct RF eliminates per-antenna RF chains</li>
+          <li><span class="b">Phased Array Radar</span> — multi-channel coherent beamforming</li>
+          <li><span class="b">Electronic Warfare</span> — wideband spectrum sensing &amp; jamming</li>
+          <li><span class="b">SIGINT / ELINT</span> — instantaneous bandwidth to 4+ GHz</li>
+          <li><span class="b">Spectrum Monitoring</span> — multi-GHz real-time analysis</li>
+          <li><span class="b">Cable / Satellite</span> — multi-carrier modem consolidation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9 — VERSAL ARCHITECTURE OVERVIEW -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">07</span>
+    <h2>Versal ACAP Architecture Overview</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <svg class="diagram" viewBox="0 0 520 340" width="520" height="340">
+        <!-- NoC backbone -->
+        <rect x="10" y="160" width="500" height="30" rx="4" fill="#2a2a3a" stroke="#f5a623" stroke-width="1.5"/>
+        <text x="260" y="180" text-anchor="middle" fill="#f5a623" font-size="12" font-family="JetBrains Mono">Network-on-Chip (NoC) — AXI Interconnect</text>
+        <!-- Scalar Engines -->
+        <rect x="10" y="10" width="155" height="135" rx="6" fill="#10101a" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="87" y="30" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600" font-family="JetBrains Mono">Scalar Engines</text>
+        <text x="87" y="50" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">Dual ARM Cortex-A72</text>
+        <text x="87" y="65" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">Dual ARM Cortex-R5F</text>
+        <text x="87" y="80" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">Platform Mgmt Controller</text>
+        <text x="87" y="95" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">OCM · GIC · L2 Cache</text>
+        <text x="87" y="115" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">Security: Crypto, RoT, PUF</text>
+        <text x="87" y="130" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">Boot: QSPI, SD, JTAG</text>
+        <!-- Adaptable Engines -->
+        <rect x="180" y="10" width="160" height="135" rx="6" fill="#10101a" stroke="#4ecb8d" stroke-width="1.5"/>
+        <text x="260" y="30" text-anchor="middle" fill="#4ecb8d" font-size="11" font-weight="600" font-family="JetBrains Mono">Adaptable Engines</text>
+        <text x="260" y="50" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">FPGA Fabric (CLBs)</text>
+        <text x="260" y="65" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">Block RAM · UltraRAM</text>
+        <text x="260" y="80" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">DSP58 Engines</text>
+        <text x="260" y="95" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">GTY / GTYP Transceivers</text>
+        <text x="260" y="115" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">PCIe Gen4/5 · MRMAC</text>
+        <text x="260" y="130" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">DDR4/LPDDR4 Controllers</text>
+        <!-- AI Engines -->
+        <rect x="355" y="10" width="155" height="135" rx="6" fill="#10101a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="432" y="30" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600" font-family="JetBrains Mono">Intelligent Engines</text>
+        <text x="432" y="50" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">AI Engine Array</text>
+        <text x="432" y="65" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">VLIW + SIMD Cores</text>
+        <text x="432" y="80" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">32 KB Tile Local Memory</text>
+        <text x="432" y="95" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">Cascade Stream Routing</text>
+        <text x="432" y="115" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">Up to 400 AI Engine Tiles</text>
+        <text x="432" y="130" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">~130 INT8 TOPS (AI Core)</text>
+        <!-- DDR / IO at bottom -->
+        <rect x="10" y="205" width="500" height="55" rx="6" fill="#10101a" stroke="#2a2a3a" stroke-width="1"/>
+        <text x="260" y="225" text-anchor="middle" fill="#f87171" font-size="10" font-weight="600" font-family="JetBrains Mono">I/O &amp; Memory</text>
+        <text x="260" y="245" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">DDR4/LPDDR4 DDRMC · XPIO · HDIO · GTY/GTYP/GTM · PCIe Gen4/5 · MRMAC 400G</text>
+        <!-- PMC -->
+        <rect x="10" y="275" width="500" height="45" rx="6" fill="#10101a" stroke="#f87171" stroke-width="1"/>
+        <text x="260" y="295" text-anchor="middle" fill="#f87171" font-size="10" font-weight="600" font-family="JetBrains Mono">Platform Management Controller (PMC)</text>
+        <text x="260" y="311" text-anchor="middle" fill="#ccc" font-size="9" font-family="DM Sans">Boot · Configuration · Security · Power Management · Debug · Health Monitoring</text>
+      </svg>
+    </div>
+    <div>
+      <div class="card amber" style="margin-bottom:.3em;">
+        <h3>ACAP = Adaptive Compute Acceleration Platform</h3>
+        <p>Versal is <span class="a">not just an FPGA</span> — it is a heterogeneous SoC with three distinct compute domains connected by a programmable NoC.</p>
+      </div>
+      <div class="card green" style="margin-bottom:.3em;">
+        <h3>NoC Architecture</h3>
+        <ul>
+          <li>Hardened <span class="g">AXI streaming NoC</span> replaces soft interconnect</li>
+          <li>Deterministic, QoS-aware routing with configurable arbitration</li>
+          <li>Eliminates ~40% of fabric congestion from interconnect logic</li>
+          <li>128-bit data paths @ 1 GHz = <span class="g">16 GB/s per port</span></li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>Key Differentiators vs UltraScale+</h3>
+        <ul>
+          <li><span class="p">7 nm TSMC</span> vs 16 nm — 2x density, 40% lower power</li>
+          <li>AI Engines: dedicated vector DSP array (not in UltraScale+)</li>
+          <li>Hardened NoC replaces soft AXI interconnect</li>
+          <li>Hardened DDR memory controllers (DDRMC)</li>
+          <li>New <span class="p">DSP58</span>: 27x24 multiplier (vs DSP48E2 27x18)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10 — VERSAL AI CORE SERIES -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">08</span>
+    <h2>Versal AI Core Series</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>AI Engine Tile Architecture</h3>
+        <ul>
+          <li>Each tile: <span class="p">VLIW scalar core</span> + <span class="p">512-bit SIMD vector unit</span></li>
+          <li>Vector unit: 8x INT8 MACs/cycle or 16x INT4 MACs/cycle or 8x FP32 operations</li>
+          <li><span class="p">32 KB local data memory</span> + 16 KB program memory per tile</li>
+          <li>Tiles interconnected via <span class="p">cascade streaming</span> — direct neighbor data transfer with no NoC overhead</li>
+          <li>AXI4-Stream interfaces to PL fabric for data ingress/egress</li>
+          <li>Each tile runs at <span class="p">1.0–1.25 GHz</span></li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <h3>AI Core Device Lineup</h3>
+        <table>
+          <tr><th>Device</th><th>AI Engines</th><th>LUTs</th><th>DSP58</th><th>INT8 TOPS</th></tr>
+          <tr><td>VC1502</td><td>128</td><td>337K</td><td>928</td><td>~50</td></tr>
+          <tr><td>VC1702</td><td>192</td><td>477K</td><td>1,312</td><td>~75</td></tr>
+          <tr><td>VC1902</td><td>400</td><td>900K</td><td>1,968</td><td>~133</td></tr>
+          <tr><td>VC2802</td><td>400</td><td>1.96M</td><td>3,984</td><td>~133</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Dataflow Programming Model</h3>
+        <ul>
+          <li>AI Engine graphs are expressed as <span class="g">directed acyclic graphs</span> (DAGs) in C/C++</li>
+          <li>Compiler maps kernels to tiles and routes streams automatically</li>
+          <li>Data flows through cascade chains without returning to main memory</li>
+          <li>Achieves <span class="g">&gt;80% compute utilization</span> for well-structured workloads</li>
+          <li>Suits: CNN inference, 5G L1 (FFT, LDPC), beamforming, radar signal processing</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>AI Core vs GPU Inference</h3>
+        <ul>
+          <li>VC1902 delivers <span class="b">~133 INT8 TOPS at 75 W</span> — competitive with NVIDIA T4 (130 TOPS @ 70 W)</li>
+          <li>Advantage: <span class="b">deterministic latency</span> — no batching requirement</li>
+          <li>Advantage: <span class="b">PL-accelerated pre/post-processing</span> integrated on-chip</li>
+          <li>Advantage: inline deployment (SmartNIC, 5G) without host CPU</li>
+          <li>Disadvantage: smaller software ecosystem, longer development cycle</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11 — VERSAL AI EDGE SERIES -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">09</span>
+    <h2>Versal AI Edge Series</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Power-Efficient Edge AI</h3>
+        <ul>
+          <li>AI Engine-ML tiles: optimized for <span class="g">INT4/INT8</span> inference at lower power</li>
+          <li>AI Engine-ML adds native <span class="g">sparse matrix</span> support (2:4 structured sparsity) — effectively 2x throughput for pruned models</li>
+          <li>Up to <span class="g">304 AI Engine-ML tiles</span> (VE2802)</li>
+          <li>Peak: <span class="g">~200 INT4 TOPS</span> at sub-40W total device power</li>
+          <li>Integrated <span class="g">H.264/H.265 VCU</span> in select variants</li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <h3>AI Edge Device Lineup</h3>
+        <table>
+          <tr><th>Device</th><th>AI-ML Tiles</th><th>LUTs</th><th>Peak INT8</th></tr>
+          <tr><td>VE1752</td><td>32</td><td>295K</td><td>~16 TOPS</td></tr>
+          <tr><td>VE2102</td><td>64</td><td>440K</td><td>~32 TOPS</td></tr>
+          <tr><td>VE2302</td><td>152</td><td>671K</td><td>~75 TOPS</td></tr>
+          <tr><td>VE2802</td><td>304</td><td>1.02M</td><td>~150 TOPS</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Automotive ADAS Use Cases</h3>
+        <ul>
+          <li><span class="p">Multi-sensor fusion</span>: camera, lidar, radar processed on single device</li>
+          <li>CNN-based object detection (YOLO, SSD) at <span class="p">&lt;10 ms latency</span></li>
+          <li>Functional safety: lockstep R5F, ECC memory, built-in self-test</li>
+          <li>AEC-Q100 qualified variants (XA prefix)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Other Edge Applications</h3>
+        <ul>
+          <li><span class="b">Robotics</span>: real-time motor control + vision AI on one device</li>
+          <li><span class="b">Surveillance</span>: multi-stream video analytics, person re-ID</li>
+          <li><span class="b">Medical</span>: ultrasound beam-forming + AI-assisted diagnosis</li>
+          <li><span class="b">Industrial</span>: defect detection, predictive maintenance on production line</li>
+          <li><span class="b">Drone/UAV</span>: obstacle avoidance + payload processing</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12 — VERSAL PREMIUM SERIES -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">10</span>
+    <h2>Versal Premium Series</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Highest Bandwidth Versal</h3>
+        <ul>
+          <li>Designed for <span class="a">data center networking, wired telecom, test &amp; measurement</span></li>
+          <li><span class="a">112G PAM4</span> GTM transceivers — up to 72 lanes per device</li>
+          <li>Integrated <span class="a">600G Ethernet</span> subsystem (DCMAC — dual 300G or 6x100G)</li>
+          <li>Integrated <span class="a">PCIe Gen5 x32</span> with CCIX support</li>
+          <li>Up to <span class="a">1.97M</span> LUTs, 4,000+ DSP58 engines</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Crypto &amp; Security</h3>
+        <ul>
+          <li>Hardened <span class="g">multi-100G inline crypto engines</span> (AES-256-GCM, IPsec/MACsec)</li>
+          <li>Up to <span class="g">600 Gbps</span> aggregate crypto throughput — no fabric resources consumed</li>
+          <li>FIPS 140-3 ready; PQC (post-quantum crypto) via PL soft implementation</li>
+          <li>Integrated hardware root of trust, PUF, secure boot</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Premium Device Lineup</h3>
+        <table>
+          <tr><th>Device</th><th>LUTs</th><th>GTM (112G)</th><th>DCMAC</th><th>PCIe</th></tr>
+          <tr><td>VP1052</td><td>586K</td><td>32</td><td>6x100G</td><td>Gen5 x16</td></tr>
+          <tr><td>VP1202</td><td>833K</td><td>44</td><td>2x DCMAC</td><td>2x Gen5</td></tr>
+          <tr><td>VP1402</td><td>1.15M</td><td>56</td><td>2x DCMAC</td><td>2x Gen5</td></tr>
+          <tr><td>VP1802</td><td>1.97M</td><td>72</td><td>3x DCMAC</td><td>3x Gen5</td></tr>
+        </table>
+      </div>
+      <div class="card blue">
+        <h3>Target Workloads</h3>
+        <ul>
+          <li><span class="b">400G/800G switches &amp; routers</span> — packet processing + programmable forwarding</li>
+          <li><span class="b">5G UPF / BNG</span> — user-plane function acceleration</li>
+          <li><span class="b">Network test equipment</span> — multi-rate protocol exerciser</li>
+          <li><span class="b">Financial exchanges</span> — ultra-low-latency matching engines with 100G connectivity</li>
+          <li><span class="b">Storage controllers</span> — NVMe-oF, erasure coding, compression</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 13 — VERSAL HBM SERIES -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">11</span>
+    <h2>Versal HBM Series</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>HBM2e Integration</h3>
+        <ul>
+          <li>Up to <span class="a">2x HBM2e stacks</span> on 2.5D CoWoS interposer</li>
+          <li><span class="a">32 GB total</span> HBM2e capacity (16 GB per stack)</li>
+          <li>Aggregate bandwidth: <span class="a">820 GB/s</span> (32 pseudo-channels x ~25.6 GB/s each)</li>
+          <li>AXI-based memory controller; configurable QoS per channel</li>
+          <li>Both AI Engines and PL fabric have direct NoC paths to HBM</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Why HBM on an FPGA?</h3>
+        <ul>
+          <li>Eliminates <span class="g">external DDR memory bottleneck</span> — many acceleration workloads are memory-bound</li>
+          <li>Pin-count savings: HBM uses thousands of micro-bumps on interposer vs hundreds of DDR pins</li>
+          <li>Lower power per bit: <span class="g">~3.9 pJ/bit</span> vs ~8 pJ/bit for DDR4</li>
+          <li>Enables <span class="g">in-memory compute</span> patterns without external DRAM latency</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>HBM Device Lineup</h3>
+        <table>
+          <tr><th>Device</th><th>AI Engines</th><th>HBM</th><th>BW</th><th>LUTs</th></tr>
+          <tr><td>VH1522</td><td>128</td><td>8 GB</td><td>410 GB/s</td><td>587K</td></tr>
+          <tr><td>VH1542</td><td>128</td><td>16 GB</td><td>410 GB/s</td><td>587K</td></tr>
+          <tr><td>VH1582</td><td>192</td><td>16 GB</td><td>820 GB/s</td><td>929K</td></tr>
+          <tr><td>VH1742</td><td>304</td><td>32 GB</td><td>820 GB/s</td><td>1.97M</td></tr>
+          <tr><td>VH1782</td><td>400</td><td>32 GB</td><td>820 GB/s</td><td>1.97M</td></tr>
+        </table>
+      </div>
+      <div class="card blue">
+        <h3>Acceleration Workloads</h3>
+        <ul>
+          <li><span class="b">Genomics</span>: Smith-Waterman alignment, variant calling — large reference genome in HBM</li>
+          <li><span class="b">Financial risk</span>: Monte Carlo simulation with massive state tables</li>
+          <li><span class="b">Network analytics</span>: deep packet inspection with regex at line rate</li>
+          <li><span class="b">Database acceleration</span>: in-memory joins, Bloom filters, hash tables</li>
+          <li><span class="b">Graph analytics</span>: random-access graph traversal benefits from HBM bandwidth</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 14 — VERSAL GEN 2 / NEXT-GEN ROADMAP -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">12</span>
+    <h2>Versal Gen 2 &amp; Next-Gen Roadmap</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Versal Gen 2 (Announced 2024)</h3>
+        <ul>
+          <li>Migrates to advanced <span class="a">TSMC N5/N4</span> process node</li>
+          <li><span class="a">AI Engine v2 (AIE2)</span>: enhanced vector ISA, BFloat16 native support, higher MAC density</li>
+          <li>Expected <span class="a">2–3x</span> AI TOPS/W improvement over Gen 1</li>
+          <li>Updated <span class="a">ARM Cortex-A78</span> (or newer) scalar engines</li>
+          <li>Enhanced NoC v2 with higher throughput and lower latency</li>
+          <li>112G/224G PAM4 transceivers for 800G/1.6T Ethernet</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Known Product Lines</h3>
+        <ul>
+          <li><span class="g">Versal Gen 2 AI Edge</span>: targeting automotive L2+ ADAS and robotics</li>
+          <li><span class="g">Versal Gen 2 Prime</span>: general-purpose replacement for UltraScale+ designs</li>
+          <li><span class="g">Versal Gen 2 Premium</span>: 800G–1.6T networking</li>
+          <li>Sampling expected to OEMs through 2025–2026</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Architecture Trends</h3>
+        <ul>
+          <li><span class="p">Chiplet integration</span>: AMD exploring UCIe-based multi-die FPGA architectures leveraging AMD's chiplet expertise from EPYC</li>
+          <li><span class="p">CXL 3.0</span> support for shared memory pools with host CPUs</li>
+          <li><span class="p">Coherent interconnect</span> between FPGA fabric and CPU complex</li>
+          <li>Deeper <span class="p">AMD CDNA/RDNA IP</span> integration possibilities</li>
+          <li>Software-defined approach: more heterogeneous hard blocks, fewer soft implementations</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Migration Considerations</h3>
+        <ul>
+          <li>Versal Gen 2 is <span class="r">not pin-compatible</span> with Gen 1 — board redesign required</li>
+          <li>Vivado → Vitis Unified IDE migration: design flow consolidation</li>
+          <li>IP core compatibility maintained via Vitis libraries abstraction</li>
+          <li>AI Engine kernel C/C++ source generally portable between AIE v1 → v2</li>
+          <li>FPGA fabric RTL designs: largely portable with re-synthesis</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 15 — VIVADO DESIGN SUITE -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">13</span>
+    <h2>Vivado Design Suite</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Core Design Flow</h3>
+        <ul>
+          <li><span class="a">Synthesis</span>: Vivado Synthesis (XST replacement) — supports VHDL-2008, SystemVerilog-2012 subset</li>
+          <li><span class="a">Implementation</span>: opt_design → place_design → phys_opt_design → route_design</li>
+          <li><span class="a">Timing Closure</span>: integrated STA engine; timing-driven place &amp; route with incremental compilation</li>
+          <li>Report-based methodology: <code>report_timing_summary</code>, <code>report_methodology</code>, <code>report_drc</code></li>
+          <li>Generates <span class="a">.bit</span> (bitstream) and <span class="a">.xsa</span> (hardware handoff to Vitis)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>IP Integrator (IPI) Block Design</h3>
+        <ul>
+          <li>Graphical block diagram editor for IP assembly</li>
+          <li>Connection automation: infers AXI interconnects, clocking, resets</li>
+          <li>Address map editor for memory-mapped peripherals</li>
+          <li>BD validation catches connectivity/parameter mismatches</li>
+          <li>Supports Zynq PS block, Versal CIPS block as anchor IPs</li>
+          <li><span class="g">Platform design</span> workflow: export extensible platforms (.xpfm) for Vitis acceleration</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Advanced Features</h3>
+        <ul>
+          <li><span class="p">Incremental Compile</span>: reuse prior placement — reduces iteration time by 2–5x for small ECOs</li>
+          <li><span class="p">Abstract Shell</span>: partition designs for team-based IP assembly (DFX / partial reconfiguration)</li>
+          <li><span class="p">Block-level synthesis</span>: out-of-context (OOC) runs for modular compilation</li>
+          <li><span class="p">Tcl scripting</span>: entire flow scriptable; <code>write_checkpoint / read_checkpoint</code> for state save/restore</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Vivado ML (Machine Learning-Optimized)</h3>
+        <ul>
+          <li>Introduced in Vivado 2021.1+ — ML-based placement &amp; routing algorithms</li>
+          <li><span class="b">ML strategy</span>: automatically selects optimization directives based on design characteristics</li>
+          <li>Claims <span class="b">~10% WNS improvement</span> and 2x faster timing closure for congested designs</li>
+          <li>Integrated design analysis: congestion heatmaps, utilization density, timing path histogram</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 16 — VITIS UNIFIED SOFTWARE PLATFORM -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">14</span>
+    <h2>Vitis Unified Software Platform</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Vitis HLS (High-Level Synthesis)</h3>
+        <ul>
+          <li>C/C++ → RTL synthesis with pragma-driven micro-architecture control</li>
+          <li>Key pragmas: <code>#pragma HLS PIPELINE</code>, <code>#pragma HLS UNROLL</code>, <code>#pragma HLS ARRAY_PARTITION</code>, <code>#pragma HLS DATAFLOW</code></li>
+          <li>Supports <span class="a">AXI4 master/slave</span>, <span class="a">AXI4-Stream</span>, and <span class="a">AXI4-Lite</span> interface synthesis</li>
+          <li>Generates co-simulation testbench; RTL-C co-sim for functional verification</li>
+          <li>Iteration time: minutes (HLS) vs days (manual RTL)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Vitis Libraries</h3>
+        <ul>
+          <li>Open-source, performance-optimized HLS libraries on GitHub</li>
+          <li><span class="g">BLAS</span>: matrix multiply, solver, decomposition</li>
+          <li><span class="g">DSP</span>: FFT, FIR, DDS, mixer</li>
+          <li><span class="g">Data Analytics</span>: regex, Bloom filter, sort, group-by</li>
+          <li><span class="g">Vision</span>: OpenCV-equivalent accelerated functions</li>
+          <li><span class="g">Codec</span>: gzip, zstd, snappy compression/decompression</li>
+          <li><span class="g">Graph</span>: PageRank, shortest path, triangle count</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>AI Engine Compiler &amp; Simulation</h3>
+        <ul>
+          <li>AI Engine graphs written in <span class="p">C/C++ with AIE API</span></li>
+          <li><span class="p">aiecompiler</span>: maps kernels to tiles, schedules, routes streams</li>
+          <li><span class="p">aiesimulator</span>: cycle-accurate simulation of AI Engine array</li>
+          <li><span class="p">x86simulator</span>: fast functional simulation on host</li>
+          <li>Performance profiling: cycle counts, stalls, memory conflicts, stream throughput</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>XRT Runtime &amp; Acceleration Workflow</h3>
+        <ul>
+          <li><span class="b">XRT (Xilinx Runtime)</span>: open-source host runtime for Alveo / embedded</li>
+          <li>OpenCL &amp; XRT native API for host-device communication</li>
+          <li>Kernel execution: <code>xclbin</code> binary loaded at runtime</li>
+          <li>Flow: C++ kernel → HLS → <code>.xo</code> → <code>v++</code> linker → <code>.xclbin</code></li>
+          <li>Hardware emulation: full RTL sim via Vivado XSIM behind XRT abstraction</li>
+          <li>Supports PCIe-attached (Alveo) and embedded (Zynq/Versal) targets</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 17 — VITIS AI -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">15</span>
+    <h2>Vitis AI</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>DPU IP — Deep Learning Processing Unit</h3>
+        <ul>
+          <li>Configurable <span class="a">soft DPU</span> instantiated in FPGA fabric (Zynq/Versal PL)</li>
+          <li>Architectures: <span class="a">DPUCZDX8G</span> (Zynq), <span class="a">DPUCVDX8G</span> (Versal AI Core), <span class="a">DPUCV2DX8G</span> (Versal AI Edge)</li>
+          <li>Configurable parallelism: B512, B1024, B2048, B4096 — trade fabric area for throughput</li>
+          <li>Supports Conv2D, DepthwiseConv, Deconv, Pooling, Eltwise, Softmax, etc.</li>
+          <li>Multi-DPU deployment: instantiate 2–4 DPUs for multi-model parallel inference</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Quantization &amp; Optimization</h3>
+        <ul>
+          <li><span class="g">Vitis AI Quantizer</span>: post-training quantization (PTQ) from FP32 → INT8</li>
+          <li>Quantization-aware training (QAT) via PyTorch/TensorFlow plugins</li>
+          <li>Calibration: requires representative dataset (~100–1000 images)</li>
+          <li>Typical accuracy loss: <span class="g">&lt;1% top-5</span> for well-conditioned models</li>
+          <li>Pruning support: structured channel pruning for further compression</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Framework Support &amp; Model Zoo</h3>
+        <ul>
+          <li>Compiles models from <span class="p">PyTorch, TensorFlow 2.x, ONNX Runtime</span></li>
+          <li>Vitis AI Compiler: <code>vai_c_xir</code> → XIR graph intermediate representation → DPU instructions</li>
+          <li><span class="p">Model Zoo</span>: 200+ pre-optimized models (ResNet, YOLO, EfficientNet, PointPillars, Transformer variants)</li>
+          <li>Custom op support via <span class="p">CPU subgraph fallback</span> or PL-based custom kernels</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Edge vs Cloud Deployment</h3>
+        <table>
+          <tr><th>Aspect</th><th>Edge (Zynq/Versal)</th><th>Cloud (Alveo)</th></tr>
+          <tr><td>Power</td><td>5–30 W</td><td>75–225 W</td></tr>
+          <tr><td>Throughput</td><td>~50–300 FPS (ResNet-50)</td><td>~1000–5000 FPS</td></tr>
+          <tr><td>Latency</td><td>&lt;5 ms single image</td><td>&lt;2 ms batched</td></tr>
+          <tr><td>Runtime</td><td>Vitis AI Runtime (VART)</td><td>VART + XRT</td></tr>
+          <tr><td>OS</td><td>PetaLinux / bare-metal</td><td>Ubuntu + XRT driver</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 18 — AMD FPGA IN DATA CENTERS -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">16</span>
+    <h2>AMD FPGA in Data Centers — Alveo</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Alveo Accelerator Card Portfolio</h3>
+        <table>
+          <tr><th>Card</th><th>FPGA</th><th>Memory</th><th>Network</th><th>Form</th></tr>
+          <tr><td>U25N</td><td>XCU25</td><td>DDR4</td><td>2x 25G SFP28</td><td>OCP SmartNIC</td></tr>
+          <tr><td>U55C</td><td>XCU55C (HBM)</td><td>16GB HBM2</td><td>2x QSFP28</td><td>PCIe x16</td></tr>
+          <tr><td>U250</td><td>XCU250</td><td>4x 16GB DDR4</td><td>2x QSFP28</td><td>PCIe x16</td></tr>
+          <tr><td>V70</td><td>Versal AI Edge</td><td>DDR4</td><td>—</td><td>PCIe half-height</td></tr>
+          <tr><td>V80</td><td>Versal HBM</td><td>32GB HBM2e</td><td>2x QSFP-DD</td><td>PCIe Gen5</td></tr>
+        </table>
+      </div>
+      <div class="card green">
+        <h3>SmartNIC / DPU Use Cases</h3>
+        <ul>
+          <li><span class="g">U25N</span>: OVS offload, vSwitch, IPSEC, load balancing</li>
+          <li>AMD Pensando competitor — FPGA-based infrastructure processing</li>
+          <li>Deployed at <span class="g">Microsoft Azure</span> (Project Catapult / Brainwave heritage)</li>
+          <li>SNAP framework: standardized NIC abstraction for FPGA SmartNICs</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Cloud FPGA Instances</h3>
+        <ul>
+          <li><span class="p">AWS F1</span>: VU9P-based instances (f1.2xlarge → f1.16xlarge, 1–8 FPGAs)</li>
+          <li><span class="p">Alibaba Cloud</span>: F3 instances with VU9P</li>
+          <li><span class="p">Nimbix / AMD Developer Cloud</span>: Alveo U250/U55C on demand</li>
+          <li>Use: genomics, financial simulation, video transcoding, database acceleration</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>V80 — Next-Gen Data Center Card</h3>
+        <ul>
+          <li>Based on <span class="b">Versal HBM series</span> — AI Engines + HBM2e</li>
+          <li><span class="b">32 GB HBM2e, 820 GB/s</span> bandwidth</li>
+          <li>PCIe Gen5 x16 host interface</li>
+          <li>200G networking (2x QSFP-DD)</li>
+          <li>Targets: LLM serving pre/post-processing, RAG pipeline acceleration, genomics</li>
+          <li>Successor to U55C — major generational leap with AI Engine compute</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 19 — AMD FPGA IN 5G & COMMUNICATIONS -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">17</span>
+    <h2>AMD FPGA in 5G &amp; Communications</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>5G RAN Architecture Role</h3>
+        <ul>
+          <li><span class="a">RFSoC</span> dominates the Radio Unit (O-RU): direct RF sampling replaces discrete RF chains</li>
+          <li><span class="a">Versal AI Core</span> targets the Distributed Unit (O-DU): L1 physical layer processing</li>
+          <li>L1 functions: FFT/IFFT, LDPC encode/decode, MIMO equalization, beamforming, PRACH detection</li>
+          <li>AMD claims <span class="a">&gt;60%</span> share of 5G RAN FPGA sockets globally</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>O-RAN Integration</h3>
+        <ul>
+          <li>RFSoC DFE aligns with <span class="g">O-RAN 7.2x split</span> — processing split between O-RU and O-DU</li>
+          <li>eCPRI / IEEE 1914.3 fronthaul interface natively supported</li>
+          <li>T-Cell reference design: <span class="g">4T4R to 32T32R</span> massive MIMO configurations</li>
+          <li>AMD provides complete L1 IP for O-DU on Versal (partnered with Ericsson, Nokia, Samsung)</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Massive MIMO &amp; Beamforming</h3>
+        <ul>
+          <li><span class="p">64T64R</span>: requires 64 RF chains — RFSoC consolidates from 8+ boards to 1–2</li>
+          <li>Beamforming matrix: 64×12 subcarrier groups × per-symbol = massive compute</li>
+          <li>AI Engines excel at <span class="p">complex matrix multiply</span> — natural fit for beamweight calculation</li>
+          <li>DPD (Digital Pre-Distortion): per-antenna DPD runs in RFSoC DFE hard blocks</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Wireline &amp; Transport</h3>
+        <ul>
+          <li><span class="b">Versal Premium</span> for optical transport: OTN, FlexO, 400G/800G coherent DSP assist</li>
+          <li><span class="b">Kintex UltraScale+</span> in access equipment: GPON, XGS-PON, 25G-PON OLT</li>
+          <li>Cable infrastructure: DOCSIS 3.1/4.0 CMTS acceleration</li>
+          <li>Satellite ground stations: DVB-S2X modulation, multi-carrier processing</li>
+          <li>Timing: IEEE 1588 PTP hardware timestamping with sub-ns accuracy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 20 — AMD FPGA IN AUTOMOTIVE -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">18</span>
+    <h2>AMD FPGA in Automotive</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>XA (Xilinx Automotive) Family</h3>
+        <ul>
+          <li><span class="a">XA Artix / Kintex / Zynq UltraScale+</span>: AEC-Q100 Grade 2 (–40 to +105 &deg;C)</li>
+          <li><span class="a">XA Versal AI Edge</span>: next-gen automotive ADAS platform</li>
+          <li>Extended qualification: 15+ year supply commitment, PPAP documentation</li>
+          <li>Dedicated automotive support team with APQP, 8D problem-solving</li>
+          <li><span class="a">Zero-defect</span> program: DPPM &lt;1 target</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>ADAS Sensor Fusion</h3>
+        <ul>
+          <li><span class="g">Camera</span>: ISP pipeline + CNN object detection on single Zynq/Versal</li>
+          <li><span class="g">Lidar</span>: point cloud processing, 3D object detection (PointPillars)</li>
+          <li><span class="g">Radar</span>: FFT-based range-Doppler processing, CFAR detection</li>
+          <li>Fusion layer: multi-modal object tracking, prediction, path planning</li>
+          <li>Single XA Versal AI Edge can process <span class="g">8+ cameras + 1 lidar + 4 radars</span> simultaneously</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Functional Safety (ISO 26262)</h3>
+        <ul>
+          <li>XA devices support up to <span class="p">ASIL-D</span> decomposition (ASIL-B/C natively)</li>
+          <li><span class="p">Lockstep R5F</span> in Zynq/Versal: dual-core comparison for ASIL-D safety island</li>
+          <li>Soft Error Mitigation (SEM) IP: detects &amp; corrects SEUs in configuration memory</li>
+          <li>Safety manual and FMEDA (Failure Mode Effects &amp; Diagnostic Analysis) provided</li>
+          <li>Built-in self-test (BIST) for fabric, BRAM, UltraRAM</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Other Automotive Uses</h3>
+        <ul>
+          <li><span class="b">Display bridge</span>: MIPI/LVDS transcoding, AR HUD rendering</li>
+          <li><span class="b">In-vehicle networking</span>: TSN switch, 10BASE-T1S gateway</li>
+          <li><span class="b">EV powertrain</span>: motor control FOC, BMS monitoring</li>
+          <li><span class="b">V2X communication</span>: C-V2X / DSRC protocol processing</li>
+          <li><span class="b">OTA update</span>: FPGA partial reconfiguration enables field-updateable hardware functions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 21 — AMD FPGA IN AEROSPACE & DEFENSE -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">19</span>
+    <h2>AMD FPGA in Aerospace &amp; Defense</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Radiation-Tolerant &amp; Space-Grade</h3>
+        <ul>
+          <li><span class="a">RT (Radiation Tolerant)</span>: Kintex UltraScale XQRKU060 — total ionizing dose (TID) &gt;100 krad(Si)</li>
+          <li><span class="a">Space-grade</span>: extended testing for SEL (Single Event Latchup) immunity &gt;80 MeV·cm²/mg</li>
+          <li>SEU mitigation via built-in <span class="a">CRAM scrubbing</span> + ECC on BRAM</li>
+          <li>QML-Q/-V qualification per MIL-PRF-38535</li>
+          <li>Heritage in 200+ space missions (GPS, LEO constellations, deep space probes)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Radar &amp; Electronic Warfare</h3>
+        <ul>
+          <li><span class="g">AESA radar</span>: real-time pulse compression, MTI, STAP processing</li>
+          <li><span class="g">EW / SIGINT</span>: wideband digital receivers, real-time spectral analysis, threat identification</li>
+          <li>RFSoC enables <span class="g">direct digitization</span> of RF signals up to ~4 GHz</li>
+          <li>Multi-channel coherent systems: RFSoC MTS for phase-aligned sampling</li>
+          <li>AI-assisted threat classification using Versal AI Engine inference</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>SOSA &amp; Open Architecture Standards</h3>
+        <ul>
+          <li><span class="p">SOSA (Sensor Open Systems Architecture)</span>: modular C4ISR standard</li>
+          <li>AMD FPGAs core to SOSA-aligned 3U/6U VPX processing cards</li>
+          <li>VITA 49.2 (VITA Radio Transport) for standardized IF/RF data streaming</li>
+          <li>Partners: Curtiss-Wright, Mercury (Andover), L3Harris, BAE Systems</li>
+          <li>Key enabler: <span class="p">partial reconfiguration</span> for mission-adaptable waveforms</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>A&amp;D Specific Considerations</h3>
+        <ul>
+          <li><span class="b">ITAR/EAR compliance</span>: AMD provides US-manufactured variants for classified programs</li>
+          <li><span class="b">Anti-tamper</span>: bitstream encryption (AES-256), authentication (RSA-4096), DPA countermeasures</li>
+          <li><span class="b">Obsolescence management</span>: 15–20 year lifecycles; last-time-buy programs</li>
+          <li><span class="b">Trusted foundry</span>: select devices available through DMEA-accredited sources</li>
+          <li>Extended temperature: military (–55 to +125 &deg;C) and industrial (–40 to +100 &deg;C) grades</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 22 — COMPETITIVE POSITIONING -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">20</span>
+    <h2>Competitive Positioning vs Intel &amp; Lattice</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <table>
+        <tr><th>Dimension</th><th>AMD (Xilinx)</th><th>Intel (Altera)</th><th>Lattice</th></tr>
+        <tr><td>High-End</td><td><span class="a">Versal (7nm)</span></td><td><span class="b">Agilex 7/9 (7/5nm)</span></td><td>N/A</td></tr>
+        <tr><td>Mid-Range</td><td>Kintex US+ (16nm)</td><td>Agilex 5 (EMIB)</td><td>N/A</td></tr>
+        <tr><td>Low-Power</td><td>Artix (28/16nm)</td><td>Cyclone V / 10</td><td><span class="g">Nexus (28nm FD-SOI)</span></td></tr>
+        <tr><td>SoC</td><td>Zynq US+ / Versal</td><td>Agilex SoC (A53/A76)</td><td>—</td></tr>
+        <tr><td>AI Engines</td><td>AI Engine (VLIW+SIMD)</td><td>AI Tensor Blocks</td><td>sensAI (soft)</td></tr>
+        <tr><td>RF Integration</td><td><span class="a">RFSoC (ADC/DAC)</span></td><td>—</td><td>—</td></tr>
+        <tr><td>HBM</td><td>Virtex HBM / Versal HBM</td><td>Agilex 9 HBM (planned)</td><td>—</td></tr>
+        <tr><td>Top Serdes</td><td>112G PAM4 (GTM)</td><td>116G PAM4</td><td>12.5G</td></tr>
+        <tr><td>Market Share</td><td><span class="a">~51%</span></td><td><span class="b">~35%</span></td><td><span class="g">~8%</span></td></tr>
+        <tr><td>Tool Suite</td><td>Vivado / Vitis</td><td>Quartus / OneAPI</td><td>Radiant / Propel</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>AMD Strengths</h3>
+        <ul>
+          <li><span class="g">RFSoC</span>: no competitor in integrated RF FPGA</li>
+          <li><span class="g">Versal AI Engine</span>: most mature hardened AI array in FPGA</li>
+          <li><span class="g">Ecosystem</span>: largest FPGA IP/tool ecosystem (Vivado maturity)</li>
+          <li><span class="g">CPU+GPU+FPGA</span>: unique heterogeneous portfolio post-merger</li>
+          <li><span class="g">5G dominance</span>: >60% of RAN FPGA sockets</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>AMD Weaknesses / Intel Advantages</h3>
+        <ul>
+          <li>Intel Agilex 9 on Intel 7/4 process — <span class="r">competitive at high-end</span></li>
+          <li>Intel <span class="r">Quartus timing closure</span> often faster for large designs</li>
+          <li>Intel HPS (Hard Processor System) with <span class="r">Cortex-A76</span> — newer core than AMD A72</li>
+          <li>Lattice dominates <span class="r">ultra-low-power edge</span> (&lt;100 mW) niche</li>
+          <li>AMD Vivado license cost remains a barrier for small teams</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 23 — STRATEGIC DIRECTION & OUTLOOK -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">21</span>
+    <h2>Strategic Direction &amp; Outlook</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>AMD's Adaptive Computing Roadmap</h3>
+        <ul>
+          <li><span class="a">Versal Gen 2</span> (2025–2026): 5/4 nm, AIE v2, 224G PAM4, CXL 3.0</li>
+          <li><span class="a">Versal Gen 3</span> (horizon): 3 nm, deeper CPU integration, chiplet-based</li>
+          <li>Long-term: <span class="a">UCIe chiplet</span> interconnect — FPGA fabric dies mixed with CPU/GPU/HBM dies</li>
+          <li>Embedded roadmap convergence: Versal replaces UltraScale+ over 3–5 year transition</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Convergence with CPU &amp; GPU</h3>
+        <ul>
+          <li>AMD uniquely possesses <span class="g">x86 (Zen)</span>, <span class="g">GPU (CDNA/RDNA)</span>, and <span class="g">FPGA (Versal)</span></li>
+          <li>Chiplet vision: Zen core complex + FPGA fabric on same package via <span class="g">AMD Infinity Fabric</span></li>
+          <li>CXL 3.0: coherent memory sharing between FPGA and CPU — no DMA copies</li>
+          <li>Potential: EPYC + Versal combo chip for inline acceleration (SmartNIC, storage, AI)</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>AI-Everywhere Thesis</h3>
+        <ul>
+          <li>Every AMD product line gains AI capability: <span class="p">Ryzen AI, Instinct, Versal AI</span></li>
+          <li>FPGA AI niche: <span class="p">deterministic, inline, low-batch</span> inference where GPUs are overkill</li>
+          <li>Vitis AI + ONNX Runtime EP: unified deployment across CPU/GPU/FPGA targets</li>
+          <li>AI Engine roadmap: more INT4/FP8 support, transformer-optimized ISA extensions</li>
+          <li>Edge AI consolidation: Versal AI Edge displaces discrete NPU + FPGA combinations</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Key Challenges Ahead</h3>
+        <ul>
+          <li><span class="b">Software gap</span>: CUDA ecosystem dwarfs Vitis — developer adoption remains #1 challenge</li>
+          <li><span class="b">Intel competition</span>: Agilex 9 / 3 aggressive on process node and features</li>
+          <li><span class="b">Revenue diversification</span>: Comms segment cyclicality (5G capex slowdown)</li>
+          <li><span class="b">Design complexity</span>: Versal ACAP learning curve steeper than pure FPGA</li>
+          <li><span class="b">ASIC erosion</span>: Broadcom, Marvell ASIC alternatives in high-volume networking</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- slides -->
+</div><!-- reveal -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+Reveal.initialize({ hash:true, navigationMode:'linear', controlsTutorial:false,
+  slideNumber:'c/t', showSlideNumber:'speaker',
+  width:1280, height:720, margin:0.04,
+  transition:'fade', transitionSpeed:'fast' });
+</script>
+</body>
+</html>

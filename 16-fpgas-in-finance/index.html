@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPGAs in Finance — Modern SoC Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
+
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
+
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
+
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
+
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: .02em; }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============== SLIDE 1 — TITLE ============== -->
+<section class="title-slide">
+  <p class="meta">Modern SoC Design · Part 16</p>
+  <h1>FPGAs in Finance</h1>
+  <p class="subtitle">Ultra-Low Latency Trading, Risk Analytics &amp; the Hardware Arms Race</p>
+  <p class="meta">23 Slides · Deep Dive</p>
+</section>
+
+<!-- ============== SLIDE 2 — AGENDA ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">AGENDA</span>
+    <h2>Table of Contents</h2>
+  </div>
+  <div class="cols cols-2">
+    <div class="card amber">
+      <h3>Foundations &amp; Motivation</h3>
+      <ul>
+        <li><span class="a">01</span> Why FPGAs in Finance?</li>
+        <li><span class="a">02</span> History of FPGAs in Trading</li>
+        <li><span class="a">03</span> Market Data Feed Handling</li>
+        <li><span class="a">04</span> Order Book Construction</li>
+        <li><span class="a">05</span> Ultra-Low Latency Architectures</li>
+        <li><span class="a">06</span> FPGA Network Stack</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Trading Strategies in Hardware</h3>
+      <ul>
+        <li><span class="g">07</span> Market Making on FPGAs</li>
+        <li><span class="g">08</span> Stat Arb &amp; Signal Processing</li>
+        <li><span class="g">09</span> Risk Calculation on FPGAs</li>
+        <li><span class="g">10</span> Options Pricing in Hardware</li>
+        <li><span class="g">11</span> Crypto &amp; Digital Asset Trading</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Platforms &amp; Development</h3>
+      <ul>
+        <li><span class="p">12</span> Key FPGA Platforms for Finance</li>
+        <li><span class="p">13</span> FPGA Development in Finance</li>
+        <li><span class="p">14</span> Workflow &amp; Languages</li>
+        <li><span class="p">15</span> IP &amp; Vendor Ecosystem</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Challenges &amp; Future</h3>
+      <ul>
+        <li><span class="b">16</span> Development Complexity</li>
+        <li><span class="b">17</span> Regulatory &amp; Compliance</li>
+        <li><span class="b">18</span> Latency Measurement</li>
+        <li><span class="b">19</span> Colocation &amp; Infrastructure</li>
+        <li><span class="b">20</span> FPGA vs SmartNIC vs DPU</li>
+        <li><span class="b">21</span> Future Directions</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 3 — WHY FPGAs IN FINANCE ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">01</span>
+    <h2>Why FPGAs in Finance?</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>The Latency Imperative</h3>
+        <ul>
+          <li><span class="a">Every nanosecond matters</span> — a 1 &mu;s advantage can be worth millions per year in equity market-making</li>
+          <li>CPU software stacks introduce <span class="r">OS jitter, cache misses, context switches</span> — all unpredictable</li>
+          <li>FPGAs offer <span class="g">deterministic, pipeline-parallel</span> execution with zero OS overhead</li>
+          <li>Wire-speed processing: data is processed <span class="a">as it arrives off the wire</span>, bit-by-bit, before the full packet is received</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Determinism over Raw Speed</h3>
+        <ul>
+          <li>CPUs: median latency ~5 &mu;s but <span class="r">p99 can spike to 50+ &mu;s</span> (GC, TLB miss, interrupt)</li>
+          <li>FPGA: median and p99.99 within <span class="g">tens of nanoseconds</span> of each other</li>
+          <li>Consistent execution = predictable risk = better strategy modeling</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <table>
+        <tr><th>Platform</th><th>Tick-to-Trade</th><th>Jitter (p99)</th><th>Power</th></tr>
+        <tr><td><span class="r">Software (C++)</span></td><td>3–10 &mu;s</td><td>10–100 &mu;s</td><td>150 W</td></tr>
+        <tr><td><span class="b">Kernel Bypass</span></td><td>1–3 &mu;s</td><td>5–20 &mu;s</td><td>150 W</td></tr>
+        <tr><td><span class="a">FPGA</span></td><td>0.3–1 &mu;s</td><td>0.05–0.2 &mu;s</td><td>40 W</td></tr>
+        <tr><td><span class="p">ASIC</span></td><td>0.1–0.3 &mu;s</td><td>&lt;0.05 &mu;s</td><td>15 W</td></tr>
+      </table>
+      <div class="card purple" style="margin-top:.4em;">
+        <h3>Why Not ASIC?</h3>
+        <ul>
+          <li><span class="p">$10–50M NRE</span> for a custom trading ASIC — prohibitive for most firms</li>
+          <li>Exchange protocols change frequently; FPGA is <span class="g">reprogrammable in hours</span></li>
+          <li>Regulatory landscape shifts; strategies evolve — reconfigurability is essential</li>
+          <li>Some firms <em>do</em> use ASICs (rumored at Citadel, Jump) but FPGA remains the practical sweet spot</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 4 — HISTORY ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">02</span>
+    <h2>History of FPGAs in Trading</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <table>
+        <tr><th>Era</th><th>Capability</th><th>Key Technology</th></tr>
+        <tr><td><span class="a">2005–2008</span></td><td>Simple feed handlers, NIC timestamping</td><td>Xilinx Virtex-4/5, 1G/10G Ethernet</td></tr>
+        <tr><td><span class="a">2009–2012</span></td><td>Full market data parsing, order book construction</td><td>Virtex-6, Altera Stratix IV, Solarflare NICs</td></tr>
+        <tr><td><span class="g">2013–2016</span></td><td>Tick-to-trade pipelines, TCP offload, risk checks</td><td>Kintex/Virtex-7, Stratix V, 10G/40G</td></tr>
+        <tr><td><span class="b">2017–2020</span></td><td>Full strategy execution, multi-exchange, options pricing</td><td>UltraScale+, Stratix 10, 25G/100G, HBM</td></tr>
+        <tr><td><span class="p">2021–present</span></td><td>AI/ML inference, CXL, 400G, crypto, cloud FPGA</td><td>Versal, Agilex, Alveo V80, SmartNICs</td></tr>
+      </table>
+      <div class="card blue" style="margin-top:.4em;">
+        <h3>Key Milestones</h3>
+        <ul>
+          <li><span class="a">2007:</span> Celoxica demonstrates first commercial FPGA feed handler for LSE</li>
+          <li><span class="a">2010:</span> Fixnetix ships iX-eCute — sub-microsecond tick-to-trade on FPGA</li>
+          <li><span class="g">2014:</span> Solarflare (now Xilinx) ships AOE — application offload engine on NIC</li>
+          <li><span class="b">2019:</span> Xilinx Alveo U50 brings FPGA trading cards to commodity form factor</li>
+          <li><span class="p">2023:</span> AMD/Xilinx Alveo V80 with HBM2e — 32 GB on-card memory for finance</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>The Arms Race Narrative</h3>
+        <p>Electronic trading moved from <span class="a">milliseconds</span> (2000s) to <span class="g">microseconds</span> (2010s) to <span class="p">nanoseconds</span> (2020s). At each stage, the firms that invested in hardware acceleration gained an edge — until competitors caught up, forcing the next wave of innovation.</p>
+      </div>
+      <div class="card red">
+        <h3>Flash Crash &amp; Regulation</h3>
+        <p>The 2010 Flash Crash brought scrutiny to HFT. Paradoxically, this <span class="g">increased</span> FPGA adoption: regulators mandated pre-trade risk checks with <span class="a">minimal additional latency</span>. FPGAs can implement these checks in the same pipeline, adding only 10–50 ns, vs. 1–5 &mu;s for software.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 5 — MARKET DATA FEED HANDLING ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">03</span>
+    <h2>Market Data Feed Handling</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Exchange Protocol Zoo</h3>
+        <ul>
+          <li><span class="a">ITCH</span> (Nasdaq) — binary, fixed-width messages, ~50 bytes avg. Up to 40 billion messages/day</li>
+          <li><span class="a">OUCH</span> (Nasdaq) — order entry counterpart to ITCH, binary</li>
+          <li><span class="g">PITCH</span> (Cboe) — binary, similar structure to ITCH</li>
+          <li><span class="b">FIX</span> — tag-value text protocol, still used for order entry by many venues</li>
+          <li><span class="p">OPRA</span> — US options consolidated feed, ~200 billion messages/day at peak</li>
+          <li><span class="r">SBE</span> (Simple Binary Encoding) — CME and others, zero-copy friendly</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Multicast Architecture</h3>
+        <ul>
+          <li>Most feeds are <span class="g">UDP multicast</span> — no TCP handshake, no retransmission by default</li>
+          <li>FPGA joins multicast groups directly on the MAC, no kernel involvement</li>
+          <li>Gap detection and retransmission requests handled in hardware</li>
+          <li>Typical feed: <span class="a">5–20 Gbps</span> of market data across 50+ multicast channels</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>FPGA Parsing Pipeline</h3>
+        <p>Data flows through the FPGA in a streaming pipeline — each byte is processed as it arrives from the Ethernet MAC. No store-and-forward buffering.</p>
+        <ul>
+          <li><span class="p">Stage 1:</span> Ethernet frame → IP → UDP demux (2–3 clock cycles)</li>
+          <li><span class="p">Stage 2:</span> Multicast channel identification &amp; sequence number check</li>
+          <li><span class="p">Stage 3:</span> Protocol-specific message parsing (ITCH type dispatch)</li>
+          <li><span class="p">Stage 4:</span> Field extraction → normalized internal event struct</li>
+          <li><span class="a">Total: 50–150 ns</span> from first byte on wire to parsed event output</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Wire-to-App Latency</h3>
+        <p>Software (kernel NIC): <span class="r">5–15 &mu;s</span>. Kernel bypass (DPDK/ef_vi): <span class="b">1–3 &mu;s</span>. FPGA: <span class="g">80–200 ns</span>. This gap is the single biggest reason FPGAs dominate in HFT feed handling.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 6 — ORDER BOOK CONSTRUCTION ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">04</span>
+    <h2>Order Book Construction on FPGA</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Full Limit Order Book in Fabric</h3>
+        <ul>
+          <li>Maintain <span class="a">all price levels and order queues</span> for each symbol in FPGA block RAM (BRAM) or UltraRAM</li>
+          <li>Typical: 256–2048 price levels per symbol, up to 8192 orders per level</li>
+          <li>Data structure: hash-indexed <span class="g">price level array</span> with linked-list order chains</li>
+          <li>Add/Modify/Delete/Execute operations complete in <span class="a">1–3 clock cycles</span> at 300+ MHz</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>BRAM-Based Price-Level Storage</h3>
+        <ul>
+          <li>UltraScale+ provides <span class="g">~38 Mb BRAM + 90 Mb UltraRAM</span> — enough for 500+ symbols with full book depth</li>
+          <li>Price → BRAM address mapping via direct indexing (tick-normalized) or CAM lookup</li>
+          <li>Dual-port RAM enables <span class="b">simultaneous read+write</span> — process one update while reading top-of-book</li>
+          <li>For HBM-equipped cards, overflow to HBM for less-active symbols (~100 ns penalty)</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Incremental Update Flow</h3>
+        <p><span class="p">Add Order:</span> Hash order ID → store in free slot, link to price level, update aggregate quantity</p>
+        <p><span class="p">Delete Order:</span> Lookup by order ID → unlink from price level chain, update quantity</p>
+        <p><span class="p">Execute:</span> Reduce quantity at price level, remove if filled, update top-of-book if needed</p>
+      </div>
+      <div class="card blue">
+        <h3>Top-of-Book Extraction</h3>
+        <ul>
+          <li>Best bid/ask maintained as <span class="b">registered outputs</span> — available in 1 cycle, always current</li>
+          <li>BBO changes trigger downstream strategy pipeline immediately</li>
+          <li>Book imbalance ratios (bid size / ask size at top N levels) computed combinationally</li>
+          <li>Microstructure features (queue position, trade-through detection) extracted in real-time</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 7 — ULTRA-LOW LATENCY ARCHITECTURES ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">05</span>
+    <h2>Ultra-Low Latency Trading Architectures</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Tick-to-Trade Pipeline</h3>
+        <p>The critical path from market data arrival to order transmission:</p>
+        <ul>
+          <li><span class="a">Ethernet RX:</span> 20–60 ns (MAC + PHY deserialization)</li>
+          <li><span class="a">Protocol Parse:</span> 40–100 ns (ITCH/OUCH decode)</li>
+          <li><span class="g">Book Update:</span> 10–30 ns (price level lookup + update)</li>
+          <li><span class="p">Strategy Logic:</span> 30–100 ns (signal evaluation + decision)</li>
+          <li><span class="b">Risk Check:</span> 10–30 ns (position limits, order rate)</li>
+          <li><span class="r">Order Build:</span> 20–50 ns (protocol encode)</li>
+          <li><span class="a">Ethernet TX:</span> 20–60 ns (MAC + PHY serialization)</li>
+          <li><strong>Total: 150–430 ns</strong> tick-to-trade</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Colocation Topology</h3>
+        <ul>
+          <li>FPGA sits in <span class="g">exchange colocation cage</span> — 1–5 m cable to matching engine</li>
+          <li>Cross-connect cable latency: <span class="a">~5 ns/m</span> (speed of light in fiber)</li>
+          <li>Network switch adds 100–300 ns — some firms use <span class="b">direct cross-connects</span> to eliminate it</li>
+          <li>FPGA receives market data and sends orders on <span class="p">separate physical ports</span> (full duplex)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Kernel Bypass Comparison</h3>
+        <ul>
+          <li><span class="b">DPDK / ef_vi:</span> bypass kernel, poll NIC directly — still 1–2 &mu;s DMA + PCIe latency</li>
+          <li><span class="b">FPGA advantage:</span> no DMA, no PCIe, no CPU — data never leaves the card</li>
+          <li>Some hybrid architectures: FPGA handles hot path, CPU handles exceptions &amp; cold path</li>
+          <li><span class="r">PCIe round-trip: ~500 ns</span> — this alone exceeds many FPGA tick-to-trade budgets</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 8 — FPGA NETWORK STACK ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">06</span>
+    <h2>FPGA Network Stack</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Hardware TCP/UDP Offload</h3>
+        <ul>
+          <li><span class="a">UDP:</span> trivial in hardware — stateless, just parse headers. Used for market data multicast</li>
+          <li><span class="a">TCP:</span> complex — full state machine, retransmission, congestion control. Required for order entry (FIX, OUCH-over-TCP)</li>
+          <li>Hardware TCP engines maintain <span class="g">connection state in BRAM</span>: sequence numbers, window sizes, retransmit buffers</li>
+          <li>Typical: support <span class="b">64–256 simultaneous TCP connections</span> per FPGA</li>
+          <li>TCP handshake, keep-alive, and FIN handled entirely in fabric — no CPU involvement</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Ethernet MAC &amp; PHY</h3>
+        <ul>
+          <li><span class="g">10G:</span> standard for most equity venues today (64b/66b line coding, 10.3125 Gbaud)</li>
+          <li><span class="g">25G:</span> increasingly common, same PHY as 100G (4x25G breakout)</li>
+          <li><span class="b">100G:</span> options market (OPRA), consolidated feeds, inter-DC links</li>
+          <li>Xilinx CMAC hard IP: <span class="a">100G MAC in ~0 LUTs</span> — uses dedicated silicon block</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>PTP Timestamping (IEEE 1588)</h3>
+        <ul>
+          <li><span class="p">Precision Time Protocol</span> synchronizes clocks across network to &lt;100 ns accuracy</li>
+          <li>FPGA timestamps packets at the <span class="a">MAC layer</span> — no software stack delay</li>
+          <li>Hardware PTP engines implement <span class="g">boundary clock</span> or <span class="g">transparent clock</span> modes</li>
+          <li>Critical for: latency measurement, regulatory timestamping (MiFID II requires &mu;s-level accuracy), strategy correlation</li>
+          <li>Best implementations achieve <span class="b">&lt;10 ns</span> synchronization accuracy using dedicated PTP grandmaster clocks</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Cut-Through Switching</h3>
+        <ul>
+          <li>Traditional switches: store entire frame, check FCS, then forward (<span class="r">2–5 &mu;s</span>)</li>
+          <li>Cut-through: begin forwarding after reading destination MAC (<span class="g">~300 ns</span> at 10G)</li>
+          <li>FPGA can implement <span class="b">cut-through forwarding</span> between ports — useful for multi-venue strategies</li>
+          <li>Trade-off: corrupted frames propagate. Acceptable in controlled colo environments</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 9 — MARKET MAKING ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">07</span>
+    <h2>Market Making on FPGAs</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Pricing Engine Architecture</h3>
+        <ul>
+          <li>Core function: compute <span class="a">fair value</span> from order book state and reference data, then quote bid/ask with appropriate spread</li>
+          <li>Inputs: top-of-book (multiple venues), last trade, theoretical value, position, inventory risk</li>
+          <li>FPGA pricing pipeline: <span class="g">parallel evaluation</span> of fair value models across multiple symbols simultaneously</li>
+          <li>Typical throughput: <span class="b">1 million re-quotes per second</span> per FPGA, with 50–100 ns per decision</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Quoting Strategy in Hardware</h3>
+        <ul>
+          <li><span class="g">Symmetric quoting:</span> bid = fair - half_spread, ask = fair + half_spread</li>
+          <li><span class="g">Inventory-skewed:</span> shift quotes to reduce directional exposure — implemented as a lookup table indexed by position</li>
+          <li><span class="g">Multi-venue:</span> quote on 5–15 exchanges simultaneously, manage aggregate exposure in real-time</li>
+          <li>Quote throttling logic: respect exchange rate limits (e.g., Nasdaq 200 orders/sec/port)</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Greeks in Hardware</h3>
+        <ul>
+          <li><span class="p">Delta:</span> simple lookup table or linear interpolation — trivial in FPGA</li>
+          <li><span class="p">Gamma, Vega:</span> second derivatives — polynomial approximation or CORDIC-based evaluation</li>
+          <li><span class="p">Theta:</span> time decay computed once per second, broadcast to all strategy instances</li>
+          <li>Fixed-point arithmetic preferred: <span class="a">32-bit fixed-point</span> at 500 MHz vs floating-point at 300 MHz</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Spread Management</h3>
+        <ul>
+          <li>Minimum spread constrained by <span class="r">adverse selection cost</span> — FPGA tracks fill rate and adjusts</li>
+          <li>Volatility-adaptive spread: widen during fast markets (book update rate exceeds threshold)</li>
+          <li><span class="a">Fade detection:</span> if BBO moves against us within N &mu;s of quoting, widen spread for that symbol</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 10 — STAT ARB & SIGNAL PROCESSING ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">08</span>
+    <h2>Statistical Arbitrage &amp; Signal Processing</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>EWMA &amp; Running Statistics</h3>
+        <ul>
+          <li><span class="a">Exponentially Weighted Moving Average</span> — single multiply-accumulate per update</li>
+          <li>FPGA implements <span class="g">hundreds of parallel EWMA filters</span> with different decay constants</li>
+          <li>Running variance, skew, kurtosis computed incrementally using Welford's algorithm in hardware</li>
+          <li>Update rate: <span class="b">one new statistic per clock cycle</span> per filter instance (~3 ns at 300 MHz)</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Correlation Engines</h3>
+        <ul>
+          <li>Pairwise correlation across <span class="g">N instruments</span>: O(N&sup2;) pairs, but FPGA parallelizes massively</li>
+          <li>Typical: 500 instruments = 124,750 pairs, updated at every tick</li>
+          <li>Running Pearson correlation via incremental covariance / variance trackers</li>
+          <li>Breakout detection: alert when correlation deviates &gt;2&sigma; from rolling mean</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Feature Computation in Hardware</h3>
+        <ul>
+          <li><span class="p">Order flow imbalance:</span> (buy volume - sell volume) / total volume over sliding window</li>
+          <li><span class="p">Trade arrival rate:</span> tick counter with exponential decay — detects momentum bursts</li>
+          <li><span class="p">Spread dynamics:</span> bid-ask spread percentile relative to recent history</li>
+          <li><span class="p">Price impact:</span> estimated cost to trade N shares based on current book depth</li>
+          <li>All features normalized and output as <span class="a">fixed-point feature vectors</span> to strategy logic</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Multi-Asset Scanning</h3>
+        <ul>
+          <li>ETF arbitrage: track <span class="b">SPY vs. all 500 constituents</span> — compute NAV in real-time on FPGA</li>
+          <li>Index arbitrage: futures vs. cash basket — requires simultaneous book construction for 100+ symbols</li>
+          <li>Cross-exchange: same symbol on NYSE vs. Nasdaq vs. BATS — detect and exploit price discrepancies in &lt;500 ns</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 11 — RISK CALCULATION ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">09</span>
+    <h2>Risk Calculation on FPGAs</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Pre-Trade Risk Checks</h3>
+        <ul>
+          <li><span class="a">Mandatory by regulation</span> (SEC Rule 15c3-5, MiFID II RTS 6) — every order must pass risk checks before reaching the exchange</li>
+          <li>Checks implemented in FPGA pipeline, adding only <span class="g">10–30 ns</span>:</li>
+          <li>Position limits: net and gross per symbol, per account, per firm</li>
+          <li>Order rate throttling: max N orders per second per port</li>
+          <li>Fat finger checks: reject orders with price &gt;X% from NBBO</li>
+          <li>Notional limits: total $ exposure per symbol / sector / portfolio</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Real-Time VaR</h3>
+        <ul>
+          <li>Historical simulation VaR: replay <span class="g">500–1000 scenarios</span> in parallel on FPGA</li>
+          <li>Each scenario: multiply portfolio vector by scenario return vector — one DSP slice per instrument</li>
+          <li>Sort P&amp;L outcomes for percentile extraction using hardware sorting networks</li>
+          <li>Update VaR on <span class="a">every trade</span>, not end-of-day — enables dynamic position sizing</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Monte Carlo Acceleration</h3>
+        <ul>
+          <li>Random number generation: <span class="p">Mersenne Twister</span> or xoshiro256** in fabric — 1 random per cycle</li>
+          <li>Box-Muller transform for Gaussian samples using CORDIC sin/cos units</li>
+          <li>Path simulation: <span class="a">geometric Brownian motion</span> with drift and vol — pipeline depth ~20 cycles</li>
+          <li>Typical throughput: <span class="b">500M paths/sec</span> on a single Alveo U50 — 10x faster than 64-core CPU</li>
+          <li>Used for: exotic options pricing, CVA/DVA/FVA, stress testing</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Portfolio Margining</h3>
+        <ul>
+          <li>SPAN/TIMS margin calculation: evaluate portfolio across <span class="r">16+ risk scenarios</span> (price up/down x vol up/down)</li>
+          <li>FPGA computes all scenarios in parallel — one clock cycle per scenario with full pipelining</li>
+          <li>Enables <span class="a">real-time margin monitoring</span> vs. batch computation every 15 minutes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 12 — OPTIONS PRICING ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">10</span>
+    <h2>Options Pricing in Hardware</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Black-Scholes on FPGA</h3>
+        <ul>
+          <li>Black-Scholes formula requires: <span class="a">ln(x), exp(x), erfc(x), sqrt(x)</span></li>
+          <li>Each function implemented via <span class="g">piecewise polynomial approximation</span> (degree 3–5) stored in BRAM lookup tables</li>
+          <li>Pipeline: ~15–25 clock cycles end-to-end at 300 MHz = <span class="b">50–80 ns per option price</span></li>
+          <li>Throughput: with full pipelining, one new result every clock cycle = <span class="a">300M prices/sec</span></li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>Binomial/Trinomial Trees</h3>
+        <ul>
+          <li>American options require early exercise evaluation — no closed-form solution</li>
+          <li><span class="g">Binomial tree</span> with N steps: O(N&sup2;) computations — FPGA parallelizes across the tree width</li>
+          <li>Typical: 100-step tree in <span class="a">&lt;1 &mu;s</span> on FPGA vs. 50 &mu;s in software</li>
+          <li>Trinomial trees provide better Greeks accuracy — 50% more computation but better convergence</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Implied Volatility Solver</h3>
+        <ul>
+          <li>Given market price, solve for &sigma; such that BS(&sigma;) = market price</li>
+          <li><span class="p">Newton-Raphson iteration</span> in hardware: converges in 3–5 iterations (each = one BS evaluation)</li>
+          <li>Total: <span class="a">150–400 ns</span> for implied vol solve — enables real-time vol surface construction</li>
+          <li>Alternative: Brenner-Subrahmanyam initial guess + 2 Newton iterations for speed</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Fixed-Point vs. Floating-Point</h3>
+        <table>
+          <tr><th>Aspect</th><th>Fixed-Point</th><th>Floating-Point</th></tr>
+          <tr><td>DSP Usage</td><td><span class="g">1 DSP per multiply</span></td><td>2–3 DSPs per multiply</td></tr>
+          <tr><td>Clock Speed</td><td><span class="g">500+ MHz</span></td><td>300–400 MHz</td></tr>
+          <tr><td>Precision</td><td>Must tune bit-widths</td><td><span class="b">IEEE 754 standard</span></td></tr>
+          <tr><td>Latency</td><td><span class="g">Lower (fewer stages)</span></td><td>Higher (normalization)</td></tr>
+        </table>
+        <p style="font-size:.48em; margin-top:.2em;">Most finance FPGA designs use <span class="a">fixed-point for hot path</span> (pricing, book) and floating-point for risk/analytics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 13 — CRYPTO ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">11</span>
+    <h2>Cryptocurrency &amp; Digital Asset Trading</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>FPGA in Crypto Exchange Infrastructure</h3>
+        <ul>
+          <li>Major crypto exchanges (Binance, Coinbase, Kraken) have adopted <span class="a">FPGA matching engines</span> from traditional finance vendors</li>
+          <li>Matching engine on FPGA: deterministic order matching in <span class="g">&lt;1 &mu;s</span>, same technology as equity venues</li>
+          <li>Market data distribution: FPGA-based feed handlers normalize WebSocket/REST APIs to binary protocols</li>
+          <li>Latency edge is <span class="r">larger in crypto</span> than equities — many venues still have ms-level infrastructure</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Cross-Exchange Arbitrage</h3>
+        <ul>
+          <li>BTC/USDT price discrepancies across 20+ venues — FPGA monitors all feeds simultaneously</li>
+          <li>Triangle arbitrage: BTC/USD → ETH/BTC → ETH/USD — computed in <span class="g">&lt;100 ns</span> per triangle</li>
+          <li>Funding rate arbitrage: perp vs. spot spread monitoring and execution</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>DeFi &amp; MEV (Maximal Extractable Value)</h3>
+        <ul>
+          <li><span class="p">MEV</span>: profit extracted by reordering, inserting, or censoring transactions in a block</li>
+          <li>FPGA used for: mempool monitoring, transaction simulation, bundle construction</li>
+          <li>Sandwich attacks, liquidation bots, DEX arbitrage — all benefit from <span class="a">sub-&mu;s computation</span></li>
+          <li>FPGA connects directly to Ethereum execution clients (Geth/Nethermind) via custom RPC</li>
+          <li>Transaction signing: <span class="b">secp256k1 ECDSA</span> in hardware — ~5 &mu;s vs. 50 &mu;s in software</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Hash Computation &amp; PoW Legacy</h3>
+        <ul>
+          <li>Pre-merge Ethereum: <span class="r">Ethash mining on FPGAs</span> was profitable in 2018–2020 before ASICs dominated</li>
+          <li>FPGAs still used for mining altcoins with ASIC-resistant algorithms (ProgPoW, RandomX partial acceleration)</li>
+          <li>SHA-256 / Keccak-256 in FPGA: useful for block header validation in trading nodes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 14 — PLATFORMS ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">12</span>
+    <h2>Key FPGA Platforms for Finance</h2>
+  </div>
+  <table>
+    <tr>
+      <th>Platform</th>
+      <th>FPGA</th>
+      <th>Network</th>
+      <th>Memory</th>
+      <th>Use Case</th>
+      <th>Approx. Price</th>
+    </tr>
+    <tr>
+      <td><span class="a">Alveo U50</span></td>
+      <td>XCU50 (UltraScale+ HBM)</td>
+      <td>2x 100G QSFP28</td>
+      <td>8 GB HBM2</td>
+      <td>Feed handling, order book, market making</td>
+      <td>$3,000–4,000</td>
+    </tr>
+    <tr>
+      <td><span class="a">Alveo U55C</span></td>
+      <td>XCU55C (UltraScale+ HBM)</td>
+      <td>2x 100G QSFP28</td>
+      <td>16 GB HBM2</td>
+      <td>Multi-venue strategies, risk analytics</td>
+      <td>$6,000–8,000</td>
+    </tr>
+    <tr>
+      <td><span class="g">Alveo V80</span></td>
+      <td>Versal Premium VP1802</td>
+      <td>2x 400G QSFP-DD</td>
+      <td>32 GB HBM2e</td>
+      <td>Next-gen 400G, AI-enhanced trading</td>
+      <td>$15,000+</td>
+    </tr>
+    <tr>
+      <td><span class="b">Intel Agilex 7 FPGA</span></td>
+      <td>AGF027 / AGF014</td>
+      <td>Up to 8x 100G (E-Tile)</td>
+      <td>DDR5, HBM2e (select)</td>
+      <td>Multi-port strategies, CME/ICE</td>
+      <td>$5,000–12,000</td>
+    </tr>
+    <tr>
+      <td><span class="p">Solarflare X2522</span></td>
+      <td>Xilinx XC7K325T</td>
+      <td>2x 10G/25G SFP28</td>
+      <td>2 GB DDR4</td>
+      <td>SmartNIC with FPGA offload, AOE</td>
+      <td>$1,500–2,500</td>
+    </tr>
+    <tr>
+      <td><span class="r">VCU1525</span> (legacy)</td>
+      <td>XCVU9P (UltraScale+)</td>
+      <td>4x QSFP28</td>
+      <td>64 GB DDR4</td>
+      <td>High-capacity strategies, crypto mining</td>
+      <td>$4,000–6,000</td>
+    </tr>
+  </table>
+  <div class="cols cols-2" style="margin-top:.3em;">
+    <div class="card amber">
+      <h3>AMD/Xilinx Dominance</h3>
+      <p>AMD/Xilinx holds an estimated <span class="a">80–85% market share</span> in financial FPGA deployments. The Alveo accelerator card line and mature Vivado toolchain make it the default choice for most HFT firms.</p>
+    </div>
+    <div class="card blue">
+      <h3>Intel/Altera Niche</h3>
+      <p>Intel Stratix 10 / Agilex see adoption at firms trading on <span class="b">CME and ICE</span> (Chicago-centric venues). Intel's E-Tile provides native 100G transceivers. The FPGA business is being spun out as "Altera" (re-IPO expected).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 15 — DEVELOPMENT IN FINANCE ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">13</span>
+    <h2>FPGA Development in Finance</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>In-House FPGA Teams</h3>
+        <ul>
+          <li>Top HFT firms (Citadel Securities, Jump Trading, Tower Research, Virtu, IMC) maintain <span class="a">dedicated FPGA engineering teams</span> of 10–50+ engineers</li>
+          <li>Roles: RTL designers, verification engineers, network engineers, tooling/infrastructure</li>
+          <li>Compensation: senior FPGA engineers in HFT command <span class="g">$400K–$1M+ total comp</span></li>
+          <li>Competitive advantage is proprietary — firms do not share IP or methodologies</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Specialist Vendors</h3>
+        <ul>
+          <li><span class="g">Exegy</span> (acquired by Vela/TS Imagine) — market data appliances, ticker plant</li>
+          <li><span class="g">Enyx</span> (acquired by Murata) — low-latency TCP/UDP stacks, trading gateways</li>
+          <li><span class="g">Fixnetix</span> (acquired by Pico/LSEG) — iX-eCute pre-trade risk, colocation services</li>
+          <li><span class="g">Metamako</span> (acquired by Arista) — FPGA-based network switches with timestamping</li>
+          <li><span class="g">Algo-Logic</span> — IP cores for network offload and market data</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Buy vs. Build</h3>
+        <table>
+          <tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+          <tr><td><span class="a">Build In-House</span></td><td>Max performance, full control, competitive moat</td><td>$5M+/yr team cost, 12–24 month ramp</td></tr>
+          <tr><td><span class="b">Buy Vendor Solution</span></td><td>Fast deployment (weeks), proven, supported</td><td>Same product as competitors, limited customization</td></tr>
+          <tr><td><span class="g">Hybrid</span></td><td>Vendor base + custom strategy logic on top</td><td>Integration complexity, vendor lock-in</td></tr>
+        </table>
+      </div>
+      <div class="card red">
+        <h3>The Talent Problem</h3>
+        <p>There are perhaps <span class="r">2,000–5,000 engineers globally</span> who can design production FPGA trading systems. Finance competes with defense, telecom, and semiconductor companies for this talent. The result: extreme compensation and aggressive retention packages.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 16 — WORKFLOW & LANGUAGES ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">14</span>
+    <h2>Development Workflow &amp; Languages</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>VHDL vs. Verilog/SystemVerilog</h3>
+        <ul>
+          <li><span class="a">SystemVerilog</span> dominates in financial FPGA development — better tooling, faster simulation, industry standard</li>
+          <li>VHDL still used at some European firms and in legacy IP blocks</li>
+          <li>Key SystemVerilog features used: <span class="g">interfaces, structs, enums, assertions</span> (SVA for formal verification)</li>
+          <li>Coding style: heavily pipelined, register-rich designs optimized for timing closure at 300–500 MHz</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>HLS Adoption (Limited)</h3>
+        <ul>
+          <li>Vitis HLS (C/C++ to RTL) used for <span class="g">prototyping and non-critical paths</span> (risk analytics, logging)</li>
+          <li>Hot-path trading logic is <span class="r">almost never HLS</span> — HLS adds 20–50% latency overhead and unpredictable timing</li>
+          <li>Exception: Monte Carlo engines where throughput matters more than single-path latency</li>
+          <li>Some firms use HLS for initial exploration, then rewrite in RTL for production</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Simulation &amp; Verification</h3>
+        <ul>
+          <li><span class="p">Functional simulation:</span> Questa/ModelSim, VCS, Xcelium — full RTL simulation with protocol BFMs</li>
+          <li><span class="p">Market data replay:</span> feed pcap files into simulation as stimulus — validate parsing correctness</li>
+          <li><span class="p">Co-simulation:</span> SystemVerilog DPI to call C++ reference models — compare FPGA vs. software outputs</li>
+          <li><span class="p">Formal verification:</span> prove properties like "no order is sent without passing risk checks"</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Regression &amp; CI/CD</h3>
+        <ul>
+          <li>Nightly regression: <span class="b">500–2000 test cases</span> across all protocol variants and edge cases</li>
+          <li>Build time: Vivado synthesis + P&amp;R for UltraScale+ = <span class="r">4–12 hours</span> per build</li>
+          <li>Firms invest heavily in <span class="a">build farms</span> (50–200 servers) to parallelize builds across configurations</li>
+          <li>Bitstream versioning: every production bitstream is git-tagged, archived, and linked to specific test results</li>
+          <li>Hardware-in-the-loop testing: deploy bitstream to test FPGA, replay production traffic, verify behavior</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 17 — IP & VENDOR ECOSYSTEM ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">15</span>
+    <h2>FPGA IP &amp; Vendor Ecosystem</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Commercial IP Blocks</h3>
+        <ul>
+          <li><span class="a">TCP/UDP Stack IP:</span> Enyx nxTCP, Algo-Logic, Intilop — licensed per-FPGA, $50K–200K per license</li>
+          <li><span class="a">Market Data Parsers:</span> Exegy nxFramework, Enyx nxAccess — pre-built ITCH/OUCH/FIX decoders</li>
+          <li><span class="g">Ethernet MAC IP:</span> Xilinx CMAC (free with Vivado), Intel E-Tile (hard IP), third-party 10G MACs</li>
+          <li><span class="b">PTP/Timestamping:</span> Xilinx PTP IP, SolarFlare PTP stack, custom implementations</li>
+          <li><span class="p">PCIe DMA:</span> XDMA (Xilinx), QDMA, custom DMA engines for host communication</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Xilinx/AMD Alveo Ecosystem</h3>
+        <ul>
+          <li><span class="g">Alveo platform:</span> standardized shell + user partition model — shell handles PCIe, memory controllers, network MACs</li>
+          <li><span class="g">Vitis networking:</span> pre-built 10G/25G/100G network stacks for Alveo cards</li>
+          <li>XRT (Xilinx Runtime): host-side driver for PCIe communication, bitstream loading</li>
+          <li>Most HFT firms <span class="r">bypass the Alveo shell entirely</span> — write custom flat designs for full control and minimum latency</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>OpenCAPI / CXL Interconnect</h3>
+        <ul>
+          <li><span class="p">CXL (Compute Express Link)</span> emerging as next-gen FPGA-to-host interconnect</li>
+          <li>CXL.mem: FPGA memory appears in host's address space — <span class="a">coherent access without DMA</span></li>
+          <li>CXL.cache: FPGA can snoop host cache — enables shared data structures between CPU and FPGA</li>
+          <li>Potential: eliminate PCIe DMA latency (~500 ns) for hybrid CPU+FPGA trading systems</li>
+          <li>Current status: early adoption — Versal Premium and Agilex 7 support CXL 1.1/2.0</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Build vs. License: Real Costs</h3>
+        <ul>
+          <li>Full trading system IP stack (TCP + feed handler + order book + risk): <span class="r">$500K–2M/yr</span> in vendor licenses</li>
+          <li>Vivado license: ~$3,500/yr per seat (Design Edition) — but most firms need 20–50 seats</li>
+          <li>Verification tools (Questa, VCS): <span class="r">$50K–150K/yr</span> per seat</li>
+          <li>Total tooling + IP cost for a small HFT FPGA team: <span class="a">$1–3M/yr</span> before salaries</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 18 — DEVELOPMENT COMPLEXITY ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">16</span>
+    <h2>Challenges: Development Complexity</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card red" style="margin-bottom:.4em;">
+        <h3>Long Development Cycles</h3>
+        <ul>
+          <li>New exchange protocol support: <span class="r">4–12 weeks</span> from spec to production (vs. 1–2 weeks in software)</li>
+          <li>Major architecture change: <span class="r">6–18 months</span> — design, verify, test, deploy</li>
+          <li>Synthesis + place-and-route: <span class="r">4–12 hours per build</span> — iteration speed is fundamentally limited</li>
+          <li>Timing closure: may require multiple iterations of floorplanning, pipelining, constraint tuning</li>
+        </ul>
+      </div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Specialist Talent Shortage</h3>
+        <ul>
+          <li>FPGA development requires deep knowledge of <span class="a">digital design, protocols, finance, and tooling</span></li>
+          <li>University programs produce few graduates with FPGA + finance intersecting skills</li>
+          <li>Typical ramp-up for a new FPGA engineer in HFT: <span class="r">6–12 months</span> to become productive</li>
+          <li>High attrition risk: losing a key FPGA engineer can set a team back by months</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Debugging Difficulty</h3>
+        <ul>
+          <li><span class="p">No printf debugging:</span> must use ILA (Integrated Logic Analyzer) to capture internal signals</li>
+          <li>ILA captures are <span class="r">limited depth</span> (1K–16K samples) and must be planned in advance</li>
+          <li>ChipScope / SignalTap add ~5–10% resource overhead and may change timing behavior</li>
+          <li>Race conditions and metastability bugs are <span class="r">extremely hard to reproduce</span></li>
+          <li>Hardware bugs in production can require physical server access to reflash — costly in colo</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>FPGA vs. Software Development Velocity</h3>
+        <table>
+          <tr><th>Metric</th><th>FPGA</th><th>Software (C++)</th></tr>
+          <tr><td>Build time</td><td><span class="r">4–12 hours</span></td><td><span class="g">1–5 minutes</span></td></tr>
+          <tr><td>Debug cycle</td><td><span class="r">Hours–days</span></td><td><span class="g">Minutes</span></td></tr>
+          <tr><td>New protocol</td><td>4–12 weeks</td><td>1–2 weeks</td></tr>
+          <tr><td>Unit test run</td><td>Minutes (simulation)</td><td>Seconds</td></tr>
+          <tr><td>Production deploy</td><td>Minutes (bitstream load)</td><td>Seconds (restart)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 19 — REGULATORY ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">17</span>
+    <h2>Challenges: Regulatory &amp; Compliance</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>MiFID II Requirements (EU)</h3>
+        <ul>
+          <li><span class="a">RTS 25:</span> clock synchronization to <span class="g">&lt;100 &mu;s</span> (most activity), <span class="g">&lt;1 &mu;s</span> for HFT — PTP hardware timestamping is essential</li>
+          <li><span class="a">RTS 6:</span> algorithmic trading systems must have kill switches, pre-trade risk controls, and real-time monitoring</li>
+          <li><span class="a">RTS 7:</span> trading venues must implement circuit breakers, order throttling</li>
+          <li>All order and trade data must be <span class="r">retained for 5 years</span> with nanosecond timestamps</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>SEC Reg NMS / Rule 15c3-5 (US)</h3>
+        <ul>
+          <li><span class="g">Rule 15c3-5:</span> broker-dealers must implement pre-trade risk controls — <span class="a">cannot be bypassed</span></li>
+          <li>Controls must prevent: erroneous orders, breach of credit/capital limits, regulatory violations</li>
+          <li>FPGA-based risk checks satisfy this requirement while adding <span class="b">minimal latency</span></li>
+          <li>CAT (Consolidated Audit Trail): requires reporting of every order lifecycle event with timestamps</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Determinism as a Feature</h3>
+        <ul>
+          <li>Regulators want <span class="p">reproducibility</span>: given the same inputs, the system should produce the same outputs</li>
+          <li>FPGAs are inherently deterministic — same pipeline, same timing, every time</li>
+          <li>Software systems have <span class="r">non-deterministic jitter</span> (OS scheduling, cache state) — harder to reproduce exact behavior</li>
+          <li>This makes FPGAs <span class="g">easier to audit</span> than software-based trading systems in some respects</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Certification Challenges</h3>
+        <ul>
+          <li>No standardized certification process for FPGA trading systems (unlike avionics DO-254)</li>
+          <li>Firms must demonstrate to regulators that FPGA-based controls are <span class="r">equivalent to software controls</span></li>
+          <li>Audit trail: regulators expect source code review — <span class="r">RTL code is opaque</span> to non-FPGA-trained auditors</li>
+          <li>Some firms maintain a <span class="b">parallel software reference implementation</span> for compliance verification</li>
+          <li>Change management: every bitstream change must be documented, tested, and approved</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 20 — LATENCY MEASUREMENT ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">18</span>
+    <h2>Latency Measurement &amp; Benchmarking</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Wire-to-Wire Measurement</h3>
+        <ul>
+          <li><span class="a">Gold standard:</span> measure from first bit of market data on the wire to first bit of order on the wire</li>
+          <li>Requires <span class="g">network taps</span> on both RX and TX ports with hardware timestamping</li>
+          <li>Dedicated measurement appliances: Metamako (Arista), Corvil (Pico), Endace DAG cards</li>
+          <li>Timestamp resolution: <span class="b">&lt;5 ns</span> on modern measurement devices</li>
+          <li>Must account for: serialization delay (64 bytes at 10G = 51.2 ns), PHY latency, cable propagation</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>PTP &amp; Hardware Timestamping</h3>
+        <ul>
+          <li>PTP grandmaster clocks: <span class="g">GPS-disciplined oscillators</span> with &lt;10 ns accuracy to UTC</li>
+          <li>FPGA PTP implementation: hardware timestamp at MAC layer, servo loop adjusts local oscillator</li>
+          <li>Two-step PTP: timestamp is sent in a follow-up message — easier to implement</li>
+          <li>One-step PTP: timestamp is patched into the packet on the wire — <span class="a">more accurate, harder to implement</span></li>
+          <li>Vendors: Meinberg, Microchip (Microsemi), Spectracom — $5K–20K per grandmaster</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Benchmarking Methodology</h3>
+        <ul>
+          <li><span class="p">Median vs. tail latency:</span> FPGA advantage is most pronounced at p99/p99.9 — software degrades dramatically</li>
+          <li>Load testing: measure latency at 10%, 50%, 90%, 100% of peak message rate</li>
+          <li>Market replay: feed actual production pcaps and measure response timing</li>
+          <li>Beware of <span class="r">vendor benchmarks</span>: often measured at optimal conditions, single-symbol, no contention</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Typical Latency Budgets</h3>
+        <table>
+          <tr><th>Component</th><th>Latency</th></tr>
+          <tr><td>PHY + MAC RX</td><td><span class="b">20–60 ns</span></td></tr>
+          <tr><td>Feed parsing</td><td><span class="g">40–100 ns</span></td></tr>
+          <tr><td>Book update + strategy</td><td><span class="a">40–130 ns</span></td></tr>
+          <tr><td>Risk check</td><td><span class="g">10–30 ns</span></td></tr>
+          <tr><td>Order encoding + MAC TX</td><td><span class="b">40–110 ns</span></td></tr>
+          <tr><td><strong>Total wire-to-wire</strong></td><td><strong><span class="a">150–430 ns</span></strong></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 21 — COLOCATION ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">19</span>
+    <h2>Colocation &amp; Infrastructure</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>Exchange Colocation Facilities</h3>
+        <ul>
+          <li><span class="a">NYSE:</span> Mahwah, NJ (Equinix NY5) — 400,000 sq ft, 32 MW power</li>
+          <li><span class="a">Nasdaq:</span> Carteret, NJ (Equinix NY11) — dedicated HFT colocation</li>
+          <li><span class="a">CME:</span> Aurora, IL — purpose-built data center for futures/options</li>
+          <li><span class="a">LSE/Turquoise:</span> Basildon, UK (Interxion LON1/LON2)</li>
+          <li>Cost: <span class="r">$10K–50K/month per cabinet</span> depending on power, cooling, cross-connects</li>
+          <li>Exchanges guarantee <span class="g">equal cable length</span> to all participants (within a few meters)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Cross-Connects &amp; Cable Lengths</h3>
+        <ul>
+          <li>Cross-connect: direct fiber from your cage to the exchange matching engine</li>
+          <li>Speed of light in fiber: <span class="g">~4.9 ns/m</span> — a 10 m cable adds ~49 ns</li>
+          <li>Some firms measure cable lengths to the <span class="a">centimeter</span> and request specific patch panel ports</li>
+          <li>Equalizing cable lengths is mandated by most exchanges — but physical rack position still matters</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>Microwave &amp; Laser Networks</h3>
+        <ul>
+          <li><span class="p">Microwave:</span> Chicago (CME) to NJ (NYSE/Nasdaq) in ~3.97 ms — vs. ~6.5 ms via fiber</li>
+          <li><span class="p">Millimeter wave / laser:</span> point-to-point links with near-speed-of-light propagation</li>
+          <li>Companies: McKay Brothers, Anova, Jump Trading (owns towers)</li>
+          <li>Weather-dependent: rain fade causes <span class="r">outages</span> — firms maintain fiber backup</li>
+          <li>FPGA at both ends: deserialize microwave signal → strategy evaluation → serialize and transmit</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Where FPGA Sits in the Rack</h3>
+        <ul>
+          <li><span class="b">Typical topology:</span> Exchange port → FPGA NIC (or standalone FPGA server) → optional CPU server for monitoring/logging</li>
+          <li>FPGA-only path: no CPU in the critical path — market data in, orders out, all on the FPGA card</li>
+          <li>Host server runs: monitoring, position reporting, strategy parameter updates, logging</li>
+          <li>Power/cooling: FPGA cards draw <span class="a">30–75 W</span> — much less than GPU alternatives</li>
+          <li>Redundancy: primary + backup FPGA with failover in <span class="g">&lt;1 ms</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 22 — FPGA vs SmartNIC vs DPU ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">20</span>
+    <h2>FPGA vs SmartNIC vs DPU in Finance</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <table>
+        <tr>
+          <th>Feature</th>
+          <th>FPGA Card</th>
+          <th>SmartNIC</th>
+          <th>DPU</th>
+        </tr>
+        <tr>
+          <td>Programmability</td>
+          <td><span class="a">Full RTL</span></td>
+          <td>Limited (P4, eBPF)</td>
+          <td>ARM cores + offloads</td>
+        </tr>
+        <tr>
+          <td>Tick-to-trade</td>
+          <td><span class="g">&lt;500 ns</span></td>
+          <td>1–5 &mu;s</td>
+          <td>5–20 &mu;s</td>
+        </tr>
+        <tr>
+          <td>Determinism</td>
+          <td><span class="g">Excellent</span></td>
+          <td>Good</td>
+          <td>Moderate</td>
+        </tr>
+        <tr>
+          <td>Dev complexity</td>
+          <td><span class="r">Very high</span></td>
+          <td>Moderate</td>
+          <td>Low (C/C++)</td>
+        </tr>
+        <tr>
+          <td>Flexibility</td>
+          <td><span class="g">Any protocol</span></td>
+          <td>Fixed pipeline</td>
+          <td>Software-defined</td>
+        </tr>
+        <tr>
+          <td>Cost</td>
+          <td>$3K–15K</td>
+          <td>$500–2K</td>
+          <td>$1K–5K</td>
+        </tr>
+        <tr>
+          <td>Power</td>
+          <td>40–75 W</td>
+          <td>15–25 W</td>
+          <td>75–150 W</td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>NVIDIA BlueField DPU</h3>
+        <ul>
+          <li>ARM cores + ConnectX NIC + hardware offloads (crypto, regex, storage)</li>
+          <li>Good for: <span class="b">infrastructure offload</span> (OVS, firewalling, storage virtualization)</li>
+          <li><span class="r">Not competitive for HFT</span> — ARM cores introduce jitter, no custom datapath</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.4em;">
+        <h3>AMD Pensando DSC</h3>
+        <ul>
+          <li>P4-programmable pipeline + ARM cores — designed for cloud networking</li>
+          <li>Fixed pipeline stages limit <span class="r">custom protocol handling</span></li>
+          <li>Potential for: pre-trade risk checks, simple feed normalization at lower cost</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>When to Use What</h3>
+        <ul>
+          <li><span class="a">FPGA:</span> latency-critical hot path — tick-to-trade, feed parsing, market making</li>
+          <li><span class="b">SmartNIC:</span> timestamping, filtering, kernel bypass for non-HFT trading desks</li>
+          <li><span class="p">DPU:</span> infrastructure — network virtualization, security, storage in trading data centers</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 23 — FUTURE DIRECTIONS ============== -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">21</span>
+    <h2>Future Directions</h2>
+  </div>
+  <div class="cols cols-3">
+    <div>
+      <div class="card amber" style="margin-bottom:.4em;">
+        <h3>AI/ML Inference on Trading FPGAs</h3>
+        <ul>
+          <li>Lightweight neural networks (<span class="a">MLP, decision trees</span>) running directly in FPGA fabric for signal generation</li>
+          <li>Quantized INT8/INT4 inference: <span class="g">10–50 ns</span> for a small model — fits in the trading pipeline</li>
+          <li>AMD Versal AI Core: dedicated AI engines (AIE) adjacent to programmable logic — purpose-built for this</li>
+          <li>Challenge: model update frequency — retraining requires new bitstream or coefficient reload</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>PCIe Gen5 / CXL</h3>
+        <ul>
+          <li><span class="g">PCIe Gen5:</span> 32 GT/s per lane — 64 GB/s x16 — enables faster FPGA ↔ CPU data sharing</li>
+          <li><span class="g">CXL 3.0:</span> memory pooling, cache coherence across FPGA and CPU — potential to eliminate DMA entirely</li>
+          <li>Hybrid architectures: FPGA handles hot path, CPU runs complex ML models, shared via CXL</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.4em;">
+        <h3>400G / 800G Ethernet</h3>
+        <ul>
+          <li><span class="p">400G:</span> already in Alveo V80, Agilex 7 — needed for options market data (OPRA 400 Gbps peak capacity)</li>
+          <li><span class="p">800G:</span> expected 2026–2027 on next-gen FPGA platforms — consolidates feeds onto fewer ports</li>
+          <li>Challenge: <span class="r">parsing at 800G line rate</span> requires extremely wide internal datapaths (512-bit+)</li>
+          <li>Opportunity: single FPGA card handles all market data for an entire exchange</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Cloud FPGA Trading</h3>
+        <ul>
+          <li><span class="b">AWS F1:</span> Xilinx VU9P in the cloud — some firms use for backtesting, not production trading</li>
+          <li><span class="b">Azure NP-series:</span> Intel Agilex FPGAs in Azure — network-attached, low-latency potential</li>
+          <li>Barrier: cloud adds <span class="r">microseconds of network latency</span> — unacceptable for HFT, fine for risk/analytics</li>
+          <li>Exchange-adjacent cloud (e.g., Equinix Metal) may bridge the gap</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card red" style="margin-bottom:.4em;">
+        <h3>Industry Consolidation</h3>
+        <ul>
+          <li>FPGA vendor ecosystem has consolidated: AMD acquired Xilinx ($49B), Intel spinning out Altera</li>
+          <li>Trading technology vendors consolidating: Pico + Fixnetix, Exegy + Vela, Enyx + Murata</li>
+          <li>Fewer vendors = <span class="r">less competition, higher prices</span>, but also more integrated solutions</li>
+          <li>Open-source FPGA tools (Yosys, nextpnr) improving but <span class="r">not yet viable for finance-grade designs</span></li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <h3>The Asymptotic Limit</h3>
+        <p>With tick-to-trade approaching <span class="a">~150 ns</span>, we are nearing the physical limits of electronic signal propagation. The next frontier is not faster hardware but <span class="g">smarter decisions</span> — AI-enhanced signal processing, better microstructure models, and multi-venue optimization. FPGAs will remain the substrate, but the competitive edge increasingly comes from the <span class="p">intelligence</span> programmed into them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- slides -->
+</div><!-- reveal -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+Reveal.initialize({ hash:true, navigationMode:'linear', controlsTutorial:false,
+  slideNumber:'c/t', showSlideNumber:'speaker',
+  width:1280, height:720, margin:0.04,
+  transition:'fade', transitionSpeed:'fast' });
+</script>
+</body>
+</html>

@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Trends in FPGA Technology — Modern SoC Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
+
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
+
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
+
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
+
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: .02em; }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!--  SLIDE 1 — TITLE                                            -->
+<!-- ============================================================ -->
+<section class="title-slide">
+  <p class="meta">Modern SoC Design · Part 14</p>
+  <h1>Modern Trends in<br>FPGA Technology</h1>
+  <p class="subtitle">Architecture Evolution, Heterogeneous Integration &amp; the New FPGA Landscape</p>
+  <p class="meta">23 Slides · Deep Dive</p>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 2 — AGENDA                                           -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">00</span>
+    <h2>Agenda</h2>
+  </div>
+  <div class="cols cols-2">
+    <div class="card amber">
+      <h3>Foundations &amp; Fabrication</h3>
+      <ul>
+        <li>Architecture Foundations Recap</li>
+        <li>Process Node Migration (7 nm → 3 nm)</li>
+        <li>Modern Fabric Innovations (ALMs, DSP)</li>
+        <li>Hard IP Integration Trends</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Heterogeneous &amp; Advanced Packaging</h3>
+      <ul>
+        <li>Heterogeneous FPGA SoCs</li>
+        <li>Chiplet &amp; Multi-Die FPGAs</li>
+        <li>HBM Integration</li>
+        <li>High-Speed Transceivers (116 Gb/s+)</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Workloads &amp; Applications</h3>
+      <ul>
+        <li>AI / ML on FPGAs</li>
+        <li>Data Center &amp; Cloud FPGAs</li>
+        <li>Domain-Specific Architectures</li>
+        <li>FPGA vs ASIC Decision Framework</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Design, Security &amp; Future</h3>
+      <ul>
+        <li>Design Methodology Evolution (HLS, oneAPI)</li>
+        <li>Partial Reconfiguration &amp; DFX</li>
+        <li>Verification &amp; Debug</li>
+        <li>Security · Power · Open-Source · Market · Future</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 3 — FPGA Architecture Foundations Recap               -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">01</span>
+    <h2>FPGA Architecture Foundations Recap</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <svg class="diagram" viewBox="0 0 520 300" width="520" height="300">
+        <!-- Grid of CLBs -->
+        <rect x="10" y="10" width="500" height="280" rx="6" fill="none" stroke="#2a2a3a" stroke-width="1.5"/>
+        <!-- I/O Ring -->
+        <rect x="20" y="20" width="480" height="260" rx="4" fill="none" stroke="#60a5fa" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="260" y="38" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="JetBrains Mono">I/O Blocks (IOBs)</text>
+        <!-- CLBs -->
+        <rect x="60" y="60" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="95" y="80" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <text x="95" y="94" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">LUT+FF+MUX</text>
+        <rect x="160" y="60" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="195" y="80" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <text x="195" y="94" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">LUT+FF+MUX</text>
+        <rect x="260" y="60" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="295" y="80" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <text x="295" y="94" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">LUT+FF+MUX</text>
+        <rect x="360" y="60" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.2"/>
+        <text x="395" y="80" text-anchor="middle" fill="#a78bfa" font-size="9" font-family="JetBrains Mono">BRAM</text>
+        <text x="395" y="94" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">36 Kb</text>
+        <!-- Row 2 -->
+        <rect x="60" y="130" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="95" y="155" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <rect x="160" y="130" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#4ecb8d" stroke-width="1.2"/>
+        <text x="195" y="150" text-anchor="middle" fill="#4ecb8d" font-size="9" font-family="JetBrains Mono">DSP</text>
+        <text x="195" y="164" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">MAC Block</text>
+        <rect x="260" y="130" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="295" y="155" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <rect x="360" y="130" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.2"/>
+        <text x="395" y="155" text-anchor="middle" fill="#a78bfa" font-size="9" font-family="JetBrains Mono">BRAM</text>
+        <!-- Row 3 -->
+        <rect x="60" y="200" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="95" y="225" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <rect x="160" y="200" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="195" y="225" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <rect x="260" y="200" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#4ecb8d" stroke-width="1.2"/>
+        <text x="295" y="220" text-anchor="middle" fill="#4ecb8d" font-size="9" font-family="JetBrains Mono">DSP</text>
+        <text x="295" y="234" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">MAC Block</text>
+        <rect x="360" y="200" width="70" height="45" rx="3" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="395" y="225" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">CLB</text>
+        <!-- Interconnect lines -->
+        <line x1="130" y1="82" x2="160" y2="82" stroke="#2a2a3a" stroke-width="1"/>
+        <line x1="230" y1="82" x2="260" y2="82" stroke="#2a2a3a" stroke-width="1"/>
+        <line x1="330" y1="82" x2="360" y2="82" stroke="#2a2a3a" stroke-width="1"/>
+        <line x1="95" y1="105" x2="95" y2="130" stroke="#2a2a3a" stroke-width="1"/>
+        <line x1="195" y1="105" x2="195" y2="130" stroke="#2a2a3a" stroke-width="1"/>
+        <line x1="295" y1="105" x2="295" y2="130" stroke="#2a2a3a" stroke-width="1"/>
+        <line x1="395" y1="105" x2="395" y2="130" stroke="#2a2a3a" stroke-width="1"/>
+        <text x="260" y="275" text-anchor="middle" fill="#8888a8" font-size="10" font-family="DM Sans">Island-Style FPGA Architecture</text>
+      </svg>
+    </div>
+    <div>
+      <div class="card amber" style="margin-bottom:.4em">
+        <h3>Core Building Blocks</h3>
+        <ul>
+          <li><span class="a">CLB</span> — Configurable Logic Blocks: <span class="mono">k</span>-input LUTs (typically k=6), flip-flops, carry chains, MUXes</li>
+          <li><span class="p">BRAM</span> — Block RAM: dual-port, 18/36 Kb per tile, true-dual-port or simple-dual-port modes</li>
+          <li><span class="g">DSP</span> — Hardened multiply-accumulate: 18×18 or 27×27 multiply with pre-adder &amp; accumulator</li>
+          <li><span class="b">IOB</span> — I/O Blocks: LVDS, HSTL, SSTL, programmable drive strength, DPA</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Interconnect Fabric</h3>
+        <ul>
+          <li><span class="g">Switch boxes</span> at every CLB intersection — programmable via SRAM bits</li>
+          <li>Hierarchical routing: single-length, double-length, <span class="a">long lines</span> spanning full chip</li>
+          <li>Interconnect consumes <span class="r">~60-70%</span> of total FPGA area and dominates delay</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 4 — Process Node Migration                           -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">02</span>
+    <h2>Process Node Migration — 7 nm, 5 nm, 3 nm</h2>
+  </div>
+  <table>
+    <tr>
+      <th>Node</th>
+      <th>FPGA Family</th>
+      <th>Density (LUTs)</th>
+      <th>F<sub>max</sub> Fabric</th>
+      <th>Static Power</th>
+      <th>Wafer Cost (est.)</th>
+    </tr>
+    <tr>
+      <td><span class="a">16 nm</span></td>
+      <td>UltraScale+ / Stratix 10</td>
+      <td>~4.4 M (VU19P)</td>
+      <td>~650 MHz</td>
+      <td>Moderate</td>
+      <td>~$5,000</td>
+    </tr>
+    <tr>
+      <td><span class="g">7 nm</span></td>
+      <td>Versal / Agilex 7</td>
+      <td>~3.7 M (VM1802)</td>
+      <td>~750 MHz</td>
+      <td>~30% lower</td>
+      <td>~$10,000</td>
+    </tr>
+    <tr>
+      <td><span class="p">5 nm</span></td>
+      <td>Versal Premium Gen2 / Agilex 5</td>
+      <td>Projected 5 M+</td>
+      <td>~900 MHz</td>
+      <td>~45% lower</td>
+      <td>~$17,000</td>
+    </tr>
+    <tr>
+      <td><span class="r">3 nm</span></td>
+      <td>Next-gen (announced / roadmap)</td>
+      <td>>8 M (target)</td>
+      <td>>1 GHz</td>
+      <td>Leakage concern</td>
+      <td>~$25,000+</td>
+    </tr>
+  </table>
+  <div class="cols cols-2" style="margin-top:.3em">
+    <div class="card red">
+      <h3>FPGA-Specific Challenges at Advanced Nodes</h3>
+      <ul>
+        <li><span class="r">SRAM bit-cell scaling</span> — each LUT config bit needs a 6T cell; SRAM scales poorly below 5 nm due to read/write margin degradation</li>
+        <li><span class="r">Routing capacitance</span> does not scale with transistor density — interconnect delay becomes dominant below 7 nm</li>
+        <li><span class="r">Mask costs</span> rise exponentially: >$500M for 3 nm full mask set; FPGAs amortize across customers but NRE is still enormous</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Why It Still Makes Sense</h3>
+      <ul>
+        <li><span class="g">Higher logic density</span> — more LUTs per mm² enables larger designs on a single die</li>
+        <li><span class="g">Hard IP benefits</span> — SerDes, PCIe, DDR controllers scale efficiently at advanced nodes</li>
+        <li><span class="g">Chiplet approach</span> mitigates yield: fabric on N-1 node, I/O on mature node</li>
+        <li>Competitive necessity: datacenter customers demand <span class="a">performance parity</span> with 5 nm ASICs</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 5 — Modern FPGA Fabric Innovations                   -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">03</span>
+    <h2>Modern FPGA Fabric Innovations</h2>
+  </div>
+  <div class="cols cols-2">
+    <div class="card amber">
+      <h3>Adaptive Logic Modules (ALMs)</h3>
+      <ul>
+        <li>Intel ALM: <span class="a">8-input fracturable LUT</span> — can implement any 6-LUT function or two independent 4-LUT functions sharing inputs</li>
+        <li>Two registers per ALM, each independently clocked</li>
+        <li>Extended LUT mode: 7-input functions via shared input feedback</li>
+        <li>~15-20% better utilization vs classic 6-LUT architecture (Xilinx SLICEL)</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Memory Architecture</h3>
+      <ul>
+        <li><span class="g">MLAB</span> (Memory LAB): 640-bit distributed RAM built from LUT fabric — ideal for small FIFOs, register files</li>
+        <li><span class="g">M20K</span>: 20 Kb embedded block RAM — true dual-port, ECC support, 600 MHz</li>
+        <li>Xilinx equivalent: <span class="p">LUTRAM</span> (distributed) vs <span class="p">BRAM36</span> (36 Kb) vs <span class="p">URAM</span> (288 Kb ultra-RAM)</li>
+        <li>URAM enables <span class="a">on-chip caches up to 500 Mb</span> without external SRAM</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>DSP Block Evolution</h3>
+      <ul>
+        <li><span class="p">Classic</span>: 18×18 multiply, pre-adder, accumulator (DSP48E1/E2)</li>
+        <li><span class="p">Modern</span>: 27×27 native multiply (Stratix 10 DSP), enables single-cycle FP16</li>
+        <li><span class="p">AI-optimized</span>: INT8 mode packs <span class="a">2× multiplies per DSP</span>; INT4 packs 4×</li>
+        <li>Versal AI Engine: <span class="a">dedicated vector VLIW cores</span> (not DSP slices) — 400 AI Engines @ 1.25 GHz = <span class="g">133 INT8 TOPS</span></li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Carry Chain &amp; Routing Improvements</h3>
+      <ul>
+        <li>Carry chains now span <span class="b">8-16 ALMs</span> without switching penalty</li>
+        <li>Segmented interconnect with <span class="b">programmable pipeline registers</span> in routing muxes — enables higher F<sub>max</sub> via retiming</li>
+        <li>Intel HyperFlex registers: <span class="a">bypassable registers</span> at every routing node — automatic retiming yields 2× F<sub>max</sub> improvement</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 6 — Hard IP Integration Trends                       -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">04</span>
+    <h2>Hard IP Integration Trends</h2>
+  </div>
+  <div class="cols cols-3">
+    <div class="card amber">
+      <h3>PCIe</h3>
+      <ul>
+        <li><span class="a">PCIe Gen5</span> hardened: 32 GT/s per lane, ×16 = 64 GB/s per direction</li>
+        <li>Versal Premium: up to <span class="a">4× PCIe Gen5 controllers</span></li>
+        <li>CXL 2.0 support via PCIe Gen5 PHY + soft protocol stack</li>
+        <li>Gen6 (64 GT/s, PAM4) on roadmap for next-gen parts</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Ethernet &amp; Networking</h3>
+      <ul>
+        <li><span class="g">Hard 100GE MAC + PCS</span> in Versal / Agilex — frees fabric resources</li>
+        <li><span class="g">400GE</span> via 4×100G or 8×50G with FEC (RS-FEC KP4)</li>
+        <li>Emerging: <span class="g">800GE</span> targeting 8×106G PAM4 SerDes</li>
+        <li>Inline MACsec encryption at line rate</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Memory Controllers</h3>
+      <ul>
+        <li>Hard <span class="p">DDR5 controller + PHY</span>: 4800–5600 MT/s, up to 4 channels</li>
+        <li>LPDDR5/5X for power-sensitive SoC FPGAs</li>
+        <li>HBM2E controller integrated in high-end parts</li>
+        <li>Hard ECC, inline scrubbing, RAS features</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cols cols-2" style="margin-top:.4em">
+    <div class="card blue">
+      <h3>Crypto &amp; Security Engines</h3>
+      <ul>
+        <li>Hard <span class="b">AES-256-GCM</span> engines: 100+ Gbps throughput for inline encryption</li>
+        <li>Hard <span class="b">SHA-384/512</span>, RSA-4096, ECDSA accelerators</li>
+        <li>IPsec / MACsec / TLS offload without consuming fabric LUTs</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3>Network-on-Chip (NoC)</h3>
+      <ul>
+        <li>Versal: integrated <span class="r">hardened NoC</span> — replaces soft AXI interconnect</li>
+        <li>Programmable QoS, bandwidth allocation, traffic shaping</li>
+        <li>950 MHz operation, <span class="a">up to 1.2 TB/s</span> aggregate bandwidth</li>
+        <li>Eliminates the #1 resource consumer in large FPGA designs: the interconnect fabric</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 7 — Heterogeneous FPGA SoCs                          -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">05</span>
+    <h2>Heterogeneous FPGA SoCs</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <svg class="diagram" viewBox="0 0 480 310" width="480" height="310">
+        <rect x="5" y="5" width="470" height="300" rx="8" fill="none" stroke="#f5a623" stroke-width="1.5"/>
+        <text x="240" y="25" text-anchor="middle" fill="#f5a623" font-size="12" font-family="Playfair Display" font-weight="700">AMD Versal Adaptive SoC</text>
+        <!-- Scalar Engines -->
+        <rect x="20" y="40" width="130" height="110" rx="5" fill="#1a1a2e" stroke="#60a5fa" stroke-width="1.2"/>
+        <text x="85" y="60" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="JetBrains Mono" font-weight="500">Scalar Engines</text>
+        <text x="85" y="78" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Arm Cortex-A72 (2×)</text>
+        <text x="85" y="92" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Cortex-R5F (2×)</text>
+        <text x="85" y="106" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">DDR4/LPDDR4 ctrl</text>
+        <text x="85" y="120" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">GIC-500, SMMU</text>
+        <text x="85" y="138" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">Linux / RTOS / Bare-metal</text>
+        <!-- Adaptable Engines -->
+        <rect x="170" y="40" width="140" height="110" rx="5" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.2"/>
+        <text x="240" y="60" text-anchor="middle" fill="#f5a623" font-size="10" font-family="JetBrains Mono" font-weight="500">Adaptable Engines</text>
+        <text x="240" y="78" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">FPGA Fabric (CLBs)</text>
+        <text x="240" y="92" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">DSP58 Slices</text>
+        <text x="240" y="106" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Block RAM / URAM</text>
+        <text x="240" y="120" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">GTY/GTYP 32.75 Gbps</text>
+        <text x="240" y="138" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">RTL / HLS / IP Integrator</text>
+        <!-- AI Engines -->
+        <rect x="330" y="40" width="130" height="110" rx="5" fill="#1a1a2e" stroke="#4ecb8d" stroke-width="1.2"/>
+        <text x="395" y="60" text-anchor="middle" fill="#4ecb8d" font-size="10" font-family="JetBrains Mono" font-weight="500">AI Engines</text>
+        <text x="395" y="78" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">400 VLIW Tiles</text>
+        <text x="395" y="92" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">1.25 GHz, 7-way VLIW</text>
+        <text x="395" y="106" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">INT8 / INT16 / FP32</text>
+        <text x="395" y="120" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">32 KB data + 16 KB prog</text>
+        <text x="395" y="138" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">AI Engine API / Vitis</text>
+        <!-- NoC -->
+        <rect x="20" y="165" width="440" height="35" rx="4" fill="#1e1028" stroke="#a78bfa" stroke-width="1.2"/>
+        <text x="240" y="187" text-anchor="middle" fill="#a78bfa" font-size="11" font-family="JetBrains Mono" font-weight="500">Hardened Network-on-Chip (NoC) — 950 MHz, 1.2 TB/s</text>
+        <!-- Platform peripherals -->
+        <rect x="20" y="215" width="210" height="75" rx="4" fill="#1a1a2e" stroke="#f87171" stroke-width="1"/>
+        <text x="125" y="233" text-anchor="middle" fill="#f87171" font-size="9" font-family="JetBrains Mono">Platform Management</text>
+        <text x="125" y="250" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">PMC MicroBlaze, Secure Boot</text>
+        <text x="125" y="264" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">JTAG, I2C, SPI, UART, USB</text>
+        <text x="125" y="278" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">eFUSE, BBRAM, AES/SHA/RSA</text>
+        <!-- Hard IP -->
+        <rect x="250" y="215" width="210" height="75" rx="4" fill="#1a1a2e" stroke="#60a5fa" stroke-width="1"/>
+        <text x="355" y="233" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="JetBrains Mono">Hard I/O &amp; Connectivity</text>
+        <text x="355" y="250" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">PCIe Gen4/Gen5, CCIX</text>
+        <text x="355" y="264" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">100G/400G Ethernet MAC</text>
+        <text x="355" y="278" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Interlaken, DDR4/LPDDR4</text>
+      </svg>
+    </div>
+    <div>
+      <div class="card blue" style="margin-bottom:.35em">
+        <h3>Intel Agilex with HPS</h3>
+        <ul>
+          <li>Quad-core <span class="b">Arm Cortex-A76</span> (64-bit) + Cortex-A55</li>
+          <li>Dedicated DDR5 controller for HPS</li>
+          <li>FPGA ↔ HPS bridges: <span class="a">128/256-bit AXI</span>, lightweight HPS-to-FPGA</li>
+          <li>Shared L3 cache, coherent interconnect</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Why Heterogeneous?</h3>
+        <ul>
+          <li><span class="g">Hard CPU</span> handles OS, control plane, management — no soft-core overhead</li>
+          <li><span class="g">FPGA fabric</span> handles data plane, custom accelerators</li>
+          <li><span class="g">AI engines</span> handle tensor math — 10× efficiency vs DSP for inference</li>
+          <li>Single device replaces CPU + FPGA + AI chip → <span class="a">lower BOM, power, latency</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 8 — Chiplet and Multi-Die FPGAs                      -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">06</span>
+    <h2>Chiplet &amp; Multi-Die FPGAs</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <svg class="diagram" viewBox="0 0 460 280" width="460" height="280">
+        <!-- Package substrate -->
+        <rect x="10" y="180" width="440" height="90" rx="6" fill="#12121f" stroke="#2a2a3a" stroke-width="1.5"/>
+        <text x="230" y="260" text-anchor="middle" fill="#8888a8" font-size="10" font-family="DM Sans">Organic Package Substrate</text>
+        <!-- Silicon interposer / EMIB -->
+        <rect x="30" y="120" width="400" height="55" rx="4" fill="#181830" stroke="#a78bfa" stroke-width="1.2"/>
+        <text x="230" y="158" text-anchor="middle" fill="#a78bfa" font-size="9" font-family="JetBrains Mono">Silicon Bridge (EMIB) / Active Interposer</text>
+        <!-- Chiplet 1: FPGA fabric -->
+        <rect x="40" y="30" width="100" height="80" rx="4" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.5"/>
+        <text x="90" y="55" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">FPGA Fabric</text>
+        <text x="90" y="70" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Die 1 (7 nm)</text>
+        <text x="90" y="84" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">Logic + DSP</text>
+        <text x="90" y="96" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">2.5 M LUTs</text>
+        <!-- Chiplet 2: FPGA fabric -->
+        <rect x="160" y="30" width="100" height="80" rx="4" fill="#1a1a2e" stroke="#f5a623" stroke-width="1.5"/>
+        <text x="210" y="55" text-anchor="middle" fill="#f5a623" font-size="9" font-family="JetBrains Mono">FPGA Fabric</text>
+        <text x="210" y="70" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Die 2 (7 nm)</text>
+        <text x="210" y="84" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">Logic + DSP</text>
+        <text x="210" y="96" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">2.5 M LUTs</text>
+        <!-- Chiplet 3: I/O + SerDes -->
+        <rect x="280" y="30" width="75" height="80" rx="4" fill="#1a1a2e" stroke="#4ecb8d" stroke-width="1.5"/>
+        <text x="317" y="55" text-anchor="middle" fill="#4ecb8d" font-size="9" font-family="JetBrains Mono">Xcvr Tile</text>
+        <text x="317" y="70" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">SerDes (14 nm)</text>
+        <text x="317" y="84" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">116 Gbps</text>
+        <!-- Chiplet 4: HBM -->
+        <rect x="370" y="30" width="65" height="80" rx="4" fill="#1a1a2e" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="402" y="55" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="JetBrains Mono">HBM2E</text>
+        <text x="402" y="70" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Stack</text>
+        <text x="402" y="84" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">16 GB</text>
+        <!-- Connections -->
+        <line x1="90" y1="110" x2="90" y2="120" stroke="#f5a623" stroke-width="1"/>
+        <line x1="210" y1="110" x2="210" y2="120" stroke="#f5a623" stroke-width="1"/>
+        <line x1="317" y1="110" x2="317" y2="120" stroke="#4ecb8d" stroke-width="1"/>
+        <line x1="402" y1="110" x2="402" y2="120" stroke="#60a5fa" stroke-width="1"/>
+        <text x="230" y="22" text-anchor="middle" fill="#f5a623" font-size="11" font-family="Playfair Display" font-weight="700">Multi-Die FPGA Package</text>
+      </svg>
+    </div>
+    <div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>Intel EMIB Technology</h3>
+        <ul>
+          <li><span class="a">Embedded Multi-die Interconnect Bridge</span>: small silicon bridges embedded in package substrate</li>
+          <li>~55 µm bump pitch, >1 TB/s per bridge</li>
+          <li>Used in Stratix 10 GX 10M (world's largest FPGA: <span class="a">10.2 M LEs</span>) — two fabric die + I/O tiles</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.3em">
+        <h3>Why Chiplets for FPGAs?</h3>
+        <ul>
+          <li><span class="g">Yield</span>: two 300 mm² dies yield far better than one 600 mm² die — critical for large FPGAs</li>
+          <li><span class="g">Mixed nodes</span>: fabric on leading edge, SerDes / I/O on mature node (lower cost, better analog)</li>
+          <li><span class="g">Mix-and-match</span>: same fabric die + different I/O tiles = multiple product SKUs</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>Packaging Options</h3>
+        <ul>
+          <li><span class="p">2.5D</span>: silicon interposer (Xilinx SSI since Virtex-7 2000T)</li>
+          <li><span class="p">EMIB</span>: localized bridges (Intel)</li>
+          <li><span class="p">Foveros</span>: 3D face-to-face stacking — future FPGA + memory</li>
+          <li><span class="p">CoWoS</span>: TSMC interposer for AMD/Xilinx HBM FPGAs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 9 — High-Bandwidth Memory in FPGAs                   -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">07</span>
+    <h2>High-Bandwidth Memory in FPGAs</h2>
+  </div>
+  <div class="cols cols-2">
+    <div class="card amber">
+      <h3>HBM2E Integration</h3>
+      <ul>
+        <li>Xilinx Virtex UltraScale+ HBM: <span class="a">2 HBM stacks, 32 pseudo-channels, 460 GB/s</span></li>
+        <li>Intel Stratix 10 MX: 2 HBM2 stacks, 512 GB/s aggregate</li>
+        <li>Each HBM stack: 8 or 16 GB, 1024-bit wide interface per stack</li>
+        <li>HBM controller hard IP — no fabric resource consumption</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Architecture Considerations</h3>
+      <ul>
+        <li>32 pseudo-channels with <span class="g">independent AXI ports</span> — design must parallelize memory access</li>
+        <li>Latency: ~100 ns (higher than DDR's ~60 ns) — optimized for <span class="g">bandwidth, not latency</span></li>
+        <li>2.5D integration via silicon interposer: HBM die sits next to FPGA fabric die</li>
+        <li>Thermal: HBM stacks rated to 95°C — constrains FPGA junction temp budget</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cols cols-3" style="margin-top:.35em">
+    <div class="card purple">
+      <h3>Networking Use Case</h3>
+      <p>400G packet buffering: <span class="p">50 GB buffer</span> with 460 GB/s sustains line-rate buffering for flow table lookups and traffic shaping. Replaces external SRAM banks.</p>
+    </div>
+    <div class="card blue">
+      <h3>AI / ML Use Case</h3>
+      <p>Large model inference: HBM holds <span class="b">full weight matrices</span> for transformer models (GPT-2 scale). Bandwidth enables streaming weights without fabric stalls.</p>
+    </div>
+    <div class="card red">
+      <h3>Finance Use Case</h3>
+      <p>Options pricing: <span class="r">Monte Carlo</span> simulations with massive parallel random-walk state stored in HBM. 10× throughput vs DDR-only designs.</p>
+    </div>
+  </div>
+  <table style="margin-top:.3em">
+    <tr>
+      <th>Memory</th><th>Bandwidth</th><th>Capacity</th><th>Latency</th><th>Power/GB/s</th>
+    </tr>
+    <tr>
+      <td>DDR5 (4 ch)</td><td>~150 GB/s</td><td>128 GB+</td><td>~60 ns</td><td>~30 mW</td>
+    </tr>
+    <tr>
+      <td><span class="a">HBM2E (2 stacks)</span></td><td><span class="a">~460 GB/s</span></td><td>16–32 GB</td><td>~100 ns</td><td>~10 mW</td>
+    </tr>
+    <tr>
+      <td>HBM3 (future)</td><td>>800 GB/s</td><td>32–64 GB</td><td>~80 ns</td><td>~8 mW</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 10 — High-Speed Transceivers                         -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">08</span>
+    <h2>High-Speed Transceivers</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <table>
+        <tr>
+          <th>FPGA Family</th><th>Max Rate</th><th>Modulation</th><th>Lanes</th><th>Ethernet Target</th>
+        </tr>
+        <tr>
+          <td>UltraScale+ GTY</td><td>32.75 Gbps</td><td>NRZ</td><td>up to 96</td><td>100G (4×25G)</td>
+        </tr>
+        <tr>
+          <td>Versal GTM</td><td>58 Gbps</td><td>PAM4</td><td>up to 48</td><td>400G (8×50G)</td>
+        </tr>
+        <tr>
+          <td>Versal Premium GTYP</td><td><span class="a">116 Gbps</span></td><td>PAM4</td><td>up to 32</td><td><span class="a">800G</span> (8×106G)</td>
+        </tr>
+        <tr>
+          <td>Agilex 7 R-Tile</td><td>58 Gbps</td><td>PAM4</td><td>up to 48</td><td>400G</td>
+        </tr>
+        <tr>
+          <td>Agilex 9 (roadmap)</td><td>116+ Gbps</td><td>PAM4</td><td>TBD</td><td>800G+</td>
+        </tr>
+      </table>
+      <div class="card red" style="margin-top:.35em">
+        <h3>Signal Integrity Challenges</h3>
+        <ul>
+          <li><span class="r">PAM4 at 112 Gbps</span>: 3 dB SNR penalty vs NRZ — requires advanced DSP equalization (CTLE + DFE + ML-based)</li>
+          <li>Channel loss budgets: 30+ dB at Nyquist for 112G PAM4 — drives need for <span class="r">retimers</span> and <span class="r">active copper cables</span></li>
+          <li>Forward Error Correction (FEC): <span class="a">RS(544,514) KP4</span> mandatory for 100G+ lanes — adds ~100 ns latency</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>SerDes Architecture</h3>
+        <ul>
+          <li>Hard PLL (LC-tank) + fractional-N for precise frequency synthesis</li>
+          <li>TX: <span class="a">FFE (feed-forward equalization)</span> with 4+ taps</li>
+          <li>RX: <span class="a">CTLE + 12-tap DFE</span> + PAM4 slicer with 3 threshold levels</li>
+          <li>CDR bandwidth: 4-20 MHz, jitter tolerance per IEEE 802.3ck</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.3em">
+        <h3>Optical Interface Trends</h3>
+        <ul>
+          <li><span class="g">Co-packaged optics (CPO)</span>: optical engine on FPGA package substrate</li>
+          <li>Eliminates electrical channel loss — enables <span class="g">200+ Gbps per fiber</span></li>
+          <li>Intel / Ayar Labs partnership for photonic chiplets</li>
+          <li>Reduces power by ~30% vs pluggable optics at 800G</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>Protocol Flexibility</h3>
+        <ul>
+          <li>Same SerDes supports: Ethernet, PCIe, CPRI/eCPRI, JESD204C, Interlaken, SMPTE SDI</li>
+          <li>Rate switching in <span class="p">&lt;1 ms</span> — enables multi-protocol SmartNICs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 11 — AI/ML on FPGAs                                  -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">09</span>
+    <h2>AI / ML on FPGAs</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>FPGA AI Compute Primitives</h3>
+        <ul>
+          <li><span class="a">DSP58 in INT8 mode</span>: 2× INT8 MACs per DSP slice — Versal VC1902 delivers 7,992 DSPs = <span class="a">~16 INT8 TOPS</span></li>
+          <li><span class="a">INT4 mode</span>: 4× multiplies per DSP — effective <span class="a">32 TOPS</span> for quantized models</li>
+          <li>AI Engines (Versal AI Core): dedicated <span class="g">VLIW vector processors</span> — 400 tiles × 256 INT8 MACs × 1.25 GHz = <span class="g">133 INT8 TOPS</span></li>
+          <li>Fabric-based systolic arrays for custom precision (ternary, logarithmic, posit)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Where FPGAs Win for AI</h3>
+        <ul>
+          <li><span class="g">Low-latency inference</span>: deterministic pipeline, no OS/driver overhead — sub-microsecond for small models</li>
+          <li><span class="g">Custom precision</span>: INT3, INT2, ternary, block floating-point — impossible on fixed GPU/TPU datapaths</li>
+          <li><span class="g">Sparse acceleration</span>: skip zero-weight multiplies via fabric-level gating — 2-4× effective throughput on pruned models</li>
+          <li><span class="g">Inline inference</span>: process data in the network pipeline — no PCIe round-trip to host</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <table>
+        <tr>
+          <th>Platform</th><th>INT8 TOPS</th><th>Power (TDP)</th><th>TOPS/W</th><th>Latency</th>
+        </tr>
+        <tr>
+          <td>NVIDIA A100 (GPU)</td><td>624</td><td>300 W</td><td>2.1</td><td>~1 ms</td>
+        </tr>
+        <tr>
+          <td>Google TPU v4</td><td>~275</td><td>175 W</td><td>1.6</td><td>~0.5 ms</td>
+        </tr>
+        <tr>
+          <td><span class="a">Versal AI Core VC1902</span></td><td><span class="a">133</span></td><td>75 W</td><td><span class="g">1.8</span></td><td><span class="g">~10 µs</span></td>
+        </tr>
+        <tr>
+          <td>Agilex 7 AGF027</td><td>~40</td><td>60 W</td><td>0.7</td><td>~50 µs</td>
+        </tr>
+        <tr>
+          <td>Custom ASIC (e.g. Hailo)</td><td>26</td><td>2.5 W</td><td><span class="g">10.4</span></td><td>~5 ms</td>
+        </tr>
+      </table>
+      <div class="card purple" style="margin-top:.3em">
+        <h3>Where FPGAs Lose</h3>
+        <ul>
+          <li><span class="p">Raw throughput</span>: GPUs offer 5-10× more TOPS for large batch inference</li>
+          <li><span class="p">Software ecosystem</span>: CUDA/PyTorch/TensorFlow toolchains mature; FPGA tools still developing (Vitis AI, OpenVINO)</li>
+          <li><span class="p">Training</span>: near-zero FPGA usage for model training — GPUs dominate</li>
+        </ul>
+      </div>
+      <div class="card red" style="margin-top:.3em">
+        <h3>Sweet Spot</h3>
+        <p>FPGAs excel at <span class="r">low-batch, low-latency, custom-precision inference</span> in the data path — e.g., network traffic classification, sensor fusion, financial signal processing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 12 — FPGA for Data Center and Cloud                  -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">10</span>
+    <h2>FPGA for Data Center &amp; Cloud</h2>
+  </div>
+  <div class="cols cols-3">
+    <div class="card amber">
+      <h3>SmartNICs &amp; DPUs</h3>
+      <ul>
+        <li><span class="a">AMD Alveo SN1000</span>: FPGA-based SmartNIC — OVS offload, NVMe-oF, IPsec at 100G line rate</li>
+        <li>Intel N6000 Infrastructure Processing Unit: Agilex FPGA + Xeon-D for programmable data plane</li>
+        <li>Key functions: <span class="g">vSwitch</span>, storage virtualization, telemetry, crypto</li>
+        <li>FPGA advantage: <span class="a">field-updatable</span> — deploy new network functions without hardware swap</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Cloud FPGA Instances</h3>
+      <ul>
+        <li><span class="g">AWS F1</span>: Xilinx VU9P (16 nm), 8× FPGA instances, custom AFI images — used for genomics, video, HFT</li>
+        <li><span class="g">Azure NP</span>: Intel Stratix 10, networking/AI offload</li>
+        <li><span class="g">Alibaba F3</span>: Xilinx VU13P, 8 GB HBM</li>
+        <li>Challenge: <span class="r">multi-tenant isolation</span> — bitstream security, resource partitioning, side-channel protection</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Infrastructure Offload</h3>
+      <ul>
+        <li><span class="p">AWS Nitro</span> originally used FPGAs for hypervisor offload before transitioning to custom ASICs</li>
+        <li>Pattern: FPGA for <span class="a">v1 deployment</span> → prove workload → ASIC for scale</li>
+        <li>Microsoft Catapult / Azure FPGA fleet: rolling reconfiguration for Bing search ranking</li>
+        <li>Trend: FPGAs as <span class="p">programmable infrastructure accelerators</span> alongside fixed-function DPUs</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card blue" style="margin-top:.35em">
+    <h3>Data Center FPGA Deployment Architecture</h3>
+    <p><span class="b">Host-attached</span> (PCIe card) vs <span class="b">bump-in-the-wire</span> (inline on network path) vs <span class="b">disaggregated</span> (FPGA pool connected via CXL/network). Inline deployment eliminates PCIe latency for network functions. Disaggregated model enables dynamic allocation — a single FPGA serves multiple hosts via time-multiplexed reconfiguration.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 13 — Domain-Specific Architectures in FPGAs          -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">11</span>
+    <h2>Domain-Specific Architectures in FPGAs</h2>
+  </div>
+  <div class="cols cols-2">
+    <div class="card amber">
+      <h3>Network Processing</h3>
+      <ul>
+        <li><span class="a">P4-programmable pipelines</span>: AMD/Xilinx SDNet compiles P4 to FPGA fabric — 400G wire-speed packet parsing/editing</li>
+        <li>Match-action tables in TCAM emulation (BRAM + hash) — <span class="a">millions of flow entries</span></li>
+        <li>DPI (deep packet inspection): regex engines at 100G+ using FPGA parallel state machines</li>
+        <li>Network slicing / 5G UPF (User Plane Function) offload</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Video &amp; Image Processing</h3>
+      <ul>
+        <li><span class="g">8K real-time encoding</span>: H.265/HEVC encoder in FPGA fabric — used in broadcast (Xilinx Zynq UltraScale+ EV series has hard H.264/5 codec)</li>
+        <li>Multi-channel 4K transcoding: 8-16 simultaneous streams on single device</li>
+        <li>ISP (Image Signal Processing): HDR merge, demosaic, 3D denoise — <span class="g">sub-frame latency</span></li>
+        <li>AV1 decode/encode acceleration emerging in fabric-based IP</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Genomics &amp; Life Sciences</h3>
+      <ul>
+        <li><span class="p">Smith-Waterman</span> sequence alignment: FPGA implements 1000+ parallel alignment cells vs ~16 on CPU SIMD</li>
+        <li>Illumina DRAGEN: FPGA-based secondary analysis — <span class="p">30× genome in ~25 min</span> vs 30 hours on CPU</li>
+        <li>Variant calling, base quality recalibration, de-duplication — all in streaming pipeline</li>
+        <li>HBM enables in-memory reference genome storage for alignment</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3>Financial Trading</h3>
+      <ul>
+        <li><span class="r">Ultra-low latency</span>: tick-to-trade in <span class="r">&lt;1 µs</span> — FPGA implements full order book, strategy, and order generation in fabric</li>
+        <li>Market data feed parsing: 10G/25G Ethernet → decoded market data in <span class="r">~50 ns</span></li>
+        <li>Risk calculation: real-time portfolio Greeks computation via parallel Monte Carlo in DSP blocks</li>
+        <li>FPGA co-location at exchange data centers — wire-speed advantage over software stacks</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 14 — FPGA Design Methodology Evolution                -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">12</span>
+    <h2>FPGA Design Methodology Evolution</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>High-Level Synthesis (HLS)</h3>
+        <ul>
+          <li><span class="a">Vitis HLS</span> (AMD) / <span class="a">Intel HLS Compiler</span>: C/C++ → RTL with pragmas for pipeline, unroll, array partition</li>
+          <li>Typical QoR: 80-90% of hand-tuned RTL for dataflow-oriented designs</li>
+          <li>Excels at: image processing, matrix math, streaming algorithms</li>
+          <li>Weakness: complex control flow, FSMs, multi-clock designs still need RTL</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.3em">
+        <h3>OpenCL / SYCL / oneAPI</h3>
+        <ul>
+          <li><span class="g">Intel oneAPI</span>: write SYCL kernels that target CPU, GPU, or FPGA — single source</li>
+          <li>Board Support Package (BSP) abstracts PCIe DMA, DDR controllers, host interface</li>
+          <li>Kernel-level pipelining: compiler auto-pipelines loops at II=1 where possible</li>
+          <li>Adoption: growing in data center / cloud FPGA use cases; limited for timing-critical designs</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>Python-to-FPGA</h3>
+        <ul>
+          <li><span class="p">PYNQ</span>: Python productivity on Zynq — Jupyter notebooks driving FPGA overlays</li>
+          <li><span class="p">hls4ml</span>: compile trained neural networks (from Keras/PyTorch) directly to FPGA HLS — used at CERN for trigger systems</li>
+          <li><span class="p">MyHDL / Amaranth</span>: Python-based HDL for rapid prototyping</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card red" style="margin-bottom:.3em">
+        <h3>RTL: Still King for Performance</h3>
+        <ul>
+          <li><span class="r">SystemVerilog</span> remains dominant for performance-critical FPGA design</li>
+          <li>Fine-grained control over: pipeline stages, clock domain crossings, resource sharing, reset strategies</li>
+          <li>HLS-generated RTL often requires manual tuning for timing closure on large designs</li>
+          <li>Industry reality: most production FPGA designs are <span class="r">>80% hand-written RTL</span></li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Modern Design Flow</h3>
+        <ul>
+          <li><span class="b">IP Integrator / Platform Designer</span>: block-based schematic for SoC assembly</li>
+          <li><span class="b">Vitis / Quartus</span>: unified compile flow — synthesis → place → route → bitstream</li>
+          <li>Compile times: 8-48 hours for large designs — major productivity bottleneck</li>
+          <li><span class="a">Incremental compile</span>: re-route only changed modules — 2-5× speedup</li>
+          <li>Cloud compilation: AMD/Intel offer cloud-based compile farms for parallel seed runs</li>
+          <li>Design space exploration: <span class="g">auto-pipelining</span>, retiming, multi-seed P&R with F<sub>max</sub> optimization</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 15 — Partial Reconfiguration & DFX                   -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">13</span>
+    <h2>Partial Reconfiguration &amp; Dynamic Function Exchange</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <svg class="diagram" viewBox="0 0 440 260" width="440" height="260">
+        <rect x="10" y="10" width="420" height="240" rx="6" fill="#0e0e18" stroke="#2a2a3a" stroke-width="1.5"/>
+        <text x="220" y="32" text-anchor="middle" fill="#f5a623" font-size="11" font-family="Playfair Display" font-weight="700">FPGA with DFX Regions</text>
+        <!-- Static region -->
+        <rect x="25" y="45" width="180" height="190" rx="4" fill="#1a1a2e" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="115" y="65" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="JetBrains Mono">Static Region</text>
+        <text x="115" y="82" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">PCIe Controller</text>
+        <text x="115" y="96" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">DDR Controller</text>
+        <text x="115" y="110" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">DMA Engine</text>
+        <text x="115" y="124" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Management / Shell</text>
+        <!-- DFX partition 1 -->
+        <rect x="220" y="45" width="195" height="85" rx="4" fill="#1a2a1a" stroke="#4ecb8d" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="317" y="65" text-anchor="middle" fill="#4ecb8d" font-size="10" font-family="JetBrains Mono">DFX Region A</text>
+        <text x="317" y="82" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Reconfigurable Partition</text>
+        <text x="317" y="98" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">Module A₁: Crypto Engine</text>
+        <text x="317" y="112" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">Module A₂: Video Codec</text>
+        <text x="317" y="124" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">(hot-swap at runtime)</text>
+        <!-- DFX partition 2 -->
+        <rect x="220" y="145" width="195" height="85" rx="4" fill="#2a1a2a" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="317" y="165" text-anchor="middle" fill="#a78bfa" font-size="10" font-family="JetBrains Mono">DFX Region B</text>
+        <text x="317" y="182" text-anchor="middle" fill="#ccc" font-size="8" font-family="DM Sans">Reconfigurable Partition</text>
+        <text x="317" y="198" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">Module B₁: ML Inference</text>
+        <text x="317" y="212" text-anchor="middle" fill="#8888a8" font-size="8" font-family="DM Sans">Module B₂: Signal Proc.</text>
+        <text x="317" y="224" text-anchor="middle" fill="#8888a8" font-size="7" font-family="DM Sans">(hot-swap at runtime)</text>
+        <!-- Boundary arrows -->
+        <line x1="205" y1="80" x2="220" y2="80" stroke="#4ecb8d" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="205" y1="180" x2="220" y2="180" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr)"/>
+        <defs><marker id="arr" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ccc"/></marker></defs>
+      </svg>
+    </div>
+    <div>
+      <div class="card green" style="margin-bottom:.3em">
+        <h3>Dynamic Function Exchange (DFX)</h3>
+        <ul>
+          <li>Load new partial bitstreams at runtime — <span class="g">static region continues operating</span></li>
+          <li>Reconfiguration time: ~50-200 ms for typical partition (depends on region size)</li>
+          <li>Decoupler IP isolates DFX boundary signals during reconfiguration</li>
+          <li>AMD Vivado DFX flow: floor-plan partitions → compile per-module bitstreams → runtime ICAP/PCAP loading</li>
+        </ul>
+      </div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>Multi-Tenant Cloud FPGAs</h3>
+        <ul>
+          <li><span class="a">Shell + Role</span> architecture: vendor provides static shell (PCIe, DMA, management); tenant loads custom role</li>
+          <li>AWS F1 AFI model: each customer image is a partial bitstream for the role region</li>
+          <li>Isolation: shell enforces <span class="r">AXI firewall</span>, address range limits, bandwidth throttling</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Challenges</h3>
+        <ul>
+          <li><span class="r">Floor-planning complexity</span>: DFX regions must be rectangular, aligned to clock regions</li>
+          <li>All DFX modules for a partition must fit in the <span class="r">same resource footprint</span></li>
+          <li>Inter-partition routing congestion at boundaries</li>
+          <li>Verification: must test all module × partition combinations</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 16 — FPGA Verification and Debug                     -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">14</span>
+    <h2>FPGA Verification &amp; Debug</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>In-System Debug Tools</h3>
+        <ul>
+          <li><span class="a">Xilinx ILA / ChipScope</span>: embed logic analyzers in fabric — trigger on conditions, capture 1K-64K samples via JTAG</li>
+          <li><span class="a">Intel SignalTap</span>: equivalent in-system logic analyzer for Quartus designs</li>
+          <li>Virtual I/O (VIO): inject/monitor signals at runtime without re-compile</li>
+          <li>System ILA: capture AXI bus transactions with protocol-aware triggering</li>
+          <li>Trade-off: debug logic consumes <span class="r">2-10% of BRAM and LUTs</span></li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Simulation</h3>
+        <ul>
+          <li><span class="g">RTL simulation</span>: ModelSim/Questa, Xcelium, VCS — gold standard but slow (1-10 Hz for large designs)</li>
+          <li><span class="g">Co-simulation</span>: SystemVerilog DPI-C connects RTL sim to C/C++ models for host software verification</li>
+          <li><span class="g">Waveform-free</span>: UVM scoreboards + assertions reduce debug time vs manual waveform inspection</li>
+          <li>Emulation: large FPGAs increasingly used to emulate other FPGAs at near-speed</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.3em">
+        <h3>Formal Verification for FPGA</h3>
+        <ul>
+          <li><span class="p">SVA (SystemVerilog Assertions)</span>: property checking — prove that a FIFO never overflows, an AXI handshake always completes</li>
+          <li><span class="p">SymbiYosys</span>: open-source formal verification using Yosys + SMT solvers</li>
+          <li>Bounded model checking: practical for blocks up to ~50K gates</li>
+          <li>CDC (Clock Domain Crossing) verification: <span class="p">Questa CDC / Spyglass</span> — critical for multi-clock FPGA designs</li>
+          <li>FPGA-specific: verify that <span class="r">timing constraints are consistent</span> with RTL intent (false path, multicycle path)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>System-Level Debug Strategies</h3>
+        <ul>
+          <li><span class="b">Hardware-software co-debug</span>: Vitis debugger connects to both Arm core (GDB) and FPGA ILA simultaneously</li>
+          <li><span class="b">Trace buffers</span>: dedicated BRAM-based trace captures with timestamps — reconstruct event ordering across clock domains</li>
+          <li><span class="b">PCIe-based debug</span>: XDMA driver exposes debug registers via BAR — scriptable from Python on host</li>
+          <li>Reproducibility challenge: FPGA bugs often depend on <span class="r">exact timing of external events</span> — hard to reproduce in simulation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 17 — Security in Modern FPGAs                        -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">15</span>
+    <h2>Security in Modern FPGAs</h2>
+  </div>
+  <div class="cols cols-3">
+    <div class="card amber">
+      <h3>Bitstream Protection</h3>
+      <ul>
+        <li><span class="a">AES-256-GCM</span> bitstream encryption: prevents readback and cloning</li>
+        <li>Key storage: eFUSE (OTP, permanent) or BBRAM (battery-backed, zeroizable)</li>
+        <li>Authenticated configuration: <span class="a">RSA-4096 / ECDSA</span> signature verification before loading</li>
+        <li>Anti-rollback: monotonic counter prevents loading older (vulnerable) bitstreams</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Physical Security</h3>
+      <ul>
+        <li><span class="g">PUF (Physically Unclonable Function)</span>: SRAM PUF or ring-oscillator PUF generates device-unique keys</li>
+        <li>Used for: device authentication, key generation without external key injection</li>
+        <li><span class="g">Active tamper detection</span>: mesh sensors, voltage/temperature monitors, glitch detectors</li>
+        <li>Zeroization: instant key erasure on tamper event (BBRAM wipe in &lt;1 µs)</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Secure Boot Chain</h3>
+      <ul>
+        <li><span class="p">Root of Trust</span>: hardened boot ROM → authenticate first-stage loader → authenticate PL bitstream</li>
+        <li>Versal: dedicated <span class="p">Platform Management Controller (PMC)</span> with isolated MicroBlaze handles entire boot</li>
+        <li>Each stage cryptographically verified — chain cannot be bypassed</li>
+        <li>Secure debug: authenticated JTAG access with challenge-response protocol</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cols cols-2" style="margin-top:.35em">
+    <div class="card red">
+      <h3>Supply Chain &amp; Side-Channel Concerns</h3>
+      <ul>
+        <li><span class="r">Trojan insertion</span>: malicious logic added during fabrication — FPGA countermeasure: compare bitstream readback hash against golden reference</li>
+        <li><span class="r">Side-channel attacks</span>: power analysis (DPA/SPA) can extract AES keys from FPGA crypto engines — requires protocol-level countermeasures (masking, hiding)</li>
+        <li><span class="r">Fault injection</span>: voltage glitching can bypass secure boot — mitigated by redundant checking and analog glitch detectors</li>
+        <li>ITAR / export control: high-end FPGAs with strong encryption face export restrictions</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>FPGA as Security Accelerator</h3>
+      <ul>
+        <li><span class="b">Post-quantum crypto</span>: FPGA implements lattice-based algorithms (CRYSTALS-Kyber, Dilithium) with reconfigurable hardware — faster than CPU, updatable unlike ASIC</li>
+        <li><span class="b">HSM-on-FPGA</span>: hardware security module in reconfigurable fabric — key management, signing, with physical isolation</li>
+        <li><span class="b">Network security</span>: inline TLS termination, firewall, IDS/IPS at line rate</li>
+        <li>FPGA advantage: algorithm agility — update crypto when standards change</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 18 — Power and Thermal Challenges                    -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">16</span>
+    <h2>Power &amp; Thermal Challenges</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <table>
+        <tr>
+          <th>Component</th><th>% of Total Power</th><th>Scaling Trend</th>
+        </tr>
+        <tr>
+          <td>Interconnect (routing)</td><td><span class="r">35–45%</span></td><td>Scales poorly — capacitance dominant</td>
+        </tr>
+        <tr>
+          <td>Logic (CLBs/ALMs)</td><td>15–20%</td><td>Improves with node scaling</td>
+        </tr>
+        <tr>
+          <td>Clock distribution</td><td>15–20%</td><td>Reduced via clock gating, lower V<sub>dd</sub></td>
+        </tr>
+        <tr>
+          <td>Block RAM / URAM</td><td>10–15%</td><td>Dominated by leakage at 7 nm</td>
+        </tr>
+        <tr>
+          <td>SerDes / I/O</td><td>10–15%</td><td>Fixed per lane; PAM4 adds ~20%</td>
+        </tr>
+        <tr>
+          <td>Static (leakage)</td><td>10–25%</td><td><span class="r">Increases</span> at advanced nodes</td>
+        </tr>
+      </table>
+      <div class="card red" style="margin-top:.3em">
+        <h3>Power Envelope Reality</h3>
+        <ul>
+          <li>High-end FPGAs: <span class="r">75–150 W TDP</span> (Versal Premium up to 150 W)</li>
+          <li>Largest devices at full utilization can exceed <span class="r">200 W</span> — thermal throttling kicks in</li>
+          <li>PCIe card form factor: limited to 75 W (slot) or 150 W (slot + 8-pin aux) — constrains usable device size</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>Dynamic Power Management</h3>
+        <ul>
+          <li><span class="a">Clock gating</span>: Vivado/Quartus infer clock enables → synthesis inserts ICG cells — 15-30% power reduction</li>
+          <li><span class="a">Voltage scaling</span>: V<sub>CCINT</sub> from 0.85V (performance) to 0.72V (low power) — quadratic power savings</li>
+          <li><span class="a">Power islands</span>: power-gate unused DFX regions via on-die switches</li>
+          <li>Frequency scaling: trade F<sub>max</sub> for power — common in edge/embedded FPGA SoCs</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.3em">
+        <h3>Thermal Solutions</h3>
+        <ul>
+          <li><span class="g">Passive heatsink</span>: sufficient up to ~50 W (mid-range parts)</li>
+          <li><span class="g">Active fan + heatsink</span>: 50-100 W typical data center cards</li>
+          <li><span class="g">Vapor chamber</span>: 100-200 W high-end cards (Alveo U55C)</li>
+          <li>HBM constraint: memory stack at 95°C limit — careful thermal path design needed</li>
+          <li>Liquid cooling: emerging for >200 W deployments (Versal Premium in 1U servers)</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>Design-Level Techniques</h3>
+        <ul>
+          <li><span class="p">Toggle-rate optimization</span>: reduce unnecessary signal transitions via coding style</li>
+          <li><span class="p">Resource sharing</span>: time-multiplex DSP/BRAM blocks to reduce active count</li>
+          <li>Vivado Power Estimator (XPE) / Intel Early Power Estimator: model power at design time</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 19 — FPGA vs ASIC Decision Framework                 -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">17</span>
+    <h2>FPGA vs ASIC Decision Framework</h2>
+  </div>
+  <table>
+    <tr>
+      <th>Factor</th><th>FPGA</th><th>ASIC</th><th>Decision Driver</th>
+    </tr>
+    <tr>
+      <td><span class="a">NRE Cost</span></td>
+      <td><span class="g">$0 (device cost only)</span></td>
+      <td><span class="r">$50M–$500M+ (7nm)</span></td>
+      <td>Volume &lt;50K units → FPGA</td>
+    </tr>
+    <tr>
+      <td>Time-to-Market</td>
+      <td><span class="g">3–9 months</span></td>
+      <td>18–36 months</td>
+      <td>Fast iteration / evolving standards → FPGA</td>
+    </tr>
+    <tr>
+      <td>Unit Cost (at volume)</td>
+      <td>$50–$15,000</td>
+      <td><span class="g">$2–$50</span></td>
+      <td>Volume &gt;500K → ASIC usually wins</td>
+    </tr>
+    <tr>
+      <td>Performance</td>
+      <td>~300–800 MHz fabric</td>
+      <td><span class="g">1–3 GHz+</span></td>
+      <td>Raw frequency-critical → ASIC</td>
+    </tr>
+    <tr>
+      <td>Power Efficiency</td>
+      <td>10–50× worse per function</td>
+      <td><span class="g">Optimized</span></td>
+      <td>Battery / edge / mobile → ASIC</td>
+    </tr>
+    <tr>
+      <td>Flexibility</td>
+      <td><span class="g">Field-updatable</span></td>
+      <td><span class="r">Fixed at tapeout</span></td>
+      <td>Standards evolving → FPGA</td>
+    </tr>
+    <tr>
+      <td>Risk</td>
+      <td><span class="g">Low (no silicon respin)</span></td>
+      <td><span class="r">High (respin = $10M+)</span></td>
+      <td>Unproven architecture → prototype on FPGA</td>
+    </tr>
+  </table>
+  <div class="cols cols-2" style="margin-top:.3em">
+    <div class="card green">
+      <h3>FPGA Sweet Spots</h3>
+      <ul>
+        <li><span class="g">Protocol bridging</span>: standard evolving (PCIe Gen6, CXL 3.0) — FPGA updates in field</li>
+        <li><span class="g">Low-medium volume</span>: aerospace, defense, medical, industrial — 1K-50K units</li>
+        <li><span class="g">Pre-ASIC validation</span>: prove algorithm in FPGA, then harden to ASIC for volume</li>
+        <li><span class="g">Time-critical deployment</span>: product needs to ship before ASIC tape-out completes</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3>The "FPGA-to-ASIC" Pipeline</h3>
+      <ul>
+        <li>Common pattern: v1 on FPGA → validate in field → v2 as structured ASIC or full custom</li>
+        <li>Examples: <span class="r">AWS Nitro</span> (FPGA → Annapurna ASIC), <span class="r">Microsoft Catapult</span> (FPGA → Maia AI ASIC)</li>
+        <li>Structured ASICs (Intel eASIC, Achronix Speedcore eFPGA) bridge the gap — 50% power, 2× density vs FPGA</li>
+        <li>eFPGA IP: embed FPGA fabric inside an ASIC for the portions that need flexibility</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 20 — FPGA Prototyping and Emulation                  -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">18</span>
+    <h2>FPGA Prototyping &amp; Emulation</h2>
+  </div>
+  <div class="cols cols-2">
+    <div class="card amber">
+      <h3>ASIC Prototyping Platforms</h3>
+      <ul>
+        <li><span class="a">Synopsys HAPS-100</span>: up to 84 Xilinx VU19P FPGAs — capacity for 20+ billion ASIC gates</li>
+        <li><span class="a">Cadence Protium X2</span>: up to 72 FPGAs, automated RTL partitioning across devices</li>
+        <li><span class="a">Siemens Veloce</span>: hybrid emulation — FPGA array + software simulation engine</li>
+        <li>Typical speed: <span class="g">1–10 MHz</span> (vs 1–10 Hz RTL sim) — 10<sup>6</sup>× faster enables running real software (Linux boot, driver validation)</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>Multi-FPGA Challenges</h3>
+      <ul>
+        <li><span class="g">Partitioning</span>: automated tools split RTL across FPGAs — must minimize inter-FPGA signal count</li>
+        <li><span class="g">Time-domain multiplexing (TDM)</span>: 1000+ signals share a single FPGA-to-FPGA I/O pin via serialization — trades bandwidth for pin count</li>
+        <li><span class="g">Clock modeling</span>: ASIC multi-clock design mapped to FPGA global clocks — may require clock emulation</li>
+        <li>Debug: Synopsys/Cadence provide waveform capture, memory dump, and protocol-aware probing across the FPGA array</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cols cols-2" style="margin-top:.3em">
+    <div class="card purple">
+      <h3>Use Cases</h3>
+      <ul>
+        <li><span class="p">Software bring-up</span>: boot OS, run application stacks 18+ months before ASIC silicon</li>
+        <li><span class="p">Hardware/software co-validation</span>: test driver + RTL interaction at near real-time</li>
+        <li><span class="p">System validation</span>: connect prototype to real peripherals (PCIe, Ethernet, displays)</li>
+        <li><span class="p">Performance estimation</span>: measure throughput, identify bottlenecks (with frequency scaling caveats)</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Capacity Planning</h3>
+      <ul>
+        <li>Rule of thumb: 1 ASIC gate ≈ <span class="b">4-8 FPGA LUTs</span> (due to memory mapping, clock domain bridging, debug overhead)</li>
+        <li>VU19P: 4.4M LUTs ≈ <span class="b">550K-1.1M ASIC gates</span> effective capacity</li>
+        <li>Modern SoCs (5-20B transistors) require <span class="r">10-40 FPGAs</span> for full-chip prototyping</li>
+        <li>Cost: HAPS/Protium systems range from <span class="r">$500K to $5M+</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 21 — Open-Source FPGA Ecosystem                      -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">19</span>
+    <h2>Open-Source FPGA Ecosystem</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>Core Toolchain</h3>
+        <ul>
+          <li><span class="a">Yosys</span>: open-source synthesis — Verilog/SystemVerilog → technology-mapped netlist</li>
+          <li><span class="a">nextpnr</span>: open-source place &amp; route — supports iCE40, ECP5, Nexus, Gowin</li>
+          <li><span class="a">Project IceStorm</span>: reverse-engineered Lattice iCE40 bitstream format — first fully open FPGA flow</li>
+          <li><span class="a">F4PGA (formerly SymbiFlow)</span>: umbrella project for open FPGA toolchains — targeting Xilinx 7-series, QuickLogic</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-bottom:.3em">
+        <h3>Supported Devices</h3>
+        <ul>
+          <li><span class="g">Lattice iCE40</span>: full open-source support (IceStorm) — community favorite for education and small projects</li>
+          <li><span class="g">Lattice ECP5</span>: Project Trellis — supports devices up to 85K LUTs with SerDes</li>
+          <li><span class="g">Lattice Nexus (CrossLink-NX)</span>: Project Oxide — 28 nm FDSOI, low power</li>
+          <li><span class="g">Gowin GW1N/GW2A</span>: Apicula project — Chinese FPGA vendor, growing open-source support</li>
+          <li><span class="g">Xilinx 7-series</span>: F4PGA partial support — Artix-7, Zynq-7000 (limited device coverage)</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple" style="margin-bottom:.3em">
+        <h3>Formal Verification &amp; Simulation</h3>
+        <ul>
+          <li><span class="p">SymbiYosys</span>: formal verification frontend — drives Z3, Boolector, Yices SMT solvers</li>
+          <li><span class="p">Verilator</span>: open-source Verilog/SystemVerilog simulator — compiles to C++ — 10-100× faster than event-driven simulators for large designs</li>
+          <li><span class="p">cocotb</span>: Python-based testbench framework — coroutine-driven, works with any simulator</li>
+          <li><span class="p">GHDL</span>: open-source VHDL simulator and synthesis frontend</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-bottom:.3em">
+        <h3>HDL &amp; Frameworks</h3>
+        <ul>
+          <li><span class="b">SpinalHDL</span> (Scala): generates Verilog/VHDL — strong type system, parametric hardware</li>
+          <li><span class="b">Amaranth</span> (Python): successor to nMigen — first-class open-source FPGA support</li>
+          <li><span class="b">Chisel</span> (Scala): RISC-V ecosystem standard — used for SiFive cores, BOOM</li>
+          <li><span class="b">LiteX</span>: Python SoC builder — generates full SoC (CPU + peripherals + memory) for FPGA</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Limitations</h3>
+        <ul>
+          <li><span class="r">No support for high-end devices</span>: Versal, UltraScale+, Agilex — bitstream formats are proprietary and encrypted</li>
+          <li>QoR gap: open-source P&R typically <span class="r">20-40% slower F<sub>max</sub></span> vs vendor tools</li>
+          <li>Limited hard IP support: SerDes, PCIe, DDR controllers still require vendor primitives</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 22 — Emerging Competitors & Market Dynamics           -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">20</span>
+    <h2>Emerging Competitors &amp; Market Dynamics</h2>
+  </div>
+  <table>
+    <tr>
+      <th>Vendor</th><th>Key Families</th><th>Process</th><th>Strength</th><th>Market Share (est.)</th>
+    </tr>
+    <tr>
+      <td><span class="a">AMD (Xilinx)</span></td>
+      <td>Versal, UltraScale+, Zynq, Spartan</td>
+      <td>7 nm, 16 nm</td>
+      <td>Data center, AI, aero/defense, broadest portfolio</td>
+      <td><span class="a">~52%</span></td>
+    </tr>
+    <tr>
+      <td><span class="b">Intel (Altera)</span></td>
+      <td>Agilex 9/7/5/3, Stratix 10</td>
+      <td>Intel 7 (10 nm-class)</td>
+      <td>x86 integration, oneAPI, networking</td>
+      <td><span class="b">~28%</span></td>
+    </tr>
+    <tr>
+      <td><span class="g">Lattice</span></td>
+      <td>Nexus, CertusPro, MachXO5, iCE40</td>
+      <td>28 nm FDSOI</td>
+      <td>Low power, small form factor, edge AI, automotive</td>
+      <td><span class="g">~8%</span></td>
+    </tr>
+    <tr>
+      <td><span class="p">Microchip (Microsemi)</span></td>
+      <td>PolarFire, SmartFusion2, IGLOO2</td>
+      <td>28 nm</td>
+      <td>Aerospace, defense, radiation-tolerant, low power</td>
+      <td><span class="p">~7%</span></td>
+    </tr>
+    <tr>
+      <td>Efinix</td>
+      <td>Trion, Titanium</td>
+      <td>16 nm</td>
+      <td>Quantum compute fabric, low cost, edge AI</td>
+      <td>~1%</td>
+    </tr>
+    <tr>
+      <td>Gowin</td>
+      <td>GW1N, GW2A, GW5A</td>
+      <td>55/28 nm</td>
+      <td>China domestic, low cost, hobbyist-friendly</td>
+      <td>~1%</td>
+    </tr>
+    <tr>
+      <td>Achronix</td>
+      <td>Speedster7t, Speedcore eFPGA</td>
+      <td>7 nm</td>
+      <td>GDDR6 interface, eFPGA IP for ASIC integration</td>
+      <td>&lt;1%</td>
+    </tr>
+  </table>
+  <div class="cols cols-2" style="margin-top:.3em">
+    <div class="card amber">
+      <h3>Market Trends</h3>
+      <ul>
+        <li>Total FPGA market: <span class="a">~$9B (2025)</span>, projected $15B+ by 2030</li>
+        <li>Growth drivers: 5G infrastructure, data center acceleration, automotive ADAS, edge AI</li>
+        <li>Intel Altera <span class="b">re-spun as independent subsidiary</span> (2024) — signaling renewed FPGA focus</li>
+        <li>China domestic FPGA push (Gowin, AGM, Pangomicro) — driven by supply chain concerns</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>eFPGA: FPGA Inside Your ASIC</h3>
+      <ul>
+        <li><span class="g">Achronix Speedcore</span>, <span class="g">Flex Logix EFLX</span>, <span class="g">Menta eFPGA</span>: licensable FPGA fabric IP</li>
+        <li>Embed 10K-500K LUTs inside a custom ASIC — provides field-updatable subsystem</li>
+        <li>Use cases: protocol adaptation, post-silicon bug fixes, customer-specific features</li>
+        <li>Growing adoption in <span class="a">defense, networking, storage controller</span> ASICs</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  SLIDE 23 — Future Directions                               -->
+<!-- ============================================================ -->
+<section>
+  <div class="slide-hdr">
+    <span class="tag">21</span>
+    <h2>Future Directions</h2>
+  </div>
+  <div class="cols cols-3">
+    <div class="card amber">
+      <h3>Photonic FPGAs</h3>
+      <ul>
+        <li><span class="a">Silicon photonic interconnect</span>: replace electrical routing with optical waveguides — eliminate RC delay bottleneck</li>
+        <li>Mach-Zehnder modulators as programmable switching elements</li>
+        <li>Potential: <span class="a">10× bandwidth density</span> at 10× lower power for long-reach interconnect</li>
+        <li>Challenge: photonic device footprint still 100× larger than transistors — hybrid approach most likely</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>3D-Stacked FPGA + Memory</h3>
+      <ul>
+        <li><span class="g">Logic-on-memory stacking</span>: FPGA fabric directly bonded to SRAM/DRAM die via hybrid bonding</li>
+        <li>TSV pitch: &lt;5 µm with hybrid bonding — enables <span class="g">TB/s memory bandwidth</span> at femtojoule/bit</li>
+        <li>Eliminates I/O bottleneck for memory-bound FPGA workloads</li>
+        <li>Samsung, TSMC SoIC, Intel Foveros all developing applicable technology</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Compute-in-Memory</h3>
+      <ul>
+        <li><span class="p">RRAM/MRAM-based LUTs</span>: replace SRAM configuration bits with non-volatile memory — instant-on FPGAs, no configuration time</li>
+        <li><span class="p">Analog compute-in-memory</span>: use RRAM crossbar arrays for matrix-vector multiply — integrate directly with FPGA fabric for AI</li>
+        <li>Potential: <span class="p">100× energy efficiency</span> for inference vs digital MACs</li>
+        <li>Research stage — reliability and precision challenges remain</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cols cols-2" style="margin-top:.35em">
+    <div class="card blue">
+      <h3>Neuromorphic FPGA Fabric</h3>
+      <ul>
+        <li><span class="b">Spiking neural network</span> primitives in FPGA fabric — leaky integrate-and-fire neurons as hard blocks</li>
+        <li>Event-driven computation: only active neurons consume power — <span class="b">1000× more efficient</span> for sparse temporal data</li>
+        <li>Applications: sensor processing, anomaly detection, robotics at ultra-low power</li>
+        <li>Hybrid: conventional FPGA fabric + neuromorphic tiles for mixed workloads</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3>RISC-V Soft Cores &amp; Hard Cores</h3>
+      <ul>
+        <li><span class="r">Soft RISC-V</span>: VexRiscv, NEORV32, PicoRV32 — run on any FPGA fabric, fully customizable pipeline</li>
+        <li><span class="r">Hard RISC-V</span>: Microchip PolarFire SoC integrates 4× SiFive U54 + 1× E51 RISC-V cores</li>
+        <li>Trend: RISC-V replacing Arm in FPGA SoCs for cost (no licensing) and customizability</li>
+        <li>Future: <span class="a">RISC-V with custom extensions</span> implemented in FPGA fabric — tight coupling between ISA and accelerator</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div><!-- slides -->
+</div><!-- reveal -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+Reveal.initialize({ hash:true, navigationMode:'linear', controlsTutorial:false,
+  slideNumber:'c/t', showSlideNumber:'speaker',
+  width:1280, height:720, margin:0.04,
+  transition:'fade', transitionSpeed:'fast' });
+</script>
+</body>
+</html>
