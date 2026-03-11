@@ -27,6 +27,9 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 | 11 | Power Management in ML Accelerator SoCs | 23 | ✅ Complete |
 | 12 | Thermal Management in ML Accelerator SoCs | 23 | ✅ Complete |
 | 13 | Clocks and Resets in ML Accelerator SoCs | 23 | ✅ Complete |
+| 14 | Modern Trends in FPGA Technology | 23 | ✅ Complete |
+| 15 | AMD / Xilinx FPGA Technology & Products | 23 | ✅ Complete |
+| 16 | FPGAs in Finance | 23 | ✅ Complete |
 
 ---
 
@@ -310,6 +313,76 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ---
 
+## Presentation 14: Modern Trends in FPGA Technology
+
+23 interactive slides covering:
+
+**Architecture Foundations** — LUT-based FPGA architecture recap, CLBs, island-style interconnect fabric, I/O blocks, and the evolution from simple PLDs to modern adaptive compute platforms.
+
+**Process Node Migration** — FPGAs moving to 7nm, 5nm, and 3nm nodes. FPGA-specific challenges vs ASICs at advanced nodes: routing dominance, configuration cell density, cost implications, and why trailing-edge nodes remain viable for many applications.
+
+**Modern Fabric Innovations** — Adaptive Logic Modules (ALMs), fracturable LUTs, MLAB vs M20K vs UltraRAM memory hierarchy, DSP block evolution from simple multipliers to AI-optimized tensor blocks with INT8/INT4 packing.
+
+**Hard IP & Heterogeneous Integration** — PCIe Gen5, 100G/400G Ethernet MACs, DDR5/HBM memory controllers, crypto engines, and Network-on-Chip (NoC) integration. Heterogeneous FPGA SoCs: hard ARM/RISC-V cores with FPGA fabric, AMD Versal model (scalar + adaptable + AI engines), Intel Agilex HPS.
+
+**Chiplets & HBM** — EMIB, Foveros, and chiplet-based FPGA approaches. Why FPGAs benefit from chiplets (yield, mixed-node integration). HBM2E integration in FPGAs, bandwidth vs capacity tradeoffs.
+
+**High-Speed Transceivers** — Modern FPGA SerDes at 116 Gbps+, PAM4 signalling, 800G Ethernet support, co-packaged optics trends.
+
+**AI/ML on FPGAs** — INT8/INT4 inference, AI tensor blocks, where FPGAs fit vs GPU/ASIC for inference workloads. Data center and cloud FPGA deployments: SmartNICs, DPUs, infrastructure offload, AWS F1 and Azure NP instances.
+
+**Design Methodology** — HLS adoption, OpenCL/SYCL/oneAPI flows, Python-to-FPGA tools, RTL still dominant for performance-critical paths. Partial reconfiguration and Dynamic Function Exchange (DFX) for runtime reconfiguration and multi-tenant cloud FPGAs.
+
+**Verification, Security & Power** — FPGA-specific verification and debug (SignalTap/ILA, formal verification), bitstream encryption, PUFs, secure boot. Power budgets at advanced nodes, dynamic power management, thermal solutions for high-end FPGAs.
+
+**FPGA vs ASIC** — Decision framework: NRE costs, time-to-market, volume crossover points. FPGA prototyping and emulation for ASIC development (Synopsys HAPS, Cadence Protium).
+
+**Ecosystem & Future** — Open-source FPGA toolchains (Yosys, nextpnr, F4PGA). Market dynamics: AMD/Xilinx vs Intel/Altera vs Lattice vs Microchip. Future directions: photonic FPGAs, 3D-stacked FPGA+memory, compute-in-memory, neuromorphic fabric, RISC-V softcores.
+
+---
+
+## Presentation 15: AMD / Xilinx FPGA Technology & Products
+
+23 interactive slides covering:
+
+**Heritage & Acquisition** — Xilinx history from the invention of the FPGA through Virtex, Spartan, and UltraScale families. AMD's $49B acquisition in 2022, strategic rationale, and integration into the Adaptive Computing Division.
+
+**UltraScale+ Families** — Virtex UltraScale+ architecture deep dive: CLB structure, UltraRAM, DSP48E2 slices, GTY/GTM transceivers, HBM variants. Kintex UltraScale+ mid-range and Artix cost-optimized families: target applications, key specifications, device comparison.
+
+**Zynq Platform** — Zynq UltraScale+ MPSoC: quad-core A53 + dual R5F + FPGA fabric, PS-PL interfaces, TrustZone security, PMU, APU/RPU isolation. Zynq RFSoC: integrated RF-ADC/DAC, direct RF sampling for 5G/radar/EW, Gen 1/2/3/DFE evolution.
+
+**Versal ACAP** — Versal architecture overview: Scalar Engines (ARM A72/R5), Adaptable Engines (FPGA fabric), Intelligent Engines (AI Engines), integrated NoC, platform management controller. AI Core series: AI Engine tile architecture (VLIW + SIMD vector core), cascade dataflow, INT8/INT4 throughput. AI Edge series: power-efficient inference for automotive ADAS, robotics, surveillance. Premium series: 112G PAM4 transceivers, 600G Ethernet, multi-100G crypto, PCIe Gen5. HBM series: HBM2e integration, 820 GB/s bandwidth. Gen 2 roadmap and next-generation migration path.
+
+**Software Ecosystem** — Vivado Design Suite: synthesis, implementation, timing closure, IP Integrator, block design flows. Vitis Unified Software Platform: HLS, AI Engine compiler, Vitis libraries, XRT runtime. Vitis AI: DPU IP, quantization tools, model zoo, ONNX/TensorFlow/PyTorch support.
+
+**Market Applications** — Data center: Alveo accelerator cards (U25N, U55C, V70, V80), SmartNIC, cloud deployments. 5G & communications: O-RAN, massive MIMO, beamforming, RFSoC in radio access networks. Automotive: XA family, ADAS sensor fusion, ISO 26262 functional safety. Aerospace & defense: radiation-tolerant and space-grade variants, SOSA standard, anti-tamper.
+
+**Competitive Positioning & Direction** — AMD vs Intel Agilex vs Lattice Nexus comparison. AMD's adaptive computing roadmap: chiplet strategy, CPU/GPU convergence, AI-everywhere thesis.
+
+---
+
+## Presentation 16: FPGAs in Finance
+
+23 interactive slides covering:
+
+**The Latency Imperative** — Why FPGAs dominate ultra-low latency trading: deterministic execution, wire-speed processing, nanosecond-level response. Comparison vs CPU, kernel bypass, GPU, and ASIC approaches. History of FPGA adoption in finance from ~2007 through modern full-pipeline implementations.
+
+**Market Data & Order Books** — Parsing exchange protocols (ITCH, OUCH, FIX, OPRA, SBE) at wire speed. FPGA-based order book construction: BRAM-based price-level storage, incremental updates, top-of-book extraction. Tick-to-trade pipeline architecture with sub-microsecond latency budgets.
+
+**FPGA Network Infrastructure** — Hardware TCP/UDP offload, 10G/25G/100G Ethernet MAC, PTP timestamping (IEEE 1588), cut-through switching. Colocation facilities, cross-connects, microwave/laser networks, and where FPGAs sit in the rack topology.
+
+**Trading Strategies in Hardware** — Market making: pricing engines, quoting strategies, Greeks calculation in fabric. Statistical arbitrage: EWMA, correlation engines, multi-asset scanning. Options pricing: Black-Scholes pipeline, binomial/trinomial trees, implied volatility solvers, fixed-point vs floating-point tradeoffs.
+
+**Risk & Analytics** — Real-time pre-trade risk checks in hardware. VaR calculation, Monte Carlo acceleration, portfolio margining. Cryptocurrency and digital asset trading: exchange infrastructure, DeFi/MEV applications.
+
+**Platforms & Development** — Key FPGA platforms for finance: Xilinx Alveo, Intel Agilex, Solarflare/Xilinx SmartNICs. FPGA development in finance: dedicated teams in banks/HFT firms vs specialist vendors (Exegy, Enyx, Fixnetix). Development workflow: SystemVerilog dominance, limited HLS adoption, simulation and regression testing, commercial IP ecosystem.
+
+**Challenges** — Development complexity: long build cycles, specialist talent shortage, debugging difficulty. Regulatory and compliance: MiFID II, Reg NMS, audit trails, determinism as a compliance feature. Latency measurement and benchmarking methodology.
+
+**Future Directions** — AI/ML inference on trading FPGAs, PCIe Gen5/CXL integration, 400G/800G Ethernet, cloud FPGA trading, FPGA vs SmartNIC vs DPU convergence, industry consolidation trends.
+
+---
+
 ## Repository Structure
 
 ```
@@ -339,7 +412,13 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 │   └── index.html
 ├── 12-thermal-management/
 │   └── index.html
-└── 13-clocks-and-resets/
+├── 13-clocks-and-resets/
+│   └── index.html
+├── 14-modern-fpga-trends/
+│   └── index.html
+├── 15-amd-xilinx-fpgas/
+│   └── index.html
+└── 16-fpgas-in-finance/
     └── index.html
 ```
 
@@ -385,6 +464,10 @@ Each presentation is a single self-contained `index.html`. No build step, no npm
 **Thermal:** ASHRAE TC 9.9, *Thermal Guidelines for Data Processing Environments* · Bar-Cohen & Iyengar, *Design and Optimization of Thermal Systems*, Wiley · TSMC Direct-to-Silicon Liquid Cooling Technology · Kandlikar et al., "Review of Heat Transfer Enhancement in Microchannels," ASME 2005
 
 **Clocks & Resets:** Razavi, *Design of Analog CMOS Integrated Circuits* (PLL chapters) · Kundert, *The Designer's Guide to Spice and Spectre* · Ginosar, "Metastability and Synchronizers: A Tutorial," IEEE Design & Test 2011 · Cummings, "Simulation and Synthesis Techniques for Asynchronous FIFO Design," SNUG 2002
+
+**FPGAs:** AMD/Xilinx Versal ACAP Architecture Manual · AMD/Xilinx UltraScale+ Architecture Reference · Intel Agilex 7/9 Device Overview · Lattice Nexus Platform White Paper · Trimberger, "Three Ages of FPGAs," ISSCC 2015 · Kuon & Rose, "Measuring the Gap Between FPGAs and ASICs," IEEE TCAD 2007 · Yosys Open Synthesis Suite Documentation · Project F4PGA (formerly SymbiFlow) · AMD Vitis AI User Guide · AMD Alveo Data Center Accelerator Card Specifications
+
+**FPGAs in Finance:** Lockwood et al., "Low Latency Trading with FPGAs," IEEE Micro 2012 · Morris et al., "FPGA Accelerated Market Data Feed Handling," ACM FPGA 2014 · Sadoghi et al., "Multi-query Stream Processing on FPGAs," ICDE 2012 · Enyx FPGA Trading Solutions White Paper · Exegy Market Data Architecture · IEEE 1588 Precision Time Protocol Specification · MiFID II Regulatory Technical Standards · Celoxica/Fixnetix Historical White Papers
 
 ## License
 
