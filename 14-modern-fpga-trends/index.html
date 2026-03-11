@@ -385,16 +385,14 @@
         <li><span class="a">PCIe Gen5</span> hardened: 32 GT/s per lane, ×16 = 64 GB/s per direction</li>
         <li>Versal Premium: up to <span class="a">4× PCIe Gen5 controllers</span></li>
         <li>CXL 2.0 support via PCIe Gen5 PHY + soft protocol stack</li>
-        <li>Gen6 (64 GT/s, PAM4) on roadmap for next-gen parts</li>
       </ul>
     </div>
     <div class="card green">
       <h3>Ethernet &amp; Networking</h3>
       <ul>
         <li><span class="g">Hard 100GE MAC + PCS</span> in Versal / Agilex — frees fabric resources</li>
-        <li><span class="g">400GE</span> via 4×100G or 8×50G with FEC (RS-FEC KP4)</li>
+        <li><span class="g">400GE</span> via 4×100G or 8×50G with RS-FEC KP4</li>
         <li>Emerging: <span class="g">800GE</span> targeting 8×106G PAM4 SerDes</li>
-        <li>Inline MACsec encryption at line rate</li>
       </ul>
     </div>
     <div class="card purple">
@@ -403,7 +401,6 @@
         <li>Hard <span class="p">DDR5 controller + PHY</span>: 4800–5600 MT/s, up to 4 channels</li>
         <li>LPDDR5/5X for power-sensitive SoC FPGAs</li>
         <li>HBM2E controller integrated in high-end parts</li>
-        <li>Hard ECC, inline scrubbing, RAS features</li>
       </ul>
     </div>
   </div>
@@ -422,7 +419,6 @@
         <li>Versal: integrated <span class="r">hardened NoC</span> — replaces soft AXI interconnect</li>
         <li>Programmable QoS, bandwidth allocation, traffic shaping</li>
         <li>950 MHz operation, <span class="a">up to 1.2 TB/s</span> aggregate bandwidth</li>
-        <li>Eliminates the #1 resource consumer in large FPGA designs: the interconnect fabric</li>
       </ul>
     </div>
   </div>
@@ -610,21 +606,7 @@
       </ul>
     </div>
   </div>
-  <div class="cols cols-3" style="margin-top:.35em">
-    <div class="card purple">
-      <h3>Networking Use Case</h3>
-      <p>400G packet buffering: <span class="p">50 GB buffer</span> with 460 GB/s sustains line-rate buffering for flow table lookups and traffic shaping. Replaces external SRAM banks.</p>
-    </div>
-    <div class="card blue">
-      <h3>AI / ML Use Case</h3>
-      <p>Large model inference: HBM holds <span class="b">full weight matrices</span> for transformer models (GPT-2 scale). Bandwidth enables streaming weights without fabric stalls.</p>
-    </div>
-    <div class="card red">
-      <h3>Finance Use Case</h3>
-      <p>Options pricing: <span class="r">Monte Carlo</span> simulations with massive parallel random-walk state stored in HBM. 10× throughput vs DDR-only designs.</p>
-    </div>
-  </div>
-  <table style="margin-top:.3em">
+  <table style="margin-top:.35em">
     <tr>
       <th>Memory</th><th>Bandwidth</th><th>Capacity</th><th>Latency</th><th>Power/GB/s</th>
     </tr>
@@ -918,9 +900,7 @@
         <ul>
           <li><span class="b">IP Integrator / Platform Designer</span>: block-based schematic for SoC assembly</li>
           <li><span class="b">Vitis / Quartus</span>: unified compile flow — synthesis → place → route → bitstream</li>
-          <li>Compile times: 8-48 hours for large designs — major productivity bottleneck</li>
           <li><span class="a">Incremental compile</span>: re-route only changed modules — 2-5× speedup</li>
-          <li>Cloud compilation: AMD/Intel offer cloud-based compile farms for parallel seed runs</li>
           <li>Design space exploration: <span class="g">auto-pipelining</span>, retiming, multi-seed P&R with F<sub>max</sub> optimization</li>
         </ul>
       </div>
@@ -1065,28 +1045,25 @@
     <div class="card amber">
       <h3>Bitstream Protection</h3>
       <ul>
-        <li><span class="a">AES-256-GCM</span> bitstream encryption: prevents readback and cloning</li>
-        <li>Key storage: eFUSE (OTP, permanent) or BBRAM (battery-backed, zeroizable)</li>
-        <li>Authenticated configuration: <span class="a">RSA-4096 / ECDSA</span> signature verification before loading</li>
-        <li>Anti-rollback: monotonic counter prevents loading older (vulnerable) bitstreams</li>
+        <li><span class="a">AES-256-GCM</span> encryption prevents readback and cloning</li>
+        <li>Key storage: eFUSE (OTP) or BBRAM (battery-backed, zeroizable)</li>
+        <li><span class="a">RSA-4096 / ECDSA</span> signature verification before loading</li>
       </ul>
     </div>
     <div class="card green">
       <h3>Physical Security</h3>
       <ul>
-        <li><span class="g">PUF (Physically Unclonable Function)</span>: SRAM PUF or ring-oscillator PUF generates device-unique keys</li>
-        <li>Used for: device authentication, key generation without external key injection</li>
-        <li><span class="g">Active tamper detection</span>: mesh sensors, voltage/temperature monitors, glitch detectors</li>
+        <li><span class="g">PUF</span>: SRAM or ring-oscillator PUF generates device-unique keys</li>
+        <li><span class="g">Active tamper detection</span>: mesh sensors, voltage/temp monitors, glitch detectors</li>
         <li>Zeroization: instant key erasure on tamper event (BBRAM wipe in &lt;1 µs)</li>
       </ul>
     </div>
     <div class="card purple">
       <h3>Secure Boot Chain</h3>
       <ul>
-        <li><span class="p">Root of Trust</span>: hardened boot ROM → authenticate first-stage loader → authenticate PL bitstream</li>
-        <li>Versal: dedicated <span class="p">Platform Management Controller (PMC)</span> with isolated MicroBlaze handles entire boot</li>
-        <li>Each stage cryptographically verified — chain cannot be bypassed</li>
-        <li>Secure debug: authenticated JTAG access with challenge-response protocol</li>
+        <li><span class="p">Root of Trust</span>: boot ROM → authenticate loader → authenticate bitstream</li>
+        <li>Versal: dedicated <span class="p">PMC</span> with isolated MicroBlaze handles entire boot</li>
+        <li>Secure debug: authenticated JTAG with challenge-response protocol</li>
       </ul>
     </div>
   </div>
@@ -1094,10 +1071,10 @@
     <div class="card red">
       <h3>Supply Chain &amp; Side-Channel Concerns</h3>
       <ul>
-        <li><span class="r">Trojan insertion</span>: malicious logic added during fabrication — FPGA countermeasure: compare bitstream readback hash against golden reference</li>
-        <li><span class="r">Side-channel attacks</span>: power analysis (DPA/SPA) can extract AES keys from FPGA crypto engines — requires protocol-level countermeasures (masking, hiding)</li>
-        <li><span class="r">Fault injection</span>: voltage glitching can bypass secure boot — mitigated by redundant checking and analog glitch detectors</li>
-        <li>ITAR / export control: high-end FPGAs with strong encryption face export restrictions</li>
+        <li><span class="r">Trojan insertion</span>: detect via bitstream readback hash vs golden reference</li>
+        <li><span class="r">Side-channel attacks</span>: DPA/SPA extract keys — mitigated by masking and hiding</li>
+        <li><span class="r">Fault injection</span>: voltage glitching bypasses secure boot — needs glitch detectors</li>
+        <li>ITAR / export control: high-end encrypted FPGAs face restrictions</li>
       </ul>
     </div>
     <div class="card blue">
@@ -1167,11 +1144,9 @@
       <div class="card green" style="margin-bottom:.3em">
         <h3>Thermal Solutions</h3>
         <ul>
-          <li><span class="g">Passive heatsink</span>: sufficient up to ~50 W (mid-range parts)</li>
-          <li><span class="g">Active fan + heatsink</span>: 50-100 W typical data center cards</li>
-          <li><span class="g">Vapor chamber</span>: 100-200 W high-end cards (Alveo U55C)</li>
+          <li><span class="g">Passive heatsink</span> up to ~50 W; <span class="g">active fan</span> for 50–100 W data center cards</li>
+          <li><span class="g">Vapor chamber</span>: 100–200 W high-end cards; liquid cooling for >200 W</li>
           <li>HBM constraint: memory stack at 95°C limit — careful thermal path design needed</li>
-          <li>Liquid cooling: emerging for >200 W deployments (Versal Premium in 1U servers)</li>
         </ul>
       </div>
       <div class="card purple">
@@ -1390,13 +1365,13 @@
       <td><span class="a">AMD (Xilinx)</span></td>
       <td>Versal, UltraScale+, Zynq, Spartan</td>
       <td>7 nm, 16 nm</td>
-      <td>Data center, AI, aero/defense, broadest portfolio</td>
+      <td>Data center, AI, broadest portfolio</td>
       <td><span class="a">~52%</span></td>
     </tr>
     <tr>
       <td><span class="b">Intel (Altera)</span></td>
       <td>Agilex 9/7/5/3, Stratix 10</td>
-      <td>Intel 7 (10 nm-class)</td>
+      <td>Intel 7 (10 nm)</td>
       <td>x86 integration, oneAPI, networking</td>
       <td><span class="b">~28%</span></td>
     </tr>
@@ -1404,36 +1379,15 @@
       <td><span class="g">Lattice</span></td>
       <td>Nexus, CertusPro, MachXO5, iCE40</td>
       <td>28 nm FDSOI</td>
-      <td>Low power, small form factor, edge AI, automotive</td>
+      <td>Low power, edge AI, automotive</td>
       <td><span class="g">~8%</span></td>
     </tr>
     <tr>
       <td><span class="p">Microchip (Microsemi)</span></td>
       <td>PolarFire, SmartFusion2, IGLOO2</td>
       <td>28 nm</td>
-      <td>Aerospace, defense, radiation-tolerant, low power</td>
+      <td>Aerospace, defense, rad-tolerant</td>
       <td><span class="p">~7%</span></td>
-    </tr>
-    <tr>
-      <td>Efinix</td>
-      <td>Trion, Titanium</td>
-      <td>16 nm</td>
-      <td>Quantum compute fabric, low cost, edge AI</td>
-      <td>~1%</td>
-    </tr>
-    <tr>
-      <td>Gowin</td>
-      <td>GW1N, GW2A, GW5A</td>
-      <td>55/28 nm</td>
-      <td>China domestic, low cost, hobbyist-friendly</td>
-      <td>~1%</td>
-    </tr>
-    <tr>
-      <td>Achronix</td>
-      <td>Speedster7t, Speedcore eFPGA</td>
-      <td>7 nm</td>
-      <td>GDDR6 interface, eFPGA IP for ASIC integration</td>
-      <td>&lt;1%</td>
     </tr>
   </table>
   <div class="cols cols-2" style="margin-top:.3em">
@@ -1470,28 +1424,25 @@
     <div class="card amber">
       <h3>Photonic FPGAs</h3>
       <ul>
-        <li><span class="a">Silicon photonic interconnect</span>: replace electrical routing with optical waveguides — eliminate RC delay bottleneck</li>
-        <li>Mach-Zehnder modulators as programmable switching elements</li>
-        <li>Potential: <span class="a">10× bandwidth density</span> at 10× lower power for long-reach interconnect</li>
-        <li>Challenge: photonic device footprint still 100× larger than transistors — hybrid approach most likely</li>
+        <li><span class="a">Silicon photonic interconnect</span>: optical waveguides eliminate RC delay</li>
+        <li>Potential: <span class="a">10× bandwidth density</span> at 10× lower power</li>
+        <li>Challenge: photonic footprint 100× larger — hybrid approach likely</li>
       </ul>
     </div>
     <div class="card green">
       <h3>3D-Stacked FPGA + Memory</h3>
       <ul>
-        <li><span class="g">Logic-on-memory stacking</span>: FPGA fabric directly bonded to SRAM/DRAM die via hybrid bonding</li>
-        <li>TSV pitch: &lt;5 µm with hybrid bonding — enables <span class="g">TB/s memory bandwidth</span> at femtojoule/bit</li>
-        <li>Eliminates I/O bottleneck for memory-bound FPGA workloads</li>
-        <li>Samsung, TSMC SoIC, Intel Foveros all developing applicable technology</li>
+        <li><span class="g">Logic-on-memory stacking</span> via hybrid bonding to SRAM/DRAM die</li>
+        <li>&lt;5 µm TSV pitch enables <span class="g">TB/s bandwidth</span> at femtojoule/bit</li>
+        <li>Samsung, TSMC SoIC, Intel Foveros developing applicable tech</li>
       </ul>
     </div>
     <div class="card purple">
       <h3>Compute-in-Memory</h3>
       <ul>
-        <li><span class="p">RRAM/MRAM-based LUTs</span>: replace SRAM configuration bits with non-volatile memory — instant-on FPGAs, no configuration time</li>
-        <li><span class="p">Analog compute-in-memory</span>: use RRAM crossbar arrays for matrix-vector multiply — integrate directly with FPGA fabric for AI</li>
+        <li><span class="p">RRAM/MRAM-based LUTs</span>: non-volatile config — instant-on, no load time</li>
+        <li><span class="p">Analog compute-in-memory</span>: RRAM crossbar for matrix-vector multiply</li>
         <li>Potential: <span class="p">100× energy efficiency</span> for inference vs digital MACs</li>
-        <li>Research stage — reliability and precision challenges remain</li>
       </ul>
     </div>
   </div>
@@ -1499,19 +1450,17 @@
     <div class="card blue">
       <h3>Neuromorphic FPGA Fabric</h3>
       <ul>
-        <li><span class="b">Spiking neural network</span> primitives in FPGA fabric — leaky integrate-and-fire neurons as hard blocks</li>
-        <li>Event-driven computation: only active neurons consume power — <span class="b">1000× more efficient</span> for sparse temporal data</li>
-        <li>Applications: sensor processing, anomaly detection, robotics at ultra-low power</li>
+        <li><span class="b">Spiking neural network</span> primitives — LIF neurons as hard blocks</li>
+        <li>Event-driven: <span class="b">1000× more efficient</span> for sparse temporal data</li>
         <li>Hybrid: conventional FPGA fabric + neuromorphic tiles for mixed workloads</li>
       </ul>
     </div>
     <div class="card red">
       <h3>RISC-V Soft Cores &amp; Hard Cores</h3>
       <ul>
-        <li><span class="r">Soft RISC-V</span>: VexRiscv, NEORV32, PicoRV32 — run on any FPGA fabric, fully customizable pipeline</li>
-        <li><span class="r">Hard RISC-V</span>: Microchip PolarFire SoC integrates 4× SiFive U54 + 1× E51 RISC-V cores</li>
-        <li>Trend: RISC-V replacing Arm in FPGA SoCs for cost (no licensing) and customizability</li>
-        <li>Future: <span class="a">RISC-V with custom extensions</span> implemented in FPGA fabric — tight coupling between ISA and accelerator</li>
+        <li><span class="r">Soft RISC-V</span>: VexRiscv, NEORV32, PicoRV32 — customizable pipeline on any fabric</li>
+        <li><span class="r">Hard RISC-V</span>: PolarFire SoC with 4× SiFive U54 + 1× E51 cores</li>
+        <li>Future: <span class="a">RISC-V custom extensions</span> in fabric — tight ISA-accelerator coupling</li>
       </ul>
     </div>
   </div>

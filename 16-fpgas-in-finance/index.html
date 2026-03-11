@@ -562,12 +562,10 @@
       <div class="card amber" style="margin-bottom:.4em;">
         <h3>Pre-Trade Risk Checks</h3>
         <ul>
-          <li><span class="a">Mandatory by regulation</span> (SEC Rule 15c3-5, MiFID II RTS 6) — every order must pass risk checks before reaching the exchange</li>
-          <li>Checks implemented in FPGA pipeline, adding only <span class="g">10–30 ns</span>:</li>
-          <li>Position limits: net and gross per symbol, per account, per firm</li>
-          <li>Order rate throttling: max N orders per second per port</li>
-          <li>Fat finger checks: reject orders with price &gt;X% from NBBO</li>
-          <li>Notional limits: total $ exposure per symbol / sector / portfolio</li>
+          <li><span class="a">Mandatory by regulation</span> (SEC Rule 15c3-5, MiFID II RTS 6) — every order must pass risk checks before the exchange</li>
+          <li>FPGA pipeline adds only <span class="g">10–30 ns</span> for all checks combined</li>
+          <li>Position &amp; notional limits: net/gross per symbol, per account, per firm; total $ exposure per sector/portfolio</li>
+          <li>Fat finger &amp; rate checks: reject price &gt;X% from NBBO; throttle max N orders/sec per port</li>
         </ul>
       </div>
       <div class="card green">
@@ -717,55 +715,41 @@
       <th>Network</th>
       <th>Memory</th>
       <th>Use Case</th>
-      <th>Approx. Price</th>
     </tr>
     <tr>
       <td><span class="a">Alveo U50</span></td>
       <td>XCU50 (UltraScale+ HBM)</td>
       <td>2x 100G QSFP28</td>
       <td>8 GB HBM2</td>
-      <td>Feed handling, order book, market making</td>
-      <td>$3,000–4,000</td>
+      <td>Feed handling, order book</td>
     </tr>
     <tr>
       <td><span class="a">Alveo U55C</span></td>
       <td>XCU55C (UltraScale+ HBM)</td>
       <td>2x 100G QSFP28</td>
       <td>16 GB HBM2</td>
-      <td>Multi-venue strategies, risk analytics</td>
-      <td>$6,000–8,000</td>
+      <td>Multi-venue, risk analytics</td>
     </tr>
     <tr>
       <td><span class="g">Alveo V80</span></td>
       <td>Versal Premium VP1802</td>
       <td>2x 400G QSFP-DD</td>
       <td>32 GB HBM2e</td>
-      <td>Next-gen 400G, AI-enhanced trading</td>
-      <td>$15,000+</td>
+      <td>Next-gen 400G, AI trading</td>
     </tr>
     <tr>
-      <td><span class="b">Intel Agilex 7 FPGA</span></td>
+      <td><span class="b">Intel Agilex 7</span></td>
       <td>AGF027 / AGF014</td>
       <td>Up to 8x 100G (E-Tile)</td>
-      <td>DDR5, HBM2e (select)</td>
-      <td>Multi-port strategies, CME/ICE</td>
-      <td>$5,000–12,000</td>
+      <td>DDR5, HBM2e</td>
+      <td>Multi-port, CME/ICE</td>
     </tr>
     <tr>
       <td><span class="p">Solarflare X2522</span></td>
       <td>Xilinx XC7K325T</td>
       <td>2x 10G/25G SFP28</td>
       <td>2 GB DDR4</td>
-      <td>SmartNIC with FPGA offload, AOE</td>
-      <td>$1,500–2,500</td>
-    </tr>
-    <tr>
-      <td><span class="r">VCU1525</span> (legacy)</td>
-      <td>XCVU9P (UltraScale+)</td>
-      <td>4x QSFP28</td>
-      <td>64 GB DDR4</td>
-      <td>High-capacity strategies, crypto mining</td>
-      <td>$4,000–6,000</td>
+      <td>SmartNIC FPGA offload</td>
     </tr>
   </table>
   <div class="cols cols-2" style="margin-top:.3em;">
@@ -888,20 +872,18 @@
       <div class="card amber" style="margin-bottom:.4em;">
         <h3>Commercial IP Blocks</h3>
         <ul>
-          <li><span class="a">TCP/UDP Stack IP:</span> Enyx nxTCP, Algo-Logic, Intilop — licensed per-FPGA, $50K–200K per license</li>
-          <li><span class="a">Market Data Parsers:</span> Exegy nxFramework, Enyx nxAccess — pre-built ITCH/OUCH/FIX decoders</li>
-          <li><span class="g">Ethernet MAC IP:</span> Xilinx CMAC (free with Vivado), Intel E-Tile (hard IP), third-party 10G MACs</li>
-          <li><span class="b">PTP/Timestamping:</span> Xilinx PTP IP, SolarFlare PTP stack, custom implementations</li>
-          <li><span class="p">PCIe DMA:</span> XDMA (Xilinx), QDMA, custom DMA engines for host communication</li>
+          <li><span class="a">TCP/UDP Stack IP:</span> licensed per-FPGA ($50K–200K) from vendors like Enyx, Algo-Logic</li>
+          <li><span class="a">Market Data Parsers:</span> pre-built ITCH/OUCH/FIX decoders (Exegy, Enyx)</li>
+          <li><span class="g">Ethernet MAC &amp; PTP:</span> Xilinx CMAC (free), Intel E-Tile hard IP, hardware timestamping</li>
+          <li><span class="p">PCIe DMA:</span> XDMA/QDMA (Xilinx) or custom DMA engines for host communication</li>
         </ul>
       </div>
       <div class="card green">
         <h3>Xilinx/AMD Alveo Ecosystem</h3>
         <ul>
-          <li><span class="g">Alveo platform:</span> standardized shell + user partition model — shell handles PCIe, memory controllers, network MACs</li>
-          <li><span class="g">Vitis networking:</span> pre-built 10G/25G/100G network stacks for Alveo cards</li>
-          <li>XRT (Xilinx Runtime): host-side driver for PCIe communication, bitstream loading</li>
-          <li>Most HFT firms <span class="r">bypass the Alveo shell entirely</span> — write custom flat designs for full control and minimum latency</li>
+          <li><span class="g">Alveo platform:</span> shell + user partition model — shell handles PCIe, memory, MACs</li>
+          <li><span class="g">Vitis networking:</span> pre-built 10G/25G/100G stacks; XRT for host-side driver</li>
+          <li>Most HFT firms <span class="r">bypass the shell entirely</span> — custom flat designs for minimum latency</li>
         </ul>
       </div>
     </div>
@@ -909,20 +891,18 @@
       <div class="card purple" style="margin-bottom:.4em;">
         <h3>OpenCAPI / CXL Interconnect</h3>
         <ul>
-          <li><span class="p">CXL (Compute Express Link)</span> emerging as next-gen FPGA-to-host interconnect</li>
-          <li>CXL.mem: FPGA memory appears in host's address space — <span class="a">coherent access without DMA</span></li>
-          <li>CXL.cache: FPGA can snoop host cache — enables shared data structures between CPU and FPGA</li>
-          <li>Potential: eliminate PCIe DMA latency (~500 ns) for hybrid CPU+FPGA trading systems</li>
-          <li>Current status: early adoption — Versal Premium and Agilex 7 support CXL 1.1/2.0</li>
+          <li><span class="p">CXL</span> emerging as next-gen FPGA-to-host interconnect — <span class="a">coherent access without DMA</span></li>
+          <li>CXL.mem / CXL.cache: shared memory and cache snooping between CPU and FPGA</li>
+          <li>Potential: eliminate PCIe DMA latency (~500 ns) for hybrid trading systems</li>
+          <li>Early adoption: Versal Premium and Agilex 7 support CXL 1.1/2.0</li>
         </ul>
       </div>
       <div class="card red">
         <h3>Build vs. License: Real Costs</h3>
         <ul>
-          <li>Full trading system IP stack (TCP + feed handler + order book + risk): <span class="r">$500K–2M/yr</span> in vendor licenses</li>
-          <li>Vivado license: ~$3,500/yr per seat (Design Edition) — but most firms need 20–50 seats</li>
-          <li>Verification tools (Questa, VCS): <span class="r">$50K–150K/yr</span> per seat</li>
-          <li>Total tooling + IP cost for a small HFT FPGA team: <span class="a">$1–3M/yr</span> before salaries</li>
+          <li>Full IP stack (TCP + feed + book + risk): <span class="r">$500K–2M/yr</span> in licenses</li>
+          <li>Vivado + verification tools (Questa, VCS): <span class="r">$50K–150K/yr</span> per seat</li>
+          <li>Total tooling + IP for a small HFT team: <span class="a">$1–3M/yr</span> before salaries</li>
         </ul>
       </div>
     </div>
@@ -960,11 +940,9 @@
       <div class="card purple" style="margin-bottom:.4em;">
         <h3>Debugging Difficulty</h3>
         <ul>
-          <li><span class="p">No printf debugging:</span> must use ILA (Integrated Logic Analyzer) to capture internal signals</li>
-          <li>ILA captures are <span class="r">limited depth</span> (1K–16K samples) and must be planned in advance</li>
-          <li>ChipScope / SignalTap add ~5–10% resource overhead and may change timing behavior</li>
-          <li>Race conditions and metastability bugs are <span class="r">extremely hard to reproduce</span></li>
-          <li>Hardware bugs in production can require physical server access to reflash — costly in colo</li>
+          <li><span class="p">No printf debugging:</span> must use ILA to capture signals — <span class="r">limited depth</span>, planned in advance</li>
+          <li>Debug probes add ~5–10% resource overhead and may change timing behavior</li>
+          <li>Race conditions and metastability bugs are <span class="r">extremely hard to reproduce</span>; production fixes require physical colo access</li>
         </ul>
       </div>
       <div class="card blue">
@@ -974,8 +952,6 @@
           <tr><td>Build time</td><td><span class="r">4–12 hours</span></td><td><span class="g">1–5 minutes</span></td></tr>
           <tr><td>Debug cycle</td><td><span class="r">Hours–days</span></td><td><span class="g">Minutes</span></td></tr>
           <tr><td>New protocol</td><td>4–12 weeks</td><td>1–2 weeks</td></tr>
-          <tr><td>Unit test run</td><td>Minutes (simulation)</td><td>Seconds</td></tr>
-          <tr><td>Production deploy</td><td>Minutes (bitstream load)</td><td>Seconds (restart)</td></tr>
         </table>
       </div>
     </div>
@@ -1044,21 +1020,17 @@
       <div class="card amber" style="margin-bottom:.4em;">
         <h3>Wire-to-Wire Measurement</h3>
         <ul>
-          <li><span class="a">Gold standard:</span> measure from first bit of market data on the wire to first bit of order on the wire</li>
-          <li>Requires <span class="g">network taps</span> on both RX and TX ports with hardware timestamping</li>
-          <li>Dedicated measurement appliances: Metamako (Arista), Corvil (Pico), Endace DAG cards</li>
-          <li>Timestamp resolution: <span class="b">&lt;5 ns</span> on modern measurement devices</li>
-          <li>Must account for: serialization delay (64 bytes at 10G = 51.2 ns), PHY latency, cable propagation</li>
+          <li><span class="a">Gold standard:</span> first bit of data in to first bit of order out, via network taps with HW timestamps</li>
+          <li>Appliances: Metamako (Arista), Corvil (Pico), Endace DAG — <span class="b">&lt;5 ns</span> resolution</li>
+          <li>Must account for serialization delay, PHY latency, and cable propagation</li>
         </ul>
       </div>
       <div class="card green">
         <h3>PTP &amp; Hardware Timestamping</h3>
         <ul>
-          <li>PTP grandmaster clocks: <span class="g">GPS-disciplined oscillators</span> with &lt;10 ns accuracy to UTC</li>
-          <li>FPGA PTP implementation: hardware timestamp at MAC layer, servo loop adjusts local oscillator</li>
-          <li>Two-step PTP: timestamp is sent in a follow-up message — easier to implement</li>
-          <li>One-step PTP: timestamp is patched into the packet on the wire — <span class="a">more accurate, harder to implement</span></li>
-          <li>Vendors: Meinberg, Microchip (Microsemi), Spectracom — $5K–20K per grandmaster</li>
+          <li>PTP grandmasters: <span class="g">GPS-disciplined oscillators</span> with &lt;10 ns accuracy to UTC</li>
+          <li>FPGA PTP: hardware timestamp at MAC layer; one-step PTP is <span class="a">more accurate, harder to implement</span></li>
+          <li>Vendors: Meinberg, Microchip, Spectracom — $5K–20K per grandmaster</li>
         </ul>
       </div>
     </div>
@@ -1077,10 +1049,8 @@
         <table>
           <tr><th>Component</th><th>Latency</th></tr>
           <tr><td>PHY + MAC RX</td><td><span class="b">20–60 ns</span></td></tr>
-          <tr><td>Feed parsing</td><td><span class="g">40–100 ns</span></td></tr>
-          <tr><td>Book update + strategy</td><td><span class="a">40–130 ns</span></td></tr>
-          <tr><td>Risk check</td><td><span class="g">10–30 ns</span></td></tr>
-          <tr><td>Order encoding + MAC TX</td><td><span class="b">40–110 ns</span></td></tr>
+          <tr><td>Feed parse + book + strategy</td><td><span class="a">80–230 ns</span></td></tr>
+          <tr><td>Risk + order encode + MAC TX</td><td><span class="b">50–140 ns</span></td></tr>
           <tr><td><strong>Total wire-to-wire</strong></td><td><strong><span class="a">150–430 ns</span></strong></td></tr>
         </table>
       </div>
@@ -1099,10 +1069,7 @@
       <div class="card amber" style="margin-bottom:.4em;">
         <h3>Exchange Colocation Facilities</h3>
         <ul>
-          <li><span class="a">NYSE:</span> Mahwah, NJ (Equinix NY5) — 400,000 sq ft, 32 MW power</li>
-          <li><span class="a">Nasdaq:</span> Carteret, NJ (Equinix NY11) — dedicated HFT colocation</li>
-          <li><span class="a">CME:</span> Aurora, IL — purpose-built data center for futures/options</li>
-          <li><span class="a">LSE/Turquoise:</span> Basildon, UK (Interxion LON1/LON2)</li>
+          <li><span class="a">NYSE:</span> Mahwah, NJ &nbsp;|&nbsp; <span class="a">Nasdaq:</span> Carteret, NJ &nbsp;|&nbsp; <span class="a">CME:</span> Aurora, IL &nbsp;|&nbsp; <span class="a">LSE:</span> Basildon, UK</li>
           <li>Cost: <span class="r">$10K–50K/month per cabinet</span> depending on power, cooling, cross-connects</li>
           <li>Exchanges guarantee <span class="g">equal cable length</span> to all participants (within a few meters)</li>
         </ul>
@@ -1121,21 +1088,19 @@
       <div class="card purple" style="margin-bottom:.4em;">
         <h3>Microwave &amp; Laser Networks</h3>
         <ul>
-          <li><span class="p">Microwave:</span> Chicago (CME) to NJ (NYSE/Nasdaq) in ~3.97 ms — vs. ~6.5 ms via fiber</li>
-          <li><span class="p">Millimeter wave / laser:</span> point-to-point links with near-speed-of-light propagation</li>
-          <li>Companies: McKay Brothers, Anova, Jump Trading (owns towers)</li>
+          <li><span class="p">Microwave:</span> CME to NJ in ~3.97 ms vs. ~6.5 ms fiber (McKay Brothers, Anova, Jump Trading)</li>
           <li>Weather-dependent: rain fade causes <span class="r">outages</span> — firms maintain fiber backup</li>
-          <li>FPGA at both ends: deserialize microwave signal → strategy evaluation → serialize and transmit</li>
+          <li>FPGA at both ends: deserialize signal, evaluate strategy, serialize and transmit</li>
+          <li><span class="p">Millimeter wave / laser:</span> point-to-point links with near-speed-of-light propagation</li>
         </ul>
       </div>
       <div class="card blue">
         <h3>Where FPGA Sits in the Rack</h3>
         <ul>
-          <li><span class="b">Typical topology:</span> Exchange port → FPGA NIC (or standalone FPGA server) → optional CPU server for monitoring/logging</li>
-          <li>FPGA-only path: no CPU in the critical path — market data in, orders out, all on the FPGA card</li>
-          <li>Host server runs: monitoring, position reporting, strategy parameter updates, logging</li>
-          <li>Power/cooling: FPGA cards draw <span class="a">30–75 W</span> — much less than GPU alternatives</li>
-          <li>Redundancy: primary + backup FPGA with failover in <span class="g">&lt;1 ms</span></li>
+          <li><span class="b">Topology:</span> Exchange port → FPGA NIC → optional CPU for monitoring/logging</li>
+          <li>FPGA-only path: no CPU in critical path — data in, orders out, all on FPGA</li>
+          <li>Host handles: monitoring, position reporting, parameter updates, logging</li>
+          <li>Power: <span class="a">30–75 W</span>; redundancy: primary + backup with <span class="g">&lt;1 ms</span> failover</li>
         </ul>
       </div>
     </div>
@@ -1236,23 +1201,22 @@
     <span class="tag">21</span>
     <h2>Future Directions</h2>
   </div>
-  <div class="cols cols-3">
+  <div class="cols cols-2">
     <div>
       <div class="card amber" style="margin-bottom:.4em;">
         <h3>AI/ML Inference on Trading FPGAs</h3>
         <ul>
-          <li>Lightweight neural networks (<span class="a">MLP, decision trees</span>) running directly in FPGA fabric for signal generation</li>
-          <li>Quantized INT8/INT4 inference: <span class="g">10–50 ns</span> for a small model — fits in the trading pipeline</li>
-          <li>AMD Versal AI Core: dedicated AI engines (AIE) adjacent to programmable logic — purpose-built for this</li>
-          <li>Challenge: model update frequency — retraining requires new bitstream or coefficient reload</li>
+          <li>Quantized INT8/INT4 inference in <span class="g">10–50 ns</span> — fits directly in the trading pipeline</li>
+          <li>AMD Versal AI Core: dedicated AI engines adjacent to programmable logic</li>
+          <li>Challenge: model updates require bitstream reload or coefficient swap</li>
         </ul>
       </div>
       <div class="card green">
-        <h3>PCIe Gen5 / CXL</h3>
+        <h3>PCIe Gen5 / CXL 3.0</h3>
         <ul>
-          <li><span class="g">PCIe Gen5:</span> 32 GT/s per lane — 64 GB/s x16 — enables faster FPGA ↔ CPU data sharing</li>
-          <li><span class="g">CXL 3.0:</span> memory pooling, cache coherence across FPGA and CPU — potential to eliminate DMA entirely</li>
-          <li>Hybrid architectures: FPGA handles hot path, CPU runs complex ML models, shared via CXL</li>
+          <li><span class="g">PCIe Gen5:</span> 64 GB/s x16 — faster FPGA-CPU data sharing</li>
+          <li><span class="g">CXL 3.0:</span> cache coherence across FPGA and CPU — eliminates DMA</li>
+          <li>Hybrid: FPGA hot path + CPU complex ML, shared via CXL</li>
         </ul>
       </div>
     </div>
@@ -1260,35 +1224,18 @@
       <div class="card purple" style="margin-bottom:.4em;">
         <h3>400G / 800G Ethernet</h3>
         <ul>
-          <li><span class="p">400G:</span> already in Alveo V80, Agilex 7 — needed for options market data (OPRA 400 Gbps peak capacity)</li>
-          <li><span class="p">800G:</span> expected 2026–2027 on next-gen FPGA platforms — consolidates feeds onto fewer ports</li>
-          <li>Challenge: <span class="r">parsing at 800G line rate</span> requires extremely wide internal datapaths (512-bit+)</li>
-          <li>Opportunity: single FPGA card handles all market data for an entire exchange</li>
+          <li><span class="p">400G:</span> in Alveo V80, Agilex 7 — needed for OPRA peak capacity</li>
+          <li><span class="p">800G:</span> expected 2026–2027; requires 512-bit+ internal datapaths</li>
+          <li>Goal: single FPGA handles all data for an entire exchange</li>
         </ul>
       </div>
-      <div class="card blue">
-        <h3>Cloud FPGA Trading</h3>
+      <div class="card red">
+        <h3>Industry &amp; The Asymptotic Limit</h3>
         <ul>
-          <li><span class="b">AWS F1:</span> Xilinx VU9P in the cloud — some firms use for backtesting, not production trading</li>
-          <li><span class="b">Azure NP-series:</span> Intel Agilex FPGAs in Azure — network-attached, low-latency potential</li>
-          <li>Barrier: cloud adds <span class="r">microseconds of network latency</span> — unacceptable for HFT, fine for risk/analytics</li>
-          <li>Exchange-adjacent cloud (e.g., Equinix Metal) may bridge the gap</li>
+          <li>Vendor consolidation: AMD+Xilinx, Intel spinning out Altera — <span class="r">fewer vendors, higher prices</span></li>
+          <li>Cloud FPGAs (AWS F1, Azure NP): viable for backtesting/risk, not HFT latency</li>
+          <li>At <span class="a">~150 ns</span> tick-to-trade, the edge shifts from faster hardware to <span class="g">smarter decisions</span></li>
         </ul>
-      </div>
-    </div>
-    <div>
-      <div class="card red" style="margin-bottom:.4em;">
-        <h3>Industry Consolidation</h3>
-        <ul>
-          <li>FPGA vendor ecosystem has consolidated: AMD acquired Xilinx ($49B), Intel spinning out Altera</li>
-          <li>Trading technology vendors consolidating: Pico + Fixnetix, Exegy + Vela, Enyx + Murata</li>
-          <li>Fewer vendors = <span class="r">less competition, higher prices</span>, but also more integrated solutions</li>
-          <li>Open-source FPGA tools (Yosys, nextpnr) improving but <span class="r">not yet viable for finance-grade designs</span></li>
-        </ul>
-      </div>
-      <div class="card amber">
-        <h3>The Asymptotic Limit</h3>
-        <p>With tick-to-trade approaching <span class="a">~150 ns</span>, we are nearing the physical limits of electronic signal propagation. The next frontier is not faster hardware but <span class="g">smarter decisions</span> — AI-enhanced signal processing, better microstructure models, and multi-venue optimization. FPGAs will remain the substrate, but the competitive edge increasingly comes from the <span class="p">intelligence</span> programmed into them.</p>
       </div>
     </div>
   </div>
