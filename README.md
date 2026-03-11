@@ -14,8 +14,8 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 | # | Topic | Slides | Status |
 |---|-------|--------|--------|
-| 01 | Modern SoC Packaging | 18 | ✅ Complete |
-| 02 | On-Chip Interconnect & NoC Design | 20 | ✅ Complete |
+| 01 | Modern SoC Packaging | 30 | ✅ Complete |
+| 02 | On-Chip Interconnect & NoC Design | 31 | ✅ Complete |
 | 03 | Memory Hierarchy in ML Accelerator SoCs | 23 | ✅ Complete |
 | 04 | High-Speed SerDes & I/O | 23 | ✅ Complete |
 | 05 | AI / ML Accelerator Architectures | 22 | ✅ Complete |
@@ -35,7 +35,7 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ## Presentation 01: Modern SoC Packaging
 
-18 interactive slides covering:
+30 interactive slides covering:
 
 **Fundamentals** — Evolution from DIP through QFP, BGA, and flip-chip to modern fan-out wafer-level packaging. Wire bond vs flip-chip architecture comparison. TSMC InFO family (WLP, PoP, L, M) and the redistribution layer (RDL) innovation.
 
@@ -55,7 +55,7 @@ Interactive slide decks covering modern System-on-Chip design end-to-end — fro
 
 ## Presentation 02: On-Chip Interconnect & NoC Design
 
-20 interactive slides covering:
+31 interactive slides covering:
 
 **Interconnect Evolution** — Shared bus (AHB/APB) limitations, crossbar switch architecture (NIC-400, DesignWare), and the transition to packet-switched Networks-on-Chip. Bus vs crossbar vs NoC trade-off analysis.
 
